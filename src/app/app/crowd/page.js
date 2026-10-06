@@ -40,7 +40,7 @@ export default function CrowdPage() {
         </div>
       </section>
 
-      <section className="mt-4 flex h-[79px] items-start gap-3 rounded-[20px] border border-white/20 bg-moss/40 px-4 pt-4">
+      <section className="mt-4 flex h-[79px] items-start gap-3 rounded-[20px] border border-white/20 bg-leaf/20 px-4 pt-4">
         <span className="grid size-8 shrink-0 place-items-center rounded-full bg-leaf"><Timer size={16} /></span>
         <span>
           <span className="block text-[11px] font-semibold leading-tight">Waktu terbaik berkunjung</span>

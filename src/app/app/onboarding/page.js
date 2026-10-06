@@ -3,9 +3,11 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 // Onboarding 3 slide: bisa digeser (swipe/drag) DAN pakai tombol Kembali/Lanjut (syarat dosen).
+// Slide juga maju sendiri tiap AUTOPLAY_MS sampai slide ketiga, lalu berhenti (tidak berulang).
+// Begitu pengguna menggeser atau menekan tombol/titik, putar otomatis berhenti dan pengguna yang mengatur.
 const SLIDES = [
   {
     image: "/images/onboarding-air-jernih.webp",
@@ -24,16 +26,29 @@ const SLIDES = [
   },
 ];
 const SWIPE_THRESHOLD = 50; // px
+const AUTOPLAY_MS = 2000; // jeda antar slide otomatis
 
 export default function OnboardingPage() {
   const router = useRouter();
   const [index, setIndex] = useState(0);
   const [drag, setDrag] = useState(0);
   const [dragging, setDragging] = useState(false);
+  const [autoplay, setAutoplay] = useState(true);
   const start = useRef(null);
   const last = index === SLIDES.length - 1;
+  const playing = autoplay && !last && !dragging;
 
-  const go = (next) => setIndex(Math.max(0, Math.min(SLIDES.length - 1, next)));
+  useEffect(() => {
+    if (!playing) return;
+    const timer = setTimeout(() => setIndex((i) => Math.min(SLIDES.length - 1, i + 1)), AUTOPLAY_MS);
+    return () => clearTimeout(timer);
+  }, [playing, index]);
+
+  // Semua perpindahan dari pengguna lewat sini, sehingga putar otomatis berhenti.
+  const go = (next) => {
+    setAutoplay(false);
+    setIndex(Math.max(0, Math.min(SLIDES.length - 1, next)));
+  };
   const finish = () => router.push("/app/home");
 
   const onPointerDown = (e) => {
@@ -83,11 +98,17 @@ export default function OnboardingPage() {
         {SLIDES.map((slide, i) => (
           <button key={slide.title} type="button" role="tab" aria-selected={i === index} aria-label={`Slide ${i + 1}`}
                   onClick={() => go(i)}
-                  className={`h-2 rounded-full transition-all duration-300 ${i === index ? "w-5 bg-leaf" : "w-2 bg-white/25"}`} />
+                  className={`relative h-2 overflow-hidden rounded-full bg-white/25 transition-all duration-300 ${i === index ? "w-5" : "w-2"}`}>
+            {/* Titik aktif terisi selama jeda otomatis, jadi terlihat kapan slide berikutnya muncul. */}
+            {i === index && (
+              <span key={`${index}-${playing}`} className="absolute inset-0 origin-left rounded-full bg-leaf"
+                    style={playing ? { animation: `fill-x ${AUTOPLAY_MS}ms linear both` } : undefined} />
+            )}
+          </button>
         ))}
       </div>
 
-      <div key={index} className="px-9 pt-[26px] text-center animate-fade-up">
+      <div key={index} aria-live={playing ? "off" : "polite"} className="px-9 pt-[26px] text-center animate-fade-up">
         <h1 className="font-display text-[22px] font-semibold leading-[1.2]">{SLIDES[index].title}</h1>
         <p className="mt-3.5 text-xs leading-[15px] text-white/70">{SLIDES[index].text}</p>
       </div>

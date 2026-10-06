@@ -42,15 +42,15 @@ export default function KonfirmasiPage() {
 
   return (
     <main className="flex min-h-dvh flex-col px-5 pb-8 pt-[60px]">
-      <span className="mx-auto grid size-[100px] place-items-center rounded-full border border-white/30 bg-moss animate-pop">
+      <span className="mx-auto grid size-[100px] place-items-center rounded-full border border-white/30 bg-leaf/45 animate-pop">
         <Check size={46} strokeWidth={2.6} />
       </span>
       <h1 className="mt-5 text-center font-display text-2xl font-semibold leading-tight">Booking Berhasil!</h1>
       <p className="mt-0.5 text-center text-xs text-white/70">Tunjukkan QR ini di pintu masuk</p>
       <p className="mt-1 text-center font-mono text-[10px] font-medium">Kode: {booking.code}</p>
 
-      <div className="mx-auto mt-[18px] rounded-[20px] bg-[#dfe2e1] p-5">
-        {booking.code && <QRCodeSVG value={booking.code} size={140} bgColor="#dfe2e1" fgColor="#172321" level="M" />}
+      <div className="mx-auto mt-[18px] rounded-[20px] bg-white/85 p-5">
+        {booking.code && <QRCodeSVG value={booking.code} size={140} bgColor="transparent" fgColor="#172321" level="M" />}
       </div>
 
       <dl className="glass mt-[22px] grid h-[170px] grid-cols-[160px_1fr] content-start items-center gap-y-[19.5px] rounded-[20px] px-5 pt-[18px]">

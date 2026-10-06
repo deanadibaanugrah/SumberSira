@@ -16,7 +16,7 @@ export default function IntroPage() {
     <main className="app-bg min-h-dvh text-white">
       <section className="relative overflow-hidden">
         <Image src="/images/hero-sawah.webp" alt="" fill priority sizes="100vw" className="object-cover opacity-40" />
-        <div className="absolute inset-0 bg-gradient-to-b from-forest/40 via-forest/70 to-[#1b3a2f]" />
+        <div className="absolute inset-0 bg-gradient-to-b from-forest/40 via-forest/70 to-forest" />
         <div className="relative mx-auto max-w-5xl px-6 pb-20 pt-16 sm:pt-24">
           <p className="flex items-center gap-2 text-sm text-white/80"><MapPin size={16} /> Desa Putukrejo, Malang</p>
           <h1 className="mt-4 font-display text-5xl font-semibold leading-tight sm:text-6xl">Sumber Sira</h1>
@@ -41,7 +41,7 @@ export default function IntroPage() {
         <ul className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {FEATURES.map(({ title, text, icon: Icon }) => (
             <li key={title} className="glass rounded-[24px] p-5">
-              <span className="grid size-12 place-items-center rounded-2xl bg-moss"><Icon size={22} /></span>
+              <span className="grid size-12 place-items-center rounded-2xl bg-leaf/45"><Icon size={22} /></span>
               <h3 className="mt-4 font-semibold">{title}</h3>
               <p className="mt-1.5 text-sm text-white/70">{text}</p>
             </li>

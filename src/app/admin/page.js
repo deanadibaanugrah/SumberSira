@@ -19,7 +19,7 @@ export default function DashboardPage() {
             <CardTitle size="sm">Live Crowd Monitor</CardTitle>
             <div className="mt-[37px]">
               <BarChart data={VISITORS_TODAY} height={179} columns={7} align="start" barWidth="w-[73%]" rounded="rounded-md"
-                        highlight={(d) => ["12", "14", "16"].includes(d.label)} barClass="bg-[#6fae92]" highlightClass="bg-forest"
+                        highlight={(d) => ["12", "14", "16"].includes(d.label)} barClass="bg-leaf/75" highlightClass="bg-forest"
                         labelClass="text-[9px] text-ink/60" />
             </div>
           </Card>
@@ -29,7 +29,7 @@ export default function DashboardPage() {
             <ul className="mt-5 space-y-5">
               {INCOMING.map((b) => (
                 <li key={b.label} className="flex items-center gap-3">
-                  <span className="size-8 shrink-0 rounded-full bg-mist" aria-hidden="true" />
+                  <span className="size-8 shrink-0 rounded-full bg-leaf/12" aria-hidden="true" />
                   <span className="flex-1 text-[11px] text-ink">{b.label}</span>
                   <StatusPill status={b.status} />
                 </li>
@@ -42,7 +42,7 @@ export default function DashboardPage() {
             <ul className="mt-[22px] space-y-[45px]">
               {AI_NOTIFICATIONS.map((n) => (
                 <li key={n} className="flex min-h-[27px] items-center gap-3 text-[10px] leading-[11.5px] text-ink">
-                  <span className="grid size-[27px] shrink-0 place-items-center rounded-full bg-mist text-leaf"><Bell size={11} /></span>
+                  <span className="grid size-[27px] shrink-0 place-items-center rounded-full bg-leaf/12 text-leaf"><Bell size={11} /></span>
                   {n}
                 </li>
               ))}

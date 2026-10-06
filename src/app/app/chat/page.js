@@ -73,7 +73,7 @@ export default function ChatPage() {
               <li key={i} className="flex flex-wrap gap-[6.5px] pl-9">
                 {m.options.map((o) => (
                   <button key={o} type="button" onClick={() => send(o)}
-                          className="h-[30px] rounded-full border border-white/25 bg-moss/50 pl-2.5 pr-9 text-[9px] transition hover:bg-moss">
+                          className="h-[30px] rounded-full border border-white/25 bg-leaf/25 pl-2.5 pr-9 text-[9px] transition hover:bg-leaf/45">
                     {o}
                   </button>
                 ))}

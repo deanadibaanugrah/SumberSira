@@ -22,7 +22,7 @@ function Photo({ src, label, filter, badge }) {
       <img src={src} alt={`Foto ${label.toLowerCase()} enhance`} className="size-full object-cover" style={{ filter }} />
       {badge && (
         <span className="absolute right-3 top-3 flex h-6 items-center gap-1 rounded-full bg-white/95 px-2.5 text-[8.5px] font-semibold text-forest">
-          <Sparkles size={10} className="text-amber-400" /> AI Enhanced
+          <Sparkles size={10} className="text-leaf" /> AI Enhanced
         </span>
       )}
       <figcaption className="glass absolute bottom-2.5 left-3 flex h-6 items-center rounded-full px-3 text-[10px] font-semibold">{label}</figcaption>

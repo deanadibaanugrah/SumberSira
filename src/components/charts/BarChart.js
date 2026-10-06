@@ -6,7 +6,7 @@ export default function BarChart({
   highlight = () => false,
   height = 240,
   columns = null,
-  barClass = "bg-sage",
+  barClass = "bg-leaf/75",
   highlightClass = "bg-forest",
   labelClass = "text-xs text-ink/60",
   rounded = "rounded-lg",

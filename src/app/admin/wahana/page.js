@@ -44,7 +44,7 @@ export default function WahanaPage() {
             <colgroup>
               {COLUMNS.map((c) => <col key={c.label} style={c.width ? { width: c.width } : undefined} />)}
             </colgroup>
-            <thead className="bg-mint text-[11px] text-ink/80">
+            <thead className="bg-leaf/15 text-[11px] text-ink/80">
               <tr>
                 {COLUMNS.map((c) => <th key={c.label} className="h-10 pl-5 font-semibold">{c.label}</th>)}
               </tr>

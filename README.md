@@ -102,7 +102,7 @@ src/lib/
   diekspor 2×, jadi 1 px di kode = 2 px di PNG. Ukuran teks, jarak, dan kartu diukur dari PNG.
   Teksnya memang kecil (9–13 px) karena begitu di desain. Kalau mau diperbesar demi keterbacaan,
   diskusikan dulu dengan kelompok supaya tetap konsisten.
-- Warna dan font ada di `src/app/globals.css` (`@theme`): `forest`, `leaf`, `moss`, `mint`, `coral`, dan lainnya.
+- Warna dan font ada di `src/app/globals.css` (`@theme`): `forest` dan `leaf` (hanya dua hijau, sama dengan papan Color Palette di Figma), `ink`, `paper`, `coral`. Warna yang lebih muda dibuat dengan transparansi, mis. `bg-leaf/15`, bukan token baru.
   Pakai lewat kelas Tailwind, misalnya `bg-forest` dan `text-leaf`.
 - Font dipasang dari npm (Fontsource): Fraunces (judul), Inter (teks), JetBrains Mono (angka/harga).
 - Foto di `public/images/` dipotong dari PNG desain. Badge yang ikut tercetak di foto galeri sudah

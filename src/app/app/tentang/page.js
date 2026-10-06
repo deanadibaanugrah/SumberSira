@@ -44,7 +44,7 @@ export default function TentangPage() {
       <ul className="mt-4 grid grid-cols-4 text-center">
         {FEATURES.map(({ label, icon: Icon }) => (
           <li key={label} className="flex flex-col items-center gap-2">
-            <span className="grid size-[52px] place-items-center rounded-full border border-white/25 bg-moss/70">
+            <span className="grid size-[52px] place-items-center rounded-full border border-white/25 bg-leaf/30">
               <Icon size={20} />
             </span>
             <span className="text-[11px] text-white/90">{label}</span>
@@ -55,7 +55,7 @@ export default function TentangPage() {
       <ul className="glass mt-5 divide-y divide-white/15 rounded-[20px] px-4 py-0.5">
         {INFO.map(({ title, text, icon: Icon }) => (
           <li key={title} className="flex h-12 items-center gap-3">
-            <span className="grid size-8 shrink-0 place-items-center rounded-full bg-moss/80"><Icon size={15} /></span>
+            <span className="grid size-8 shrink-0 place-items-center rounded-full bg-leaf/35"><Icon size={15} /></span>
             <span>
               <span className="block text-xs font-semibold">{title}</span>
               <span className="block text-[11px] text-white/70">{text}</span>

@@ -6,7 +6,7 @@ export function AdminHeader({ title, action }) {
       <h1 className="font-display text-xl font-semibold text-ink">{title}</h1>
       <div className="flex items-center gap-5">
         {action}
-        <span className="grid size-9 place-items-center rounded-full bg-mist text-[10px] font-semibold text-forest" title="Admin: Pak Yono">PY</span>
+        <span className="grid size-9 place-items-center rounded-full bg-leaf/12 text-[10px] font-semibold text-forest" title="Admin: Pak Yono">PY</span>
       </div>
     </header>
   );
@@ -40,12 +40,12 @@ export function StatCard({ label, value, note, dot = "leaf" }) {
 }
 
 const PILL = {
-  Baru: "bg-mint text-leaf",
-  Diproses: "bg-mist text-forest",
-  Selesai: "bg-[#e4e8e6] text-ink",
-  Ditolak: "bg-coral-soft text-coral",
-  Aktif: "bg-[#e4e8e6] text-ink",
-  Nonaktif: "bg-coral-soft text-coral",
+  Baru: "bg-leaf/15 text-leaf",
+  Diproses: "bg-leaf/12 text-forest",
+  Selesai: "bg-ink/10 text-ink",
+  Ditolak: "bg-coral/12 text-coral",
+  Aktif: "bg-ink/10 text-ink",
+  Nonaktif: "bg-coral/12 text-coral",
 };
 
 // size "sm" = daftar ringkas di dashboard, "md" = tabel booking, "tag" = tabel wahana.
@@ -68,7 +68,7 @@ export function FilterPills({ options, value, onChange }) {
     <div className="flex flex-wrap gap-2.5" role="tablist">
       {options.map((o) => (
         <button key={o} type="button" role="tab" aria-selected={value === o} onClick={() => onChange(o)}
-                className={`h-9 rounded-full pl-3.5 pr-5 text-[11px] transition ${value === o ? "bg-leaf font-semibold text-white" : "bg-mint text-ink hover:bg-[#d3e7dd]"}`}>
+                className={`h-9 rounded-full pl-3.5 pr-5 text-[11px] transition ${value === o ? "bg-leaf font-semibold text-white" : "bg-leaf/15 text-ink hover:bg-leaf/25"}`}>
           {o}
         </button>
       ))}
@@ -86,7 +86,7 @@ export function PrimaryButton({ children, className = "", ...props }) {
 }
 
 export function IconButton({ tone = "leaf", label, children, ...props }) {
-  const tones = { leaf: "bg-[#e5ece8] text-leaf hover:bg-[#d3e7dd]", coral: "bg-coral-soft text-coral hover:bg-[#f7ddd6]" };
+  const tones = { leaf: "bg-leaf/12 text-leaf hover:bg-leaf/25", coral: "bg-coral/12 text-coral hover:bg-coral/25" };
   return (
     <button type="button" aria-label={label} title={label} {...props}
             className={`grid size-7 place-items-center rounded-full transition ${tones[tone]}`}>

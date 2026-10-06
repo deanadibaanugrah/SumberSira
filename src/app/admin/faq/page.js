@@ -33,7 +33,7 @@ export default function FaqPage() {
           <CardTitle>Daftar FAQ</CardTitle>
           <ul className="mt-[18px] space-y-4">
             {faqs.map((f) => (
-              <li key={f.id} className="flex min-h-[76px] items-center gap-2 rounded-[10px] bg-mist pl-4 pr-3">
+              <li key={f.id} className="flex min-h-[76px] items-center gap-2 rounded-[10px] bg-leaf/12 pl-4 pr-3">
                 <div className="flex-1 self-start pb-3 pt-3">
                   <p className="text-xs font-semibold text-ink">{f.q}</p>
                   <p className="mt-1.5 text-[10px] text-ink/65">Jawaban tersimpan — tampil otomatis di chatbot Tanya Sira</p>
@@ -51,7 +51,7 @@ export default function FaqPage() {
           <CardTitle>Belum Terjawab</CardTitle>
           <ul className="mt-[22px] space-y-4">
             {pending.map((p) => (
-              <li key={p.id} className="min-h-[84px] rounded-lg border border-leaf/30 bg-mist px-3.5 pb-2 pt-3">
+              <li key={p.id} className="min-h-[84px] rounded-lg border border-leaf/30 bg-leaf/12 px-3.5 pb-2 pt-3">
                 <p className="text-[11px] text-ink">{p.q}</p>
                 <button type="button" onClick={() => setForm({ id: p.id, q: p.q, a: "", fromPending: true })}
                         className="mt-[21px] h-[26px] w-20 rounded-full bg-leaf text-[9.5px] font-semibold text-white hover:brightness-110">

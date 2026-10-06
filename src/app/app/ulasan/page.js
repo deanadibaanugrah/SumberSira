@@ -71,7 +71,7 @@ export default function UlasanPage() {
         {reviews.map((r) => (
           <li key={r.id} className="glass min-h-[90px] rounded-[20px] px-4 pb-3 pt-3.5 animate-fade-up">
             <div className="flex items-center gap-2.5">
-              <span className="grid size-8 place-items-center rounded-full bg-moss text-[11px] font-semibold">{r.name[0]}</span>
+              <span className="grid size-8 place-items-center rounded-full bg-leaf/45 text-[11px] font-semibold">{r.name[0]}</span>
               <span>
                 <span className="block text-[10.5px] font-semibold">{r.name}</span>
                 <Stars value={r.stars} size={8} gap="gap-px" />

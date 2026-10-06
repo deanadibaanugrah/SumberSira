@@ -42,7 +42,7 @@ export default function BookingPage() {
           const qty = booking.qty[w.id] || 0;
           return (
             <li key={w.id} className="glass flex h-[60px] items-center gap-2.5 rounded-[20px] pl-2 pr-[15px]">
-              <span className="grid size-11 shrink-0 place-items-center rounded-full border border-white/25 bg-moss/80">
+              <span className="grid size-11 shrink-0 place-items-center rounded-full border border-white/25 bg-leaf/35">
                 <WahanaIcon name={w.icon} size={18} />
               </span>
               <span className="flex-1">

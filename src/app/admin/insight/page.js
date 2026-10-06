@@ -14,7 +14,7 @@ export default function InsightPage() {
           <CardTitle sub="Prediksi keramaian per jam — highlight jam sibuk 10.00–14.00">AI Crowd Forecast</CardTitle>
           {/* Geometri sesuai desain: lebar plot 660, pita jam sibuk 240 tinggi, skala 0–100%. */}
           <LineChart data={forecast} band={[2, 6]} max={100} width={660} height={270} padX={0} top={4} bottom={244} bandTop={4}
-                     labelY={262.5} labelSize={9} strokeWidth={3} pointRadius={4} ringWidth={0} bandColor="#e2efe9"
+                     labelY={262.5} labelSize={9} strokeWidth={3} pointRadius={4} ringWidth={0} bandColor="rgba(64, 145, 108, 0.15)"
                      axisColor="rgba(23, 35, 33, 0.12)" labelColor="rgba(23, 35, 33, 0.6)" />
         </Card>
 
@@ -35,7 +35,7 @@ export default function InsightPage() {
           <ul className="mt-3 space-y-3">
             {COMPLAINT_TAGS.map((t) => (
               <li key={t.label} className="flex items-center justify-between">
-                <span className="flex h-7 items-center rounded-full bg-coral-soft pl-3.5 pr-10 text-[10px] text-coral">{t.label}</span>
+                <span className="flex h-7 items-center rounded-full bg-coral/12 pl-3.5 pr-10 text-[10px] text-coral">{t.label}</span>
                 <span className="w-10 shrink-0 text-[10px] text-ink">{t.count}x</span>
               </li>
             ))}

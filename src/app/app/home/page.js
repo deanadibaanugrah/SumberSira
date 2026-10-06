@@ -49,7 +49,7 @@ export default function HomePage() {
       <nav aria-label="Fitur" className="mt-4 grid grid-cols-4 text-center">
         {ACTIONS.map(({ href, label, icon: Icon }) => (
           <Link key={href} href={href} className="group flex flex-col items-center gap-1.5">
-            <span className="grid size-[55px] place-items-center rounded-2xl border border-white/25 bg-moss transition group-hover:bg-leaf">
+            <span className="grid size-[55px] place-items-center rounded-2xl border border-white/25 bg-leaf/45 transition group-hover:bg-leaf">
               <Icon size={20} strokeWidth={2.4} />
             </span>
             <span className="text-[9px] leading-tight text-white/90">{label}</span>
@@ -63,7 +63,7 @@ export default function HomePage() {
              aria-label={`Keramaian: ${visits.map((d) => `${d.hour}.00 ${d.value}%`).join(", ")}`}>
           {visits.map((d, i) => (
             <span key={d.hour} style={{ height: barHeight(d.value), animationDelay: `${i * 90}ms` }}
-                  className={`w-6 origin-bottom rounded-md animate-grow-up ${d.value === busiest ? "bg-[#eeeeee]" : "bg-[#3c785d]"}`} />
+                  className={`w-6 origin-bottom rounded-md animate-grow-up ${d.value === busiest ? "bg-white/90" : "bg-leaf/70"}`} />
           ))}
         </div>
         <div className="mt-1.5 flex gap-9 pl-1 font-mono text-[8px] text-white/70" aria-hidden="true">

@@ -1,20 +1,18 @@
 @import "tailwindcss";
 
 /* ------------------------------------------------------------------
-   Token desain Sumber Sira — diambil dari desain Figma (HI-FI).
+   Token desain Sumber Sira — sama dengan papan "Color Palette" di Figma.
+   Hanya DUA hijau: forest dan leaf. Warna yang lebih muda dibuat dari
+   transparansi warna yang sama (bg-leaf/15, bg-white/70, border-ink/10),
+   jangan menambah token hijau baru.
    Pakai lewat kelas Tailwind, mis. bg-forest, text-leaf, font-display.
    ------------------------------------------------------------------ */
 @theme {
-  --color-forest: #1b4332;      /* hijau tua: sidebar admin, latar app */
-  --color-ink: #172321;         /* paling gelap: teks admin, ujung gradasi */
-  --color-moss: #2d6a4f;        /* hijau tengah */
-  --color-leaf: #40916c;        /* aksen utama: tombol, menu aktif */
-  --color-sage: #70ac91;        /* batang grafik terang */
-  --color-mint: #e2efe9;        /* latar pill/status terang */
-  --color-mist: #e8f2ed;        /* avatar, latar kartu FAQ */
-  --color-coral: #e07a5f;       /* ramai, tolak, negatif */
-  --color-coral-soft: #fbefec;  /* latar tag keluhan */
+  --color-forest: #1b4332;      /* Hijau Tua: latar app, sidebar admin, judul, sorotan grafik */
+  --color-leaf: #40916c;        /* Hijau Daun: tombol, menu aktif, ikon, grafik, status Sepi */
+  --color-ink: #172321;         /* teks admin, kode QR, ujung gradasi latar */
   --color-paper: #f5f6f5;       /* latar halaman admin */
+  --color-coral: #e07a5f;       /* satu-satunya aksen: ramai, tolak, keluhan */
 
   --font-display: "Fraunces Variable", Georgia, serif;
   --font-sans: "Inter Variable", system-ui, sans-serif;
@@ -55,12 +53,12 @@ body {
   font-family: var(--font-sans);
 }
 
-/* Latar aplikasi mobile: gradasi hijau tua dengan cahaya lembut, seperti di desain. */
+/* Latar aplikasi mobile: gradasi Hijau Tua ke Ink dengan cahaya Hijau Daun, seperti di desain. */
 .app-bg {
   background:
     radial-gradient(120% 60% at 0% 75%, rgba(64, 145, 108, 0.35), transparent 60%),
     radial-gradient(90% 50% at 100% 0%, rgba(23, 35, 33, 0.9), transparent 70%),
-    linear-gradient(160deg, #1b4332 0%, #1d3a2f 45%, #172321 100%);
+    linear-gradient(160deg, #1b4332 0%, #172321 100%);
 }
 
 /* Kartu kaca (glassmorphism) yang dipakai di hampir semua layar mobile. */

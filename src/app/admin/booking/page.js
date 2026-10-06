@@ -46,7 +46,7 @@ export default function BookingManagementPage() {
               <colgroup>
                 {COLUMNS.map((c) => <col key={c.label} style={c.width ? { width: c.width } : undefined} />)}
               </colgroup>
-              <thead className="bg-mint text-ink/80">
+              <thead className="bg-leaf/15 text-ink/80">
                 <tr>
                   {COLUMNS.map((c) => <th key={c.label} className="h-10 pl-5 font-semibold">{c.label}</th>)}
                 </tr>
@@ -55,7 +55,7 @@ export default function BookingManagementPage() {
                 {visible.map((r) => (
                   <tr key={r.id} onClick={() => setSelectedId(r.id)} tabIndex={0}
                       onKeyDown={(e) => e.key === "Enter" && setSelectedId(r.id)}
-                      className={`h-[52px] cursor-pointer border-t border-black/5 transition hover:bg-mint/50 ${r.id === selectedId ? "bg-mist" : ""}`}>
+                      className={`h-[52px] cursor-pointer border-t border-black/5 transition hover:bg-leaf/8 ${r.id === selectedId ? "bg-leaf/12" : ""}`}>
                     <td className="pl-5 font-medium text-ink">{r.name}</td>
                     <td className="pl-5 text-ink/70">{r.items}</td>
                     <td className="pl-5 font-mono text-[10.5px] text-ink">{r.time}</td>
@@ -87,7 +87,7 @@ export default function BookingManagementPage() {
                   </button>
                   <button type="button" disabled={selected.status === "Selesai" || selected.status === "Ditolak"}
                           onClick={() => setStatus(selected.id, "Ditolak")}
-                          className="h-9 rounded-md border border-black/15 bg-white text-[11px] font-semibold text-ink transition enabled:hover:bg-coral-soft enabled:hover:text-coral disabled:opacity-60">
+                          className="h-9 rounded-md border border-black/15 bg-white text-[11px] font-semibold text-ink transition enabled:hover:bg-coral/12 enabled:hover:text-coral disabled:opacity-60">
                     Tolak
                   </button>
                 </div>

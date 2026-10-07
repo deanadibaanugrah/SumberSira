@@ -13,14 +13,17 @@ export const CROWD_TODAY = [
 ];
 
 // Jumlah pengunjung per jam untuk grafik "Live Crowd Monitor" di dashboard admin.
-// Tinggi batang di desain admin sebanding dengan angka ini (puncak jam 14.00).
+// Ditulis per jam agar label waktu lebih jelas di dashboard.
 export const VISITORS_TODAY = [
-  { label: "08", value: 40 },
-  { label: "10", value: 60 },
-  { label: "12", value: 94 },
-  { label: "14", value: 120 },
-  { label: "16", value: 101 },
-  { label: "18", value: 53 },
+  { label: "08:00", value: 40 },
+  { label: "09:00", value: 52 },
+  { label: "10:00", value: 60 },
+  { label: "11:00", value: 78 },
+  { label: "12:00", value: 94 },
+  { label: "13:00", value: 108 },
+  { label: "14:00", value: 120 },
+  { label: "15:00", value: 112 },
+  { label: "16:00", value: 101 },
 ];
 
 export const CROWD_NOW = { percent: 62, label: "Sedang", updated: "2 menit lalu" };

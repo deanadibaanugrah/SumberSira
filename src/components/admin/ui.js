@@ -50,14 +50,14 @@ const PILL = {
 
 // size "sm" = daftar ringkas di dashboard, "md" = tabel booking, "tag" = tabel wahana.
 const PILL_SIZE = {
-  sm: "h-5 min-w-14 px-2.5 text-[8.5px]",
-  md: "h-[22px] w-[76px] px-3 text-[10px]",
-  tag: "h-[22px] w-[60px] px-3 text-[8.5px]", // kolom status tabel Wahana
+  sm: "h-6 min-w-[70px] px-3 text-[9px]",
+  md: "h-7 min-w-[82px] px-3 text-[10px]",
+  tag: "h-6 min-w-[72px] px-3 text-[9px]", // kolom status tabel Wahana
 };
 
 export function StatusPill({ status, size = "sm" }) {
   return (
-    <span className={`inline-flex items-center rounded-full font-semibold ${PILL_SIZE[size]} ${PILL[status] ?? PILL.Selesai}`}>
+    <span className={`inline-flex items-center justify-center rounded-full text-center font-semibold leading-none ${PILL_SIZE[size]} ${PILL[status] ?? PILL.Selesai}`}>
       {status}
     </span>
   );

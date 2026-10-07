@@ -113,15 +113,16 @@ export default function OnboardingPage() {
         <p className="mt-3.5 text-xs leading-[15px] text-white/70">{SLIDES[index].text}</p>
       </div>
 
-      <div className="mt-auto flex justify-end gap-[19px] px-5 pt-8">
+      {/* Tombol Kembali & Lanjut dibagi rata (flex-1, maks 150px) dan dipasang di tengah. */}
+      <div className="mt-auto flex justify-center gap-[19px] px-5 pt-8">
         {index > 0 && (
           <button type="button" onClick={() => go(index - 1)}
-                  className="glass h-[50px] w-[150px] rounded-full text-[13px] font-semibold transition hover:bg-white/15">
+                  className="glass h-[50px] min-w-[130px] max-w-[150px] flex-1 rounded-full text-[13px] font-semibold transition hover:bg-white/15">
             Kembali
           </button>
         )}
         <button type="button" onClick={() => (last ? finish() : go(index + 1))}
-                className="h-[50px] w-[150px] rounded-full bg-leaf text-[13px] font-semibold shadow-lg shadow-black/25 transition hover:brightness-110">
+                className="h-[50px] min-w-[130px] max-w-[150px] flex-1 rounded-full bg-leaf text-[13px] font-semibold shadow-lg shadow-black/25 transition hover:brightness-110">
           {last ? "Mulai Jelajahi" : "Lanjut"}
         </button>
       </div>

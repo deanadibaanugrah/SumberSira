@@ -3,15 +3,21 @@
 import { Check, MessageCircle } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 import { QRCodeSVG } from "qrcode.react";
 
 import { useBooking } from "@/lib/booking-context";
 import { rupiah } from "@/lib/format";
-import { sendInvoice } from "@/lib/whatsapp";
 
 export default function KonfirmasiPage() {
   const router = useRouter();
   const booking = useBooking();
+
+  // Halaman ini hanya boleh tampil setelah pembayaran QRIS lunas (paid diisi di /app/pembayaran).
+  const unpaid = booking.loaded && Boolean(booking.code) && !booking.paid;
+  useEffect(() => {
+    if (unpaid) router.replace("/app/pembayaran");
+  }, [unpaid, router]);
 
   if (booking.loaded && !booking.code) {
     return (
@@ -24,10 +30,14 @@ export default function KonfirmasiPage() {
     );
   }
 
-  const invoice = {
-    code: booking.code, name: booking.name, whatsapp: booking.whatsapp, slot: booking.slotInfo.range,
-    items: booking.items, total: booking.total, payment: booking.payment,
-  };
+  if (unpaid) {
+    return (
+      <main className="grid min-h-dvh place-items-center px-5 text-center">
+        <p className="text-xs text-white/80">Mengarahkan ke halaman pembayaran QRIS…</p>
+      </main>
+    );
+  }
+
   const itemSummary = booking.items.map((i) => `${i.qty}x ${i.short}`).join(", ");
   const backHome = () => {
     booking.reset();
@@ -62,10 +72,11 @@ export default function KonfirmasiPage() {
         ))}
       </dl>
 
-      {/* Syarat dosen: setelah bayar, invoice terkirim ke WhatsApp pemesan (tahap frontend: lewat wa.me). */}
+      {/* Fase frontend: tombol invoice tampil dulu tapi belum aktif. Auto-send diaktifkan
+          kembali saat backend /api/invoice diuji (lihat src/app/api/invoice/route.js). */}
       <p className="mt-3 text-center text-[9.5px] text-white/70">Invoice dikirim ke WhatsApp <span className="font-mono">{booking.whatsapp}</span></p>
-      <button type="button" onClick={() => sendInvoice(invoice)}
-              className="glass mt-2 flex h-10 items-center justify-center gap-2 rounded-full text-xs font-semibold transition hover:bg-white/15">
+      <button type="button" disabled aria-disabled="true"
+              className="glass mt-2 flex h-10 items-center justify-center gap-2 rounded-full text-xs font-semibold transition hover:bg-white/15 disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:bg-white/10">
         <MessageCircle size={15} /> Kirim Invoice ke WhatsApp
       </button>
 

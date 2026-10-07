@@ -3,13 +3,20 @@
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
 
 import { SLOTS, WAHANA, bookingLabel } from "@/data/wahana";
+import { PAYMENT_METHODS } from "@/lib/payment";
+
+// Satu sumber data metode pembayaran (client & server); di-export ulang agar
+// halaman checkout tetap bisa mengimpor dari sini.
+export { PAYMENT_METHODS };
 
 // Keranjang booking dibagi ke halaman Booking -> Checkout -> Konfirmasi.
 // Disimpan di sessionStorage supaya tidak hilang saat halaman di-refresh.
 const BookingContext = createContext(null);
 const STORAGE_KEY = "sumber-sira:booking";
 
-const empty = { slot: SLOTS[0].id, qty: {}, name: "", whatsapp: "", payment: "Cash di Lokasi", code: null };
+// paid: true hanya setelah pembayaran QRIS terverifikasi di /app/pembayaran,
+// sebelum itu halaman /app/konfirmasi menolak tampil (lihat guard di sana).
+const empty = { slot: SLOTS[0].id, qty: {}, name: "", whatsapp: "", payment: PAYMENT_METHODS[0], code: null, paid: false };
 
 export function BookingProvider({ children }) {
   const [state, setState] = useState(empty);
@@ -19,8 +26,12 @@ export function BookingProvider({ children }) {
     try {
       const saved = window.sessionStorage.getItem(STORAGE_KEY);
       // Membaca penyimpanan browser hanya bisa setelah komponen tampil di browser.
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      if (saved) setState({ ...empty, ...JSON.parse(saved) });
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        // Sesi lama bisa menyimpan metode yang sudah dihapus; paksa kembali ke pilihan yang valid.
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        setState({ ...empty, ...parsed, payment: PAYMENT_METHODS.includes(parsed.payment) ? parsed.payment : empty.payment });
+      }
     } catch {
       // penyimpanan diblokir (mode privat): keranjang tetap jalan, hanya tidak bertahan saat refresh
     }

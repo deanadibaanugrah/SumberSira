@@ -5,14 +5,11 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import PageHeader from "@/components/mobile/PageHeader";
-import { useBooking } from "@/lib/booking-context";
+import { PAYMENT_METHODS, useBooking } from "@/lib/booking-context";
 import { bookingCode, rupiah } from "@/lib/format";
 
-// Lebar tombol mengikuti desain (Cash 125 px, QRIS 86 px).
-const METHODS = [
-  { id: "Cash di Lokasi", width: "w-[125px]" },
-  { id: "QRIS", width: "w-[86px]" },
-];
+// Hanya QRIS: pembayaran cash di lokasi dihapus. Lebar tombol mengikuti desain (86 px).
+const METHODS = [{ id: PAYMENT_METHODS[0], width: "w-[86px]" }];
 const WA_PATTERN = /^(\+?62|0)8\d{8,12}$/;
 const inputClass =
   "glass mt-1 h-11 w-full rounded-2xl px-4 text-[11px] text-white outline-none placeholder:text-white/55 focus:border-white/50";
@@ -42,7 +39,8 @@ export default function CheckoutPage() {
     setErrors(next);
     if (Object.keys(next).length) return;
     booking.update({ code: bookingCode() });
-    router.push("/app/konfirmasi");
+    // Lanjut ke step pembayaran QRIS dulu; /app/konfirmasi baru terbuka setelah lunas.
+    router.push("/app/pembayaran");
   };
 
   return (

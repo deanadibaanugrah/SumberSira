@@ -18,9 +18,9 @@ export default function DashboardPage() {
           <Card className="xl:h-[280px]">
             <CardTitle size="sm">Live Crowd Monitor</CardTitle>
             <div className="mt-[37px]">
-              <BarChart data={VISITORS_TODAY} height={179} columns={7} align="start" barWidth="w-[73%]" rounded="rounded-md"
-                        highlight={(d) => ["12", "14", "16"].includes(d.label)} barClass="bg-leaf/75" highlightClass="bg-forest"
-                        labelClass="text-[9px] text-ink/60" />
+              <BarChart data={VISITORS_TODAY} height={179} columns={9} align="center" barWidth="w-[62%]" rounded="rounded-md"
+                        highlight={(d) => ["12:00", "13:00", "14:00", "15:00", "16:00"].includes(d.label)} barClass="bg-leaf/75" highlightClass="bg-forest"
+                        labelClass="text-[8px] text-ink/60" />
             </div>
           </Card>
 

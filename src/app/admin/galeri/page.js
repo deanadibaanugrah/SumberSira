@@ -45,7 +45,7 @@ export default function GaleriPage() {
             <Card key={p.id} className="px-2.5! pb-4! pt-[11px]! animate-fade-up">
               <div className="relative aspect-[254/130] overflow-hidden rounded-lg">
                 <Image src={p.src} alt={`Foto dari ${p.owner}`} fill sizes="(min-width:1280px) 25vw, 50vw" className="object-cover" />
-                <span className={`absolute right-[19px] top-[9px] flex h-[18px] items-center rounded-full px-2.5 text-[9px] font-semibold ${BADGE[p.status]}`}>{p.status}</span>
+                <span className={`absolute right-[19px] top-[9px] inline-flex h-6 min-w-[78px] items-center justify-center rounded-full px-3 text-center text-[9px] font-semibold leading-none ${BADGE[p.status]}`}>{p.status}</span>
               </div>
               <p className="mt-2.5 text-[11px] font-semibold text-ink">{p.owner}</p>
               <div className="mt-2 flex gap-1.5">

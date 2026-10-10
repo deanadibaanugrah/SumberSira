@@ -66,7 +66,7 @@ export default function PembayaranPage() {
         </div>
         <p className="mt-3.5 text-center font-mono text-lg font-semibold leading-none">{rupiah(booking.total)}</p>
         <p className="mt-1.5 text-center text-[9.5px] text-white/65">
-          Nominal sudah terkunci di dalam QR — pastikan nilainya sama persis sebelum membayar.
+          Nominal sudah terkunci di dalam QR, pastikan nilainya sama persis sebelum membayar.
         </p>
       </div>
 

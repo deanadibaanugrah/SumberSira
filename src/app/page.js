@@ -2,6 +2,8 @@ import { Calendar, Camera, ChartColumn, Clock, LayoutGrid, MapPin, MessageSquare
 import Image from "next/image";
 import Link from "next/link";
 
+import LogoMark from "@/components/Logo";
+
 // Introduction web (syarat dosen: "introduction web dan app").
 // Halaman ini tidak ada di Figma; dibuat dengan gaya yang sama untuk mengarahkan ke aplikasi dan admin.
 const FEATURES = [
@@ -18,8 +20,9 @@ export default function IntroPage() {
         <Image src="/images/hero-sawah.webp" alt="" fill priority sizes="100vw" className="object-cover opacity-40" />
         <div className="absolute inset-0 bg-gradient-to-b from-forest/40 via-forest/70 to-forest" />
         <div className="relative mx-auto max-w-5xl px-6 pb-20 pt-16 sm:pt-24">
-          <p className="flex items-center gap-2 text-sm text-white/80"><MapPin size={16} /> Desa Putukrejo, Malang</p>
-          <h1 className="mt-4 font-display text-5xl font-semibold leading-tight sm:text-6xl">Sumber Sira</h1>
+          <LogoMark size={72} ring className="shadow-lg shadow-black/25" />
+          <p className="mt-6 flex items-center gap-2 text-sm text-white/80"><MapPin size={16} /> Desa Putukrejo, Malang</p>
+          <h1 className="mt-3 font-display text-5xl font-semibold leading-tight sm:text-6xl">Sumber Sira</h1>
           <p className="mt-3 text-xl text-white/90 sm:text-2xl">Kunjungan Jernih Tanpa Antre</p>
           <p className="mt-5 max-w-xl text-white/75">
             Kolam mata air alami yang jernih dan sejuk, dikelola masyarakat Desa Putukrejo. Booking wahana, cek keramaian,
@@ -50,7 +53,7 @@ export default function IntroPage() {
 
         <div className="mt-10 grid gap-4 sm:grid-cols-2">
           <p className="glass flex items-center gap-4 rounded-[24px] p-5">
-            <Clock className="shrink-0" /> <span><b className="block">Jam buka</b><span className="text-sm text-white/70">Weekday 08.00–16.00 · Weekend s/d 17.00</span></span>
+            <Clock className="shrink-0" /> <span><b className="block">Jam buka</b><span className="text-sm text-white/70">Weekday 08.00-16.00 · Weekend s/d 17.00</span></span>
           </p>
           <p className="glass flex items-center gap-4 rounded-[24px] p-5">
             <Ticket className="shrink-0" /> <span><b className="block">Tiket masuk</b><span className="text-sm text-white/70">Rp5.000 per orang (usia 3 tahun ke atas)</span></span>
@@ -59,7 +62,7 @@ export default function IntroPage() {
       </section>
 
       <footer className="border-t border-white/10 px-6 py-6 text-center text-sm text-white/55">
-        Sumber Sira · Tugas kelompok (UTS) — Next.js + Tailwind CSS
+        Sumber Sira · Tugas kelompok (UTS) · Next.js + Tailwind CSS
       </footer>
     </main>
   );

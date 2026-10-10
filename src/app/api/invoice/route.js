@@ -5,12 +5,12 @@ import { PAYMENT_METHODS } from "@/lib/payment";
 import { normalizeWhatsapp } from "@/lib/whatsapp";
 
 /*
-  POST /api/invoice — buat invoice PDF di server lalu kirim dari nomor WhatsApp
+  POST /api/invoice: buat invoice PDF di server lalu kirim dari nomor WhatsApp
   RESMI Sumber Sira ke nomor penyewa (WhatsApp Cloud API Meta).
 
   Anti-rekayasa (tahap tanpa database):
   • nama item, harga & total diambil/dihitung ulang dari katalog src/data/wahana.js,
-    bukan dari data klien — PDF tidak bisa "dipalsukan" dari sisi pengguna;
+    bukan dari data klien, jadi PDF tidak bisa "dipalsukan" dari sisi pengguna;
   • PDF digenerate di server, jadi tidak bisa diedit pengguna;
   • pengiriman dari nomor bisnis resmi (WHATSAPP_PHONE_NUMBER_ID), bukan wa.me.
 
@@ -47,7 +47,7 @@ export async function POST(request) {
   for (const raw of rawItems) {
     const wahana = WAHANA.find((w) => w.id === raw?.id);
     const qty = Number(raw?.qty);
-    // Harga & nama dari katalog server — klien tidak bisa memanipulasi nominal.
+    // Harga & nama dari katalog server, jadi klien tidak bisa memanipulasi nominal.
     if (!wahana || !Number.isInteger(qty) || qty < 1 || qty > 99) return json(400, { ok: false, error: "invalid_payload" });
     items.push({ name: bookingLabel(wahana), qty, price: wahana.price });
   }
@@ -97,7 +97,7 @@ export async function POST(request) {
         document: {
           id: uploaded.id,
           filename,
-          caption: `Invoice resmi ${code} — Total ${rupiah(total)}. Terima kasih sudah berkunjung ke Sumber Sira!`,
+          caption: `Invoice resmi ${code}, total ${rupiah(total)}. Terima kasih sudah berkunjung ke Sumber Sira!`,
         },
       }),
       signal: AbortSignal.timeout(20000),

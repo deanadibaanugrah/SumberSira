@@ -6,7 +6,7 @@ import { rupiah } from "./format";
 /*
   Generator invoice PDF di sisi server.
 
-  Kenapa di server: pengguna TIDAK BISA mengedit isinya — PDF dibuat dari data
+  Kenapa di server: pengguna TIDAK BISA mengedit isinya, karena PDF dibuat dari data
   yang divalidasi server (harga & nama item diverifikasi terhadap katalog
   src/data/wahana.js, total dihitung ulang), lalu dikirim dari nomor WhatsApp
   resmi lewat Cloud API (lihat src/app/api/invoice/route.js).
@@ -22,7 +22,7 @@ const COL = { item: MARGIN, qty: 232, price: 300, amount: PAGE.width - MARGIN };
 
 export async function buildInvoicePdf({ code, name, whatsapp, slot, items, total, payment, issuedAt = new Date() }) {
   const pdf = await PDFDocument.create();
-  pdf.setTitle(`Invoice ${code} — Sumber Sira`);
+  pdf.setTitle(`Invoice ${code} · Sumber Sira`);
   pdf.setAuthor("Sumber Sira");
   pdf.setCreator("Sistem Sumber Sira (otomatis)");
   const page = pdf.addPage([PAGE.width, PAGE.height]);
@@ -45,7 +45,7 @@ export async function buildInvoicePdf({ code, name, whatsapp, slot, items, total
   page.drawText("STATUS: LUNAS", { x: MARGIN, y: PAGE.height - 73, size: 8, font: bold, color: LEAF });
   const codeText = code;
   page.drawText(codeText, { x: PAGE.width - MARGIN - mono.widthOfTextAtSize(codeText, 10), y: PAGE.height - 46, size: 10, font: monoBold, color: rgb(1, 1, 1) });
-  page.drawText("Dokumen resmi — diterbitkan sistem", { x: PAGE.width - MARGIN - regular.widthOfTextAtSize("Dokumen resmi — diterbitkan sistem", 6.5), y: PAGE.height - 60, size: 6.5, font: regular, color: rgb(0.7, 0.8, 0.77) });
+  page.drawText("Dokumen resmi, diterbitkan sistem", { x: PAGE.width - MARGIN - regular.widthOfTextAtSize("Dokumen resmi, diterbitkan sistem", 6.5), y: PAGE.height - 60, size: 6.5, font: regular, color: rgb(0.7, 0.8, 0.77) });
 
   // Data pemesan.
   let y = PAGE.height - 110;
@@ -60,7 +60,7 @@ export async function buildInvoicePdf({ code, name, whatsapp, slot, items, total
   drawPair("Metode Pembayaran", payment, y);
   y -= 20;
 
-  // Tabel item — angka memakai font mono agar rapi dan mudah diperiksa.
+  // Tabel item: angka memakai font mono agar rapi dan mudah diperiksa.
   page.drawLine({ start: { x: MARGIN, y: y + 8 }, end: { x: PAGE.width - MARGIN, y: y + 8 }, thickness: 1, color: DARK });
   page.drawText("Item", { x: COL.item, y, size: 7, font: bold, color: GRAY });
   page.drawText("Qty", { x: COL.qty, y, size: 7, font: bold, color: GRAY });
@@ -79,7 +79,7 @@ export async function buildInvoicePdf({ code, name, whatsapp, slot, items, total
   }
   page.drawLine({ start: { x: MARGIN, y: y + 7 }, end: { x: PAGE.width - MARGIN, y: y + 7 }, thickness: 0.75, color: rgb(0.8, 0.8, 0.8) });
 
-  // Total tagih — server menghitung ulang, bukan menerima dari klien.
+  // Total tagih: server menghitung ulang, bukan menerima dari klien.
   y -= 8;
   page.drawText("TOTAL DIBAYAR", { x: 150, y, size: 9, font: bold, color: DARK });
   const totalText = rupiah(total);

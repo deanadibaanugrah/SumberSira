@@ -4,6 +4,8 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
+import LogoMark from "@/components/Logo";
+
 // Layar Splash: tampil sebentar, lalu lanjut otomatis ke "Tentang Sumber Sira". Ketuk untuk lewati.
 // Posisi elemen memakai persen tinggi layar agar sejajar dengan foto latar (rasio frame desain 375×812).
 export default function SplashPage() {
@@ -24,13 +26,13 @@ export default function SplashPage() {
             className="relative block min-h-dvh w-full overflow-hidden text-left">
       <Image src="/images/splash-sumber-sira.webp" alt="" fill priority sizes="430px" className="object-cover" />
 
-      <div className="absolute left-1/2 top-[37%] size-[100px] -translate-x-1/2">
-        <span className="absolute inset-0 rounded-full border border-white/40 bg-gradient-to-b from-white/10 to-white/0 backdrop-blur-[2px] animate-pop" />
-        <h1 className="absolute left-1/2 top-[54px] -translate-x-1/2 -translate-y-1/2 whitespace-nowrap font-display text-[28px] font-semibold animate-fade-up">
+      {/* Logo Sumber Sira (varian latar gelap) di atas nama dan tagline, seperti di desain Splash. */}
+      <div className="absolute inset-x-0 top-[30%] flex flex-col items-center">
+        <LogoMark size={76} ring className="shadow-lg shadow-black/25 animate-pop" />
+        <h1 className="mt-4 whitespace-nowrap font-display text-[28px] font-semibold leading-tight animate-fade-up">
           Sumber Sira
         </h1>
-        <p className="absolute left-1/2 top-[87px] -translate-x-1/2 -translate-y-1/2 whitespace-nowrap text-xs text-white/85 animate-fade-up"
-           style={{ animationDelay: "200ms" }}>
+        <p className="mt-2 whitespace-nowrap text-xs text-white/85 animate-fade-up" style={{ animationDelay: "200ms" }}>
           Kunjungan Jernih Tanpa Antre
         </p>
       </div>

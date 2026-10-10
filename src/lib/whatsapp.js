@@ -4,7 +4,7 @@ import { rupiah } from "./format";
   Invoice WhatsApp setelah pembayaran (syarat dosen: "after bayar invoice terkirim ke whatsapp user").
 
   Tahap UTS (frontend): tombol membuka WhatsApp ke nomor pengunjung dengan teks invoice terisi otomatis
-  (link wa.me — tanpa server, tanpa API key).
+  (link wa.me, tanpa server, tanpa API key).
 
   Tahap backend (dikerjakan kelompok berikutnya): ganti sendInvoice() dengan panggilan ke API backend
   sendiri, mis. POST /api/invoice, yang mengirim pesan otomatis lewat WhatsApp Cloud API (Meta) atau
@@ -20,9 +20,9 @@ export function normalizeWhatsapp(number) {
 }
 
 export function buildInvoiceMessage(booking) {
-  const lines = booking.items.map((item) => `• ${item.qty}x ${item.name} — ${rupiah(item.qty * item.price)}`);
+  const lines = booking.items.map((item) => `• ${item.qty}x ${item.name}: ${rupiah(item.qty * item.price)}`);
   return [
-    "*INVOICE — Sumber Sira*",
+    "*INVOICE · Sumber Sira*",
     `Kode: ${booking.code}`,
     `Nama: ${booking.name}`,
     `Waktu kunjungan: ${booking.slot}`,

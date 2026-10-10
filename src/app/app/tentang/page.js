@@ -2,6 +2,8 @@ import { Car, Clock, Droplet, Fish, LifeBuoy, MapPin, Tent, Ticket, Users, Walle
 import Image from "next/image";
 import Link from "next/link";
 
+import LogoMark from "@/components/Logo";
+
 // Introduction aplikasi: "Tentang Sumber Sira" (syarat dosen: introduction app).
 const FEATURES = [
   { label: "Air jernih", icon: Droplet },
@@ -11,7 +13,7 @@ const FEATURES = [
 ];
 
 const INFO = [
-  { title: "Jam buka", text: "Weekday 08.00–16.00 · Weekend s/d 17.00", icon: Clock },
+  { title: "Jam buka", text: "Weekday 08.00-16.00 · Weekend s/d 17.00", icon: Clock },
   { title: "Tiket masuk", text: "Rp5.000 per orang (usia 3 tahun ke atas)", icon: Ticket },
   { title: "Parkir", text: "Motor 3rb · Mobil 10rb · Bus 20rb", icon: Car },
   { title: "Pembayaran", text: "Tunai & QRIS", icon: Wallet },
@@ -21,7 +23,9 @@ export default function TentangPage() {
   return (
     <main className="px-5 pb-6">
       <header className="flex items-center justify-between pt-9 pb-4">
-        <span className="font-display text-base font-semibold">Sumber Sira</span>
+        <span className="flex items-center gap-2.5 font-display text-[17px] font-semibold">
+          <LogoMark size={30} ring label="" /> Sumber Sira
+        </span>
         <Link href="/app/home" className="mr-[25px] text-[11px] font-semibold text-white/75 hover:text-white">Lewati</Link>
       </header>
 
@@ -34,7 +38,7 @@ export default function TentangPage() {
 
       <h1 className="mt-5 font-display text-[26px] font-semibold leading-tight">Tentang Sumber Sira</h1>
       <p className="mt-1.5 text-[13px] leading-[1.35] text-white/80">
-        Kolam mata air alami yang jernih dan sejuk — seru buat berenang, main air, dan foto bareng keluarga.
+        Kolam mata air alami yang jernih dan sejuk, seru buat berenang, main air, dan foto bareng keluarga.
       </p>
 
       <p className="glass mt-3 inline-flex h-[29px] items-center gap-2 rounded-full px-3 text-[11px]">

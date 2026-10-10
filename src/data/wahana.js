@@ -18,8 +18,8 @@ export function bookingLabel(item) {
 }
 
 export const SLOTS = [
-  { id: "08-10", label: "08–10", range: "08.00 – 10.00", busy: false },
-  { id: "10-12", label: "10–12", range: "10.00 – 12.00", busy: true },
-  { id: "12-14", label: "12–14", range: "12.00 – 14.00", busy: true },
-  { id: "14-16", label: "14–16", range: "14.00 – 16.00", busy: true },
+  { id: "08-10", label: "08-10", range: "08.00 - 10.00", busy: false },
+  { id: "10-12", label: "10-12", range: "10.00 - 12.00", busy: true },
+  { id: "12-14", label: "12-14", range: "12.00 - 14.00", busy: true },
+  { id: "14-16", label: "14-16", range: "14.00 - 16.00", busy: true },
 ];

@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 /* ------------------------------------------------------------------
-   Token desain Sumber Sira — sama dengan papan "Color Palette" di Figma.
+   Token desain Sumber Sira, sama dengan papan "Color Palette" di Figma.
    Hanya DUA hijau: forest dan leaf. Warna yang lebih muda dibuat dari
    transparansi warna yang sama (bg-leaf/15, bg-white/70, border-ink/10),
    jangan menambah token hijau baru.

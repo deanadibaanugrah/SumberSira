@@ -1,12 +1,12 @@
 "use client";
 
-import { Pencil, Trash2 } from "lucide-react";
+import { Clock, MessageCircle, Pencil, Plus, Sparkles, Trash2 } from "lucide-react";
 import { useState } from "react";
 
-import { AdminHeader, Card, CardTitle, IconButton, Modal, PrimaryButton, inputClass } from "@/components/admin/ui";
-import { FAQ, UNANSWERED } from "@/data/dummy";
+import { AdminHeader, Card, CardTitle, IconButton, Modal, PrimaryButton, SecondaryButton, StatCard, inputClass, labelClass } from "@/components/admin/ui";
+import { FAQ, FAQ_AUTO_RATE, UNANSWERED } from "@/data/dummy";
 
-// Admin 5/6: Chatbot / FAQ — jawaban yang tersimpan tampil otomatis di chatbot Tanya Sira.
+// Admin 5/6: Chatbot & FAQ. Jawaban yang tersimpan dipakai otomatis oleh chatbot Tanya Sira.
 export default function FaqPage() {
   const [faqs, setFaqs] = useState(FAQ);
   const [pending, setPending] = useState(UNANSWERED);
@@ -16,7 +16,7 @@ export default function FaqPage() {
     e.preventDefault();
     if (!form.q.trim() || !form.a.trim()) return;
     if (form.id && !form.fromPending) {
-      setFaqs((all) => all.map((f) => (f.id === form.id ? { ...f, q: form.q, a: form.a } : f)));
+      setFaqs((all) => all.map((f) => (f.id === form.id ? { ...f, q: form.q.trim(), a: form.a.trim() } : f)));
     } else {
       setFaqs((all) => [...all, { id: Date.now(), q: form.q.trim(), a: form.a.trim() }]);
       if (form.fromPending) setPending((all) => all.filter((p) => p.id !== form.id));
@@ -26,57 +26,78 @@ export default function FaqPage() {
 
   return (
     <>
-      <AdminHeader title="Chatbot / FAQ"
-                   action={<PrimaryButton onClick={() => setForm({ q: "", a: "" })}>+ Tambah FAQ</PrimaryButton>} />
-      <main className="grid gap-5 p-6 lg:p-8 xl:grid-cols-[700fr_436fr]">
-        <Card className="pt-5! xl:min-h-[700px]">
-          <CardTitle>Daftar FAQ</CardTitle>
-          <ul className="mt-[18px] space-y-4">
-            {faqs.map((f) => (
-              <li key={f.id} className="flex min-h-[76px] items-center gap-2 rounded-[10px] bg-leaf/12 pl-4 pr-3">
-                <div className="flex-1 self-start pb-3 pt-3">
-                  <p className="text-xs font-semibold text-ink">{f.q}</p>
-                  <p className="mt-1.5 text-[10px] text-ink/65">Jawaban tersimpan — tampil otomatis di chatbot Tanya Sira</p>
+      <AdminHeader title="Chatbot & FAQ" subtitle="Atur jawaban Tanya Sira dan pertanyaan pengunjung"
+                   action={<PrimaryButton icon={Plus} onClick={() => setForm({ q: "", a: "" })}>Tambah FAQ</PrimaryButton>} />
+
+      <div className="mt-6 grid gap-5 sm:grid-cols-3">
+        <StatCard icon={MessageCircle} solid value={faqs.length} label="FAQ aktif" />
+        <StatCard icon={Clock} value={pending.length} label="Belum terjawab" />
+        <StatCard icon={Sparkles} value={`${FAQ_AUTO_RATE}%`} label="Dijawab otomatis oleh AI" />
+      </div>
+
+      <div className="mt-5 grid gap-5 xl:grid-cols-[736fr_380fr]">
+        <Card className="px-4! pt-5!">
+          <CardTitle className="px-2" sub="Dipakai Tanya Sira untuk menjawab pengunjung">Daftar FAQ</CardTitle>
+          <ol className="mt-5 space-y-3">
+            {faqs.map((f, i) => (
+              <li key={f.id} className="flex min-h-20 items-center gap-4 rounded-2xl bg-paper py-3 pl-4 pr-3 animate-fade-up">
+                <span className="grid size-8 shrink-0 place-items-center rounded-full bg-leaf/12 text-sm font-semibold text-forest">{i + 1}</span>
+                <div className="min-w-0 flex-1">
+                  <p className="text-[15px] font-semibold leading-snug text-ink">{f.q}</p>
+                  <p className="mt-1 text-sm text-ink/70">{f.a}</p>
                 </div>
-                <IconButton label="Edit FAQ" onClick={() => setForm({ ...f })}><Pencil size={13} /></IconButton>
-                <IconButton label="Hapus FAQ" tone="coral" onClick={() => setFaqs((all) => all.filter((x) => x.id !== f.id))}>
-                  <Trash2 size={13} />
+                <IconButton label={`Edit FAQ: ${f.q}`} onClick={() => setForm({ ...f })}><Pencil size={16} /></IconButton>
+                <IconButton label={`Hapus FAQ: ${f.q}`} tone="coral" onClick={() => setFaqs((all) => all.filter((x) => x.id !== f.id))}>
+                  <Trash2 size={16} />
                 </IconButton>
               </li>
             ))}
-          </ul>
+          </ol>
+          {faqs.length === 0 && <p className="mt-4 px-2 text-sm text-ink/60">Belum ada FAQ. Tambahkan lewat tombol Tambah FAQ.</p>}
         </Card>
 
-        <Card className="pt-5! xl:min-h-[700px]">
-          <CardTitle>Belum Terjawab</CardTitle>
-          <ul className="mt-[22px] space-y-4">
+        <section className="flex flex-col rounded-3xl bg-forest p-5 text-white">
+          <div className="flex items-start justify-between gap-3 px-1">
+            <div>
+              <h2 className="text-lg font-semibold leading-tight">Belum Terjawab</h2>
+              <p className="mt-1.5 text-[13px] text-white/70">Pertanyaan yang belum bisa dijawab Tanya Sira</p>
+            </div>
+            {pending.length > 0 && (
+              <span className="shrink-0 rounded-full bg-coral px-3 py-1.5 text-xs font-semibold leading-none">{pending.length} pertanyaan</span>
+            )}
+          </div>
+          <ul className="mt-5 space-y-3">
             {pending.map((p) => (
-              <li key={p.id} className="min-h-[84px] rounded-lg border border-leaf/30 bg-leaf/12 px-3.5 pb-2 pt-3">
-                <p className="text-[11px] text-ink">{p.q}</p>
+              <li key={p.id} className="flex items-center gap-3 rounded-2xl bg-white/[0.08] p-4 animate-fade-up">
+                <div className="min-w-0 flex-1">
+                  <p className="text-[15px] font-semibold leading-snug">{p.q}</p>
+                  <p className="mt-2 text-[13px] text-white/60">Ditanyakan {p.asked}x minggu ini</p>
+                </div>
                 <button type="button" onClick={() => setForm({ id: p.id, q: p.q, a: "", fromPending: true })}
-                        className="mt-[21px] h-[26px] w-20 rounded-full bg-leaf text-[9.5px] font-semibold text-white hover:brightness-110">
+                        className="h-10 shrink-0 rounded-full bg-white px-4 text-[13px] font-semibold text-forest transition hover:bg-white/90">
                   Jawab
                 </button>
               </li>
             ))}
-            {pending.length === 0 && <li className="text-[11px] text-ink/60">Semua pertanyaan sudah dijawab. 🎉</li>}
+            {pending.length === 0 && <li className="rounded-2xl bg-white/[0.08] p-4 text-sm text-white/80">Semua pertanyaan sudah dijawab. 🎉</li>}
           </ul>
-        </Card>
-      </main>
+          <p className="mt-auto px-1 pt-6 text-[13px] text-white/60">Jawaban baru langsung dipakai Tanya Sira di aplikasi pengunjung.</p>
+        </section>
+      </div>
 
       {form && (
         <Modal title={form.fromPending ? "Jawab Pertanyaan" : form.id ? "Edit FAQ" : "Tambah FAQ"} onClose={() => setForm(null)}>
           <form onSubmit={save} className="space-y-3">
-            <label className="block text-[11px] text-ink/70">Pertanyaan
+            <label className={labelClass}>Pertanyaan
               <input value={form.q} onChange={(e) => setForm({ ...form, q: e.target.value })} className={`${inputClass} mt-1`} required />
             </label>
-            <label className="block text-[11px] text-ink/70">Jawaban
+            <label className={labelClass}>Jawaban
               <textarea value={form.a} onChange={(e) => setForm({ ...form, a: e.target.value })} rows={4}
-                        className={`${inputClass} mt-1 h-auto! resize-none py-2`} required autoFocus />
+                        className={`${inputClass} mt-1 h-auto! resize-none py-2.5`} required autoFocus />
             </label>
             <div className="flex justify-end gap-3 pt-2">
-              <button type="button" onClick={() => setForm(null)} className="h-8 rounded-md px-4 text-[11px] font-semibold text-ink/70 hover:bg-paper">Batal</button>
-              <PrimaryButton type="submit" className="min-w-0!">Simpan</PrimaryButton>
+              <SecondaryButton onClick={() => setForm(null)}>Batal</SecondaryButton>
+              <PrimaryButton type="submit" className="h-11!">Simpan</PrimaryButton>
             </div>
           </form>
         </Modal>

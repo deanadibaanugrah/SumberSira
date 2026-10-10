@@ -2,6 +2,7 @@ import { Bell, Calendar, Camera, ChartColumn, MessageSquare } from "lucide-react
 import Image from "next/image";
 import Link from "next/link";
 
+import LogoMark from "@/components/Logo";
 import BottomNav from "@/components/mobile/BottomNav";
 import { CROWD_NOW, CROWD_TODAY } from "@/data/dummy";
 
@@ -21,7 +22,9 @@ export default function HomePage() {
   return (
     <main className="px-5 pb-24">
       <header className="flex items-center justify-between pt-8 pb-5">
-        <h1 className="font-display text-xl font-semibold">Sumber Sira</h1>
+        <h1 className="flex items-center gap-2.5 font-display text-xl font-semibold">
+          <LogoMark size={30} ring label="" /> Sumber Sira
+        </h1>
         <button type="button" aria-label="Notifikasi (ada yang baru)"
                 className="glass relative grid size-9 place-items-center rounded-full">
           <Bell size={14} strokeWidth={2.6} />
@@ -69,7 +72,7 @@ export default function HomePage() {
         <div className="mt-1.5 flex gap-9 pl-1 font-mono text-[8px] text-white/70" aria-hidden="true">
           {visits.map((d) => <span key={d.hour} className="w-6">{d.hour}</span>)}
         </div>
-        <p className="text-[10px]">Jam sepi terbaik: 08.00–09.00</p>
+        <p className="text-[10px]">Jam sepi terbaik: 08.00-09.00</p>
       </section>
 
       <Link href="/app/ai-photo" className="glass mt-[25px] flex h-[89px] items-start gap-3.5 rounded-[20px] px-4 pt-3.5 transition hover:bg-white/10">

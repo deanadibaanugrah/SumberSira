@@ -44,7 +44,7 @@ export default function CrowdPage() {
         <span className="grid size-8 shrink-0 place-items-center rounded-full bg-leaf"><Timer size={16} /></span>
         <span>
           <span className="block text-[11px] font-semibold leading-tight">Waktu terbaik berkunjung</span>
-          <span className="mt-1 block text-[10px] text-white/75">08.00–09.00 atau setelah 15.00</span>
+          <span className="mt-1 block text-[10px] text-white/75">08.00-09.00 atau setelah 15.00</span>
         </span>
       </section>
 

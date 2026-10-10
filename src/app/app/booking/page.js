@@ -34,7 +34,7 @@ export default function BookingPage() {
         })}
       </div>
       <p className="mt-1.5 flex items-center gap-1.5 text-[9px] text-white/70">
-        <span className="size-2 rounded-full bg-coral" /> Jam ramai (10.00–14.00)
+        <span className="size-2 rounded-full bg-coral" /> Jam ramai (10.00-14.00)
       </p>
 
       <ul className="mt-3 space-y-2">

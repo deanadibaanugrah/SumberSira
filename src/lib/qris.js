@@ -15,7 +15,7 @@ function tlv(tag, value) {
   return `${tag}${String(text.length).padStart(2, "0")}${text}`;
 }
 
-// CRC16-CCITT (polinom 0x1021, init 0xFFFF) — checksum wajib di akhir payload QRIS.
+// CRC16-CCITT (polinom 0x1021, init 0xFFFF), checksum wajib di akhir payload QRIS.
 function crc16(text) {
   let crc = 0xffff;
   for (let i = 0; i < text.length; i += 1) {

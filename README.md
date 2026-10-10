@@ -1,4 +1,4 @@
-# Sumber Sira — Aplikasi Mobile & Web Admin
+# Sumber Sira · Aplikasi Mobile & Web Admin
 
 Tugas kelompok (UTS, fokus frontend). Konversi desain Figma **HI-FI** Sumber Sira ke kode:
 aplikasi pengunjung (tampilan mobile) dan panel admin (tampilan web), dibangun dengan
@@ -43,7 +43,7 @@ Perintah lain:
 |---|---|
 | `/app` | Splash (otomatis lanjut ke Tentang setelah 2,6 detik, atau ketuk) |
 | `/app/tentang` | Tentang Sumber Sira (introduction app) |
-| `/app/onboarding` | Onboarding 1–3: bisa digeser (swipe/drag) **dan** pakai tombol Kembali/Lanjut |
+| `/app/onboarding` | Onboarding 1-3: bisa digeser (swipe/drag) **dan** pakai tombol Kembali/Lanjut |
 | `/app/home` | Home |
 | `/app/booking` | Booking Sewa & Wahana |
 | `/app/checkout` | Checkout (Ringkasan Booking) |
@@ -57,12 +57,16 @@ Perintah lain:
 
 | Rute | Halaman |
 |---|---|
-| `/admin` | Dashboard Overview (grafik batang beranimasi) |
-| `/admin/booking` | Booking Management (filter, cari, detail, konfirmasi/tolak) |
-| `/admin/insight` | AI Insight (grafik garis + batang sentimen beranimasi) |
-| `/admin/galeri` | Galeri & Konten (moderasi foto) |
-| `/admin/faq` | Chatbot / FAQ (tambah, edit, hapus, jawab pertanyaan) |
-| `/admin/wahana` | Wahana & Harga (tambah, edit, hapus) |
+| `/admin` | Dashboard Overview (kartu ringkasan, grafik batang pill beranimasi, Insight AI, booking masuk) |
+| `/admin/booking` | Booking Sewa & Wahana (filter, cari lewat kotak cari di header, detail booking, konfirmasi/tolak) |
+| `/admin/insight` | AI Insight (grafik area prediksi, ringkasan AI, donat sentimen, batang keluhan, ulasan terbaru) |
+| `/admin/galeri` | Galeri & Konten (moderasi foto, urut terbaru/terlama, tampilan grid atau daftar) |
+| `/admin/faq` | Chatbot & FAQ (tambah, edit, hapus, jawab pertanyaan pengunjung) |
+| `/admin/wahana` | Wahana & Harga (filter kategori, tambah, edit, hapus) |
+
+Tampilan admin mengikuti desain admin terbaru di Figma: sidebar berupa kartu putih yang melayang, menu aktif
+berbentuk pill Hijau Tua, kartu statistik membulat dengan ikon di dalam lingkaran, grafik batang berbentuk pill,
+baris tabel membulat, dan status berbentuk pill. Warnanya tetap dua hijau yang sama.
 
 ## Syarat dosen dan letaknya
 
@@ -70,7 +74,7 @@ Perintah lain:
 |---|---|
 | Gunakan Next.js | Next.js 16 App Router (`src/app`) |
 | UTS fokus frontend web, minimal 3 slide (admin) | 6 halaman admin di `src/app/admin` |
-| Animasi grafik di admin | `src/components/charts/`: batang tumbuh dari bawah (`BarChart`), garis digambar kiri ke kanan (`LineChart`), progres mengisi (`ProgressBar`) |
+| Animasi grafik di admin | `src/components/charts/`: batang pill tumbuh dari bawah (`BarChart`), garis prediksi digambar kiri ke kanan (`AreaChart`), donat sentimen muncul (`DonutChart`), batang keluhan mengisi (`ProgressBar`) |
 | Onboarding pakai tombol atau swipe | `src/app/app/onboarding/page.js`: keduanya ada, plus tombol titik dan panah keyboard |
 | Introduction web dan app | Web: `src/app/page.js`. App: splash + `src/app/app/tentang/page.js` |
 | Setelah bayar, invoice terkirim ke WhatsApp user | `src/lib/whatsapp.js` + halaman konfirmasi. Lihat bagian "Tahap backend" |
@@ -78,16 +82,17 @@ Perintah lain:
 ## Struktur folder
 
 ```
-desain/                PNG ekspor dari Figma (acuan tampilan, 2× dari ukuran asli)
+desain/                PNG ekspor dari Figma (acuan tampilan: mobile 2×, admin 1,25×)
 public/images/         Foto yang dipotong dari PNG desain
 src/app/               Halaman (App Router)
   page.js              Intro web
   app/                 Aplikasi pengunjung (layout lebar maks 430 px)
   admin/               Panel admin (layout sidebar)
 src/components/
-  charts/              BarChart, LineChart, ProgressBar (beranimasi)
+  charts/              BarChart, AreaChart, DonutChart (admin), LineChart (mobile), ProgressBar (beranimasi)
   mobile/              PageHeader, BottomNav
-  admin/               Sidebar, ui.js (AdminHeader, Card, StatCard, StatusPill, Modal, ...)
+  admin/               Sidebar, Today, ui.js (AdminHeader, Card, StatCard, StatusPill, FilterPills, Modal, ...)
+  Logo.js              Logo Sumber Sira (tetes air + sawah bertingkat), juga dipakai di src/app/icon.svg
   WahanaIcon.js        Ikon per wahana
 src/data/              Data dummy (wahana.js, dummy.js). Tahap backend: ganti dengan data API
 src/lib/
@@ -98,15 +103,17 @@ src/lib/
 
 ## Catatan desain
 
-- Ukuran mengikuti Figma: frame mobile **375 × 812** dan admin **1440 × 900**. PNG di `desain/`
-  diekspor 2×, jadi 1 px di kode = 2 px di PNG. Ukuran teks, jarak, dan kartu diukur dari PNG.
-  Teksnya memang kecil (9–13 px) karena begitu di desain. Kalau mau diperbesar demi keterbacaan,
+- Ukuran mengikuti Figma: frame mobile **375 × 812** dan admin **1440 × 900**. PNG mobile di `desain/`
+  diekspor 2× (1 px di kode = 2 px di PNG), PNG admin diekspor 1,25× (1 px di kode = 1,25 px di PNG).
+  Ukuran teks, jarak, dan kartu diukur dari PNG. Teks mobile memang kecil (9-13 px) karena begitu di desain. Kalau mau diperbesar demi keterbacaan,
   diskusikan dulu dengan kelompok supaya tetap konsisten.
 - Warna dan font ada di `src/app/globals.css` (`@theme`): `forest` dan `leaf` (hanya dua hijau, sama dengan papan Color Palette di Figma), `ink`, `paper`, `coral`. Warna yang lebih muda dibuat dengan transparansi, mis. `bg-leaf/15`, bukan token baru.
   Pakai lewat kelas Tailwind, misalnya `bg-forest` dan `text-leaf`.
 - Font dipasang dari npm (Fontsource): Fraunces (judul), Inter (teks), JetBrains Mono (angka/harga).
-- Foto di `public/images/` dipotong dari PNG desain. Badge yang ikut tercetak di foto galeri sudah
-  ditambal; posisinya tertutup badge dari kode.
+- Foto di `public/images/` dipotong dari PNG desain. Semua foto adalah foto asli Sumber Sira; foto galeri admin
+  memakai foto yang sama dengan potongan berbeda (`pos` di `src/data/dummy.js`).
+- Logo Sumber Sira ada di `src/components/Logo.js` (Splash, header Home dan Tentang, sidebar admin, intro web)
+  dan sebagai ikon tab browser di `src/app/icon.svg`.
 - Yang tidak ada di Figma dan sengaja ditambahkan: halaman intro web, tombol "Kirim Invoice ke WhatsApp",
   pesan validasi form, stepper jumlah di Booking, dan modal Tambah/Edit di admin.
 - Ikon profil di navigasi bawah sementara menuju Ulasan & Rating, karena halaman Profil belum didesain.

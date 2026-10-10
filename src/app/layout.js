@@ -7,7 +7,7 @@ import "@fontsource-variable/jetbrains-mono";
 import "./globals.css";
 
 export const metadata = {
-  title: "Sumber Sira — Kunjungan Jernih Tanpa Antre",
+  title: "Sumber Sira · Kunjungan Jernih Tanpa Antre",
   description: "Aplikasi booking wahana, cek keramaian, dan foto AI bawah air untuk wisata mata air Sumber Sira, Desa Putukrejo, Malang.",
 };
 

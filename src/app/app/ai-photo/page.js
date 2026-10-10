@@ -74,7 +74,7 @@ export default function AiPhotoPage() {
         ))}
         {showAll && GALLERY.filter((g) => g.status === "Ditampilkan").map((g) => (
           <div key={g.id} className="relative aspect-[103/110] overflow-hidden rounded-[20px] animate-fade-up">
-            <Image src={g.src} alt={`Foto dari ${g.owner}`} fill sizes="140px" className="object-cover" />
+            <Image src={g.src} alt={`Foto dari ${g.owner}`} fill sizes="140px" className="object-cover" style={{ objectPosition: g.pos }} />
           </div>
         ))}
       </div>

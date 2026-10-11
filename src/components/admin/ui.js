@@ -96,6 +96,9 @@ const PILL = {
   Ditampilkan: "bg-leaf/12 text-forest",
   Aktif: "bg-leaf/12 text-forest",
   Nonaktif: "bg-coral/12 text-coral",
+  "Di dalam": "bg-leaf/15 text-forest",
+  "Belum masuk": "bg-ink/[0.07] text-ink/75",
+  Keluar: "bg-forest/10 text-forest",
 };
 const DOT = {
   Baru: "bg-leaf",
@@ -105,6 +108,9 @@ const DOT = {
   Ditampilkan: "bg-leaf",
   Aktif: "bg-leaf",
   Nonaktif: "bg-coral",
+  "Di dalam": "bg-leaf",
+  "Belum masuk": "bg-ink/50",
+  Keluar: "bg-forest",
 };
 
 // Status berbentuk pill dengan titik warna di depannya.

@@ -6,7 +6,7 @@ import ProgressBar from "@/components/charts/ProgressBar";
 import { AdminHeader, Avatar, Card, CardTitle, PrimaryButton } from "@/components/admin/ui";
 import { COMPLAINT_TAGS, COMPLAINT_TIP, CROWD_FORECAST, FORECAST_SUMMARY, REVIEWS, REVIEW_COUNT, SENTIMENT } from "@/data/dummy";
 
-// Admin 3/6: AI Insight. Prediksi keramaian (area beranimasi), ringkasan AI, sentimen (donat), keluhan (batang), ulasan terbaru.
+// Admin 4/7: AI Insight. Prediksi keramaian (area beranimasi), ringkasan AI, sentimen (donat), keluhan (batang), ulasan terbaru.
 const COMPLAINT_FILL = ["bg-coral", "bg-coral/70", "bg-coral/50"];
 
 export default function InsightPage() {

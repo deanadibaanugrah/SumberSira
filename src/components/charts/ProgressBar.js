@@ -3,7 +3,7 @@ export default function ProgressBar({ value, fillClass = "bg-leaf", trackClass =
   return (
     <div className={`w-full overflow-hidden rounded-full ${trackClass} ${height}`} role="progressbar"
          aria-valuenow={value} aria-valuemin={0} aria-valuemax={100}>
-      <div className={`h-full origin-left rounded-full animate-fill-x ${fillClass}`}
+      <div className={`h-full origin-left rounded-full transition-[width] duration-700 animate-fill-x ${fillClass}`}
            style={{ width: `${value}%`, animationDelay: `${delay}ms` }} />
     </div>
   );

@@ -1,15 +1,10 @@
-import Sidebar from "@/components/admin/Sidebar";
+import AdminShell from "@/components/admin/AdminShell";
 
 export const metadata = {
   title: "Admin Panel · Sumber Sira",
 };
 
-// Kerangka semua halaman admin (URL /admin/...): sidebar kartu di kiri + isi halaman, di atas latar abu muda.
+// Kerangka semua halaman admin (URL /admin/...): wajib login, lalu sidebar kartu di kiri + isi halaman.
 export default function AdminLayout({ children }) {
-  return (
-    <div className="min-h-dvh bg-paper text-ink lg:flex lg:gap-6 lg:p-4">
-      <Sidebar />
-      <div className="min-w-0 flex-1 px-4 pb-8 pt-4 lg:px-0 lg:pb-4 lg:pr-2 lg:pt-3">{children}</div>
-    </div>
-  );
+  return <AdminShell>{children}</AdminShell>;
 }

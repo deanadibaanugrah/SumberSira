@@ -15,7 +15,7 @@ import { buildQrisPayload } from "@/lib/qris";
 // dengan nominal yang sudah terkunci di dalam QR (lihat lib/qris.js), baru
 // setelah dinyatakan lunas boleh masuk halaman konfirmasi.
 const MERCHANT = "Sumber Sira";
-const CITY = "Bojonegoro";
+const CITY = "Malang";
 
 export default function PembayaranPage() {
   const router = useRouter();

@@ -8,7 +8,7 @@ import { AdminHeader, Card, CardTitle, FilterPills, IconButton, Modal, PrimaryBu
 import { WAHANA } from "@/data/wahana";
 import { rupiah } from "@/lib/format";
 
-// Admin 6/6: Wahana & Harga. Daftar sewa alat/wahana, filter kategori, tambah, edit, hapus.
+// Admin 7/7: Wahana & Harga. Daftar sewa alat/wahana, filter kategori, tambah, edit, hapus.
 const FILTERS = ["Semua", "Sewa Alat", "Wahana"];
 const EMPTY = { name: "", category: "Wahana", price: "", unit: "", status: "Aktif" };
 const CATEGORY_TAG = { "Sewa Alat": "bg-ink/[0.07] text-ink/75", Wahana: "bg-leaf/12 text-forest" };

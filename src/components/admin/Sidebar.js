@@ -1,15 +1,17 @@
 "use client";
 
-import { CalendarCheck, Clock, Image as ImageIcon, LayoutGrid, Menu, MessageCircle, Sparkles, Tag, X } from "lucide-react";
+import { CalendarCheck, Clock, Image as ImageIcon, LayoutGrid, LogOut, Menu, MessageCircle, Sparkles, Tag, Ticket, X } from "lucide-react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
 
 import LogoMark from "@/components/Logo";
+import { logout } from "@/lib/admin-auth";
 
 export const ADMIN_MENU = [
   { href: "/admin", label: "Dashboard", icon: LayoutGrid },
   { href: "/admin/booking", label: "Booking Sewa & Wahana", icon: CalendarCheck },
+  { href: "/admin/tiket", label: "Tiket & Check-in", icon: Ticket },
   { href: "/admin/insight", label: "AI Insight", icon: Sparkles },
   { href: "/admin/galeri", label: "Galeri & Konten", icon: ImageIcon },
   { href: "/admin/faq", label: "Chatbot & FAQ", icon: MessageCircle },
@@ -17,10 +19,15 @@ export const ADMIN_MENU = [
 ];
 
 // Sidebar berbentuk kartu putih yang melayang (desain admin terbaru). Menu aktif = pill Hijau Tua.
-// Di layar kecil disembunyikan dan dibuka lewat tombol menu.
-export default function Sidebar() {
+// Di layar kecil disembunyikan dan dibuka lewat tombol menu. session = admin yang sedang login.
+export default function Sidebar({ session }) {
   const pathname = usePathname();
+  const router = useRouter();
   const [open, setOpen] = useState(false);
+  const signOut = () => {
+    logout();
+    router.replace("/admin/login");
+  };
 
   return (
     <>
@@ -72,16 +79,20 @@ export default function Sidebar() {
               <span className="block text-[15px] font-semibold text-ink">08.00 - 17.00</span>
             </span>
           </div>
-          <div className="flex h-[68px] items-center gap-3 rounded-[20px] bg-leaf/[0.08] px-3">
+          <div className="flex min-h-[68px] items-center gap-2.5 rounded-[20px] bg-leaf/[0.08] py-2 pl-3 pr-1.5">
             <span className="relative grid size-11 shrink-0 place-items-center rounded-full bg-forest text-base font-semibold text-white">
-              PY
+              {session.name.split(" ").map((w) => w[0]).join("").slice(0, 2).toUpperCase()}
               <span className="absolute -right-1 -top-1 grid size-[18px] place-items-center rounded-full bg-coral text-[10px] font-semibold ring-2 ring-white"
                     aria-label="3 notifikasi">3</span>
             </span>
-            <span>
-              <span className="block text-[15px] font-semibold text-ink">Pak Yono</span>
-              <span className="block text-xs text-ink/60">Pengelola · BUMDes</span>
+            <span className="min-w-0 flex-1">
+              <span className="block truncate text-[15px] font-semibold text-ink">{session.name}</span>
+              <span className="block text-[11px] leading-tight text-ink/60">{session.role}</span>
             </span>
+            <button type="button" onClick={signOut} aria-label="Keluar dari admin" title="Keluar"
+                    className="grid size-8 shrink-0 place-items-center rounded-full text-ink/70 transition hover:bg-coral/12 hover:text-coral">
+              <LogOut size={17} />
+            </button>
           </div>
         </div>
       </aside>

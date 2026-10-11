@@ -25,7 +25,7 @@ export const VISITORS_TODAY = [
 // Jam yang dihitung ramai (batang Hijau Tua).
 export const BUSY_HOURS = ["12.00", "14.00", "16.00"];
 
-export const CROWD_NOW = { percent: 62, label: "Sedang", updated: "2 menit lalu" };
+// Keramaian saat ini dihitung dari tiket online yang discan: lihat src/lib/tiket-store.js.
 
 // Prediksi admin (AI Insight): per jam 08-16 untuk besok, jam ramai 10.00 - 14.00 disorot.
 export const CROWD_FORECAST = [
@@ -143,3 +143,42 @@ export const REVIEWS = [
   { id: 2, name: "Dimas P.", stars: 4, text: "Spot foto oke, tapi pas siang rame banget." },
   { id: 3, name: "Kel. Ahmad", stars: 5, text: "Sewa ATV gampang lewat app, ga perlu antre." },
 ];
+
+// Pola keramaian 7 hari terakhir (persen kapasitas per jam), direkap dari tiket yang discan masuk.
+// Dipakai heatmap di dashboard admin.
+export const WEEKLY_CROWD = {
+  hours: ["08", "09", "10", "11", "12", "13", "14", "15", "16"],
+  days: [
+    { day: "Sen", values: [8, 14, 25, 38, 46, 44, 40, 26, 12] },
+    { day: "Sel", values: [6, 12, 22, 34, 42, 40, 36, 22, 10] },
+    { day: "Rab", values: [7, 15, 28, 40, 50, 47, 41, 27, 13] },
+    { day: "Kam", values: [9, 16, 30, 44, 52, 49, 43, 29, 14] },
+    { day: "Jum", values: [10, 18, 34, 48, 58, 55, 47, 32, 16] },
+    { day: "Sab", values: [18, 32, 55, 78, 92, 95, 86, 60, 30] },
+    { day: "Min", values: [22, 38, 62, 85, 97, 94, 88, 64, 34] },
+  ],
+  insight: "Sabtu dan Minggu pukul 11.00-14.00 hampir penuh. Tambah petugas loket dan parkir di jam itu.",
+};
+
+// Wahana paling banyak dipesan minggu ini (id merujuk src/data/wahana.js).
+export const WAHANA_POPULER = [
+  { id: "atv", count: 25 },
+  { id: "ban-besar", count: 22 },
+  { id: "kereta-sawah", count: 18 },
+  { id: "bebek-gayung", count: 14 },
+  { id: "flying-fox", count: 11 },
+];
+
+// Pendapatan 7 hari terakhir (rupiah): tiket masuk + parkir, dan sewa alat + wahana.
+export const PENDAPATAN_MINGGU = {
+  change: "+8% dari minggu lalu",
+  days: [
+    { day: "Sen", tiket: 420000, sewa: 610000 },
+    { day: "Sel", tiket: 380000, sewa: 540000 },
+    { day: "Rab", tiket: 450000, sewa: 650000 },
+    { day: "Kam", tiket: 470000, sewa: 700000 },
+    { day: "Jum", tiket: 560000, sewa: 820000 },
+    { day: "Sab", tiket: 1240000, sewa: 1850000 },
+    { day: "Min", tiket: 1360000, sewa: 2010000 },
+  ],
+};

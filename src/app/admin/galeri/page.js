@@ -7,7 +7,7 @@ import { useMemo, useState } from "react";
 import { AdminHeader, FilterPills, IconButton, PrimaryButton, StatCard, StatusPill } from "@/components/admin/ui";
 import { GALLERY, GALLERY_TOTALS } from "@/data/dummy";
 
-// Admin 4/6: Galeri & Konten. Moderasi foto AI-enhanced kiriman pengunjung (tampilkan/tolak).
+// Admin 5/7: Galeri & Konten. Moderasi foto AI-enhanced kiriman pengunjung (tampilkan/tolak).
 const FILTERS = ["Semua", "Baru", "Ditampilkan", "Ditolak"];
 const DATE = new Intl.DateTimeFormat("id-ID", { day: "numeric", month: "short", year: "numeric", timeZone: "UTC" });
 const formatDate = (iso) => DATE.format(new Date(`${iso}T00:00:00Z`)).replace(".", "");

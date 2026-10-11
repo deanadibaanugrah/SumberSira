@@ -4,7 +4,7 @@ import { SendHorizontal } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
 import PageHeader from "@/components/mobile/PageHeader";
-import { CROWD_NOW } from "@/data/dummy";
+import { ringkasanSekarang } from "@/lib/tiket-store";
 
 // Chatbot "Tanya Sira". Tahap UTS: jawaban dari aturan kata kunci (data FAQ).
 // Tahap backend: ganti answer() dengan panggilan ke API chatbot; FAQ dikelola di halaman admin Chatbot / FAQ.
@@ -12,17 +12,21 @@ const RULES = [
   { keys: ["jam", "buka", "tutup"], reply: "Weekend buka 08.00-17.00 ya! Weekday sampai 16.00 😊" },
   { keys: ["atv"], reply: "Buka menu Sewa & Booking, pilih jam kunjungan, tambah ATV (15 menit) Rp25.000, lalu tekan Lanjut Booking. Bisa bayar tunai atau QRIS 😊" },
   { keys: ["sewa", "ban", "loker", "wahana"], reply: "Ban kecil Rp5.000, ban besar Rp10.000, loker Rp5.000. Wahana: kereta sawah, bebek gayung, ATV, flying fox, komedi putar. Semua bisa dipesan di menu Sewa & Booking." },
-  { keys: ["tiket", "harga", "htm", "masuk"], reply: "Tiket masuk Rp5.000 per orang (usia 3 tahun ke atas)." },
+  { keys: ["tiket", "harga", "htm", "masuk"], reply: "Tiket masuk Rp5.000 per orang (usia 3 tahun ke atas). Bisa beli online di menu Tiket Masuk di Beranda, lalu tunjukkan QR-nya di pintu." },
   { keys: ["qris", "bayar", "pembayaran", "tunai"], reply: "Pembayaran bisa tunai atau QRIS. Setelah bayar, invoice dikirim ke WhatsApp-mu." },
   { keys: ["parkir", "bus", "mobil", "motor"], reply: "Parkir motor 3rb, mobil 10rb, bus 20rb." },
-  { keys: ["ramai", "sepi", "crowd", "antre"], reply: `Keramaian saat ini ${CROWD_NOW.label} (${CROWD_NOW.percent}%). Jam sepi terbaik 08.00-09.00 atau setelah 15.00.` },
+  { keys: ["ramai", "sepi", "crowd", "antre"], reply: () => {
+    const c = ringkasanSekarang(); // dihitung dari tiket yang sudah discan masuk
+    return `Keramaian saat ini ${c.label} (${c.percent}%, ${c.inside} orang di dalam). Jam sepi terbaik 08.00-09.00 atau setelah 15.00.`;
+  } },
   { keys: ["lokasi", "alamat", "dimana", "di mana"], reply: "Sumber Sira ada di Desa Putukrejo, Malang. Dikelola masyarakat Desa Putukrejo." },
 ];
 const FALLBACK = "Maaf, Tanya Sira belum tahu jawabannya. Pertanyaanmu sudah diteruskan ke admin ya 🙏";
 
 function answer(text) {
   const lower = text.toLowerCase();
-  return RULES.find((r) => r.keys.some((k) => lower.includes(k)))?.reply ?? FALLBACK;
+  const reply = RULES.find((r) => r.keys.some((k) => lower.includes(k)))?.reply ?? FALLBACK;
+  return typeof reply === "function" ? reply() : reply;
 }
 
 const START = [

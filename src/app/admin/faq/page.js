@@ -6,7 +6,7 @@ import { useState } from "react";
 import { AdminHeader, Card, CardTitle, IconButton, Modal, PrimaryButton, SecondaryButton, StatCard, inputClass, labelClass } from "@/components/admin/ui";
 import { FAQ, FAQ_AUTO_RATE, UNANSWERED } from "@/data/dummy";
 
-// Admin 5/6: Chatbot & FAQ. Jawaban yang tersimpan dipakai otomatis oleh chatbot Tanya Sira.
+// Admin 6/7: Chatbot & FAQ. Jawaban yang tersimpan dipakai otomatis oleh chatbot Tanya Sira.
 export default function FaqPage() {
   const [faqs, setFaqs] = useState(FAQ);
   const [pending, setPending] = useState(UNANSWERED);

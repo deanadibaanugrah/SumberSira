@@ -9,7 +9,7 @@ import { BOOKINGS, BOOKING_TOTALS } from "@/data/dummy";
 import { WAHANA } from "@/data/wahana";
 import { rupiah } from "@/lib/format";
 
-// Admin 2/6: Booking Sewa & Wahana. Filter status, cari pemesan (kotak cari di header), detail, konfirmasi/tolak.
+// Admin 2/7: Booking Sewa & Wahana. Filter status, cari pemesan (kotak cari di header), detail, konfirmasi/tolak.
 const FILTERS = ["Semua", "Baru", "Diproses", "Selesai"];
 const NEXT_STATUS = { Baru: "Diproses", Diproses: "Selesai" };
 const CONFIRM_LABEL = { Baru: "Konfirmasi Booking", Diproses: "Tandai Selesai" };

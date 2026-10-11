@@ -1,10 +1,11 @@
-import { Bell, Calendar, Camera, ChartColumn, MessageSquare } from "lucide-react";
+import { ArrowRight, Bell, Calendar, Camera, ChartColumn, MessageSquare, Ticket } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 
 import LogoMark from "@/components/Logo";
 import BottomNav from "@/components/mobile/BottomNav";
-import { CROWD_NOW, CROWD_TODAY } from "@/data/dummy";
+import { CrowdNowPill } from "@/components/mobile/LiveCrowd";
+import { CROWD_TODAY } from "@/data/dummy";
 import { FOTO } from "@/lib/foto";
 
 const ACTIONS = [
@@ -43,11 +44,16 @@ export default function HomePage() {
         </div>
       </section>
 
-      <Link href="/app/crowd" className="glass mt-4 flex h-10 items-center justify-between rounded-full px-4">
-        <span className="flex items-center gap-2 text-[11px]">
-          <span className="size-2 rounded-full bg-white" /> Crowd saat ini: {CROWD_NOW.label}
+      <CrowdNowPill />
+
+      {/* Tiket masuk online: QR discan di pintu, jadi angka Live Crowd berasal dari tiket sungguhan. */}
+      <Link href="/app/tiket" className="mt-3 flex items-center gap-3 rounded-[20px] border border-white/25 bg-leaf/45 px-4 py-3 transition hover:bg-leaf/60">
+        <span className="grid size-10 shrink-0 place-items-center rounded-full bg-white/95 text-forest"><Ticket size={18} strokeWidth={2.4} /></span>
+        <span className="flex-1">
+          <span className="block text-xs font-semibold">Beli Tiket Masuk Online</span>
+          <span className="mt-0.5 block text-[10px] text-white/80">Rp5.000/orang · tunjukkan QR di pintu, tanpa antre loket</span>
         </span>
-        <span className="text-[10px] font-semibold">Lihat prediksi &gt;</span>
+        <ArrowRight size={16} />
       </Link>
 
       <nav aria-label="Fitur" className="mt-4 grid grid-cols-4 text-center">

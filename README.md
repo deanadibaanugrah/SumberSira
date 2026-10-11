@@ -22,7 +22,10 @@ Buka <http://localhost:3000>:
 |---|---|
 | `/` | Halaman perkenalan web (introduction web) |
 | `/app` | Aplikasi pengunjung, mulai dari splash. Paling pas dibuka di DevTools mode ponsel (375 × 812) |
-| `/admin` | Panel admin. Desainnya untuk layar 1440 × 900 |
+| `/admin` | Panel admin (wajib login, lihat akun demo di bawah). Desainnya untuk layar 1440 × 900 |
+
+**Akun demo admin** (tahap frontend, belum ada backend): email `admin@sumbersira.id`, password `sumbersira`.
+Di halaman login juga ada tombol "Isi otomatis".
 
 Perintah lain:
 
@@ -37,7 +40,7 @@ Perintah lain:
 
 ## Halaman
 
-### Aplikasi pengunjung (13 layar, sesuai Figma)
+### Aplikasi pengunjung
 
 | Rute | Layar Figma |
 |---|---|
@@ -52,13 +55,17 @@ Perintah lain:
 | `/app/ai-photo` | AI Underwater Photo Studio |
 | `/app/chat` | Chatbot Tanya Sira |
 | `/app/ulasan` | Ulasan & Rating |
+| `/app/tiket` | Tiket masuk online (tambahan, belum ada di Figma): pilih jumlah orang dan parkir, bayar QRIS, dapat e-tiket |
+| `/app/tiket/[kode]` | E-tiket QR, statusnya ikut berubah saat discan petugas |
 
-### Panel admin (6 halaman, sesuai Figma)
+### Panel admin
 
 | Rute | Halaman |
 |---|---|
-| `/admin` | Dashboard Overview (kartu ringkasan, grafik batang pill beranimasi, Insight AI, booking masuk) |
+| `/admin/login` | Masuk admin (tambahan). Semua halaman `/admin` lain wajib login, tombol keluar ada di kartu profil sidebar |
+| `/admin` | Dashboard Overview (kartu ringkasan, grafik batang pill beranimasi, Insight AI, booking masuk, heatmap keramaian seminggu, tiket online hari ini, wahana terpopuler, pendapatan 7 hari) |
 | `/admin/booking` | Booking Sewa & Wahana (filter, cari lewat kotak cari di header, detail booking, konfirmasi/tolak) |
+| `/admin/tiket` | Tiket & Check-in (tambahan): scan kode tiket di pintu masuk, daftar tiket hari ini, check-in dan keluar |
 | `/admin/insight` | AI Insight (grafik area prediksi, ringkasan AI, donat sentimen, batang keluhan, ulasan terbaru) |
 | `/admin/galeri` | Galeri & Konten (moderasi foto, urut terbaru/terlama, tampilan grid atau daftar) |
 | `/admin/faq` | Chatbot & FAQ (tambah, edit, hapus, jawab pertanyaan pengunjung) |
@@ -67,6 +74,17 @@ Perintah lain:
 Tampilan admin mengikuti desain admin terbaru di Figma: sidebar berupa kartu putih yang melayang, menu aktif
 berbentuk pill Hijau Tua, kartu statistik membulat dengan ikon di dalam lingkaran, grafik batang berbentuk pill,
 baris tabel membulat, dan status berbentuk pill. Warnanya tetap dua hijau yang sama.
+
+### Tiket online dan Live Crowd
+
+Angka Live Crowd dihitung dari tiket masuk online: jumlah orang dari tiket yang sudah discan di pintu masuk dan
+belum keluar, dibagi kapasitas 300 orang (di bawah 40% Sepi, sampai 75% Sedang, di atasnya Ramai).
+Karena belum ada backend, tiket disimpan di `localStorage` browser (`src/lib/tiket-store.js`), jadi aplikasi
+pengunjung dan admin di browser yang sama memakai data yang sama, termasuk antar-tab.
+
+Cara demo: buka `/app/tiket` di satu tab, beli tiket (pembayaran QRIS disimulasikan), lalu buka `/admin/tiket` di
+tab lain dan masukkan kode tiketnya (mis. `TK-1038` atau cukup `1038`). E-tiket berubah jadi "Di dalam" dan angka di
+Live Crowd, Home, dan dashboard admin langsung naik. Tombol "Kembalikan data contoh hari ini" mengembalikan data awal.
 
 ## Syarat dosen dan letaknya
 
@@ -89,14 +107,17 @@ src/app/               Halaman (App Router)
   app/                 Aplikasi pengunjung (layout lebar maks 430 px)
   admin/               Panel admin (layout sidebar)
 src/components/
-  charts/              BarChart, AreaChart, DonutChart (admin), LineChart (mobile), ProgressBar (beranimasi)
+  charts/              BarChart, AreaChart, DonutChart, Heatmap (admin), LineChart (mobile), ProgressBar (beranimasi)
   mobile/              PageHeader, BottomNav
-  admin/               Sidebar, Today, ui.js (AdminHeader, Card, StatCard, StatusPill, FilterPills, Modal, ...)
+  admin/               AdminShell (cek login), Sidebar, DashboardLive, Today, ui.js (AdminHeader, Card, StatCard, ...)
+  mobile/LiveCrowd.js  Pill, kartu, dan banner Live Crowd yang ikut data tiket
   Logo.js              Logo Sumber Sira (tetes air + sawah bertingkat), juga dipakai di src/app/icon.svg
   WahanaIcon.js        Ikon per wahana
 src/data/              Data dummy (wahana.js, dummy.js). Tahap backend: ganti dengan data API
 src/lib/
   booking-context.js   Keranjang booking (disimpan di sessionStorage)
+  tiket-store.js       Tiket masuk online + angka Live Crowd (disimpan di localStorage)
+  admin-auth.js        Login admin dengan akun demo (simulasi frontend)
   whatsapp.js          Pesan invoice WhatsApp
   format.js            Format Rupiah dan kode booking
   foto.js              Import semua foto aplikasi dari desain/foto
@@ -129,8 +150,8 @@ src/lib/
 | Booking & pembayaran | Kode booking dibuat di browser, pembayaran tidak diproses | Simpan booking di server. QRIS lewat payment gateway |
 | AI Photo enhance | Filter CSS sebagai simulasi | Kirim foto ke layanan AI, tampilkan hasilnya |
 | Chatbot Tanya Sira | Jawaban berdasar kata kunci | Hubungkan ke data FAQ admin dan/atau layanan AI |
-| Live Crowd | Angka dummy | Data sensor/kamera atau perhitungan tiket masuk |
-| Login admin | Belum ada | Autentikasi, dan batasi `/admin` hanya untuk pengelola |
+| Tiket online & Live Crowd | Tiket dan scan disimpan di `localStorage` browser, pembayaran QRIS disimulasikan | Simpan tiket di database, scan QR lewat aplikasi petugas, Live Crowd dihitung server |
+| Login admin | Akun demo dicek di browser, sesi di `localStorage`/`sessionStorage` (hanya simulasi tampilan) | Cek akun di server, sesi di cookie httpOnly, lindungi `/admin` di server, jangan simpan password di kode |
 
 **Keamanan untuk tahap backend:**
 

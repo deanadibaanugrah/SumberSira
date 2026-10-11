@@ -40,6 +40,7 @@ export const CROWD_FORECAST = [
   { hour: "16", value: 15 },
 ];
 
+// Ringkasan prediksi besok yang tampil di kartu Ringkasan AI.
 export const FORECAST_SUMMARY = {
   day: "Minggu 11 Okt",
   busyRange: "10.00 - 14.00",
@@ -88,6 +89,7 @@ export const AI_NOTIFICATIONS = [
   { title: "Stok ban besar tersisa 3 unit", sub: "Tambah stok sebelum akhir pekan", icon: "box" },
 ];
 
+// Persentase sentimen ulasan (positif, netral, negatif) untuk grafik donat di AI Insight.
 export const SENTIMENT = [
   { label: "Positif", value: 75, color: "#1b4332" },
   { label: "Netral", value: 18, color: "rgba(64, 145, 108, 0.4)" },
@@ -95,6 +97,7 @@ export const SENTIMENT = [
 ];
 export const REVIEW_COUNT = { total: 132, period: "7 hari terakhir" };
 
+// Topik keluhan terbanyak hasil rangkuman AI dari ulasan pengunjung.
 export const COMPLAINT_TAGS = [
   { label: "Jalan terjal", count: 128 },
   { label: "Kurang toilet", count: 94 },
@@ -117,6 +120,7 @@ export const GALLERY = [
 // Angka total galeri di desain (312 masuk, 18 menunggu, 248 tampil) mencakup foto lama di luar 8 contoh ini.
 export const GALLERY_TOTALS = { masuk: 312, menunggu: 18, tampil: 248 };
 
+// Daftar FAQ yang dipakai chatbot Tanya Sira untuk menjawab pengunjung.
 export const FAQ = [
   { id: 1, q: "Jam buka Sumber Sira weekday & weekend?", a: "Weekday 08.00-16.00, weekend 08.00-17.00." },
   { id: 2, q: "Berapa harga tiket masuk?", a: "Rp5.000 per orang, untuk usia 3 tahun ke atas." },
@@ -138,6 +142,7 @@ export const UNANSWERED = [
 // Persentase pertanyaan pengunjung yang dijawab otomatis oleh Tanya Sira.
 export const FAQ_AUTO_RATE = 92;
 
+// Ulasan terbaru yang tampil di halaman AI Insight.
 export const REVIEWS = [
   { id: 1, name: "Bu Rani S.", stars: 5, text: "Airnya jernih banget, anak-anak senang main di kolam!" },
   { id: 2, name: "Dimas P.", stars: 4, text: "Spot foto oke, tapi pas siang rame banget." },

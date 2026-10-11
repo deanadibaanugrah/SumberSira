@@ -9,14 +9,17 @@ import { SLOTS, WAHANA, bookingLabel } from "@/data/wahana";
 import { useBooking } from "@/lib/booking-context";
 import { rupiah } from "@/lib/format";
 
+// Halaman Sewa & Booking: pilih jam kunjungan, tambah atau kurangi wahana, lalu lanjut ke checkout.
 export default function BookingPage() {
   const router = useRouter();
+  // Keranjang booking diambil dari BookingProvider (src/lib/booking-context.js).
   const booking = useBooking();
 
   return (
     <main className="px-5 pb-24">
       <PageHeader title="Sewa & Booking Wahana" backHref="/app/home" />
 
+      {/* Pilihan jam kunjungan. Titik coral menandakan jam yang biasanya ramai */}
       <h2 className="text-[11px] font-semibold">Pilih Jam Kunjungan</h2>
       <div className="mt-2 grid grid-cols-4 gap-2" role="radiogroup" aria-label="Jam kunjungan">
         {SLOTS.map((slot) => {
@@ -37,6 +40,7 @@ export default function BookingPage() {
         <span className="size-2 rounded-full bg-coral" /> Jam ramai (10.00-14.00)
       </p>
 
+      {/* Daftar wahana yang aktif, masing-masing dengan tombol tambah dan kurang */}
       <ul className="mt-3 space-y-2">
         {WAHANA.filter((w) => w.status === "Aktif").map((w) => {
           const qty = booking.qty[w.id] || 0;
@@ -49,6 +53,7 @@ export default function BookingPage() {
                 <span className="block text-[11px]">{bookingLabel(w)}</span>
                 <span className="mt-[5px] block font-mono text-[11px]">{rupiah(w.price)}</span>
               </span>
+              {/* Kalau belum dipilih tampil tombol +, kalau sudah tampil tombol - jumlah + */}
               {qty === 0 ? (
                 <button type="button" onClick={() => booking.add(w.id)} aria-label={`Tambah ${w.name}`}
                         className="grid h-7 w-10 place-items-center rounded-full bg-leaf transition hover:brightness-110">
@@ -68,6 +73,7 @@ export default function BookingPage() {
         })}
       </ul>
 
+      {/* Bar bawah: total harga dan tombol Lanjut Booking (nonaktif kalau keranjang kosong) */}
       <footer className="fixed inset-x-0 bottom-0 z-30 mx-auto w-full max-w-[430px]">
         <div className="glass flex h-16 items-center justify-between gap-4 rounded-t-[20px] border-b-0 px-5">
           <span>

@@ -6,9 +6,11 @@ import { KAPASITAS, useTiket } from "@/lib/tiket-store";
 
 // Widget kaca yang melayang di halaman login: angka live dari data tiket (src/lib/tiket-store.js).
 const glass = "rounded-[24px] border border-white/20 bg-white/10 p-5 text-white shadow-[0_20px_50px_rgba(0,0,0,0.25)] backdrop-blur-xl";
+// Jari-jari dan keliling cincin progres di widget Live Crowd.
 const R = 34;
 const C = 2 * Math.PI * R;
 
+// Titik hijau berdenyut tanda data live.
 function Ping() {
   return (
     <span className="relative flex size-2">
@@ -18,12 +20,14 @@ function Ping() {
   );
 }
 
+// Widget Live Crowd: cincin progres persen keramaian dan jumlah orang di dalam.
 export function CrowdWidget({ className = "" }) {
   const t = useTiket();
   return (
     <div className={`${glass} ${className}`} style={{ animation: "float-y 6s ease-in-out infinite" }}>
       <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.14em] text-white/75"><Ping /> Live Crowd</p>
       <div className="mt-4 flex items-center gap-4">
+        {/* Cincin progres: panjang garis mengikuti persen keramaian, jadi merah kalau Ramai */}
         <svg viewBox="0 0 80 80" className="size-20 shrink-0 -rotate-90" role="img" aria-label={`Keramaian ${t.percent}%`}>
           <circle cx="40" cy="40" r={R} fill="none" stroke="rgba(255,255,255,0.15)" strokeWidth="8" />
           <circle cx="40" cy="40" r={R} fill="none" stroke={t.label === "Ramai" ? "#e07a5f" : "#ffffff"} strokeWidth="8" strokeLinecap="round"
@@ -39,6 +43,7 @@ export function CrowdWidget({ className = "" }) {
   );
 }
 
+// Widget jumlah tiket online terjual hari ini dengan grafik batang kecil.
 export function TiketWidget({ className = "" }) {
   const t = useTiket();
   const bars = [30, 45, 38, 60, 52, 80, 100];
@@ -56,6 +61,7 @@ export function TiketWidget({ className = "" }) {
   );
 }
 
+// Widget rating ulasan pengunjung.
 export function RatingWidget({ className = "" }) {
   return (
     <div className={`${glass} ${className}`} style={{ animation: "float-y 8s ease-in-out 0.6s infinite" }}>

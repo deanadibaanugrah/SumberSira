@@ -13,20 +13,25 @@ import { PARKIR, checkIn, normalisasiKode, useTiket } from "@/lib/tiket-store";
 // E-tiket masuk: QR berisi kode tiket. Statusnya ikut berubah saat petugas memindai di /admin/tiket
 // (juga bila admin dibuka di tab lain pada browser yang sama).
 const HARI_INI = new Intl.DateTimeFormat("id-ID", { weekday: "long", day: "numeric", month: "long", year: "numeric", timeZone: "Asia/Jakarta" });
+// Pesan yang tampil di bawah QR sesuai status tiket.
 const PESAN = {
   "Belum masuk": "Tunjukkan QR ini ke petugas di pintu masuk. Setelah discan, kamu ikut terhitung di Live Crowd.",
   "Di dalam": "Kamu sudah masuk dan ikut terhitung di Live Crowd. Selamat bermain air!",
   Keluar: "Tiket sudah dipakai. Terima kasih sudah berkunjung ke Sumber Sira!",
 };
 
+// Halaman E-Tiket: menampilkan QR tiket, status (Belum masuk, Di dalam, Keluar), dan detail tiket.
 export default function ETiketPage() {
+  // Ambil kode tiket dari alamat halaman, misalnya /app/tiket/TK-1038.
   const { kode } = useParams();
   const tiket = useTiket();
   const code = normalisasiKode(decodeURIComponent(kode));
   const t = tiket.tickets.find((x) => x.code === code);
 
+  // Data tiket belum terbaca dari browser: tampilkan tulisan memuat.
   if (!tiket.ready) return <main className="grid min-h-dvh place-items-center text-xs text-white/70">Memuat e-tiket...</main>;
 
+  // Kode tidak ditemukan: tampilkan pesan dan tombol beli tiket.
   if (!t) {
     return (
       <main className="px-5">
@@ -39,6 +44,7 @@ export default function ETiketPage() {
     );
   }
 
+  // Baris detail tiket yang tampil di kartu bawah.
   const parkir = PARKIR.find((p) => p.id === t.parking);
   const rows = [
     ["Nama", t.name],
@@ -52,6 +58,7 @@ export default function ETiketPage() {
     <main className="px-5 pb-10">
       <PageHeader title="E-Tiket Masuk" backHref="/app/tiket" />
 
+      {/* QR e-tiket. QR jadi pudar setelah dipakai, dan muncul tanda centang saat pengunjung sudah di dalam */}
       <section className="glass flex flex-col items-center rounded-[24px] px-5 pb-5 pt-6">
         <div className={`relative rounded-[20px] bg-white/90 p-5 transition ${t.status === "Belum masuk" ? "" : "opacity-60"}`}>
           <QRCodeSVG value={t.code} size={170} bgColor="transparent" fgColor="#172321" level="M" />
@@ -67,6 +74,7 @@ export default function ETiketPage() {
         {t.checkInAt && <p className="mt-1 font-mono text-[10px] text-white/65">Masuk {t.checkInAt}{t.checkOutAt ? ` · keluar ${t.checkOutAt}` : ""}</p>}
       </section>
 
+      {/* Detail tiket */}
       <dl className="glass mt-4 grid grid-cols-[120px_1fr] gap-y-3 rounded-[20px] px-5 py-4">
         {rows.map(([k, v]) => (
           <div key={k} className="contents">
@@ -78,6 +86,7 @@ export default function ETiketPage() {
 
       <div className="mt-4"><LiveCrowdBanner /></div>
 
+      {/* Tombol demo untuk mensimulasikan scan petugas tanpa membuka halaman admin */}
       {t.status === "Belum masuk" && (
         <button type="button" onClick={() => checkIn(t.code)}
                 className="glass mt-4 flex h-11 w-full items-center justify-center gap-2 rounded-full text-[11px] font-semibold transition hover:bg-white/15">

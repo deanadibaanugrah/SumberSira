@@ -18,10 +18,12 @@ const STORAGE_KEY = "sumber-sira:booking";
 // sebelum itu halaman /app/konfirmasi menolak tampil (lihat guard di sana).
 const empty = { slot: SLOTS[0].id, qty: {}, name: "", whatsapp: "", payment: PAYMENT_METHODS[0], code: null, paid: false };
 
+// Komponen pembungkus yang menyimpan keranjang booking (jam, jumlah item, data pemesan) untuk semua halaman aplikasi.
 export function BookingProvider({ children }) {
   const [state, setState] = useState(empty);
   const [loaded, setLoaded] = useState(false);
 
+  // Saat aplikasi dibuka: ambil keranjang yang tersimpan di sessionStorage.
   useEffect(() => {
     try {
       const saved = window.sessionStorage.getItem(STORAGE_KEY);
@@ -38,6 +40,7 @@ export function BookingProvider({ children }) {
     setLoaded(true);
   }, []);
 
+  // Setiap kali keranjang berubah: simpan lagi ke sessionStorage.
   useEffect(() => {
     if (!loaded) return;
     try {
@@ -47,6 +50,7 @@ export function BookingProvider({ children }) {
     }
   }, [state, loaded]);
 
+  // Data yang dibagikan ke halaman: daftar item, total harga, jam kunjungan, dan fungsi untuk mengubahnya.
   const value = useMemo(() => {
     const items = WAHANA.filter((w) => state.qty[w.id] > 0).map((w) => ({
       id: w.id, name: bookingLabel(w), short: w.name, price: w.price, qty: state.qty[w.id],
@@ -55,6 +59,7 @@ export function BookingProvider({ children }) {
     const slot = SLOTS.find((s) => s.id === state.slot) ?? SLOTS[0];
     return {
       ...state, items, total, slotInfo: slot, loaded,
+      // Fungsi pengubah keranjang: pilih jam, tambah atau kurangi item, isi data pemesan, dan kosongkan keranjang.
       setSlot: (slotId) => setState((s) => ({ ...s, slot: slotId })),
       add: (id) => setState((s) => ({ ...s, qty: { ...s.qty, [id]: (s.qty[id] || 0) + 1 } })),
       remove: (id) => setState((s) => ({ ...s, qty: { ...s.qty, [id]: Math.max(0, (s.qty[id] || 0) - 1) } })),
@@ -66,6 +71,7 @@ export function BookingProvider({ children }) {
   return <BookingContext.Provider value={value}>{children}</BookingContext.Provider>;
 }
 
+// Hook untuk membaca keranjang booking dari halaman mana pun (harus berada di dalam BookingProvider).
 export function useBooking() {
   const value = useContext(BookingContext);
   if (!value) throw new Error("useBooking harus dipakai di dalam <BookingProvider>");

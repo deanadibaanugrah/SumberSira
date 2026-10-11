@@ -17,11 +17,13 @@ import { buildQrisPayload } from "@/lib/qris";
 const MERCHANT = "Sumber Sira";
 const CITY = "Malang";
 
+// Halaman Pembayaran QRIS: menampilkan QR berisi nominal, langkah membayar, dan tombol Saya Sudah Bayar.
 export default function PembayaranPage() {
   const router = useRouter();
   const booking = useBooking();
   const [checking, setChecking] = useState(false);
 
+  // Kalau belum ada kode booking (belum checkout), arahkan pengguna untuk mulai booking.
   if (booking.loaded && !booking.code) {
     return (
       <main className="grid min-h-dvh place-items-center px-5 text-center">
@@ -37,6 +39,7 @@ export default function PembayaranPage() {
   const payload = booking.code
     ? buildQrisPayload({ merchant: MERCHANT, city: CITY, amount: booking.total, reference: booking.code })
     : "";
+  // Langkah-langkah cara membayar yang tampil di kartu kaca.
   const steps = [
     "Buka aplikasi bank atau e-wallet apa pun (GoPay, OVO, DANA, dll.).",
     "Pilih menu Bayar / Scan QRIS, lalu arahkan ke QR di atas.",
@@ -59,6 +62,7 @@ export default function PembayaranPage() {
     <main className="px-5 pb-24">
       <PageHeader title="Pembayaran QRIS" backHref="/app/checkout" />
 
+      {/* Gambar QR dan nominal yang harus dibayar */}
       <div className="flex flex-col items-center pt-2">
         <p className="text-center text-[11px] text-white/75">Scan QRIS berikut dengan aplikasi pembayaranmu</p>
         <div className="mt-4 rounded-[20px] bg-white/85 p-5">

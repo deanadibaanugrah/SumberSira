@@ -19,10 +19,13 @@ import { normalizeWhatsapp } from "@/lib/whatsapp";
 
   Env (.env.local): WHATSAPP_TOKEN, WHATSAPP_PHONE_NUMBER_ID, opsional WHATSAPP_API_VERSION.
 */
+// Pola nomor WhatsApp Indonesia (08... atau 62...) dan pola kode booking SS-YYYYMMDD-NNN.
 const WA_PATTERN = /^(\+?62|0)8\d{8,12}$/;
 const CODE_PATTERN = /^SS-\d{8}-\d{3}$/;
+// Fungsi kecil untuk membalas request dengan JSON dan kode status (200, 400, dan lainnya).
 const json = (status, body) => Response.json(body, { status });
 
+// Dipanggil saat aplikasi minta invoice dikirim: cek data, hitung ulang total, buat PDF, lalu kirim ke WhatsApp penyewa.
 export async function POST(request) {
   let input;
   try {

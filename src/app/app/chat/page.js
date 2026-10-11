@@ -8,6 +8,7 @@ import { ringkasanSekarang } from "@/lib/tiket-store";
 
 // Chatbot "Tanya Sira". Tahap UTS: jawaban dari aturan kata kunci (data FAQ).
 // Tahap backend: ganti answer() dengan panggilan ke API chatbot; FAQ dikelola di halaman admin Chatbot / FAQ.
+// Aturan jawaban: kalau pertanyaan mengandung salah satu kata kunci, balas dengan jawaban di sebelahnya.
 const RULES = [
   { keys: ["jam", "buka", "tutup"], reply: "Weekend buka 08.00-17.00 ya! Weekday sampai 16.00 😊" },
   { keys: ["atv"], reply: "Buka menu Sewa & Booking, pilih jam kunjungan, tambah ATV (15 menit) Rp25.000, lalu tekan Lanjut Booking. Bisa bayar tunai atau QRIS 😊" },
@@ -21,14 +22,17 @@ const RULES = [
   } },
   { keys: ["lokasi", "alamat", "dimana", "di mana"], reply: "Sumber Sira ada di Desa Putukrejo, Malang. Dikelola masyarakat Desa Putukrejo." },
 ];
+// Jawaban kalau tidak ada kata kunci yang cocok.
 const FALLBACK = "Maaf, Tanya Sira belum tahu jawabannya. Pertanyaanmu sudah diteruskan ke admin ya 🙏";
 
+// Mencari jawaban untuk teks pengguna. Jawaban keramaian berupa fungsi supaya angkanya selalu terbaru.
 function answer(text) {
   const lower = text.toLowerCase();
   const reply = RULES.find((r) => r.keys.some((k) => lower.includes(k)))?.reply ?? FALLBACK;
   return typeof reply === "function" ? reply() : reply;
 }
 
+// Isi percakapan awal saat halaman chat dibuka.
 const START = [
   { from: "bot", text: "Halo! Aku Tanya Sira 👋 Ada yang bisa dibantu soal Sumber Sira?" },
   { from: "quick", options: ["Jam buka?", "Cara sewa ATV?"] },
@@ -36,16 +40,19 @@ const START = [
   { from: "bot", text: "Weekend buka 08.00-17.00 ya! Weekday sampai 16.00 😊" },
 ];
 
+// Halaman chatbot Tanya Sira: daftar pesan, pilihan cepat, dan kolom untuk mengetik pertanyaan.
 export default function ChatPage() {
   const [messages, setMessages] = useState(START);
   const [draft, setDraft] = useState("");
   const [typing, setTyping] = useState(false);
   const end = useRef(null);
 
+  // Setiap ada pesan baru, gulir otomatis ke pesan paling bawah.
   useEffect(() => {
     end.current?.scrollIntoView({ behavior: "smooth", block: "end" });
   }, [messages, typing]);
 
+  // Mengirim pesan: tampilkan pesan pengguna, tampilkan animasi mengetik, lalu 0,7 detik kemudian bot membalas.
   const send = (text) => {
     const clean = text.trim();
     if (!clean || typing) return;
@@ -72,6 +79,7 @@ export default function ChatPage() {
 
       <ol className="mt-3 flex-1 space-y-4 pb-24" aria-live="polite">
         {messages.map((m, i) => {
+          {/* Tombol pertanyaan cepat */}
           if (m.from === "quick") {
             return (
               <li key={i} className="flex flex-wrap gap-[6.5px] pl-9">
@@ -84,6 +92,7 @@ export default function ChatPage() {
               </li>
             );
           }
+          {/* Pesan dari pengguna (rata kanan) */}
           if (m.from === "me") {
             return (
               <li key={i} className="flex justify-end animate-fade-up">
@@ -91,6 +100,7 @@ export default function ChatPage() {
               </li>
             );
           }
+          {/* Pesan dari bot (rata kiri) */}
           return (
             <li key={i} className="flex items-start gap-2 animate-fade-up">
               <span className="size-7 shrink-0 rounded-full bg-leaf" aria-hidden="true" />
@@ -98,6 +108,7 @@ export default function ChatPage() {
             </li>
           );
         })}
+        {/* Animasi titik-titik saat bot sedang mengetik */}
         {typing && (
           <li className="flex items-center gap-2">
             <span className="size-7 shrink-0 rounded-full bg-leaf" aria-hidden="true" />
@@ -109,6 +120,7 @@ export default function ChatPage() {
         <li ref={end} aria-hidden="true" />
       </ol>
 
+      {/* Kolom ketik pertanyaan dan tombol kirim */}
       <form onSubmit={(e) => { e.preventDefault(); send(draft); }}
             className="fixed inset-x-0 bottom-0 z-30 mx-auto flex w-full max-w-[430px] items-center gap-2 px-5 pb-6 pt-3">
         <label htmlFor="pesan" className="sr-only">Tulis pertanyaan</label>

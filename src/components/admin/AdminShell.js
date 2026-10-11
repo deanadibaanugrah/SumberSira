@@ -10,17 +10,21 @@ import { useAdminSession } from "@/lib/admin-auth";
 // Kerangka panel admin: halaman /admin/login tampil sendiri, halaman lain wajib login
 // lalu tampil dengan sidebar. Belum login = diarahkan ke halaman login.
 export default function AdminShell({ children }) {
+  // Ambil alamat halaman sekarang dan status login admin.
   const pathname = usePathname();
   const router = useRouter();
   const session = useAdminSession();
   const onLogin = pathname === "/admin/login";
 
+  // Kalau belum login dan bukan di halaman login, pindahkan ke halaman login (alamat asal dibawa lewat ?next=).
   useEffect(() => {
     if (!onLogin && session === null) router.replace(`/admin/login?next=${encodeURIComponent(pathname)}`);
   }, [onLogin, session, pathname, router]);
 
+  // Halaman login tampil tanpa sidebar.
   if (onLogin) return children;
 
+  // Selama status login belum terbaca, tampilkan layar memeriksa sesi.
   if (!session || session === "loading") {
     return (
       <div className="grid min-h-dvh place-items-center bg-paper text-ink" role="status">
@@ -32,6 +36,7 @@ export default function AdminShell({ children }) {
     );
   }
 
+  // Sudah login: tampilkan sidebar di kiri dan isi halaman di kanan.
   return (
     <div className="min-h-dvh bg-paper text-ink lg:flex lg:gap-6 lg:p-4">
       <Sidebar session={session} />

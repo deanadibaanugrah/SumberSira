@@ -6,6 +6,7 @@ import { Bell, Search } from "lucide-react";
 // Judul halaman (Fraunces) + subjudul, lalu tombol aksi, kotak cari, dan lonceng di kanan.
 // search: { value, onChange, placeholder } bila halaman ingin memakai kotak cari untuk menyaring data.
 export function AdminHeader({ title, subtitle, action, search }) {
+  // Kalau halaman mengirim search, kotak cari dihubungkan ke state halaman itu.
   const searchProps = search?.onChange ? { value: search.value, onChange: (e) => search.onChange(e.target.value) } : {};
   return (
     <header className="flex flex-wrap items-start justify-between gap-x-6 gap-y-4 pl-14 lg:pl-0">
@@ -30,6 +31,7 @@ export function AdminHeader({ title, subtitle, action, search }) {
   );
 }
 
+// Kartu putih membulat, wadah dasar hampir semua bagian admin.
 export function Card({ as: Tag = "section", className = "", children }) {
   return <Tag className={`rounded-3xl bg-white p-6 ${className}`}>{children}</Tag>;
 }
@@ -60,6 +62,7 @@ export function IconCircle({ icon: Icon, solid = false, size = 44, iconSize = 20
 // Kartu angka. "tall" = dashboard (ikon di atas, angka besar, label + catatan).
 // "compact" = halaman lain (ikon di kiri, angka dan label di kanan).
 export function StatCard({ icon, value, label, note, trend, trendIcon: TrendIcon, solid = false, variant = "compact" }) {
+  // Varian tall dipakai di dashboard.
   if (variant === "tall") {
     return (
       <section className="rounded-3xl bg-white p-5 animate-fade-up">
@@ -77,6 +80,7 @@ export function StatCard({ icon, value, label, note, trend, trendIcon: TrendIcon
       </section>
     );
   }
+  // Varian compact dipakai di halaman lain.
   return (
     <section className="flex h-24 items-center gap-4 rounded-3xl bg-white px-5 animate-fade-up">
       <IconCircle icon={icon} solid={solid} />
@@ -88,6 +92,7 @@ export function StatCard({ icon, value, label, note, trend, trendIcon: TrendIcon
   );
 }
 
+// Warna latar dan teks status (Baru, Diproses, Selesai, Di dalam, dan lainnya).
 const PILL = {
   Baru: "bg-leaf/15 text-forest",
   Diproses: "bg-forest/10 text-forest",
@@ -100,6 +105,7 @@ const PILL = {
   "Belum masuk": "bg-ink/[0.07] text-ink/75",
   Keluar: "bg-forest/10 text-forest",
 };
+// Warna titik kecil di depan teks status.
 const DOT = {
   Baru: "bg-leaf",
   Diproses: "bg-forest",
@@ -150,6 +156,7 @@ export function PrimaryButton({ icon: Icon, children, className = "", ...props }
 
 // Tombol ikon bulat: abu/hijau untuk setujui atau edit, coral untuk tolak atau hapus.
 export function IconButton({ tone = "leaf", label, children, className = "", ...props }) {
+  // Pilihan warna tombol: leaf (hijau), gray (abu), coral (merah bata).
   const tones = {
     leaf: "bg-leaf/12 text-forest hover:bg-leaf/25",
     gray: "bg-ink/[0.07] text-ink hover:bg-ink/15",
@@ -164,12 +171,14 @@ export function IconButton({ tone = "leaf", label, children, className = "", ...
 }
 
 // Inisial nama untuk avatar: "Bu Rani S." -> "RS", "Kel. Ahmad" -> "A".
+// Gelar yang dilewati saat membuat inisial.
 const TITLES = new Set(["bu", "ibu", "bpk", "bpk.", "pak", "kel", "kel."]);
 export function initials(name) {
   const words = name.replace(/\./g, " ").split(/\s+/).filter((w) => w && !TITLES.has(w.toLowerCase()));
   return words.slice(0, 2).map((w) => w[0].toUpperCase()).join("");
 }
 
+// Lingkaran berisi inisial nama.
 export function Avatar({ name, size = 32, solid = false, className = "" }) {
   return (
     <span style={{ width: size, height: size, fontSize: Math.round(size * 0.36) }} aria-hidden="true"
@@ -181,6 +190,7 @@ export function Avatar({ name, size = 32, solid = false, className = "" }) {
 
 // Jendela dialog sederhana untuk form Tambah/Edit.
 export function Modal({ title, onClose, children }) {
+  // Klik di latar gelap menutup dialog, klik di dalam kotak putih tidak (stopPropagation).
   return (
     <div className="fixed inset-0 z-50 grid place-items-center bg-ink/40 p-4" role="dialog" aria-modal="true" aria-label={title}
          onClick={onClose}>
@@ -192,6 +202,7 @@ export function Modal({ title, onClose, children }) {
   );
 }
 
+// Tombol kedua (tanpa warna), misalnya Batal.
 export function SecondaryButton({ children, className = "", ...props }) {
   return (
     <button type="button" {...props}
@@ -201,5 +212,6 @@ export function SecondaryButton({ children, className = "", ...props }) {
   );
 }
 
+// Gaya kolom isian dan label yang dipakai di form admin.
 export const inputClass = "h-11 w-full rounded-xl border border-black/10 bg-white px-4 text-sm text-ink outline-none focus:border-leaf focus:ring-2 focus:ring-leaf/20";
 export const labelClass = "block text-[13px] text-ink/70";

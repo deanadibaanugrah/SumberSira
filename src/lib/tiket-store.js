@@ -46,10 +46,12 @@ const SEED_KELUAR = [
   ["Kel. Lestari", 4, "mobil", "07.10", "08.07", "10.05"], ["Pak Darto", 3, "motor", "07.25", "08.10", "10.14"],
 ];
 
+// Membuat data tiket contoh untuk hari ini, lengkap dengan kode TK-1001 dan seterusnya serta total harganya.
 function seedTickets() {
   // Jumlah orang tiket terakhir di dalam diisi agar totalnya tepat 186.
   const rows = SEED_DI_DALAM.map((r) => [...r]);
   rows[rows.length - 1][1] = 186 - rows.slice(0, -1).reduce((sum, r) => sum + r[1], 0);
+  // Mengubah satu baris data contoh menjadi objek tiket.
   const make = (status) => ([name, people, parking, boughtAt, checkInAt = null, checkOutAt = null]) => {
     const kids = people >= 4 && parking === "mobil" ? 1 : 0; // keluarga biasanya membawa balita (gratis)
     return { name, adults: people - kids, kids, parking, boughtAt, checkInAt, checkOutAt, status, mine: false };
@@ -59,19 +61,23 @@ function seedTickets() {
   return all.map((t, i) => ({ ...t, code: `TK-${1001 + i}`, whatsapp: "", total: hargaTiket(t.adults, t.parking) }));
 }
 
+// Menghitung harga tiket: jumlah orang (3 tahun ke atas) x Rp5.000, ditambah biaya parkir.
 export function hargaTiket(adults, parking) {
   return adults * HARGA_TIKET + (PARKIR.find((p) => p.id === parking)?.price ?? 0);
 }
 
+// Menentukan label keramaian dari persen isi: di bawah 40% Sepi, sampai 75% Sedang, di atasnya Ramai.
 export function statusKeramaian(percent) {
   if (percent < 40) return "Sepi";
   if (percent <= 75) return "Sedang";
   return "Ramai";
 }
 
+// Jumlah orang dalam satu tiket (dewasa + balita).
 const orang = (t) => t.adults + t.kids;
 
 // Ringkasan untuk Live Crowd, dashboard admin, dan halaman tiket.
+// Menghitung orang di dalam, persen kapasitas, yang belum datang, yang sudah keluar, dan daftar check-in terbaru.
 export function ringkasan(tickets) {
   const inside = tickets.filter((t) => t.status === "Di dalam").reduce((sum, t) => sum + orang(t), 0);
   const percent = Math.round((inside / KAPASITAS) * 100);
@@ -81,10 +87,13 @@ export function ringkasan(tickets) {
   return { inside, percent, label: statusKeramaian(percent), waiting, out, sold: tickets.length, recent };
 }
 
+// Tanggal hari ini (WIB), untuk mengecek apakah data yang tersimpan masih data hari ini.
 const tanggalHariIni = () => new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Jakarta" }).format(new Date());
+// Jam sekarang dengan format 10.42 (WIB), dipakai untuk jam beli, jam masuk, dan jam keluar.
 export const jamSekarang = () =>
   new Intl.DateTimeFormat("id-ID", { hour: "2-digit", minute: "2-digit", hour12: false, timeZone: "Asia/Jakarta" }).format(new Date()).replace(":", ".");
 
+// Data baru untuk hari ini, berisi tiket contoh.
 const fresh = () => ({ date: tanggalHariIni(), updatedAt: null, tickets: seedTickets() });
 // Dipakai saat render di server dan saat hydration, supaya angka awal sama dengan di browser.
 const SERVER = { date: null, updatedAt: null, tickets: seedTickets() };
@@ -92,6 +101,7 @@ const SERVER = { date: null, updatedAt: null, tickets: seedTickets() };
 const listeners = new Set();
 let cache = null;
 
+// Membaca data tiket dari localStorage. Hasilnya disimpan di cache supaya tidak dibaca berulang kali.
 function load() {
   if (cache) return cache;
   try {
@@ -104,6 +114,7 @@ function load() {
   return cache;
 }
 
+// Menyimpan data tiket ke localStorage lalu memberi tahu semua komponen supaya angkanya ikut berubah.
 function save(next) {
   cache = next;
   try {
@@ -114,6 +125,7 @@ function save(next) {
   listeners.forEach((l) => l());
 }
 
+// Mendaftarkan komponen yang memakai data tiket, termasuk perubahan dari tab lain lewat event storage.
 function subscribe(listener) {
   listeners.add(listener);
   const onStorage = (e) => {
@@ -128,6 +140,7 @@ function subscribe(listener) {
   };
 }
 
+// Hook utama: dipakai halaman mana pun untuk membaca data tiket dan ringkasan Live Crowd yang selalu terbaru.
 export function useTiket() {
   const data = useSyncExternalStore(subscribe, load, () => SERVER);
   return { ...data, ...ringkasan(data.tickets), ready: data !== SERVER };
@@ -138,12 +151,14 @@ export function ringkasanSekarang() {
   return ringkasan(load().tickets);
 }
 
+// Merapikan kode yang diketik petugas: 1038, tk1038, atau TK 1038 semuanya jadi TK-1038.
 export function normalisasiKode(raw) {
   const text = String(raw || "").toUpperCase().replace(/\s/g, "");
   if (/^\d+$/.test(text)) return `TK-${text}`;
   return text.startsWith("TK") && !text.startsWith("TK-") ? `TK-${text.slice(2)}` : text;
 }
 
+// Membuat tiket baru dari form aplikasi: kode berikutnya, status Belum masuk, lalu disimpan.
 export function beliTiket({ name, whatsapp, adults, kids, parking }) {
   const data = load();
   const next = Math.max(1000, ...data.tickets.map((t) => Number(t.code.slice(3)) || 0)) + 1;
@@ -156,6 +171,7 @@ export function beliTiket({ name, whatsapp, adults, kids, parking }) {
 }
 
 // Scan petugas di pintu masuk. Mengembalikan { ok, message }.
+// Ditolak bila kode salah, tiket sudah dipakai, atau kapasitas penuh. Kalau berhasil, status jadi Di dalam dan Live Crowd naik.
 export function checkIn(raw) {
   const code = normalisasiKode(raw);
   const data = load();
@@ -170,6 +186,7 @@ export function checkIn(raw) {
   return { ok: true, message: `${t.name} (${orang(t)} orang) masuk pukul ${now}.` };
 }
 
+// Mencatat pengunjung keluar: status jadi Keluar sehingga angka Live Crowd turun.
 export function checkOut(raw) {
   const code = normalisasiKode(raw);
   const data = load();
@@ -180,8 +197,10 @@ export function checkOut(raw) {
   return { ok: true, message: `${t.name} (${orang(t)} orang) keluar pukul ${now}.` };
 }
 
+// Mengembalikan data ke tiket contoh awal (tombol di halaman admin Tiket).
 export function resetDemo() {
   save(fresh());
 }
 
+// Diekspor dengan nama lain supaya mudah dipakai di halaman tiket.
 export const jumlahOrang = orang;

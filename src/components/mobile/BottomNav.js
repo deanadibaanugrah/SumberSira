@@ -14,6 +14,7 @@ const ITEMS = [
   { href: "/app/ulasan", label: "Profil & Ulasan", icon: User },
 ];
 
+// Komponen navigasi bawah. Ikon halaman yang sedang dibuka diberi warna hijau (aktif).
 export default function BottomNav() {
   const pathname = usePathname();
   return (
@@ -21,6 +22,7 @@ export default function BottomNav() {
          className="fixed inset-x-0 bottom-0 z-30 mx-auto w-full max-w-[430px] px-5 pb-5">
       <ul className="glass grid h-14 grid-cols-5 rounded-full shadow-lg shadow-black/20">
         {ITEMS.map(({ href, label, icon: Icon }) => {
+          // Cocokkan alamat halaman sekarang dengan alamat menu untuk menentukan menu aktif.
           const active = pathname === href;
           return (
             <li key={href}>

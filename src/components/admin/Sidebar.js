@@ -8,6 +8,7 @@ import { useState } from "react";
 import LogoMark from "@/components/Logo";
 import { logout } from "@/lib/admin-auth";
 
+// Daftar menu sidebar admin: alamat halaman, nama menu, dan ikon.
 export const ADMIN_MENU = [
   { href: "/admin", label: "Dashboard", icon: LayoutGrid },
   { href: "/admin/booking", label: "Booking Sewa & Wahana", icon: CalendarCheck },
@@ -23,7 +24,9 @@ export const ADMIN_MENU = [
 export default function Sidebar({ session }) {
   const pathname = usePathname();
   const router = useRouter();
+  // open = sidebar sedang terbuka di layar HP atau tidak.
   const [open, setOpen] = useState(false);
+  // Tombol keluar: hapus sesi login lalu kembali ke halaman login.
   const signOut = () => {
     logout();
     router.replace("/admin/login");
@@ -31,10 +34,12 @@ export default function Sidebar({ session }) {
 
   return (
     <>
+      {/* Tombol menu untuk membuka sidebar di layar HP */}
       <button type="button" onClick={() => setOpen(true)} aria-label="Buka menu"
               className="fixed left-4 top-4 z-40 grid size-12 place-items-center rounded-full bg-forest text-white shadow-md lg:hidden">
         <Menu size={20} />
       </button>
+      {/* Latar gelap di belakang sidebar saat terbuka di HP, diklik untuk menutup */}
       {open && <div className="fixed inset-0 z-40 bg-ink/40 lg:hidden" onClick={() => setOpen(false)} aria-hidden="true" />}
 
       <aside className={`fixed inset-y-4 left-4 z-50 flex w-[240px] flex-col rounded-3xl bg-white px-3 pb-4 pt-[26px] text-ink shadow-[0_8px_30px_rgba(23,35,33,0.06)] transition-transform
@@ -54,6 +59,7 @@ export default function Sidebar({ session }) {
         <nav aria-label="Menu admin" className="mt-2">
           <ul className="space-y-2">
             {ADMIN_MENU.map(({ href, label, icon: Icon }) => {
+              // Menu aktif: Dashboard harus sama persis, menu lain cukup diawali alamatnya.
               const active = href === "/admin" ? pathname === "/admin" : pathname.startsWith(href);
               return (
                 <li key={href}>
@@ -71,6 +77,7 @@ export default function Sidebar({ session }) {
           </ul>
         </nav>
 
+        {/* Bagian bawah sidebar: jam buka dan profil admin yang login beserta tombol keluar */}
         <div className="mt-auto space-y-4">
           <div className="flex h-[76px] items-center gap-3 rounded-[20px] bg-leaf/[0.08] px-4">
             <span className="grid size-10 shrink-0 place-items-center rounded-full bg-white text-ink"><Clock size={18} aria-hidden="true" /></span>
@@ -81,6 +88,7 @@ export default function Sidebar({ session }) {
           </div>
           <div className="flex min-h-[68px] items-center gap-2.5 rounded-[20px] bg-leaf/[0.08] py-2 pl-3 pr-1.5">
             <span className="relative grid size-11 shrink-0 place-items-center rounded-full bg-forest text-base font-semibold text-white">
+              {/* Inisial nama admin, misalnya Pak Yono jadi PY */}
               {session.name.split(" ").map((w) => w[0]).join("").slice(0, 2).toUpperCase()}
               <span className="absolute -right-1 -top-1 grid size-[18px] place-items-center rounded-full bg-coral text-[10px] font-semibold ring-2 ring-white"
                     aria-label="3 notifikasi">3</span>

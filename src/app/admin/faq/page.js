@@ -8,10 +8,12 @@ import { FAQ, FAQ_AUTO_RATE, UNANSWERED } from "@/data/dummy";
 
 // Admin 6/7: Chatbot & FAQ. Jawaban yang tersimpan dipakai otomatis oleh chatbot Tanya Sira.
 export default function FaqPage() {
+  // Daftar FAQ, pertanyaan yang belum terjawab, dan isi form (null = form tertutup).
   const [faqs, setFaqs] = useState(FAQ);
   const [pending, setPending] = useState(UNANSWERED);
   const [form, setForm] = useState(null); // { id?, q, a, fromPending? }
 
+  // Simpan form: kalau edit, ganti FAQ lama. Kalau baru atau menjawab pertanyaan pengunjung, tambahkan FAQ baru dan hapus dari daftar belum terjawab.
   const save = (e) => {
     e.preventDefault();
     if (!form.q.trim() || !form.a.trim()) return;
@@ -29,6 +31,7 @@ export default function FaqPage() {
       <AdminHeader title="Chatbot & FAQ" subtitle="Atur jawaban Tanya Sira dan pertanyaan pengunjung"
                    action={<PrimaryButton icon={Plus} onClick={() => setForm({ q: "", a: "" })}>Tambah FAQ</PrimaryButton>} />
 
+      {/* Kartu ringkasan FAQ */}
       <div className="mt-6 grid gap-5 sm:grid-cols-3">
         <StatCard icon={MessageCircle} solid value={faqs.length} label="FAQ aktif" />
         <StatCard icon={Clock} value={pending.length} label="Belum terjawab" />
@@ -38,6 +41,7 @@ export default function FaqPage() {
       <div className="mt-5 grid gap-5 xl:grid-cols-[736fr_380fr]">
         <Card className="px-4! pt-5!">
           <CardTitle className="px-2" sub="Dipakai Tanya Sira untuk menjawab pengunjung">Daftar FAQ</CardTitle>
+          {/* Daftar FAQ yang dipakai chatbot */}
           <ol className="mt-5 space-y-3">
             {faqs.map((f, i) => (
               <li key={f.id} className="flex min-h-20 items-center gap-4 rounded-2xl bg-paper py-3 pl-4 pr-3 animate-fade-up">
@@ -46,6 +50,7 @@ export default function FaqPage() {
                   <p className="text-[15px] font-semibold leading-snug text-ink">{f.q}</p>
                   <p className="mt-1 text-sm text-ink/70">{f.a}</p>
                 </div>
+                {/* Tombol edit dan hapus FAQ */}
                 <IconButton label={`Edit FAQ: ${f.q}`} onClick={() => setForm({ ...f })}><Pencil size={16} /></IconButton>
                 <IconButton label={`Hapus FAQ: ${f.q}`} tone="coral" onClick={() => setFaqs((all) => all.filter((x) => x.id !== f.id))}>
                   <Trash2 size={16} />
@@ -56,6 +61,7 @@ export default function FaqPage() {
           {faqs.length === 0 && <p className="mt-4 px-2 text-sm text-ink/60">Belum ada FAQ. Tambahkan lewat tombol Tambah FAQ.</p>}
         </Card>
 
+        {/* Kartu pertanyaan pengunjung yang belum bisa dijawab chatbot */}
         <section className="flex flex-col rounded-3xl bg-forest p-5 text-white">
           <div className="flex items-start justify-between gap-3 px-1">
             <div>
@@ -85,6 +91,7 @@ export default function FaqPage() {
         </section>
       </div>
 
+      {/* Jendela form tambah, edit, atau jawab FAQ */}
       {form && (
         <Modal title={form.fromPending ? "Jawab Pertanyaan" : form.id ? "Edit FAQ" : "Tambah FAQ"} onClose={() => setForm(null)}>
           <form onSubmit={save} className="space-y-3">

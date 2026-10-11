@@ -10,18 +10,25 @@ import { KAPASITAS, PARKIR, checkIn, checkOut, jumlahOrang, resetDemo, useTiket 
 
 // Admin 3/7: Tiket & Check-in. Petugas memindai kode tiket di pintu masuk;
 // jumlah orang yang sudah masuk dan belum keluar menjadi angka Live Crowd di aplikasi pengunjung.
+// Pilihan filter status tiket.
 const FILTERS = ["Semua", "Belum masuk", "Di dalam", "Keluar"];
+// Nama parkir untuk tabel (Tidak ditulis sebagai tanda -).
 const PARKIR_LABEL = Object.fromEntries(PARKIR.map((p) => [p.id, p.id === "none" ? "-" : p.label]));
+// Warna batang kapasitas sesuai status keramaian.
 const BAR = { Sepi: "bg-leaf", Sedang: "bg-forest", Ramai: "bg-coral" };
 
+// Halaman admin Tiket & Check-in: petugas scan kode tiket di pintu, angka di sini menjadi Live Crowd aplikasi.
 export default function TiketAdminPage() {
+  // Data tiket dan ringkasan live (orang di dalam, persen, terjual, belum datang).
   const tiket = useTiket();
+  // Filter tabel, kata pencarian, kode yang diketik petugas, dan hasil scan terakhir.
   const [filter, setFilter] = useState("Semua");
   const [query, setQuery] = useState("");
   const [kode, setKode] = useState("");
   const [hasil, setHasil] = useState(null); // { ok, message }
   const input = useRef(null);
 
+  // Tiket yang tampil di tabel: cocok dengan filter dan pencarian (nama atau kode), urut dari yang terbaru dibeli.
   const visible = useMemo(() => {
     const q = query.trim().toLowerCase();
     return [...tiket.tickets]
@@ -29,6 +36,7 @@ export default function TiketAdminPage() {
       .sort((a, b) => b.boughtAt.localeCompare(a.boughtAt));
   }, [tiket.tickets, filter, query]);
 
+  // Form scan: check-in kode yang diketik, tampilkan hasilnya, kosongkan kolom, lalu fokus lagi untuk scan berikutnya.
   const scan = (e) => {
     e.preventDefault();
     if (!kode.trim()) return;
@@ -36,6 +44,7 @@ export default function TiketAdminPage() {
     setKode("");
     input.current?.focus();
   };
+  // Tombol Scan Tiket di atas: arahkan kursor ke kolom kode tiket.
   const fokusScan = () => {
     input.current?.focus();
     input.current?.scrollIntoView({ block: "center", behavior: "smooth" });
@@ -47,6 +56,7 @@ export default function TiketAdminPage() {
                    action={<PrimaryButton icon={ScanLine} onClick={fokusScan}>Scan Tiket</PrimaryButton>}
                    search={{ value: query, onChange: setQuery, placeholder: "Cari nama atau kode tiket..." }} />
 
+      {/* Kartu ringkasan: terjual, orang di dalam, kapasitas, belum datang */}
       <div className="mt-6 grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard icon={Ticket} solid value={tiket.sold} label="Tiket terjual hari ini" />
         <StatCard icon={Users} value={tiket.inside} label="Orang di dalam" />
@@ -63,6 +73,7 @@ export default function TiketAdminPage() {
                      </span>}>
             Scan Tiket di Pintu Masuk
           </CardTitle>
+          {/* Form scan kode tiket */}
           <form onSubmit={scan} className="mt-5 flex flex-wrap gap-3">
             <label className="flex h-12 min-w-[240px] flex-1 items-center gap-3 rounded-full bg-paper px-5 focus-within:ring-2 focus-within:ring-leaf/30">
               <ScanLine size={18} className="shrink-0 text-forest" aria-hidden="true" />
@@ -72,12 +83,14 @@ export default function TiketAdminPage() {
             </label>
             <PrimaryButton type="submit" icon={LogIn}>Check-in</PrimaryButton>
           </form>
+          {/* Pesan hasil scan: hijau kalau berhasil, merah kalau ditolak */}
           {hasil && (
             <p role="status" className={`mt-3 rounded-2xl px-4 py-3 text-sm animate-fade-up ${hasil.ok ? "bg-leaf/12 text-forest" : "bg-coral/12 text-coral"}`}>
               {hasil.message}
             </p>
           )}
 
+          {/* Jumlah pengunjung di dalam dan batang kapasitas (inilah angka Live Crowd) */}
           <div className="mt-6 rounded-2xl bg-paper p-5">
             <div className="flex flex-wrap items-end justify-between gap-3">
               <div>
@@ -95,6 +108,7 @@ export default function TiketAdminPage() {
           </div>
         </Card>
 
+        {/* Daftar check-in terbaru */}
         <Card className="flex flex-col">
           <CardTitle sub="Diurutkan dari yang paling baru">Check-in Terbaru</CardTitle>
           <ul className="mt-4 space-y-2.5">
@@ -112,6 +126,7 @@ export default function TiketAdminPage() {
               </li>
             ))}
           </ul>
+          {/* Tombol untuk mengembalikan data contoh */}
           <button type="button" onClick={() => { resetDemo(); setHasil(null); }}
                   className="mt-auto flex items-center gap-2 self-start pt-5 text-[13px] text-ink/60 hover:text-forest max-xl:mt-4">
             <RotateCcw size={14} /> Kembalikan data contoh hari ini
@@ -119,6 +134,7 @@ export default function TiketAdminPage() {
         </Card>
       </div>
 
+      {/* Tabel semua tiket hari ini */}
       <Card className="mt-5 px-4! pt-5!">
         <div className="px-2">
           <CardTitle>Daftar Tiket Hari Ini</CardTitle>
@@ -154,12 +170,14 @@ export default function TiketAdminPage() {
                   <td className="font-mono">{t.checkInAt ?? "-"}</td>
                   <td><StatusPill status={t.status} /></td>
                   <td className="pr-3 text-right">
+                    {/* Tiket belum masuk: tombol Check-in */}
                     {t.status === "Belum masuk" && (
                       <button type="button" onClick={() => setHasil(checkIn(t.code))}
                               className="inline-flex h-8 items-center gap-1.5 rounded-full bg-forest px-3 text-xs font-semibold text-white hover:brightness-125">
                         <LogIn size={14} /> Check-in
                       </button>
                     )}
+                    {/* Pengunjung di dalam: tombol Keluar */}
                     {t.status === "Di dalam" && (
                       <button type="button" onClick={() => setHasil(checkOut(t.code))}
                               className="inline-flex h-8 items-center gap-1.5 rounded-full bg-white px-3 text-xs font-semibold text-ink hover:bg-ink/10">

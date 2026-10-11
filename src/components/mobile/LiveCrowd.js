@@ -8,6 +8,7 @@ import { KAPASITAS, useTiket } from "@/lib/tiket-store";
 
 // Angka keramaian di aplikasi pengunjung, dihitung dari tiket online yang sudah discan masuk.
 
+// Titik kecil berdenyut sebagai tanda data live.
 function LivePing({ className = "bg-white" }) {
   return (
     <span className="relative flex size-2 shrink-0">
@@ -19,6 +20,7 @@ function LivePing({ className = "bg-white" }) {
 
 // Pill di Home: "Crowd saat ini: Sedang".
 export function CrowdNowPill() {
+  // Data tiket dan ringkasan keramaian diambil dari useTiket, jadi angkanya ikut berubah saat ada scan.
   const t = useTiket();
   return (
     <Link href="/app/crowd" className="glass mt-4 flex h-10 items-center justify-between rounded-full px-4">
@@ -68,12 +70,14 @@ export function LiveCrowdBanner() {
   );
 }
 
+// Warna label status tiket.
 const STATUS_STYLE = {
   "Belum masuk": "bg-white/15 text-white",
   "Di dalam": "bg-leaf text-white",
   Keluar: "bg-white/10 text-white/70",
 };
 
+// Label status tiket: Belum masuk, Di dalam, atau Keluar.
 export function TicketStatus({ status, className = "" }) {
   return (
     <span className={`inline-flex h-6 items-center rounded-full px-2.5 text-[9.5px] font-semibold ${STATUS_STYLE[status] ?? STATUS_STYLE["Belum masuk"]} ${className}`}>

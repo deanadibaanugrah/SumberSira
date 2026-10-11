@@ -1,9 +1,11 @@
 // Donat sentimen ulasan. Segmen digambar searah jarum jam mulai dari atas, lalu muncul dengan animasi.
 // segments: [{ label: "Positif", value: 75, color: "#1b4332" }] dalam persen (jumlah 100).
+// Jari-jari lingkaran dan kelilingnya, dipakai untuk menghitung panjang tiap segmen.
 const R = 46;
 const C = 2 * Math.PI * R;
 const GAP = 1.6; // celah putih tipis antar segmen
 
+// Komponen grafik donat sentimen ulasan (positif, netral, negatif).
 export default function DonutChart({ segments, size = 112, stroke = 20 }) {
   const total = segments.reduce((s, x) => s + x.value, 0) || 1;
   // Titik mulai tiap segmen = jumlah panjang segmen sebelumnya.
@@ -15,6 +17,7 @@ export default function DonutChart({ segments, size = 112, stroke = 20 }) {
   return (
     <svg viewBox="0 0 120 120" width={size} height={size} className="shrink-0 -rotate-90 animate-pop" role="img"
          aria-label={segments.map((s) => `${s.label} ${s.value}%`).join(", ")}>
+      {/* Setiap segmen adalah lingkaran dengan garis putus-putus sepanjang persentasenya */}
       {arcs.map((a) => {
         const dash = Math.max(a.len - GAP, 0.1);
         return (

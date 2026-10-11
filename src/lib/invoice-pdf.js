@@ -20,6 +20,7 @@ const DARK = rgb(0x17 / 255, 0x23 / 255, 0x21 / 255);
 const GRAY = rgb(0.45, 0.47, 0.47);
 const COL = { item: MARGIN, qty: 232, price: 300, amount: PAGE.width - MARGIN };
 
+// Membuat file PDF invoice ukuran A5: data pemesan, tabel item, total, dan QR kode booking.
 export async function buildInvoicePdf({ code, name, whatsapp, slot, items, total, payment, issuedAt = new Date() }) {
   const pdf = await PDFDocument.create();
   pdf.setTitle(`Invoice ${code} · Sumber Sira`);
@@ -31,7 +32,9 @@ export async function buildInvoicePdf({ code, name, whatsapp, slot, items, total
   const mono = await pdf.embedFont(StandardFonts.Courier);
   const monoBold = await pdf.embedFont(StandardFonts.CourierBold);
 
+  // Memotong teks yang terlalu panjang supaya tidak keluar dari kolom.
   const fits = (text, font, size, maxWidth) => (font.widthOfTextAtSize(text, size) <= maxWidth ? text : `${text.slice(0, -3)}...`);
+  // Menulis satu baris label dan nilainya, misalnya Nama Pemesan: Bu Rani.
   const drawPair = (label, value, y, valueFont = regular) => {
     page.drawText(label, { x: MARGIN, y, size: 7, font: regular, color: GRAY });
     page.drawText(fits(value, valueFont, 9.5, 240), { x: 150, y: y - 1, size: 9.5, font: valueFont, color: DARK });

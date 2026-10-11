@@ -11,6 +11,7 @@ import { rupiah } from "./format";
   gateway WhatsApp. API key disimpan di backend (environment variable), JANGAN di kode frontend.
 */
 
+// Mengubah nomor WhatsApp ke format internasional (62...) yang diminta wa.me.
 // 08123456789 / +62 812-3456-789 -> 628123456789
 export function normalizeWhatsapp(number) {
   const digits = String(number || "").replace(/\D/g, "");
@@ -19,6 +20,7 @@ export function normalizeWhatsapp(number) {
   return digits ? `62${digits}` : "";
 }
 
+// Menyusun isi pesan invoice: kode, nama, jam kunjungan, daftar item, dan total bayar.
 export function buildInvoiceMessage(booking) {
   const lines = booking.items.map((item) => `• ${item.qty}x ${item.name}: ${rupiah(item.qty * item.price)}`);
   return [
@@ -36,6 +38,7 @@ export function buildInvoiceMessage(booking) {
   ].join("\n");
 }
 
+// Membuat link wa.me ke nomor pengunjung, teks invoice dimasukkan ke parameter ?text=.
 export function invoiceLink(booking) {
   const phone = normalizeWhatsapp(booking.whatsapp);
   return `https://wa.me/${phone}?text=${encodeURIComponent(buildInvoiceMessage(booking))}`;

@@ -9,18 +9,26 @@ import { WAHANA } from "@/data/wahana";
 import { rupiah } from "@/lib/format";
 
 // Admin 7/7: Wahana & Harga. Daftar sewa alat/wahana, filter kategori, tambah, edit, hapus.
+// Pilihan filter kategori.
 const FILTERS = ["Semua", "Sewa Alat", "Wahana"];
+// Isi awal form saat menambah wahana baru.
 const EMPTY = { name: "", category: "Wahana", price: "", unit: "", status: "Aktif" };
+// Warna label kategori di tabel.
 const CATEGORY_TAG = { "Sewa Alat": "bg-ink/[0.07] text-ink/75", Wahana: "bg-leaf/12 text-forest" };
 
+// Halaman Wahana & Harga: daftar alat sewa dan wahana, bisa tambah, edit, dan hapus.
 export default function WahanaPage() {
+  // Data wahana, filter kategori, dan isi form (null = form tertutup).
   const [items, setItems] = useState(WAHANA);
   const [filter, setFilter] = useState("Semua");
   const [form, setForm] = useState(null);
 
+  // Wahana yang tampil sesuai filter kategori.
   const visible = useMemo(() => items.filter((w) => filter === "Semua" || w.category === filter), [items, filter]);
+  // Menghitung jumlah item per kategori untuk kartu ringkasan.
   const count = (category) => items.filter((w) => w.category === category).length;
 
+  // Simpan form: nama wajib diisi dan harga harus lebih dari 0. Kalau ada id berarti edit, kalau tidak berarti item baru.
   const save = (e) => {
     e.preventDefault();
     const price = Number(form.price);
@@ -37,6 +45,7 @@ export default function WahanaPage() {
       <AdminHeader title="Wahana & Harga" subtitle="Daftar alat sewa dan wahana beserta tarifnya"
                    action={<PrimaryButton icon={Plus} onClick={() => setForm(EMPTY)}>Tambah Wahana</PrimaryButton>} />
 
+      {/* Kartu ringkasan jumlah item */}
       <div className="mt-6 grid gap-5 sm:grid-cols-3">
         <StatCard icon={Package} solid value={items.length} label="Total item" />
         <StatCard icon={LifeBuoy} value={count("Sewa Alat")} label="Sewa alat" />
@@ -49,6 +58,7 @@ export default function WahanaPage() {
           <div className="mt-4"><FilterPills options={FILTERS} value={filter} onChange={setFilter} label="Filter kategori" /></div>
         </div>
         <div className="mt-4 overflow-x-auto">
+          {/* Tabel daftar wahana */}
           <table className="w-full min-w-[760px] border-separate border-spacing-y-2.5 text-left text-sm">
             <thead className="text-[13px] text-ink/60">
               <tr>
@@ -76,6 +86,7 @@ export default function WahanaPage() {
                   <td><StatusPill status={w.status} /></td>
                   <td className="pr-3">
                     <div className="flex gap-2">
+                      {/* Tombol edit (buka form berisi data wahana) dan hapus */}
                       <IconButton label={`Edit ${w.name}`} onClick={() => setForm({ ...w, price: String(w.price) })}><Pencil size={16} /></IconButton>
                       <IconButton label={`Hapus ${w.name}`} tone="coral" onClick={() => setItems((all) => all.filter((x) => x.id !== w.id))}>
                         <Trash2 size={16} />
@@ -92,6 +103,7 @@ export default function WahanaPage() {
         </div>
       </Card>
 
+      {/* Jendela form tambah atau edit wahana */}
       {form && (
         <Modal title={form.id ? "Edit Wahana" : "Tambah Wahana"} onClose={() => setForm(null)}>
           <form onSubmit={save} className="space-y-3">

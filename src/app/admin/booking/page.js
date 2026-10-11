@@ -10,12 +10,16 @@ import { WAHANA } from "@/data/wahana";
 import { rupiah } from "@/lib/format";
 
 // Admin 2/7: Booking Sewa & Wahana. Filter status, cari pemesan (kotak cari di header), detail, konfirmasi/tolak.
+// Pilihan filter status booking.
 const FILTERS = ["Semua", "Baru", "Diproses", "Selesai"];
+// Status berikutnya saat tombol utama ditekan: Baru jadi Diproses, Diproses jadi Selesai.
 const NEXT_STATUS = { Baru: "Diproses", Diproses: "Selesai" };
 const CONFIRM_LABEL = { Baru: "Konfirmasi Booking", Diproses: "Tandai Selesai" };
+// Katalog wahana berdasarkan id, untuk mengambil nama dan harga.
 const CATALOG = Object.fromEntries(WAHANA.map((w) => [w.id, w]));
 
 // Baris item + total dihitung dari katalog wahana, bukan diketik manual.
+// Menyusun rincian item satu booking (nama, jumlah, harga) dari katalog wahana.
 function lineItems(booking) {
   return booking.lines.map(({ id, qty }) => {
     const w = CATALOG[id];
@@ -23,20 +27,26 @@ function lineItems(booking) {
   });
 }
 
+// Halaman Booking Sewa & Wahana: daftar booking dengan filter dan pencarian, detail di kanan, tombol konfirmasi atau tolak.
 export default function BookingManagementPage() {
+  // Data booking, filter aktif, kata pencarian, dan booking yang sedang dipilih.
   const [rows, setRows] = useState(BOOKINGS);
   const [filter, setFilter] = useState("Semua");
   const [query, setQuery] = useState("");
   const [selectedId, setSelectedId] = useState(1);
 
+  // Booking yang tampil = cocok dengan filter status dan namanya mengandung kata pencarian.
   const visible = useMemo(() => rows.filter((r) =>
     (filter === "Semua" || r.status === filter) && r.name.toLowerCase().includes(query.trim().toLowerCase())), [rows, filter, query]);
+  // Booking yang dipilih, rincian itemnya, dan total harganya.
   const selected = rows.find((r) => r.id === selectedId) ?? null;
   const lines = selected ? lineItems(selected) : [];
   const total = lines.reduce((sum, l) => sum + l.price, 0);
 
   // Angka desain dipakai sebagai dasar; perubahan status di halaman ini ikut menggeser angkanya.
+  // Selisih jumlah status dibanding data awal, supaya angka di kartu ringkasan ikut berubah saat status diganti.
   const delta = (status) => rows.filter((r) => r.status === status).length - BOOKINGS.filter((r) => r.status === status).length;
+  // Mengganti status satu booking (dipakai tombol Konfirmasi, Tandai Selesai, dan Tolak).
   const setStatus = (id, status) => setRows((all) => all.map((r) => (r.id === id ? { ...r, status } : r)));
 
   return (
@@ -45,6 +55,7 @@ export default function BookingManagementPage() {
                    action={<PrimaryButton icon={Download}>Export</PrimaryButton>}
                    search={{ value: query, onChange: setQuery, placeholder: "Cari nama pemesan..." }} />
 
+      {/* Kartu ringkasan jumlah booking per status */}
       <div className="mt-6 grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard icon={CalendarCheck} solid value={BOOKING_TOTALS.hariIni} label="Booking hari ini" />
         <StatCard icon={Clock} value={BOOKING_TOTALS.menunggu + delta("Baru")} label="Menunggu konfirmasi" />
@@ -52,6 +63,7 @@ export default function BookingManagementPage() {
         <StatCard icon={Check} value={BOOKING_TOTALS.selesai + delta("Selesai")} label="Selesai" />
       </div>
 
+      {/* Kiri: daftar booking. Kanan: detail booking yang dipilih */}
       <div className="mt-5 grid gap-5 xl:grid-cols-[736fr_380fr]">
         <Card className="flex flex-col px-4! pt-5!">
           <div className="px-2">
@@ -63,6 +75,7 @@ export default function BookingManagementPage() {
           </div>
 
           <div className="mt-4 overflow-x-auto">
+            {/* Tabel booking, klik satu baris untuk melihat detailnya */}
             <table className="w-full min-w-[600px] border-separate border-spacing-y-2.5 text-left text-sm">
               <thead className="text-[13px] text-ink/60">
                 <tr>
@@ -117,6 +130,7 @@ export default function BookingManagementPage() {
           </div>
         </Card>
 
+        {/* Panel detail booking yang dipilih */}
         <Card className="flex flex-col pt-5!">
           <CardTitle right={selected && <span className="rounded-full bg-paper px-3 py-1.5 font-mono text-xs text-ink/80">{selected.code}</span>}>
             Detail Booking
@@ -158,6 +172,7 @@ export default function BookingManagementPage() {
                 </span>
               </div>
 
+              {/* Tombol Konfirmasi atau Tandai Selesai, dan tombol Tolak */}
               <div className="mt-auto space-y-3 pt-6">
                 <PrimaryButton icon={Check} className="w-full" disabled={!NEXT_STATUS[selected.status]}
                                onClick={() => setStatus(selected.id, NEXT_STATUS[selected.status])}>

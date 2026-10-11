@@ -17,6 +17,7 @@ export function bookingLabel(item) {
   return item.unit.includes("menit") ? `${item.name} (${item.unit})` : `${item.name} (per ${item.unit})`;
 }
 
+// Pilihan jam kunjungan untuk booking. busy: true artinya jam itu biasanya ramai.
 export const SLOTS = [
   { id: "08-10", label: "08-10", range: "08.00 - 10.00", busy: false },
   { id: "10-12", label: "10-12", range: "10.00 - 12.00", busy: true },

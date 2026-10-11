@@ -4,6 +4,7 @@
 // Dihitung di browser supaya tidak membeku di tanggal build.
 const FORMAT = new Intl.DateTimeFormat("id-ID", { weekday: "long", day: "numeric", month: "long", year: "numeric", timeZone: "Asia/Jakarta" });
 
+// Komponen yang menampilkan tanggal hari ini.
 export default function Today() {
   return <span suppressHydrationWarning>{FORMAT.format(new Date())}</span>;
 }

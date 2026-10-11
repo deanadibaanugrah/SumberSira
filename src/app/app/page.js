@@ -13,6 +13,7 @@ export default function SplashPage() {
   const router = useRouter();
   const [dot, setDot] = useState(1);
 
+  // Setelah 2,6 detik pindah otomatis ke halaman Tentang. Titik loading berganti setiap 0,45 detik.
   useEffect(() => {
     const timer = setTimeout(() => router.replace("/app/tentang"), 2600);
     const loader = setInterval(() => setDot((d) => (d + 1) % 3), 450);
@@ -38,6 +39,7 @@ export default function SplashPage() {
         </p>
       </div>
 
+      {/* Tiga titik loading di bagian bawah */}
       <div className="absolute inset-x-0 bottom-[12.9%] flex justify-center gap-2" aria-hidden="true">
         {[0, 1, 2].map((i) => (
           <span key={i} className={`size-2 rounded-full transition-colors duration-300 ${i === dot ? "bg-white" : "bg-white/20"}`} />

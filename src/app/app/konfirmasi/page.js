@@ -9,6 +9,7 @@ import { QRCodeSVG } from "qrcode.react";
 import { useBooking } from "@/lib/booking-context";
 import { rupiah } from "@/lib/format";
 
+// Halaman Konfirmasi: booking berhasil, tampil QR kode booking dan ringkasan pesanan.
 export default function KonfirmasiPage() {
   const router = useRouter();
   const booking = useBooking();
@@ -19,6 +20,7 @@ export default function KonfirmasiPage() {
     if (unpaid) router.replace("/app/pembayaran");
   }, [unpaid, router]);
 
+  // Belum ada booking sama sekali: tampilkan pesan dan tombol mulai booking.
   if (booking.loaded && !booking.code) {
     return (
       <main className="grid min-h-dvh place-items-center px-5 text-center">
@@ -30,6 +32,7 @@ export default function KonfirmasiPage() {
     );
   }
 
+  // Belum bayar: tampilkan pesan sambil diarahkan ke halaman pembayaran.
   if (unpaid) {
     return (
       <main className="grid min-h-dvh place-items-center px-5 text-center">
@@ -38,11 +41,14 @@ export default function KonfirmasiPage() {
     );
   }
 
+  // Ringkasan item, contoh: 2x Ban Besar, 1x ATV.
   const itemSummary = booking.items.map((i) => `${i.qty}x ${i.short}`).join(", ");
+  // Kembali ke Home sekaligus mengosongkan keranjang untuk booking berikutnya.
   const backHome = () => {
     booking.reset();
     router.push("/app/home");
   };
+  // Baris data yang tampil di kartu ringkasan.
   const rows = [
     ["Nama Pemesan", booking.name],
     ["Waktu Kunjungan", booking.slotInfo.range],
@@ -59,6 +65,7 @@ export default function KonfirmasiPage() {
       <p className="mt-0.5 text-center text-xs text-white/70">Tunjukkan QR ini di pintu masuk</p>
       <p className="mt-1 text-center font-mono text-[10px] font-medium">Kode: {booking.code}</p>
 
+      {/* QR berisi kode booking, ditunjukkan ke petugas di pintu masuk */}
       <div className="mx-auto mt-[18px] rounded-[20px] bg-white/85 p-5">
         {booking.code && <QRCodeSVG value={booking.code} size={140} bgColor="transparent" fgColor="#172321" level="M" />}
       </div>

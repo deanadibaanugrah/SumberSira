@@ -5,10 +5,14 @@
 // dan lapisan sawah bergoyang pelan. Gerakan otomatis berhenti bila pengguna memilih "kurangi gerakan".
 // ring = garis tepi putih tipis untuk dipasang di atas latar gelap atau foto (varian "latar gelap").
 // label kosong = logo hanya hiasan (mis. di samping tulisan "Sumber Sira"), jadi disembunyikan dari pembaca layar.
+// Pengaturan supaya animasi berputar dan bergeser dari titik tengah bentuknya sendiri.
 const fillBox = { transformBox: "fill-box", transformOrigin: "center" };
+// Memasang animasi CSS hanya kalau animated aktif.
 const anim = (on, value, extra = {}) => (on ? { ...fillBox, animation: value, ...extra } : undefined);
 
+// Komponen logo: lingkaran hijau berisi sawah, riak air, dan tetes air yang bergerak.
 export default function LogoMark({ size = 40, ring = false, animated = true, label = "Logo Sumber Sira", className = "" }) {
+  // Kalau label diisi, logo dibacakan pembaca layar. Kalau kosong, logo dianggap hiasan.
   const a11y = label ? { role: "img", "aria-label": label } : { "aria-hidden": true };
   return (
     <span {...a11y} style={{ width: size, height: size }}
@@ -22,6 +26,7 @@ export default function LogoMark({ size = 40, ring = false, animated = true, lab
               style={anim(animated, "logo-sway-b 5s ease-in-out infinite")} />
         <path d="M-16 102 C14 92 46 100 64 99 C84 98 114 92 136 98 L136 124 L-16 124Z" fill="#40916c"
               style={anim(animated, "logo-sway-a 7s ease-in-out infinite reverse")} />
+        {/* Dua riak air bergantian melebar dan memudar */}
         {animated && (
           <>
             <ellipse cx="60" cy="74" rx="16" ry="3.5" fill="none" stroke="#ffffff" strokeOpacity="0.85" strokeWidth="2"
@@ -30,11 +35,13 @@ export default function LogoMark({ size = 40, ring = false, animated = true, lab
                      style={anim(true, "logo-ripple 3s ease-out 1.5s infinite")} />
           </>
         )}
+        {/* Tetes air naik turun */}
         <g style={anim(animated, "logo-bob 3s ease-in-out infinite")}>
           <path d="M60 17 C60 17 43 37 43 50 A17 17 0 0 0 77 50 C77 37 60 17 60 17Z" fill="#ffffff" />
           <path d="M53 49 A8 8 0 0 0 58 58" fill="none" stroke="#40916c" strokeWidth="3" strokeLinecap="round" />
         </g>
       </svg>
+      {/* Garis tepi putih untuk varian latar gelap */}
       {ring && (
         <span aria-hidden="true" className="absolute inset-0 rounded-full border-white/40"
               style={{ borderWidth: Math.max(1, Math.round((size * 4) / 120)), borderStyle: "solid" }} />

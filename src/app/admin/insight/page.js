@@ -7,10 +7,14 @@ import { AdminHeader, Avatar, Card, CardTitle, PrimaryButton } from "@/component
 import { COMPLAINT_TAGS, COMPLAINT_TIP, CROWD_FORECAST, FORECAST_SUMMARY, REVIEWS, REVIEW_COUNT, SENTIMENT } from "@/data/dummy";
 
 // Admin 4/7: AI Insight. Prediksi keramaian (area beranimasi), ringkasan AI, sentimen (donat), keluhan (batang), ulasan terbaru.
+// Warna batang keluhan: makin banyak keluhan makin pekat.
 const COMPLAINT_FILL = ["bg-coral", "bg-coral/70", "bg-coral/50"];
 
+// Halaman AI Insight: prediksi keramaian besok, ringkasan AI, sentimen ulasan, topik keluhan, dan ulasan terbaru.
 export default function InsightPage() {
+  // Ubah data prediksi ke bentuk yang dibaca grafik area.
   const forecast = CROWD_FORECAST.map((d) => ({ label: d.hour, value: d.value }));
+  // Keluhan terbanyak dipakai sebagai panjang 100% batang.
   const maxComplaint = Math.max(...COMPLAINT_TAGS.map((t) => t.count));
   const s = FORECAST_SUMMARY;
 
@@ -19,6 +23,7 @@ export default function InsightPage() {
       <AdminHeader title="AI Insight" subtitle="Prediksi keramaian dan ringkasan ulasan otomatis"
                    action={<PrimaryButton icon={Download}>Unduh Laporan</PrimaryButton>} />
 
+      {/* Baris 1: grafik prediksi keramaian di kiri, ringkasan AI dan sentimen di kanan */}
       <div className="mt-6 grid gap-5 xl:grid-cols-[736fr_380fr]">
         <Card>
           <CardTitle sub={`Prediksi keramaian per jam untuk besok, ${s.day}`}
@@ -32,6 +37,7 @@ export default function InsightPage() {
         </Card>
 
         <div className="grid gap-5">
+          {/* Kartu Ringkasan AI: jam tersibuk dan saran */}
           <section className="rounded-3xl bg-forest p-6 text-white">
             <div className="flex items-center gap-3">
               <span className="grid size-10 place-items-center rounded-full bg-white/12"><Sparkles size={18} aria-hidden="true" /></span>
@@ -53,6 +59,7 @@ export default function InsightPage() {
             </div>
           </section>
 
+          {/* Kartu sentimen ulasan dengan grafik donat */}
           <Card>
             <CardTitle sub={`${REVIEW_COUNT.total} ulasan · ${REVIEW_COUNT.period}`}>Sentimen Ulasan</CardTitle>
             <div className="mt-4 flex items-center gap-6">
@@ -70,6 +77,7 @@ export default function InsightPage() {
           </Card>
         </div>
 
+        {/* Topik keluhan teratas dalam bentuk batang */}
         <Card className="flex flex-col">
           <CardTitle sub="Dirangkum AI dari ulasan pengunjung">Topik Keluhan Teratas</CardTitle>
           <ul className="mt-5 space-y-4">
@@ -91,6 +99,7 @@ export default function InsightPage() {
           </p>
         </Card>
 
+        {/* Ulasan terbaru pengunjung */}
         <Card>
           <CardTitle>Ulasan Terbaru</CardTitle>
           <ul className="mt-4 space-y-4">

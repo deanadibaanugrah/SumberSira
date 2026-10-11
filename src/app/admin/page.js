@@ -14,9 +14,11 @@ import { rupiah } from "@/lib/format";
 
 // Admin 1/7: Dashboard Overview. Kartu ringkasan, grafik keramaian beranimasi, Insight AI, booking masuk,
 // lalu di bawah: heatmap keramaian seminggu, tiket online hari ini (live), wahana terpopuler, dan pendapatan 7 hari.
+// Ikon untuk 4 kartu ringkasan dan ikon notifikasi Insight AI.
 const STAT_ICONS = [CalendarCheck, Ticket, Users, Star];
 const NOTIF_ICONS = { trend: TrendingUp, chat: MessageCircle, box: Package };
 
+// Halaman Dashboard admin, disusun dari atas ke bawah per baris.
 export default function DashboardPage() {
   return (
     <>
@@ -25,12 +27,14 @@ export default function DashboardPage() {
                    action={<PrimaryButton icon={Download}>Unduh Laporan</PrimaryButton>} />
 
       <div className="mt-6 space-y-5">
+        {/* Baris 1: empat kartu ringkasan. Kartu ketiga (keramaian) memakai angka live dari tiket */}
         <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
           {STATS.map((s, i) => (i === 2
             ? <LiveCrowdStat key={s.label} />
             : <StatCard key={s.label} variant="tall" icon={STAT_ICONS[i]} solid={i === 0} trendIcon={TrendingUp} {...s} />))}
         </div>
 
+        {/* Baris 2: grafik pengunjung per jam dan kartu Insight AI */}
         <div className="grid gap-5 xl:grid-cols-[736fr_380fr]">
           <Card>
             <CardTitle sub="Jumlah pengunjung per jam, hari ini"
@@ -76,6 +80,7 @@ export default function DashboardPage() {
           </section>
         </div>
 
+        {/* Baris 3: tabel 3 booking sewa terbaru */}
         <Card className="px-4! pb-2! pt-5!">
           <CardTitle className="px-2"
                      right={<Link href="/admin/booking" className="text-sm font-semibold text-leaf hover:text-forest">Lihat semua</Link>}>
@@ -112,6 +117,7 @@ export default function DashboardPage() {
             </table>
           </div>
         </Card>
+        {/* Baris 4: heatmap keramaian seminggu dan kartu tiket online hari ini */}
         <div className="grid gap-5 xl:grid-cols-[736fr_380fr]">
           <Card>
             <CardTitle sub="Persentase kapasitas per jam, 7 hari terakhir (dari tiket yang discan)">Pola Keramaian Minggu Ini</CardTitle>
@@ -125,11 +131,13 @@ export default function DashboardPage() {
           <TiketHariIniCard />
         </div>
 
+        {/* Baris 5: wahana terpopuler dan pendapatan 7 hari */}
         <div className="grid gap-5 xl:grid-cols-2">
           <Card>
             <CardTitle sub="Jumlah booking 7 hari terakhir">Wahana Terpopuler</CardTitle>
             <ol className="mt-5 space-y-4">
               {WAHANA_POPULER.map((w, i) => {
+                // Cari data wahana (nama dan ikon) berdasarkan id.
                 const item = WAHANA.find((x) => x.id === w.id);
                 return (
                   <li key={w.id} className="flex items-center gap-3">
@@ -157,17 +165,20 @@ export default function DashboardPage() {
               Pendapatan 7 Hari
             </CardTitle>
             <p className="mt-4 text-[32px] font-semibold leading-none tracking-tight">
+              {/* Total pendapatan seminggu = jumlah tiket + sewa setiap hari */}
               {rupiah(PENDAPATAN_MINGGU.days.reduce((sum, d) => sum + d.tiket + d.sewa, 0))}
             </p>
             <div className="mt-5 flex h-[150px] items-end gap-3" role="img"
                  aria-label={`Pendapatan per hari: ${PENDAPATAN_MINGGU.days.map((d) => `${d.day} ${rupiah(d.tiket + d.sewa)}`).join(", ")}`}>
               {PENDAPATAN_MINGGU.days.map((d, i) => {
+                // Pendapatan tertinggi dipakai sebagai tinggi 100% batang.
                 const top = Math.max(...PENDAPATAN_MINGGU.days.map((x) => x.tiket + x.sewa));
                 return (
                   <div key={d.day} className="flex h-full flex-1 flex-col items-center justify-end gap-2">
                     <div className="flex w-full max-w-8 origin-bottom flex-col justify-end overflow-hidden rounded-[10px] animate-grow-up"
                          style={{ height: `${((d.tiket + d.sewa) / top) * 100}%`, animationDelay: `${i * 80}ms` }}
                          title={`${d.day}: tiket ${rupiah(d.tiket)}, sewa ${rupiah(d.sewa)}`}>
+                      {/* Satu batang dibagi dua warna: bagian bawah tiket, bagian atas sewa */}
                       <span className="w-full bg-leaf/45" style={{ height: `${(d.sewa / (d.tiket + d.sewa)) * 100}%` }} />
                       <span className="w-full bg-forest" style={{ height: `${(d.tiket / (d.tiket + d.sewa)) * 100}%` }} />
                     </div>

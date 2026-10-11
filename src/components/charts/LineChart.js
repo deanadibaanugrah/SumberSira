@@ -1,6 +1,7 @@
 // Grafik garis beranimasi: garis "digambar" dari kiri ke kanan, titik muncul satu per satu,
 // dan rentang jam sibuk disorot. data: [{ label: "08", value: 10 }]  ·  band: [indeksAwal, indeksAkhir].
 // Satuan geometri = satuan viewBox (width × height); SVG lalu diskalakan selebar wadahnya.
+// Komponen grafik garis prediksi keramaian di halaman Live Crowd aplikasi.
 export default function LineChart({
   data,
   band = null,
@@ -25,6 +26,7 @@ export default function LineChart({
 }) {
   const W = width;
   const H = height;
+  // Hitung skala, posisi titik, dan bentuk garis dari data.
   const axis = bottom ?? H - 36;
   const peak = max ?? Math.max(...data.map((d) => d.value), 1);
   const r = pointRadius ?? strokeWidth + 3;
@@ -37,18 +39,22 @@ export default function LineChart({
   return (
     <svg viewBox={`0 0 ${W} ${H}`} className="h-auto w-full overflow-visible" role="img"
          aria-label={`Grafik: ${data.map((d) => `${d.label} ${d.value}%`).join(", ")}`}>
+      {/* Pita sorotan jam ramai */}
       {band && (
         <rect x={x(band[0])} y={bandY} width={x(band[1]) - x(band[0])} height={axis - bandY}
               fill={bandColor} className="animate-fade-up" />
       )}
       <line x1={padX} x2={W - padX} y1={axis} y2={axis} stroke={axisColor} strokeWidth="1" />
+      {/* Garis yang digambar dengan animasi dari kiri ke kanan */}
       <path d={path} fill="none" stroke={lineColor} strokeWidth={strokeWidth} strokeLinejoin="round"
             strokeLinecap="round" pathLength="1" strokeDasharray="1" strokeDashoffset="1"
             style={{ animation: "draw-line 1.4s ease-out 0.15s forwards" }} />
+      {/* Titik di setiap jam */}
       {points.map(([px, py], i) => (
         <circle key={data[i].label} cx={px} cy={py} r={r} fill={pointColor} stroke={pointRing}
                 strokeWidth={ringWidth} className="animate-pop" style={{ animationDelay: `${0.2 + i * 0.12}s`, transformOrigin: `${px}px ${py}px` }} />
       ))}
+      {/* Label jam di bawah */}
       {data.map((d, i) => (
         <text key={d.label} x={x(i)} y={labelY ?? H - 8} textAnchor="middle" fill={labelColor}
               style={{ fontFamily: "var(--font-mono)", fontSize: labelSize }}>

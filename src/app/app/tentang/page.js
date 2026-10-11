@@ -6,6 +6,7 @@ import LogoMark from "@/components/Logo";
 import { FOTO } from "@/lib/foto";
 
 // Introduction aplikasi: "Tentang Sumber Sira" (syarat dosen: introduction app).
+// Empat keunggulan yang tampil sebagai ikon bulat.
 const FEATURES = [
   { label: "Air jernih", icon: Droplet },
   { label: "Ikan wader", icon: Fish },
@@ -13,6 +14,7 @@ const FEATURES = [
   { label: "Gazebo", icon: Tent },
 ];
 
+// Info penting pengunjung: jam buka, harga tiket, parkir, dan cara bayar.
 const INFO = [
   { title: "Jam buka", text: "Weekday 08.00-16.00 · Weekend s/d 17.00", icon: Clock },
   { title: "Tiket masuk", text: "Rp5.000 per orang (usia 3 tahun ke atas)", icon: Ticket },
@@ -20,9 +22,11 @@ const INFO = [
   { title: "Pembayaran", text: "Tunai & QRIS", icon: Wallet },
 ];
 
+// Halaman Tentang Sumber Sira: foto, deskripsi singkat, keunggulan, dan info kunjungan, lalu tombol Lanjut ke onboarding.
 export default function TentangPage() {
   return (
     <main className="px-5 pb-6">
+      {/* Header: logo dan tombol Lewati langsung ke Home */}
       <header className="flex items-center justify-between pt-9 pb-4">
         <span className="flex items-center gap-2.5 font-display text-[17px] font-semibold">
           <LogoMark size={30} ring label="" /> Sumber Sira
@@ -46,6 +50,7 @@ export default function TentangPage() {
         <Users size={13} /> Dikelola masyarakat Desa Putukrejo
       </p>
 
+      {/* Ikon keunggulan dibuat dari array FEATURES dengan map() */}
       <ul className="mt-4 grid grid-cols-4 text-center">
         {FEATURES.map(({ label, icon: Icon }) => (
           <li key={label} className="flex flex-col items-center gap-2">
@@ -57,6 +62,7 @@ export default function TentangPage() {
         ))}
       </ul>
 
+      {/* Daftar info kunjungan dibuat dari array INFO */}
       <ul className="glass mt-5 divide-y divide-white/15 rounded-[20px] px-4 py-0.5">
         {INFO.map(({ title, text, icon: Icon }) => (
           <li key={title} className="flex h-12 items-center gap-3">

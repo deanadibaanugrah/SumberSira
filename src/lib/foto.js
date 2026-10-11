@@ -10,6 +10,7 @@ import keretaSawah from "../../desain/foto/onboarding-kereta-sawah.webp";
 import sawah from "../../desain/foto/sawah-sumber-sira.webp";
 import splash from "../../desain/foto/splash-sumber-sira.webp";
 
+// Kumpulan foto yang dipakai di aplikasi, dipanggil lewat FOTO.splash, FOTO.heroSawah, dan seterusnya.
 export const FOTO = {
   heroSawah,
   komunitas: [komunitas1, komunitas2, komunitas3],

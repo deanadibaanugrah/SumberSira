@@ -8,6 +8,7 @@ import { CrowdNowPill } from "@/components/mobile/LiveCrowd";
 import { CROWD_TODAY } from "@/data/dummy";
 import { FOTO } from "@/lib/foto";
 
+// Empat menu cepat di Home beserta tujuan halamannya.
 const ACTIONS = [
   { href: "/app/booking", label: "Sewa & Booking", icon: Calendar },
   { href: "/app/crowd", label: "Live Crowd", icon: ChartColumn },
@@ -18,11 +19,14 @@ const ACTIONS = [
 // Tinggi batang (px) dari persen keramaian; ada tinggi minimum agar jam sepi tetap terlihat (sesuai desain).
 const barHeight = (value) => Math.round(18 + value * 0.45);
 
+// Halaman Home aplikasi: header, banner, status keramaian, tombol beli tiket, menu cepat, rekomendasi jam, dan promo AI Photo.
 export default function HomePage() {
+  // Ambil 5 jam pertama dan cari nilai paling ramai untuk diberi warna putih.
   const visits = CROWD_TODAY.slice(0, 5);
   const busiest = Math.max(...visits.map((d) => d.value));
   return (
     <main className="px-5 pb-24">
+      {/* Header: logo, nama, dan tombol notifikasi */}
       <header className="flex items-center justify-between pt-8 pb-5">
         <h1 className="flex items-center gap-2.5 font-display text-xl font-semibold">
           <LogoMark size={30} ring label="" /> Sumber Sira
@@ -34,6 +38,7 @@ export default function HomePage() {
         </button>
       </header>
 
+      {/* Banner foto Sumber Sira */}
       <section className="relative h-[170px] overflow-hidden rounded-[20px] border border-white/20">
         <Image src={FOTO.heroSawah} alt="" fill priority sizes="430px" className="object-cover" />
         <div className="absolute inset-0 bg-gradient-to-br from-ink/70 via-ink/45 to-ink/25" />
@@ -44,6 +49,7 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* Status keramaian saat ini (angka dari tiket yang sudah discan) */}
       <CrowdNowPill />
 
       {/* Tiket masuk online: QR discan di pintu, jadi angka Live Crowd berasal dari tiket sungguhan. */}
@@ -56,6 +62,7 @@ export default function HomePage() {
         <ArrowRight size={16} />
       </Link>
 
+      {/* Menu cepat dibuat dari array ACTIONS */}
       <nav aria-label="Fitur" className="mt-4 grid grid-cols-4 text-center">
         {ACTIONS.map(({ href, label, icon: Icon }) => (
           <Link key={href} href={href} className="group flex flex-col items-center gap-1.5">
@@ -67,6 +74,7 @@ export default function HomePage() {
         ))}
       </nav>
 
+      {/* Grafik batang rekomendasi jam kunjungan */}
       <h2 className="mt-9 font-display text-[15px] font-semibold">Rekomendasi Kunjungan</h2>
       <section className="glass mt-2 h-[109px] rounded-[20px] px-4 pt-3">
         <div className="flex h-[60px] items-end gap-9 pl-1" role="img"
@@ -82,6 +90,7 @@ export default function HomePage() {
         <p className="text-[10px]">Jam sepi terbaik: 08.00-09.00</p>
       </section>
 
+      {/* Promo AI Underwater Photo Studio */}
       <Link href="/app/ai-photo" className="glass mt-[25px] flex h-[89px] items-start gap-3.5 rounded-[20px] px-4 pt-3.5 transition hover:bg-white/10">
         <span className="relative mt-0.5 size-10 shrink-0 overflow-hidden rounded-full border border-white/25">
           <Image src={FOTO.bawahAir} alt="" fill sizes="40px" className="object-cover" />
@@ -93,6 +102,7 @@ export default function HomePage() {
         </span>
       </Link>
 
+      {/* Menu navigasi bawah */}
       <BottomNav />
     </main>
   );

@@ -28,6 +28,7 @@ function crc16(text) {
   return crc.toString(16).toUpperCase().padStart(4, "0");
 }
 
+// Menyusun teks QRIS lengkap yang nanti diubah jadi gambar QR di halaman pembayaran.
 // amount dalam rupiah (angka bulat), reference = kode booking.
 export function buildQrisPayload({ merchant, city, amount, reference }) {
   const merchantAccount = tlv("00", "ID.CO.QRIS.WWW") + tlv("01", "936009140000000123"); // akun merchant demo

@@ -19,6 +19,7 @@ const LOADING = "loading";
 const listeners = new Set();
 let cache; // undefined = belum dibaca, null = belum login
 
+// Membaca sesi login dari penyimpanan browser. Sesi yang sudah kedaluwarsa dianggap belum login.
 function read() {
   if (cache !== undefined) return cache;
   let session = null;
@@ -33,10 +34,12 @@ function read() {
   return cache;
 }
 
+// Memberi tahu semua komponen bahwa status login berubah, supaya tampilannya ikut diperbarui.
 function emit() {
   listeners.forEach((l) => l());
 }
 
+// Mendaftarkan komponen yang ingin tahu perubahan login, termasuk login atau logout dari tab lain.
 function subscribe(listener) {
   listeners.add(listener);
   const onStorage = (e) => {
@@ -56,6 +59,7 @@ export function useAdminSession() {
   return useSyncExternalStore(subscribe, read, () => LOADING);
 }
 
+// Mengecek email dan password dengan akun demo. Kalau cocok, sesi disimpan (7 hari bila Ingat saya aktif, 8 jam bila tidak).
 export function login(email, password, remember) {
   const ok = email.trim().toLowerCase() === AKUN_DEMO.email && password === AKUN_DEMO.password;
   if (!ok) return false;
@@ -77,6 +81,7 @@ export function login(email, password, remember) {
   return true;
 }
 
+// Keluar: hapus sesi dari penyimpanan browser lalu kabari semua komponen.
 export function logout() {
   try {
     window.localStorage.removeItem(KEY);

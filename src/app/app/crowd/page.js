@@ -7,6 +7,7 @@ import PageHeader from "@/components/mobile/PageHeader";
 import { CrowdStatusCard } from "@/components/mobile/LiveCrowd";
 import { CROWD_TODAY } from "@/data/dummy";
 
+// Keterangan warna status keramaian di bagian bawah halaman.
 const LEGEND = [
   { label: "Sepi", dot: "bg-leaf" },
   { label: "Sedang", dot: "bg-white" },
@@ -19,8 +20,10 @@ export default function CrowdPage() {
     <main className="px-5 pb-24">
       <PageHeader title="Live Crowd Tracker (AI)" backHref="/app/home" />
 
+      {/* Kartu status sekarang: persen, label Sepi/Sedang/Ramai, dan jumlah orang di dalam */}
       <CrowdStatusCard />
 
+      {/* Grafik garis prediksi keramaian per jam. Area yang disorot = jam ramai */}
       <section className="glass mt-4 h-[230px] rounded-[20px] px-5 pt-[17px]">
         <h2 className="text-xs font-semibold">Prediksi Keramaian Hari Ini</h2>
         <div className="mt-2">
@@ -31,6 +34,7 @@ export default function CrowdPage() {
         </div>
       </section>
 
+      {/* Saran waktu terbaik untuk berkunjung */}
       <section className="mt-4 flex h-[79px] items-start gap-3 rounded-[20px] border border-white/20 bg-leaf/20 px-4 pt-4">
         <span className="grid size-8 shrink-0 place-items-center rounded-full bg-leaf"><Timer size={16} /></span>
         <span>

@@ -10,15 +10,18 @@ import { bookingCode, rupiah } from "@/lib/format";
 
 // Hanya QRIS: pembayaran cash di lokasi dihapus. Lebar tombol mengikuti desain (86 px).
 const METHODS = [{ id: PAYMENT_METHODS[0], width: "w-[86px]" }];
+// Pola nomor WhatsApp Indonesia: diawali 08 atau 62, total 10 sampai 14 angka.
 const WA_PATTERN = /^(\+?62|0)8\d{8,12}$/;
 const inputClass =
   "glass mt-1 h-11 w-full rounded-2xl px-4 text-[11px] text-white outline-none placeholder:text-white/55 focus:border-white/50";
 
+// Halaman Checkout: tampilkan ringkasan pesanan, isi data pemesan, pilih metode bayar.
 export default function CheckoutPage() {
   const router = useRouter();
   const booking = useBooking();
   const [errors, setErrors] = useState({});
 
+  // Kalau keranjang kosong, tampilkan pesan dan tombol untuk memilih wahana dulu.
   if (booking.loaded && booking.items.length === 0) {
     return (
       <main className="px-5">
@@ -31,6 +34,7 @@ export default function CheckoutPage() {
     );
   }
 
+  // Saat tombol Konfirmasi & Bayar ditekan: cek nama dan nomor WhatsApp. Kalau valid, buat kode booking lalu ke halaman pembayaran.
   const submit = (e) => {
     e.preventDefault();
     const next = {};
@@ -53,6 +57,7 @@ export default function CheckoutPage() {
           {booking.slotInfo.range}
         </p>
 
+        {/* Daftar item yang dipesan beserta harganya */}
         <h2 className="mt-5 text-[11px] font-semibold">Item Dipesan</h2>
         <ul className="mt-2 space-y-[25px] border-b border-white/15 pb-9 pr-8">
           {booking.items.map((item) => (
@@ -63,6 +68,7 @@ export default function CheckoutPage() {
           ))}
         </ul>
 
+        {/* Form data pemesan, pesan error muncul di bawah kolom yang salah */}
         <h2 className="mt-3.5 text-[11px] font-semibold">Data Pemesan</h2>
         <label className="mt-2 block text-[9px] text-white/65" htmlFor="nama">Nama Lengkap</label>
         <input id="nama" value={booking.name} onChange={(e) => booking.update({ name: e.target.value })}
@@ -75,6 +81,7 @@ export default function CheckoutPage() {
         {errors.whatsapp && <p className="mt-1 text-[9.5px] text-coral">{errors.whatsapp}</p>}
         <p className="mt-1 text-[9px] text-white/55">Invoice dikirim ke nomor ini setelah pembayaran.</p>
 
+        {/* Pilihan metode pembayaran (sekarang hanya QRIS) */}
         <h2 className="mt-4 text-[11px] font-semibold">Metode Pembayaran</h2>
         <div className="mt-1.5 flex gap-[39px]" role="radiogroup" aria-label="Metode pembayaran">
           {METHODS.map((m) => {

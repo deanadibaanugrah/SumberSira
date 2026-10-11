@@ -6,15 +6,18 @@ import "@fontsource-variable/inter";
 import "@fontsource-variable/jetbrains-mono";
 import "./globals.css";
 
+// Judul dan deskripsi website yang muncul di tab browser dan hasil pencarian.
 export const metadata = {
   title: "Sumber Sira · Kunjungan Jernih Tanpa Antre",
   description: "Aplikasi booking wahana, cek keramaian, dan foto AI bawah air untuk wisata mata air Sumber Sira, Desa Putukrejo, Malang.",
 };
 
+// Warna bar browser di HP (Hijau Tua).
 export const viewport = {
   themeColor: "#1b4332",
 };
 
+// Kerangka paling luar untuk semua halaman: web intro, aplikasi, dan admin.
 export default function RootLayout({ children }) {
   return (
     <html lang="id" className="h-full antialiased">

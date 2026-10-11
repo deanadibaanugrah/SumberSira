@@ -2,6 +2,7 @@ import { Fragment } from "react";
 
 // Heatmap keramaian: baris = hari, kolom = jam. Warna makin pekat = makin ramai (dua hijau + coral untuk hampir penuh).
 // Kotak muncul berurutan (animasi), arahkan kursor untuk melihat angkanya.
+// Tingkatan warna: makin tinggi persen keramaian, makin pekat warnanya.
 const TONES = [
   { max: 25, cls: "bg-leaf/10", label: "< 25%" },
   { max: 45, cls: "bg-leaf/30", label: "25-45%" },
@@ -10,8 +11,10 @@ const TONES = [
   { max: 90, cls: "bg-forest", label: "80-90%" },
   { max: 101, cls: "bg-coral", label: "90% ke atas" },
 ];
+// Memilih warna kotak sesuai nilai persen.
 const tone = (v) => TONES.find((t) => v < t.max).cls;
 
+// Komponen heatmap keramaian 7 hari di dashboard admin.
 export default function Heatmap({ hours, rows }) {
   const grid = { gridTemplateColumns: `36px repeat(${hours.length}, minmax(0, 1fr))` };
   return (
@@ -19,7 +22,9 @@ export default function Heatmap({ hours, rows }) {
       <div className="grid gap-1.5" style={grid} role="img"
            aria-label={`Keramaian per jam: ${rows.map((r) => `${r.day} puncak ${Math.max(...r.values)}%`).join(", ")}`}>
         <span />
+        {/* Baris judul jam di atas */}
         {hours.map((h) => <span key={h} className="text-center font-mono text-[11px] text-ink/50">{h}</span>)}
+        {/* Satu baris per hari, satu kotak per jam */}
         {rows.map((r, ri) => (
           <Fragment key={r.day}>
             <span className="self-center text-[13px] text-ink/70">{r.day}</span>
@@ -31,6 +36,7 @@ export default function Heatmap({ hours, rows }) {
           </Fragment>
         ))}
       </div>
+      {/* Keterangan warna dari sepi ke ramai */}
       <div className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-2 text-xs text-ink/60">
         <span>Sepi</span>
         {TONES.map((t) => <span key={t.label} title={t.label} className={`h-3 w-6 rounded-full ${t.cls}`} />)}

@@ -8,10 +8,13 @@ import { AdminHeader, FilterPills, IconButton, PrimaryButton, StatCard, StatusPi
 import { GALLERY, GALLERY_TOTALS } from "@/data/dummy";
 
 // Admin 5/7: Galeri & Konten. Moderasi foto AI-enhanced kiriman pengunjung (tampilkan/tolak).
+// Pilihan filter status foto.
 const FILTERS = ["Semua", "Baru", "Ditampilkan", "Ditolak"];
+// Format tanggal foto, contoh: 10 Okt 2026.
 const DATE = new Intl.DateTimeFormat("id-ID", { day: "numeric", month: "short", year: "numeric", timeZone: "UTC" });
 const formatDate = (iso) => DATE.format(new Date(`${iso}T00:00:00Z`)).replace(".", "");
 
+// Tombol aksi tiap foto: tampilkan (centang) atau tolak (silang).
 function Actions({ photo, onSet }) {
   return (
     <div className="flex gap-2">
@@ -21,6 +24,7 @@ function Actions({ photo, onSet }) {
   );
 }
 
+// Label kecil AI Enhanced di atas foto.
 function AiBadge({ className = "" }) {
   return (
     <span className={`inline-flex h-[26px] items-center gap-1.5 rounded-full bg-white/90 px-2.5 text-xs font-semibold text-forest ${className}`}>
@@ -29,19 +33,24 @@ function AiBadge({ className = "" }) {
   );
 }
 
+// Halaman Galeri & Konten: moderasi foto kiriman pengunjung sebelum tampil di aplikasi.
 export default function GaleriPage() {
+  // Data foto, filter, urutan (terbaru atau terlama), dan mode tampilan (grid atau list).
   const [photos, setPhotos] = useState(GALLERY);
   const [filter, setFilter] = useState("Semua");
   const [sort, setSort] = useState("Terbaru");
   const [view, setView] = useState("grid");
 
+  // Foto yang tampil: disaring sesuai filter lalu diurutkan sesuai pilihan.
   const visible = useMemo(() => {
     const list = photos.filter((p) => filter === "Semua" || p.status === filter);
     return [...list].sort((a, b) => (sort === "Terbaru" ? b.date.localeCompare(a.date) || a.id - b.id : a.date.localeCompare(b.date) || a.id - b.id));
   }, [photos, filter, sort]);
 
   // Angka desain dipakai sebagai dasar; perubahan moderasi di halaman ini ikut menggeser angkanya.
+  // Selisih jumlah status dibanding data awal untuk memperbarui angka di kartu ringkasan.
   const delta = (status) => photos.filter((p) => p.status === status).length - GALLERY.filter((p) => p.status === status).length;
+  // Mengganti status satu foto (Ditampilkan atau Ditolak).
   const setStatus = (id, status) => setPhotos((all) => all.map((p) => (p.id === id ? { ...p, status } : p)));
 
   return (
@@ -49,12 +58,14 @@ export default function GaleriPage() {
       <AdminHeader title="Galeri & Konten" subtitle="Moderasi foto AI-enhanced kiriman pengunjung"
                    action={<PrimaryButton icon={Upload}>Unggah Foto</PrimaryButton>} />
 
+      {/* Kartu ringkasan jumlah foto */}
       <div className="mt-6 grid gap-5 sm:grid-cols-3">
         <StatCard icon={ImageIcon} solid value={GALLERY_TOTALS.masuk} label="Foto masuk" />
         <StatCard icon={Clock} value={GALLERY_TOTALS.menunggu + delta("Baru")} label="Menunggu review" />
         <StatCard icon={Check} value={GALLERY_TOTALS.tampil + delta("Ditampilkan")} label="Ditampilkan di aplikasi" />
       </div>
 
+      {/* Baris filter, urutan, dan tombol ganti tampilan grid atau list */}
       <div className="mt-6 flex flex-wrap items-center justify-between gap-4">
         <FilterPills options={FILTERS} value={filter} onChange={setFilter} label="Filter status foto" />
         <div className="flex items-center gap-4">
@@ -78,7 +89,8 @@ export default function GaleriPage() {
         </div>
       </div>
 
-      {view === "grid" ? (
+      {/* Tampilan grid (kartu foto) atau list (baris foto), sesuai tombol yang dipilih */}
+      {view === "grid" ? (
         <div className="mt-5 grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
           {visible.map((p) => (
             <article key={p.id} className="rounded-3xl bg-white p-3 pb-4 animate-fade-up">
@@ -97,7 +109,7 @@ export default function GaleriPage() {
             </article>
           ))}
         </div>
-      ) : (
+      ) : (
         <ul className="mt-5 space-y-3">
           {visible.map((p) => (
             <li key={p.id} className="flex items-center gap-4 rounded-3xl bg-white p-3 pr-5 animate-fade-up">

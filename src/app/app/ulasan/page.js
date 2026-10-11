@@ -6,6 +6,7 @@ import { useState } from "react";
 import PageHeader from "@/components/mobile/PageHeader";
 import { REVIEWS } from "@/data/dummy";
 
+// Menampilkan 5 bintang, bintang terisi sesuai nilai rating.
 function Stars({ value, size = 13, gap = "gap-[1.5px]" }) {
   return (
     <span className={`flex ${gap}`} aria-label={`${value} dari 5 bintang`}>
@@ -18,11 +19,13 @@ function Stars({ value, size = 13, gap = "gap-[1.5px]" }) {
 
 // Ulasan & Rating. Di desain halaman ini tidak memakai navigasi bawah; kembali lewat tombol panah.
 export default function UlasanPage() {
+  // Daftar ulasan, rating yang dipilih, isi ulasan, dan penanda ulasan sudah terkirim.
   const [reviews, setReviews] = useState(REVIEWS);
   const [rating, setRating] = useState(4);
   const [text, setText] = useState("");
   const [sent, setSent] = useState(false);
 
+  // Kirim ulasan: tambahkan ke paling atas daftar lalu kosongkan kolom teks.
   const submit = (e) => {
     e.preventDefault();
     if (!text.trim()) return;
@@ -37,6 +40,7 @@ export default function UlasanPage() {
         <h1 className="font-display text-lg font-semibold leading-tight">Ulasan &amp; Rating</h1>
       </PageHeader>
 
+      {/* Ringkasan rating rata-rata dan jumlah ulasan */}
       <section className="glass flex h-[90px] items-center rounded-[20px] px-5">
         <span className="w-[70px] font-display text-[30px] font-semibold leading-none">4.8</span>
         <span>
@@ -45,6 +49,7 @@ export default function UlasanPage() {
         </span>
       </section>
 
+      {/* Form tulis ulasan: pilih bintang lalu ketik pengalaman */}
       <form onSubmit={submit} className="glass relative mt-4 min-h-[150px] rounded-[20px] px-5 pb-6 pt-4">
         <h2 className="text-xs font-semibold">Tulis Ulasan</h2>
         <div className="mt-2.5 flex gap-[1.5px]" role="radiogroup" aria-label="Pilih bintang">
@@ -67,6 +72,7 @@ export default function UlasanPage() {
       </form>
 
       <h2 className="mt-6 font-display text-sm font-semibold">Ulasan Terbaru</h2>
+      {/* Daftar ulasan terbaru */}
       <ul className="mt-3 space-y-2.5">
         {reviews.map((r) => (
           <li key={r.id} className="glass min-h-[90px] rounded-[20px] px-4 pb-3 pt-3.5 animate-fade-up">

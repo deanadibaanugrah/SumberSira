@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 // Header halaman mobile: tombol kembali bulat (kaca) + judul serif, seperti di desain.
 export default function PageHeader({ title, backHref, children }) {
   const router = useRouter();
+  // Tombol kembali: ke halaman backHref kalau diisi, kalau tidak kembali ke halaman sebelumnya.
   const goBack = () => (backHref ? router.push(backHref) : router.back());
   return (
     <header className="flex items-center gap-3 pt-[34px] pb-[18px]">

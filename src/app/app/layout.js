@@ -1,5 +1,6 @@
 import { BookingProvider } from "@/lib/booking-context";
 
+// Judul tab untuk halaman aplikasi.
 export const metadata = {
   title: "Sumber Sira App",
 };

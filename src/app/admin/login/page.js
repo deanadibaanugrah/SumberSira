@@ -12,6 +12,7 @@ import { AKUN_DEMO, login, useAdminSession } from "@/lib/admin-auth";
 
 // Halaman masuk panel admin (tahap frontend: akun demo, lihat src/lib/admin-auth.js).
 // Latar bergerak dari foto asli Sumber Sira + widget kaca melayang dengan angka live dari data tiket.
+// Gaya kolom isian dan kotak ikon di dalamnya.
 const field = "flex h-12 items-center gap-3 rounded-2xl border border-transparent bg-paper pl-1.5 pr-3 transition focus-within:border-leaf focus-within:bg-white focus-within:ring-4 focus-within:ring-leaf/15";
 const iconBox = "grid size-9 shrink-0 place-items-center rounded-xl bg-white text-forest shadow-sm";
 
@@ -21,9 +22,11 @@ function tujuanSetelahLogin() {
   return next.startsWith("/admin") && !next.startsWith("/admin/login") ? next : "/admin";
 }
 
+// Halaman login admin: latar bergerak, widget live di kiri, form masuk di kanan.
 export default function AdminLoginPage() {
   const router = useRouter();
   const session = useAdminSession();
+  // Isi form (email, password, ingat saya), lihat password, pesan error, dan status sedang memeriksa.
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [remember, setRemember] = useState(true);
@@ -36,6 +39,7 @@ export default function AdminLoginPage() {
     if (session && session !== "loading") router.replace(tujuanSetelahLogin());
   }, [session, router]);
 
+  // Saat tombol Masuk ditekan: cek kolom tidak kosong, lalu cek akun. Kalau salah tampilkan pesan error.
   const submit = (e) => {
     e.preventDefault();
     if (busy) return;
@@ -54,6 +58,7 @@ export default function AdminLoginPage() {
     }, 700);
   };
 
+  // Tombol Isi otomatis: mengisi email dan password akun demo.
   const isiAkunDemo = () => {
     setEmail(AKUN_DEMO.email);
     setPassword(AKUN_DEMO.password);
@@ -107,6 +112,7 @@ export default function AdminLoginPage() {
               <h2 className="mt-4 font-display text-[28px] font-semibold leading-tight sm:text-[32px]">Selamat datang kembali</h2>
               <p className="mt-1.5 text-sm text-ink/60">Masuk untuk mengelola wisata Sumber Sira.</p>
 
+              {/* Kolom email */}
               <label className="mt-7 block text-[13px] font-semibold text-ink/80" htmlFor="email">Email</label>
               <div className={`mt-1.5 ${field}`}>
                 <span className={iconBox}><Mail size={16} aria-hidden="true" /></span>
@@ -114,6 +120,7 @@ export default function AdminLoginPage() {
                        placeholder="nama@sumbersira.id" className="w-full bg-transparent text-sm outline-none placeholder:text-ink/40" />
               </div>
 
+              {/* Kolom password dengan tombol mata untuk melihat atau menyembunyikan */}
               <label className="mt-4 block text-[13px] font-semibold text-ink/80" htmlFor="password">Password</label>
               <div className={`mt-1.5 ${field}`}>
                 <span className={iconBox}><Lock size={16} aria-hidden="true" /></span>
@@ -125,6 +132,7 @@ export default function AdminLoginPage() {
                 </button>
               </div>
 
+              {/* Saklar Ingat saya: aktif = sesi 7 hari, mati = sesi 8 jam */}
               <button type="button" role="switch" aria-checked={remember} onClick={() => setRemember((v) => !v)}
                       className="mt-4 flex items-center gap-3 text-sm text-ink/80">
                 <span className={`relative h-6 w-11 rounded-full transition ${remember ? "bg-forest" : "bg-ink/15"}`}>
@@ -135,6 +143,7 @@ export default function AdminLoginPage() {
 
               {error && <p role="alert" className="mt-4 rounded-2xl bg-coral/12 px-4 py-2.5 text-sm text-coral animate-fade-up">{error}</p>}
 
+              {/* Tombol masuk, berubah jadi Memeriksa... saat proses */}
               <button type="submit" disabled={busy}
                       className="group relative mt-6 flex h-[52px] w-full items-center justify-center gap-2.5 overflow-hidden rounded-full bg-gradient-to-r from-forest to-leaf text-[15px] font-semibold text-white shadow-lg shadow-forest/30 transition hover:shadow-xl hover:shadow-forest/40 disabled:opacity-80">
                 <span className="pointer-events-none absolute inset-y-0 left-0 w-1/3 bg-white/25 opacity-0 group-hover:opacity-100"
@@ -144,6 +153,7 @@ export default function AdminLoginPage() {
                 {!busy && <ArrowRight size={18} className="transition group-hover:translate-x-1" />}
               </button>
 
+              {/* Kotak akun demo untuk presentasi */}
               <div className="mt-6 flex items-center gap-3 rounded-2xl border border-dashed border-leaf/40 bg-leaf/[0.06] p-3.5">
                 <span className="grid size-10 shrink-0 place-items-center rounded-full bg-forest text-white"><Sparkles size={17} /></span>
                 <div className="min-w-0 flex-1">

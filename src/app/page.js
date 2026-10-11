@@ -14,9 +14,11 @@ const FEATURES = [
   { title: "Tanya Sira", text: "Chatbot yang menjawab pertanyaan seputar Sumber Sira.", icon: MessageSquare },
 ];
 
+// Halaman awal website: perkenalan Sumber Sira dan tombol menuju aplikasi atau panel admin.
 export default function IntroPage() {
   return (
     <main className="app-bg min-h-dvh text-white">
+      {/* Bagian atas: foto latar, logo, nama, dan tombol Buka Aplikasi / Masuk Admin */}
       <section className="relative overflow-hidden">
         <Image src={FOTO.heroSawah} alt="" fill priority sizes="100vw" className="object-cover opacity-40" />
         <div className="absolute inset-0 bg-gradient-to-b from-forest/40 via-forest/70 to-forest" />
@@ -40,6 +42,7 @@ export default function IntroPage() {
         </div>
       </section>
 
+      {/* Daftar fitur utama aplikasi */}
       <section className="mx-auto max-w-5xl px-6 py-14">
         <h2 className="font-display text-3xl font-semibold">Apa yang bisa dilakukan?</h2>
         <ul className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -52,6 +55,7 @@ export default function IntroPage() {
           ))}
         </ul>
 
+        {/* Info jam buka dan harga tiket masuk */}
         <div className="mt-10 grid gap-4 sm:grid-cols-2">
           <p className="glass flex items-center gap-4 rounded-[24px] p-5">
             <Clock className="shrink-0" /> <span><b className="block">Jam buka</b><span className="text-sm text-white/70">Weekday 08.00-16.00 · Weekend s/d 17.00</span></span>

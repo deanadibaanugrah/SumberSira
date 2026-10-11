@@ -1,5 +1,6 @@
 import AdminShell from "@/components/admin/AdminShell";
 
+// Judul tab untuk halaman admin.
 export const metadata = {
   title: "Admin Panel · Sumber Sira",
 };

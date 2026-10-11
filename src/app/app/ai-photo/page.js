@@ -15,6 +15,7 @@ const DULL = "saturate(0.25) brightness(0.7) contrast(0.85)";
 const ENHANCE = "saturate(1.45) contrast(1.12) brightness(1.06)";
 const COMMUNITY = FOTO.komunitas;
 
+// Komponen satu kartu foto (Sebelum atau Sesudah) dengan label dan badge AI Enhanced.
 function Photo({ src, label, filter, badge }) {
   return (
     <figure className="relative aspect-[161/200] overflow-hidden rounded-[20px] border border-white/20">
@@ -31,23 +32,28 @@ function Photo({ src, label, filter, badge }) {
   );
 }
 
+// Halaman AI Underwater Photo Studio: upload foto, tampil perbandingan sebelum dan sesudah, plus galeri komunitas.
 export default function AiPhotoPage() {
   const [photo, setPhoto] = useState(null);
   const [showAll, setShowAll] = useState(false);
   const input = useRef(null);
 
+  // Hapus alamat foto sementara dari memori saat foto diganti atau halaman ditutup.
   useEffect(() => () => photo && URL.revokeObjectURL(photo), [photo]);
 
+  // Saat pengguna memilih foto dari HP: buat alamat sementara (blob URL) supaya fotonya bisa langsung ditampilkan.
   const onPick = (e) => {
     const file = e.target.files?.[0];
     if (file) setPhoto(URL.createObjectURL(file));
   };
 
+  // Kalau belum upload, pakai foto contoh bawah air.
   const src = photo ?? FOTO.bawahAir.src;
   return (
     <main className="px-5 pb-24">
       <PageHeader title="AI Underwater Photo Studio" backHref="/app/home" />
 
+      {/* Perbandingan foto sebelum dan sesudah di-enhance */}
       <div className="grid grid-cols-2 gap-3">
         <Photo src={src} label="Sebelum" filter={photo ? "none" : DULL} />
         <Photo src={src} label="Sesudah" filter={photo ? ENHANCE : "none"} badge />
@@ -67,6 +73,7 @@ export default function AiPhotoPage() {
           {showAll ? "Sembunyikan" : "Lihat semua >"}
         </button>
       </div>
+      {/* Galeri foto komunitas, tombol Lihat semua menambah foto dari data galeri */}
       <div className="mt-3 grid grid-cols-3 gap-3">
         {COMMUNITY.map((src) => (
           <div key={src.src} className="relative aspect-[103/110] overflow-hidden rounded-[20px]">

@@ -1,8 +1,13 @@
 # Sumber Sira · Aplikasi Mobile & Web Admin
 
-Tugas kelompok (UTS, fokus frontend). Konversi desain Figma **HI-FI** Sumber Sira ke kode:
-aplikasi pengunjung (tampilan mobile) dan panel admin (tampilan web), dibangun dengan
-**Next.js 16 (App Router) + JavaScript + Tailwind CSS 4**.
+Tugas kelompok (UTS, fokus frontend). Satu rancangan sistem dengan dua antarmuka, dari desain Figma **HI-FI** Sumber Sira:
+
+| Bagian | Pengguna | Teknologi | Folder |
+|---|---|---|---|
+| **Mobile Application** | Pengunjung | **Flutter** (Dart) | `mobile/` |
+| **Dashboard Web** | Admin / pengelola | **Next.js 16 (App Router) + TypeScript + Tailwind CSS 4** | `src/` |
+
+Versi web aplikasi pengunjung (`/app`) tetap ada di Next.js sebagai pembanding desain.
 
 Sumber Sira adalah wisata kolam mata air di Desa Putukrejo, Malang. Aplikasi ini untuk booking sewa alat
 dan wahana, cek keramaian, foto AI bawah air, chatbot, dan ulasan. Panel admin dipakai pengelola.
@@ -37,6 +42,72 @@ Perintah lain:
 > (misalnya `D:\Tugas\Sumber Sira`), mode dev Turbopack kadang tidak memperbarui CSS Tailwind
 > setelah file diubah. Kelas baru jadi tidak berpengaruh sampai server di-restart. Mode webpack
 > tidak punya masalah ini. Kalau folder kamu tanpa spasi, `npm run dev:turbo` juga aman.
+
+## Aplikasi Mobile (Flutter)
+
+Butuh Flutter SDK 3.4x atau lebih baru.
+
+```bash
+cd mobile
+flutter pub get
+flutter run            # pilih perangkat: Android, Chrome, atau Windows
+flutter test           # uji format Rupiah, validasi form, login, dan Live Crowd
+flutter build web      # hasil build ada di mobile/build/web
+```
+
+**Akun demo pengunjung** (login simulasi): `pengunjung@sumbersira.id`, password `sira123` (ada tombol "Isi otomatis").
+
+| Layar | File | Isi |
+|---|---|---|
+| Splash | `screens/splash_screen.dart` | Foto bergerak, riak air dari logo, garis loading, lanjut otomatis 3,2 detik |
+| Login (simulasi) | `screens/login_screen.dart` | Form email + password dengan validasi, cek akun demo |
+| Beranda | `screens/home_tab.dart` | Banner, status keramaian, tombol beli tiket, menu cepat, rekomendasi jam |
+| Form beli tiket | `screens/ticket_form_screen.dart` | Jumlah pengunjung, parkir, nama, WhatsApp (divalidasi), bayar QRIS (simulasi) |
+| E-Tiket (hasil input) | `screens/eticket_screen.dart` | QR tiket, status, detail, simulasi scan petugas |
+| Tiket Saya | `screens/tickets_tab.dart` | Daftar tiket yang sudah dibeli |
+| Live Crowd | `screens/crowd_tab.dart` | Persen keramaian dari tiket yang discan + prediksi per jam |
+| Sewa & Booking | `screens/booking_screen.dart` | Daftar wahana dari mock JSON `assets/data/wahana.json` |
+| AI Photo Studio | `screens/ai_photo_screen.dart` | Rancangan fitur AI (belum diimplementasikan) |
+| Profil | `screens/profile_tab.dart` | Data akun, info wisata, tombol keluar |
+
+Struktur `mobile/lib`: `screens/` (layar), `widgets/` (komponen yang dipakai ulang: kartu kaca, logo bergerak, grafik,
+stepper), `models/` (Ticket, Wahana), `data/` (data contoh dan `AppState` berbasis ChangeNotifier), `theme/` (warna dan font),
+`utils/` (rute, format Rupiah, validasi). Package: `google_fonts` (Fraunces, Inter, JetBrains Mono) dan `qr_flutter` (kode QR).
+Responsif: isi halaman bisa digulir, lebar maksimal 480 px di tengah untuk tablet/web, ukuran mengikuti layar lewat
+`Expanded`, `Wrap`, `LayoutBuilder`, dan `SafeArea`, jadi tidak ada overflow saat layar kecil atau landscape.
+
+## Rancangan Fitur AI
+
+**AI Underwater Photo Studio.** Di lokasi belum ada fotografer, sementara foto bawah air biasanya kebiruan dan buram.
+Rencananya pengunjung mengunggah foto, lalu model *image enhancement* bawah air memperbaiki warna, mengurangi kabut air,
+dan menajamkan detail. Hasilnya tampil berdampingan dengan foto asli dan bisa dibagikan ke Galeri Komunitas (dimoderasi
+admin di halaman Galeri & Konten). Tahap UTS hanya menampilkan rancangan dan simulasi filter warna, belum memakai model atau API AI.
+Fitur AI lain yang sudah dirancang tampilannya: prediksi keramaian (AI Insight di admin) dan chatbot Tanya Sira.
+
+## Pemenuhan Soal UTS
+
+| Ketentuan | Dashboard Web (Next.js + TypeScript) | Mobile Application (Flutter) |
+|---|---|---|
+| Halaman login (simulasi) | `/admin/login` | `login_screen.dart` |
+| Dashboard / halaman utama | `/admin` | `home_tab.dart` |
+| Data berbentuk tabel atau kartu | Tabel booking, tiket, wahana; kartu ringkasan | Kartu tiket, daftar wahana |
+| Pengelolaan data / form input | `/admin/wahana` (tambah, edit, hapus), `/admin/faq`, `/admin/tiket` | `ticket_form_screen.dart` |
+| Halaman hasil input | Tabel ikut berubah setelah aksi | `eticket_screen.dart`, `tickets_tab.dart` |
+| Navigasi dan validasi | Sidebar, redirect login, validasi form | Named routes, tab bawah, validasi email, password, nama, WhatsApp |
+| Data | Data contoh + `localStorage` | Data contoh + mock JSON |
+| Rancangan AI | Lihat bagian Rancangan Fitur AI | Layar AI Photo Studio |
+
+## Screenshot
+
+| Login admin | Dashboard admin | Tiket & Check-in |
+|---|---|---|
+| ![](docs/screenshots/web-login.png) | ![](docs/screenshots/web-dashboard.png) | ![](docs/screenshots/web-tiket.png) |
+
+| Login (Flutter) | Beranda (Flutter) | Beli tiket (Flutter) | Booking (Flutter) |
+|---|---|---|---|
+| ![](docs/screenshots/mobile-login.png) | ![](docs/screenshots/mobile-home.png) | ![](docs/screenshots/mobile-tiket.png) | ![](docs/screenshots/mobile-booking.png) |
+
+Ekspor desain Figma lengkap ada di folder `desain/`.
 
 ## Halaman
 
@@ -79,7 +150,7 @@ baris tabel membulat, dan status berbentuk pill. Warnanya tetap dua hijau yang s
 
 Angka Live Crowd dihitung dari tiket masuk online: jumlah orang dari tiket yang sudah discan di pintu masuk dan
 belum keluar, dibagi kapasitas 300 orang (di bawah 40% Sepi, sampai 75% Sedang, di atasnya Ramai).
-Karena belum ada backend, tiket disimpan di `localStorage` browser (`src/lib/tiket-store.js`), jadi aplikasi
+Karena belum ada backend, tiket disimpan di `localStorage` browser (`src/lib/tiket-store.ts`), jadi aplikasi
 pengunjung dan admin di browser yang sama memakai data yang sama, termasuk antar-tab.
 
 Cara demo: buka `/app/tiket` di satu tab, beli tiket (pembayaran QRIS disimulasikan), lalu buka `/admin/tiket` di
@@ -90,37 +161,37 @@ Live Crowd, Home, dan dashboard admin langsung naik. Tombol "Kembalikan data con
 
 | Syarat | Implementasi |
 |---|---|
-| Gunakan Next.js | Next.js 16 App Router (`src/app`) |
+| Gunakan Next.js | Next.js 16 App Router + TypeScript (`src/app`) |
 | UTS fokus frontend web, minimal 3 slide (admin) | 6 halaman admin di `src/app/admin` |
 | Animasi grafik di admin | `src/components/charts/`: batang pill tumbuh dari bawah (`BarChart`), garis prediksi digambar kiri ke kanan (`AreaChart`), donat sentimen muncul (`DonutChart`), batang keluhan mengisi (`ProgressBar`) |
-| Onboarding pakai tombol atau swipe | `src/app/app/onboarding/page.js`: keduanya ada, plus tombol titik dan panah keyboard |
-| Introduction web dan app | Web: `src/app/page.js`. App: splash + `src/app/app/tentang/page.js` |
-| Setelah bayar, invoice terkirim ke WhatsApp user | `src/lib/whatsapp.js` + halaman konfirmasi. Lihat bagian "Tahap backend" |
+| Onboarding pakai tombol atau swipe | `src/app/app/onboarding/page.tsx`: keduanya ada, plus tombol titik dan panah keyboard |
+| Introduction web dan app | Web: `src/app/page.tsx`. App: splash + `src/app/app/tentang/page.tsx` |
+| Setelah bayar, invoice terkirim ke WhatsApp user | `src/lib/whatsapp.ts` + halaman konfirmasi. Lihat bagian "Tahap backend" |
 
 ## Struktur folder
 
 ```
 desain/                PNG ekspor dari Figma (acuan tampilan: mobile 2×, admin 1,25×)
-  foto/                Foto asli Sumber Sira yang dipakai aplikasi (di-import lewat src/lib/foto.js)
+  foto/                Foto asli Sumber Sira yang dipakai aplikasi (di-import lewat src/lib/foto.ts)
 src/app/               Halaman (App Router)
-  page.js              Intro web
+  page.tsx              Intro web
   app/                 Aplikasi pengunjung (layout lebar maks 430 px)
   admin/               Panel admin (layout sidebar)
 src/components/
   charts/              BarChart, AreaChart, DonutChart, Heatmap (admin), LineChart (mobile), ProgressBar (beranimasi)
   mobile/              PageHeader, BottomNav
-  admin/               AdminShell (cek login), Sidebar, DashboardLive, Today, ui.js (AdminHeader, Card, StatCard, ...)
-  mobile/LiveCrowd.js  Pill, kartu, dan banner Live Crowd yang ikut data tiket
-  Logo.js              Logo Sumber Sira (tetes air + sawah bertingkat), juga dipakai di src/app/icon.svg
-  WahanaIcon.js        Ikon per wahana
-src/data/              Data dummy (wahana.js, dummy.js). Tahap backend: ganti dengan data API
+  admin/               AdminShell (cek login), Sidebar, DashboardLive, Today, ui.tsx (AdminHeader, Card, StatCard, ...)
+  mobile/LiveCrowd.tsx  Pill, kartu, dan banner Live Crowd yang ikut data tiket
+  Logo.tsx              Logo Sumber Sira (tetes air + sawah bertingkat), juga dipakai di src/app/icon.svg
+  WahanaIcon.tsx        Ikon per wahana
+src/data/              Data dummy (wahana.ts, dummy.ts). Tahap backend: ganti dengan data API
 src/lib/
-  booking-context.js   Keranjang booking (disimpan di sessionStorage)
-  tiket-store.js       Tiket masuk online + angka Live Crowd (disimpan di localStorage)
-  admin-auth.js        Login admin dengan akun demo (simulasi frontend)
-  whatsapp.js          Pesan invoice WhatsApp
-  format.js            Format Rupiah dan kode booking
-  foto.js              Import semua foto aplikasi dari desain/foto
+  booking-context.tsx   Keranjang booking (disimpan di sessionStorage)
+  tiket-store.ts       Tiket masuk online + angka Live Crowd (disimpan di localStorage)
+  admin-auth.ts        Login admin dengan akun demo (simulasi frontend)
+  whatsapp.ts          Pesan invoice WhatsApp
+  format.ts            Format Rupiah dan kode booking
+  foto.ts              Import semua foto aplikasi dari desain/foto
 ```
 
 ## Catatan desain
@@ -132,10 +203,10 @@ src/lib/
 - Warna dan font ada di `src/app/globals.css` (`@theme`): `forest` dan `leaf` (hanya dua hijau, sama dengan papan Color Palette di Figma), `ink`, `paper`, `coral`. Warna yang lebih muda dibuat dengan transparansi, mis. `bg-leaf/15`, bukan token baru.
   Pakai lewat kelas Tailwind, misalnya `bg-forest` dan `text-leaf`.
 - Font dipasang dari npm (Fontsource): Fraunces (judul), Inter (teks), JetBrains Mono (angka/harga).
-- Foto aplikasi ada di `desain/foto/` (folder `public/` tidak dipakai lagi) dan di-import lewat `src/lib/foto.js`,
-  jadi Next.js memprosesnya sebagai gambar statis. Foto baru: taruh di `desain/foto/`, lalu tambahkan di `foto.js`. Semua foto adalah foto asli Sumber Sira; foto galeri admin
-  memakai foto yang sama dengan potongan berbeda (`pos` di `src/data/dummy.js`).
-- Logo Sumber Sira ada di `src/components/Logo.js` (Splash, header Home dan Tentang, sidebar admin, intro web)
+- Foto aplikasi ada di `desain/foto/` (folder `public/` tidak dipakai lagi) dan di-import lewat `src/lib/foto.ts`,
+  jadi Next.js memprosesnya sebagai gambar statis. Foto baru: taruh di `desain/foto/`, lalu tambahkan di `foto.ts`. Semua foto adalah foto asli Sumber Sira; foto galeri admin
+  memakai foto yang sama dengan potongan berbeda (`pos` di `src/data/dummy.ts`).
+- Logo Sumber Sira ada di `src/components/Logo.tsx` (Splash, header Home dan Tentang, sidebar admin, intro web)
   dan sebagai ikon tab browser di `src/app/icon.svg`.
 - Yang tidak ada di Figma dan sengaja ditambahkan: halaman intro web, tombol "Kirim Invoice ke WhatsApp",
   pesan validasi form, stepper jumlah di Booking, dan modal Tambah/Edit di admin.

@@ -49,6 +49,47 @@
   to { stroke-dashoffset: 0; }
 }
 
+/* ---------- Latar bergerak halaman login admin (seperti video, dari foto asli) ---------- */
+/* Foto bergantian: tiap foto tampil 6 detik dari siklus 24 detik, lalu memudar ke foto berikutnya. */
+@keyframes slide-fade {
+  0% { opacity: 0; }
+  6% { opacity: 1; }
+  25% { opacity: 1; }
+  31% { opacity: 0; }
+  100% { opacity: 0; }
+}
+
+/* Efek Ken Burns: foto pelan-pelan membesar dan bergeser. */
+@keyframes ken-burns {
+  from { transform: scale(1.05) translate(0, 0); }
+  to { transform: scale(1.2) translate(-3%, -2%); }
+}
+
+/* Gelembung air naik dari bawah layar. */
+@keyframes bubble-rise {
+  0% { transform: translateY(0) scale(0.6); opacity: 0; }
+  12% { opacity: 0.8; }
+  100% { transform: translateY(-105vh) scale(1.15); opacity: 0; }
+}
+
+/* Ombak di bagian bawah bergeser terus (path diulang dua kali, jadi geser 50% terlihat mulus). */
+@keyframes wave-x {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+/* Widget kaca melayang naik turun. */
+@keyframes float-y {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+/* Kilau yang lewat di tombol saat disorot. */
+@keyframes shimmer {
+  from { transform: translateX(-120%) skewX(-20deg); }
+  to { transform: translateX(220%) skewX(-20deg); }
+}
+
 body {
   font-family: var(--font-sans);
 }

@@ -1,22 +1,19 @@
 "use client";
 
-import { ArrowLeft, BarChart3, Eye, EyeOff, Loader2, Lock, LogIn, Mail, Sparkles, Ticket } from "lucide-react";
-import Image from "next/image";
+import { ArrowLeft, ArrowRight, Eye, EyeOff, Loader2, Lock, Mail, ShieldCheck, Sparkles } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 import LogoMark from "@/components/Logo";
+import LoginBackdrop from "@/components/admin/LoginBackdrop";
+import { CrowdChip, CrowdWidget, RatingWidget, TiketWidget } from "@/components/admin/LoginWidgets";
 import { AKUN_DEMO, login, useAdminSession } from "@/lib/admin-auth";
-import { FOTO } from "@/lib/foto";
 
 // Halaman masuk panel admin (tahap frontend: akun demo, lihat src/lib/admin-auth.js).
-const HIGHLIGHTS = [
-  { icon: Ticket, text: "Live Crowd dari tiket online yang discan" },
-  { icon: BarChart3, text: "Booking sewa & wahana dalam satu dasbor" },
-  { icon: Sparkles, text: "Ringkasan ulasan dan prediksi oleh AI" },
-];
-const field = "flex h-12 items-center gap-3 rounded-xl border border-black/10 bg-white px-4 focus-within:border-leaf focus-within:ring-2 focus-within:ring-leaf/20";
+// Latar bergerak dari foto asli Sumber Sira + widget kaca melayang dengan angka live dari data tiket.
+const field = "flex h-12 items-center gap-3 rounded-2xl border border-transparent bg-paper pl-1.5 pr-3 transition focus-within:border-leaf focus-within:bg-white focus-within:ring-4 focus-within:ring-leaf/15";
+const iconBox = "grid size-9 shrink-0 place-items-center rounded-xl bg-white text-forest shadow-sm";
 
 // Hanya izinkan kembali ke halaman di dalam /admin (mencegah redirect ke situs lain).
 function tujuanSetelahLogin() {
@@ -54,7 +51,7 @@ export default function AdminLoginPage() {
         setError("Email atau password salah. Coba lagi.");
         setBusy(false);
       }
-    }, 600);
+    }, 700);
   };
 
   const isiAkunDemo = () => {
@@ -64,87 +61,115 @@ export default function AdminLoginPage() {
   };
 
   return (
-    <main className="grid min-h-dvh gap-4 bg-paper p-4 text-ink lg:grid-cols-2">
-      <section className="relative hidden overflow-hidden rounded-3xl bg-forest text-white lg:block">
-        <Image src={FOTO.sawah} alt="" fill priority sizes="50vw" className="object-cover opacity-40" />
-        <div className="absolute inset-0 bg-gradient-to-t from-forest via-forest/70 to-forest/30" />
-        <div className="relative flex h-full flex-col justify-between p-10">
-          <div className="flex items-center gap-3">
-            <LogoMark size={44} ring label="" />
+    <main className="relative min-h-dvh overflow-hidden text-ink">
+      <LoginBackdrop />
+
+      <div className="relative z-10 mx-auto grid min-h-dvh max-w-[1440px] grid-cols-[minmax(0,1fr)] items-center gap-10 px-4 py-8 sm:px-8 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)] lg:px-14">
+        {/* Kiri (layar lebar): cerita singkat + widget live */}
+        <section className="hidden text-white lg:block">
+          <div className="flex items-center gap-3 animate-fade-up">
+            <LogoMark size={48} ring label="" />
             <span>
-              <span className="block font-display text-[22px] font-semibold leading-tight">Sumber Sira</span>
-              <span className="block text-xs text-white/70">Admin Panel</span>
+              <span className="block font-display text-2xl font-semibold leading-tight">Sumber Sira</span>
+              <span className="block text-xs text-white/70">Admin Panel · Desa Putukrejo, Malang</span>
             </span>
           </div>
-          <div className="max-w-[460px]">
-            <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-white/70">Panel pengelola wisata</p>
-            <h1 className="mt-3 font-display text-[42px] font-semibold leading-[1.1]">Kelola Sumber Sira dalam satu dasbor</h1>
-            <p className="mt-4 text-[15px] leading-relaxed text-white/80">
-              Pantau keramaian dari tiket online, konfirmasi booking, dan moderasi konten pengunjung.
-            </p>
-            <ul className="mt-6 space-y-2.5">
-              {HIGHLIGHTS.map(({ icon: Icon, text }) => (
-                <li key={text} className="flex items-center gap-3 text-sm">
-                  <span className="grid size-9 place-items-center rounded-full bg-white/12"><Icon size={16} aria-hidden="true" /></span>
-                  {text}
-                </li>
-              ))}
-            </ul>
+          <h1 className="mt-10 max-w-[520px] font-display text-[48px] font-semibold leading-[1.08] animate-fade-up" style={{ animationDelay: "100ms" }}>
+            Kelola wisata mata air dalam satu dasbor
+          </h1>
+          <p className="mt-4 max-w-[480px] text-[15px] leading-relaxed text-white/80 animate-fade-up" style={{ animationDelay: "200ms" }}>
+            Pantau keramaian dari tiket online, konfirmasi booking, dan rangkum ulasan pengunjung dengan AI.
+          </p>
+          <div className="mt-10 grid max-w-[560px] grid-cols-2 gap-4">
+            <CrowdWidget className="row-span-2 self-center" />
+            <TiketWidget />
+            <RatingWidget />
           </div>
-          <p className="text-xs text-white/60">Desa Putukrejo, Malang</p>
-        </div>
-      </section>
+        </section>
 
-      <section className="grid place-items-center py-8">
-        <form onSubmit={submit} noValidate className="w-full max-w-[420px] rounded-3xl bg-white p-8 shadow-[0_8px_30px_rgba(23,35,33,0.06)] animate-fade-up">
-          <LogoMark size={48} label="Logo Sumber Sira" className="lg:hidden" />
-          <h2 className="mt-4 font-display text-[30px] font-semibold leading-tight lg:mt-0">Masuk Admin</h2>
-          <p className="mt-1.5 text-sm text-ink/60">Masuk untuk mengelola wisata Sumber Sira.</p>
-
-          <label className="mt-7 block text-[13px] font-medium text-ink/80" htmlFor="email">Email</label>
-          <div className={`mt-1.5 ${field}`}>
-            <Mail size={17} className="shrink-0 text-ink/50" aria-hidden="true" />
-            <input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} autoComplete="username"
-                   placeholder="nama@sumbersira.id" className="w-full bg-transparent text-sm outline-none placeholder:text-ink/40" />
+        {/* Kanan: form masuk */}
+        <section className="flex min-w-0 flex-col items-center">
+          <div className="mb-5 flex w-full max-w-[440px] flex-wrap items-center justify-between gap-3 text-white lg:hidden">
+            <span className="flex items-center gap-2.5">
+              <LogoMark size={40} ring label="" />
+              <span className="font-display text-xl font-semibold">Sumber Sira</span>
+            </span>
+            <CrowdChip />
           </div>
 
-          <label className="mt-4 block text-[13px] font-medium text-ink/80" htmlFor="password">Password</label>
-          <div className={`mt-1.5 ${field}`}>
-            <Lock size={17} className="shrink-0 text-ink/50" aria-hidden="true" />
-            <input id="password" type={show ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)}
-                   autoComplete="current-password" placeholder="Masukkan password" className="w-full bg-transparent text-sm outline-none placeholder:text-ink/40" />
-            <button type="button" onClick={() => setShow((v) => !v)} aria-label={show ? "Sembunyikan password" : "Tampilkan password"}
-                    className="grid size-8 shrink-0 place-items-center rounded-full text-ink/60 hover:bg-paper">
-              {show ? <EyeOff size={17} /> : <Eye size={17} />}
-            </button>
+          <form onSubmit={submit} noValidate
+                className="relative w-full max-w-[440px] overflow-hidden rounded-[32px] border border-white/60 bg-white/90 p-6 shadow-[0_30px_80px_rgba(8,28,21,0.45)] backdrop-blur-2xl animate-fade-up sm:p-10">
+            <span className="pointer-events-none absolute -right-16 -top-16 size-48 rounded-full bg-leaf/15 blur-2xl" aria-hidden="true" />
+            <div className="relative">
+              <span className="inline-flex items-center gap-2 rounded-full bg-leaf/12 px-3 py-1.5 text-xs font-semibold text-forest">
+                <ShieldCheck size={14} /> Khusus pengelola
+              </span>
+              <h2 className="mt-4 font-display text-[28px] font-semibold leading-tight sm:text-[32px]">Selamat datang kembali</h2>
+              <p className="mt-1.5 text-sm text-ink/60">Masuk untuk mengelola wisata Sumber Sira.</p>
+
+              <label className="mt-7 block text-[13px] font-semibold text-ink/80" htmlFor="email">Email</label>
+              <div className={`mt-1.5 ${field}`}>
+                <span className={iconBox}><Mail size={16} aria-hidden="true" /></span>
+                <input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} autoComplete="username"
+                       placeholder="nama@sumbersira.id" className="w-full bg-transparent text-sm outline-none placeholder:text-ink/40" />
+              </div>
+
+              <label className="mt-4 block text-[13px] font-semibold text-ink/80" htmlFor="password">Password</label>
+              <div className={`mt-1.5 ${field}`}>
+                <span className={iconBox}><Lock size={16} aria-hidden="true" /></span>
+                <input id="password" type={show ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)}
+                       autoComplete="current-password" placeholder="Masukkan password" className="w-full bg-transparent text-sm outline-none placeholder:text-ink/40" />
+                <button type="button" onClick={() => setShow((v) => !v)} aria-label={show ? "Sembunyikan password" : "Tampilkan password"}
+                        className="grid size-8 shrink-0 place-items-center rounded-full text-ink/60 hover:bg-ink/5">
+                  {show ? <EyeOff size={17} /> : <Eye size={17} />}
+                </button>
+              </div>
+
+              <button type="button" role="switch" aria-checked={remember} onClick={() => setRemember((v) => !v)}
+                      className="mt-4 flex items-center gap-3 text-sm text-ink/80">
+                <span className={`relative h-6 w-11 rounded-full transition ${remember ? "bg-forest" : "bg-ink/15"}`}>
+                  <span className={`absolute top-1 size-4 rounded-full bg-white shadow transition-all ${remember ? "left-6" : "left-1"}`} />
+                </span>
+                Ingat saya di perangkat ini
+              </button>
+
+              {error && <p role="alert" className="mt-4 rounded-2xl bg-coral/12 px-4 py-2.5 text-sm text-coral animate-fade-up">{error}</p>}
+
+              <button type="submit" disabled={busy}
+                      className="group relative mt-6 flex h-[52px] w-full items-center justify-center gap-2.5 overflow-hidden rounded-full bg-gradient-to-r from-forest to-leaf text-[15px] font-semibold text-white shadow-lg shadow-forest/30 transition hover:shadow-xl hover:shadow-forest/40 disabled:opacity-80">
+                <span className="pointer-events-none absolute inset-y-0 left-0 w-1/3 bg-white/25 opacity-0 group-hover:opacity-100"
+                      style={{ animation: "shimmer 1.4s ease-in-out infinite" }} aria-hidden="true" />
+                {busy ? <Loader2 size={18} className="animate-spin" /> : null}
+                {busy ? "Memeriksa..." : "Masuk ke Dasbor"}
+                {!busy && <ArrowRight size={18} className="transition group-hover:translate-x-1" />}
+              </button>
+
+              <div className="mt-6 flex items-center gap-3 rounded-2xl border border-dashed border-leaf/40 bg-leaf/[0.06] p-3.5">
+                <span className="grid size-10 shrink-0 place-items-center rounded-full bg-forest text-white"><Sparkles size={17} /></span>
+                <div className="min-w-0 flex-1">
+                  <p className="text-[13px] font-semibold text-forest">Akun demo</p>
+                  <p className="break-all font-mono text-[11px] leading-snug text-ink/70">{AKUN_DEMO.email}<br />{AKUN_DEMO.password}</p>
+                </div>
+                <button type="button" onClick={isiAkunDemo}
+                        className="h-9 shrink-0 rounded-full bg-white px-3.5 text-[13px] font-semibold text-forest shadow-sm transition hover:bg-forest hover:text-white">
+                  Isi otomatis
+                </button>
+              </div>
+
+              <Link href="/" className="mt-6 flex w-fit items-center gap-2 text-sm text-ink/60 hover:text-forest">
+                <ArrowLeft size={16} /> Kembali ke halaman utama
+              </Link>
+            </div>
+          </form>
+
+          {/* Layar sedang (tablet/laptop kecil): widget live ditampilkan di bawah form. */}
+          <div className="mt-6 hidden w-full max-w-[720px] grid-cols-3 gap-4 md:grid lg:hidden">
+            <CrowdWidget />
+            <TiketWidget />
+            <RatingWidget />
           </div>
-
-          <label className="mt-4 flex w-fit cursor-pointer items-center gap-2.5 text-sm text-ink/80">
-            <input type="checkbox" checked={remember} onChange={(e) => setRemember(e.target.checked)} className="size-4 accent-forest" />
-            Ingat saya di perangkat ini
-          </label>
-
-          {error && <p role="alert" className="mt-4 rounded-xl bg-coral/12 px-4 py-2.5 text-sm text-coral">{error}</p>}
-
-          <button type="submit" disabled={busy}
-                  className="mt-6 flex h-12 w-full items-center justify-center gap-2.5 rounded-full bg-forest text-sm font-semibold text-white transition hover:brightness-125 disabled:opacity-70">
-            {busy ? <Loader2 size={18} className="animate-spin" /> : <LogIn size={18} />}
-            {busy ? "Memeriksa..." : "Masuk"}
-          </button>
-
-          <div className="mt-6 rounded-2xl bg-leaf/[0.08] p-4">
-            <p className="text-[13px] font-semibold text-forest">Akun demo (tahap frontend)</p>
-            <p className="mt-1.5 font-mono text-xs text-ink/75">{AKUN_DEMO.email}<br />{AKUN_DEMO.password}</p>
-            <button type="button" onClick={isiAkunDemo} className="mt-3 h-9 rounded-full bg-white px-4 text-[13px] font-semibold text-forest transition hover:bg-leaf/15">
-              Isi otomatis
-            </button>
-          </div>
-
-          <Link href="/" className="mt-6 flex w-fit items-center gap-2 text-sm text-ink/60 hover:text-forest">
-            <ArrowLeft size={16} /> Kembali ke halaman utama
-          </Link>
-        </form>
-      </section>
+        </section>
+      </div>
     </main>
   );
 }

@@ -84,6 +84,29 @@
   50% { transform: translateY(-10px); }
 }
 
+/* ---------- Logo bergerak (src/components/Logo.js), satuan = satuan viewBox logo (120) ---------- */
+@keyframes logo-bob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+
+@keyframes logo-sway-a {
+  0%, 100% { transform: translateX(0); }
+  50% { transform: translateX(-8px); }
+}
+
+@keyframes logo-sway-b {
+  0%, 100% { transform: translateX(0); }
+  50% { transform: translateX(8px); }
+}
+
+/* Riak air: muncul tepat saat tetes air turun, lalu melebar dan memudar. */
+@keyframes logo-ripple {
+  0% { transform: scale(0.3); opacity: 0; }
+  10% { opacity: 1; }
+  70%, 100% { transform: scale(1.7); opacity: 0; }
+}
+
 /* Kilau yang lewat di tombol saat disorot. */
 @keyframes shimmer {
   from { transform: translateX(-120%) skewX(-20deg); }

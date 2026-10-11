@@ -3,6 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 
 import LogoMark from "@/components/Logo";
+import { FOTO } from "@/lib/foto";
 
 // Introduction aplikasi: "Tentang Sumber Sira" (syarat dosen: introduction app).
 const FEATURES = [
@@ -30,7 +31,7 @@ export default function TentangPage() {
       </header>
 
       <div className="relative aspect-[67/40] overflow-hidden rounded-[18px] border border-white/20">
-        <Image src="/images/sawah-sumber-sira.webp" alt="Kolam dan sawah di Sumber Sira" fill sizes="430px" className="object-cover" priority />
+        <Image src={FOTO.sawah} alt="Kolam dan sawah di Sumber Sira" fill sizes="430px" className="object-cover" priority />
         <span className="absolute left-3.5 top-3.5 flex items-center gap-1.5 rounded-full bg-black/30 px-2.5 py-1.5 text-[11px] font-medium backdrop-blur-sm">
           <MapPin size={12} /> Desa Putukrejo, Malang
         </span>

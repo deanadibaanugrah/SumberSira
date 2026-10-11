@@ -5,6 +5,7 @@ import Link from "next/link";
 import LogoMark from "@/components/Logo";
 import BottomNav from "@/components/mobile/BottomNav";
 import { CROWD_NOW, CROWD_TODAY } from "@/data/dummy";
+import { FOTO } from "@/lib/foto";
 
 const ACTIONS = [
   { href: "/app/booking", label: "Sewa & Booking", icon: Calendar },
@@ -33,7 +34,7 @@ export default function HomePage() {
       </header>
 
       <section className="relative h-[170px] overflow-hidden rounded-[20px] border border-white/20">
-        <Image src="/images/hero-sawah.webp" alt="" fill priority sizes="430px" className="object-cover" />
+        <Image src={FOTO.heroSawah} alt="" fill priority sizes="430px" className="object-cover" />
         <div className="absolute inset-0 bg-gradient-to-br from-ink/70 via-ink/45 to-ink/25" />
         <div className="relative px-4 pt-5">
           <p className="font-mono text-[9px] font-medium uppercase">Sumber Sira</p>
@@ -77,7 +78,7 @@ export default function HomePage() {
 
       <Link href="/app/ai-photo" className="glass mt-[25px] flex h-[89px] items-start gap-3.5 rounded-[20px] px-4 pt-3.5 transition hover:bg-white/10">
         <span className="relative mt-0.5 size-10 shrink-0 overflow-hidden rounded-full border border-white/25">
-          <Image src="/images/onboarding-bawah-air.webp" alt="" fill sizes="40px" className="object-cover" />
+          <Image src={FOTO.bawahAir} alt="" fill sizes="40px" className="object-cover" />
         </span>
         <span>
           <span className="block text-xs font-semibold">AI Underwater Photo Studio</span>

@@ -83,7 +83,7 @@ baris tabel membulat, dan status berbentuk pill. Warnanya tetap dua hijau yang s
 
 ```
 desain/                PNG ekspor dari Figma (acuan tampilan: mobile 2×, admin 1,25×)
-public/images/         Foto yang dipotong dari PNG desain
+  foto/                Foto asli Sumber Sira yang dipakai aplikasi (di-import lewat src/lib/foto.js)
 src/app/               Halaman (App Router)
   page.js              Intro web
   app/                 Aplikasi pengunjung (layout lebar maks 430 px)
@@ -99,6 +99,7 @@ src/lib/
   booking-context.js   Keranjang booking (disimpan di sessionStorage)
   whatsapp.js          Pesan invoice WhatsApp
   format.js            Format Rupiah dan kode booking
+  foto.js              Import semua foto aplikasi dari desain/foto
 ```
 
 ## Catatan desain
@@ -110,7 +111,8 @@ src/lib/
 - Warna dan font ada di `src/app/globals.css` (`@theme`): `forest` dan `leaf` (hanya dua hijau, sama dengan papan Color Palette di Figma), `ink`, `paper`, `coral`. Warna yang lebih muda dibuat dengan transparansi, mis. `bg-leaf/15`, bukan token baru.
   Pakai lewat kelas Tailwind, misalnya `bg-forest` dan `text-leaf`.
 - Font dipasang dari npm (Fontsource): Fraunces (judul), Inter (teks), JetBrains Mono (angka/harga).
-- Foto di `public/images/` dipotong dari PNG desain. Semua foto adalah foto asli Sumber Sira; foto galeri admin
+- Foto aplikasi ada di `desain/foto/` (folder `public/` tidak dipakai lagi) dan di-import lewat `src/lib/foto.js`,
+  jadi Next.js memprosesnya sebagai gambar statis. Foto baru: taruh di `desain/foto/`, lalu tambahkan di `foto.js`. Semua foto adalah foto asli Sumber Sira; foto galeri admin
   memakai foto yang sama dengan potongan berbeda (`pos` di `src/data/dummy.js`).
 - Logo Sumber Sira ada di `src/components/Logo.js` (Splash, header Home dan Tentang, sidebar admin, intro web)
   dan sebagai ikon tab browser di `src/app/icon.svg`.

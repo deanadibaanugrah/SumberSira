@@ -7,12 +7,13 @@ import { useEffect, useRef, useState } from "react";
 import BottomNav from "@/components/mobile/BottomNav";
 import PageHeader from "@/components/mobile/PageHeader";
 import { GALLERY } from "@/data/dummy";
+import { FOTO } from "@/lib/foto";
 
 // Foto "sebelum" = foto bawah air yang buram/kusam; "sesudah" = hasil enhance.
 // Tahap UTS: enhance disimulasikan dengan filter CSS. Tahap backend: kirim foto ke API AI, tampilkan hasilnya.
 const DULL = "saturate(0.25) brightness(0.7) contrast(0.85)";
 const ENHANCE = "saturate(1.45) contrast(1.12) brightness(1.06)";
-const COMMUNITY = ["/images/komunitas-1.webp", "/images/komunitas-2.webp", "/images/komunitas-3.webp"];
+const COMMUNITY = FOTO.komunitas;
 
 function Photo({ src, label, filter, badge }) {
   return (
@@ -42,7 +43,7 @@ export default function AiPhotoPage() {
     if (file) setPhoto(URL.createObjectURL(file));
   };
 
-  const src = photo ?? "/images/onboarding-bawah-air.webp";
+  const src = photo ?? FOTO.bawahAir.src;
   return (
     <main className="px-5 pb-24">
       <PageHeader title="AI Underwater Photo Studio" backHref="/app/home" />
@@ -68,7 +69,7 @@ export default function AiPhotoPage() {
       </div>
       <div className="mt-3 grid grid-cols-3 gap-3">
         {COMMUNITY.map((src) => (
-          <div key={src} className="relative aspect-[103/110] overflow-hidden rounded-[20px]">
+          <div key={src.src} className="relative aspect-[103/110] overflow-hidden rounded-[20px]">
             <Image src={src} alt="Foto pengunjung Sumber Sira" fill sizes="140px" className="object-cover" />
           </div>
         ))}

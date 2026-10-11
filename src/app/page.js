@@ -3,6 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 
 import LogoMark from "@/components/Logo";
+import { FOTO } from "@/lib/foto";
 
 // Introduction web (syarat dosen: "introduction web dan app").
 // Halaman ini tidak ada di Figma; dibuat dengan gaya yang sama untuk mengarahkan ke aplikasi dan admin.
@@ -17,7 +18,7 @@ export default function IntroPage() {
   return (
     <main className="app-bg min-h-dvh text-white">
       <section className="relative overflow-hidden">
-        <Image src="/images/hero-sawah.webp" alt="" fill priority sizes="100vw" className="object-cover opacity-40" />
+        <Image src={FOTO.heroSawah} alt="" fill priority sizes="100vw" className="object-cover opacity-40" />
         <div className="absolute inset-0 bg-gradient-to-b from-forest/40 via-forest/70 to-forest" />
         <div className="relative mx-auto max-w-5xl px-6 pb-20 pt-16 sm:pt-24">
           <LogoMark size={72} ring className="shadow-lg shadow-black/25" />

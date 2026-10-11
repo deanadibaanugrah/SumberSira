@@ -1,5 +1,6 @@
 // Data contoh untuk tahap UTS (frontend). Semua angka/teks diambil dari desain Figma.
 // Tahap backend: ganti setiap konstanta di sini dengan data dari API.
+import { FOTO } from "@/lib/foto";
 
 // Keramaian per jam (persen kapasitas, skala 0-100), dipakai Home dan Live Crowd (aplikasi mobile).
 // Nilai dibaca dari posisi titik grafik di desain Live Crowd Tracker.
@@ -103,14 +104,14 @@ export const COMPLAINT_TIP = "Saran AI: perbaiki jalur masuk dan tambah toilet s
 
 // Foto galeri memakai foto asli Sumber Sira dengan potongan berbeda (pos = object-position).
 export const GALLERY = [
-  { id: 1, owner: "Bu Rani S.", src: "/images/hero-sawah.webp", pos: "50% 50%", status: "Baru", date: "2026-10-10" },
-  { id: 2, owner: "Joko Didi", src: "/images/onboarding-air-jernih.webp", pos: "50% 45%", status: "Ditampilkan", date: "2026-10-10" },
-  { id: 3, owner: "Kel. Ahmad", src: "/images/sawah-sumber-sira.webp", pos: "50% 60%", status: "Ditampilkan", date: "2026-10-09" },
-  { id: 4, owner: "Rombongan SMA X", src: "/images/onboarding-kereta-sawah.webp", pos: "50% 40%", status: "Baru", date: "2026-10-09" },
-  { id: 5, owner: "Ibu Sari K.", src: "/images/onboarding-kereta-sawah.webp", pos: "50% 70%", status: "Ditolak", date: "2026-10-08" },
-  { id: 6, owner: "Dimas P.", src: "/images/onboarding-air-jernih.webp", pos: "50% 80%", status: "Ditampilkan", date: "2026-10-08" },
-  { id: 7, owner: "Bu Rani S.", src: "/images/sawah-sumber-sira.webp", pos: "20% 80%", status: "Baru", date: "2026-10-07" },
-  { id: 8, owner: "Kel. Ahmad", src: "/images/splash-sumber-sira.webp", pos: "50% 74%", status: "Ditampilkan", date: "2026-10-07" },
+  { id: 1, owner: "Bu Rani S.", src: FOTO.heroSawah, pos: "50% 50%", status: "Baru", date: "2026-10-10" },
+  { id: 2, owner: "Joko Didi", src: FOTO.airJernih, pos: "50% 45%", status: "Ditampilkan", date: "2026-10-10" },
+  { id: 3, owner: "Kel. Ahmad", src: FOTO.sawah, pos: "50% 60%", status: "Ditampilkan", date: "2026-10-09" },
+  { id: 4, owner: "Rombongan SMA X", src: FOTO.keretaSawah, pos: "50% 40%", status: "Baru", date: "2026-10-09" },
+  { id: 5, owner: "Ibu Sari K.", src: FOTO.keretaSawah, pos: "50% 70%", status: "Ditolak", date: "2026-10-08" },
+  { id: 6, owner: "Dimas P.", src: FOTO.airJernih, pos: "50% 80%", status: "Ditampilkan", date: "2026-10-08" },
+  { id: 7, owner: "Bu Rani S.", src: FOTO.sawah, pos: "20% 80%", status: "Baru", date: "2026-10-07" },
+  { id: 8, owner: "Kel. Ahmad", src: FOTO.splash, pos: "50% 74%", status: "Ditampilkan", date: "2026-10-07" },
 ];
 
 // Angka total galeri di desain (312 masuk, 18 menunggu, 248 tampil) mencakup foto lama di luar 8 contoh ini.

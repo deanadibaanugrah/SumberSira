@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 import LogoMark from "@/components/Logo";
+import { FOTO } from "@/lib/foto";
 
 // Layar Splash: tampil sebentar, lalu lanjut otomatis ke "Tentang Sumber Sira". Ketuk untuk lewati.
 // Posisi elemen memakai persen tinggi layar agar sejajar dengan foto latar (rasio frame desain 375×812).
@@ -24,7 +25,7 @@ export default function SplashPage() {
   return (
     <button type="button" onClick={() => router.replace("/app/tentang")} aria-label="Masuk ke aplikasi"
             className="relative block min-h-dvh w-full overflow-hidden text-left">
-      <Image src="/images/splash-sumber-sira.webp" alt="" fill priority sizes="430px" className="object-cover" />
+      <Image src={FOTO.splash} alt="" fill priority sizes="430px" className="object-cover" />
 
       {/* Logo Sumber Sira (varian latar gelap) di atas nama dan tagline, seperti di desain Splash. */}
       <div className="absolute inset-x-0 top-[30%] flex flex-col items-center">

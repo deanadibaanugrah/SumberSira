@@ -5,22 +5,24 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
+import { FOTO } from "@/lib/foto";
+
 // Onboarding 3 slide: bisa digeser (swipe/drag) DAN pakai tombol Kembali/Lanjut (syarat dosen).
 // Slide juga maju sendiri tiap AUTOPLAY_MS sampai slide ketiga, lalu berhenti (tidak berulang).
 // Begitu pengguna menggeser atau menekan tombol/titik, putar otomatis berhenti dan pengguna yang mengatur.
 const SLIDES = [
   {
-    image: "/images/onboarding-air-jernih.webp",
+    image: FOTO.airJernih,
     title: "Air Jernih dari Mata Air Asli",
     text: "Nikmati kolam alami dengan air jernih langsung dari sumber, dikelilingi rumput ganggang & ikan wader lokal.",
   },
   {
-    image: "/images/onboarding-kereta-sawah.webp",
+    image: FOTO.keretaSawah,
     title: "Booking Wahana Tanpa Antre",
     text: "Sewa ban, ATV, flying fox, & wahana lain dari rumah. Cek keramaian real-time sebelum berangkat.",
   },
   {
-    image: "/images/onboarding-bawah-air.webp",
+    image: FOTO.bawahAir,
     title: "Foto Bawah Air Jadi Lebih Jernih",
     text: "Belum ada fotografer di lokasi? AI Underwater Photo Studio bikin fotomu tetap estetik.",
   },

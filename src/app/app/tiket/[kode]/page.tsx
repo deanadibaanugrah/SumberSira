@@ -23,7 +23,7 @@ const PESAN = {
 // Halaman E-Tiket: menampilkan QR tiket, status (Belum masuk, Di dalam, Keluar), dan detail tiket.
 export default function ETiketPage() {
   // Ambil kode tiket dari alamat halaman, misalnya /app/tiket/TK-1038.
-  const { kode } = useParams();
+  const { kode } = useParams<{ kode: string }>();
   const tiket = useTiket();
   const code = normalisasiKode(decodeURIComponent(kode));
   const t = tiket.tickets.find((x) => x.code === code);

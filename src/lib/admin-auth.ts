@@ -16,7 +16,7 @@ export const AKUN_DEMO = {
 
 const KEY = "sumber-sira:admin-session";
 const LOADING = "loading";
-const listeners = new Set();
+const listeners = new Set<() => void>();
 let cache; // undefined = belum dibaca, null = belum login
 
 // Membaca sesi login dari penyimpanan browser. Sesi yang sudah kedaluwarsa dianggap belum login.

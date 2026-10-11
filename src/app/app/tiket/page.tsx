@@ -45,7 +45,7 @@ export default function TiketPage() {
   const [parking, setParking] = useState("motor");
   const [name, setName] = useState(booking.name);
   const [whatsapp, setWhatsapp] = useState(booking.whatsapp);
-  const [errors, setErrors] = useState({});
+  const [errors, setErrors] = useState<{ name?: string; whatsapp?: string }>({});
   const [step, setStep] = useState("form"); // form | bayar
   const [ref, setRef] = useState("");
   const [checking, setChecking] = useState(false);
@@ -58,7 +58,7 @@ export default function TiketPage() {
   // Tombol Bayar dengan QRIS: cek nama dan nomor WA. Kalau benar, buat nomor referensi lalu pindah ke langkah bayar.
   const lanjut = (e) => {
     e.preventDefault();
-    const next = {};
+    const next: { name?: string; whatsapp?: string } = {};
     if (!name.trim()) next.name = "Nama wajib diisi.";
     if (!WA_PATTERN.test(whatsapp.replace(/[\s-]/g, ""))) next.whatsapp = "Masukkan nomor WhatsApp yang valid, mis. 081234567890.";
     setErrors(next);

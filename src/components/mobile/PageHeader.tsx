@@ -2,9 +2,10 @@
 
 import { ArrowLeft } from "lucide-react";
 import { useRouter } from "next/navigation";
+import type { ReactNode } from "react";
 
 // Header halaman mobile: tombol kembali bulat (kaca) + judul serif, seperti di desain.
-export default function PageHeader({ title, backHref, children }) {
+export default function PageHeader({ title, backHref, children }: { title?: string; backHref?: string; children?: ReactNode }) {
   const router = useRouter();
   // Tombol kembali: ke halaman backHref kalau diisi, kalau tidak kembali ke halaman sebelumnya.
   const goBack = () => (backHref ? router.push(backHref) : router.back());

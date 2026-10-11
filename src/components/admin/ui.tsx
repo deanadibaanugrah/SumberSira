@@ -2,10 +2,13 @@
 // Gaya mengikuti desain admin terbaru di Figma: kartu putih membulat (24 px), tombol dan status berbentuk pill,
 // ikon di dalam lingkaran, dan hanya dua hijau (forest untuk menu aktif dan tombol, leaf untuk aksen).
 import { Bell, Search } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
+import type { ButtonHTMLAttributes, ElementType, ReactNode } from "react";
 
 // Judul halaman (Fraunces) + subjudul, lalu tombol aksi, kotak cari, dan lonceng di kanan.
 // search: { value, onChange, placeholder } bila halaman ingin memakai kotak cari untuk menyaring data.
-export function AdminHeader({ title, subtitle, action, search }) {
+type SearchProps = { value: string; onChange: (value: string) => void; placeholder?: string };
+export function AdminHeader({ title, subtitle, action, search }: { title: ReactNode; subtitle?: ReactNode; action?: ReactNode; search?: SearchProps }) {
   // Kalau halaman mengirim search, kotak cari dihubungkan ke state halaman itu.
   const searchProps = search?.onChange ? { value: search.value, onChange: (e) => search.onChange(e.target.value) } : {};
   return (
@@ -32,12 +35,12 @@ export function AdminHeader({ title, subtitle, action, search }) {
 }
 
 // Kartu putih membulat, wadah dasar hampir semua bagian admin.
-export function Card({ as: Tag = "section", className = "", children }) {
+export function Card({ as: Tag = "section", className = "", children }: { as?: ElementType; className?: string; children: ReactNode }) {
   return <Tag className={`rounded-3xl bg-white p-6 ${className}`}>{children}</Tag>;
 }
 
 // Judul kartu (Inter tebal 18 px) dengan subjudul opsional dan isi tambahan di kanan.
-export function CardTitle({ children, sub, right, className = "" }) {
+export function CardTitle({ children, sub, right, className = "" }: { children: ReactNode; sub?: ReactNode; right?: ReactNode; className?: string }) {
   return (
     <div className={`flex flex-wrap items-start justify-between gap-3 ${className}`}>
       <div>
@@ -50,7 +53,7 @@ export function CardTitle({ children, sub, right, className = "" }) {
 }
 
 // Ikon di dalam lingkaran: solid (forest, ikon putih) untuk kartu pertama, soft (hijau muda) untuk sisanya.
-export function IconCircle({ icon: Icon, solid = false, size = 44, iconSize = 20, className = "" }) {
+export function IconCircle({ icon: Icon, solid = false, size = 44, iconSize = 20, className = "" }: { icon: LucideIcon; solid?: boolean; size?: number; iconSize?: number; className?: string }) {
   return (
     <span style={{ width: size, height: size }}
           className={`grid shrink-0 place-items-center rounded-full ${solid ? "bg-forest text-white" : "bg-leaf/12 text-forest"} ${className}`}>
@@ -61,7 +64,8 @@ export function IconCircle({ icon: Icon, solid = false, size = 44, iconSize = 20
 
 // Kartu angka. "tall" = dashboard (ikon di atas, angka besar, label + catatan).
 // "compact" = halaman lain (ikon di kiri, angka dan label di kanan).
-export function StatCard({ icon, value, label, note, trend, trendIcon: TrendIcon, solid = false, variant = "compact" }) {
+type StatCardProps = { icon: LucideIcon; value: ReactNode; label: string; note?: string; trend?: string; trendIcon?: LucideIcon; solid?: boolean; variant?: "tall" | "compact" };
+export function StatCard({ icon, value, label, note, trend, trendIcon: TrendIcon, solid = false, variant = "compact" }: StatCardProps) {
   // Varian tall dipakai di dashboard.
   if (variant === "tall") {
     return (
@@ -120,7 +124,7 @@ const DOT = {
 };
 
 // Status berbentuk pill dengan titik warna di depannya.
-export function StatusPill({ status, className = "" }) {
+export function StatusPill({ status, className = "" }: { status: string; className?: string }) {
   return (
     <span className={`inline-flex h-7 items-center gap-1.5 whitespace-nowrap rounded-full px-3 text-xs font-semibold leading-none ${PILL[status] ?? PILL.Selesai} ${className}`}>
       <span className={`size-1.5 rounded-full ${DOT[status] ?? DOT.Selesai}`} aria-hidden="true" />
@@ -130,7 +134,7 @@ export function StatusPill({ status, className = "" }) {
 }
 
 // Tab filter: yang aktif Hijau Tua, sisanya abu muda.
-export function FilterPills({ options, value, onChange, label = "Filter" }) {
+export function FilterPills({ options, value, onChange, label = "Filter" }: { options: string[]; value: string; onChange: (value: string) => void; label?: string }) {
   return (
     <div className="flex flex-wrap gap-2.5" role="tablist" aria-label={label}>
       {options.map((o) => (
@@ -144,7 +148,7 @@ export function FilterPills({ options, value, onChange, label = "Filter" }) {
 }
 
 // Tombol utama: pill Hijau Tua seperti "Unduh Laporan", "Tambah FAQ", "Konfirmasi Booking".
-export function PrimaryButton({ icon: Icon, children, className = "", ...props }) {
+export function PrimaryButton({ icon: Icon, children, className = "", ...props }: ButtonHTMLAttributes<HTMLButtonElement> & { icon?: LucideIcon }) {
   return (
     <button type="button" {...props}
             className={`flex h-12 items-center justify-center gap-2.5 whitespace-nowrap rounded-full bg-forest px-6 text-sm font-semibold text-white transition hover:brightness-125 disabled:opacity-50 ${className}`}>
@@ -155,7 +159,7 @@ export function PrimaryButton({ icon: Icon, children, className = "", ...props }
 }
 
 // Tombol ikon bulat: abu/hijau untuk setujui atau edit, coral untuk tolak atau hapus.
-export function IconButton({ tone = "leaf", label, children, className = "", ...props }) {
+export function IconButton({ tone = "leaf", label, children, className = "", ...props }: ButtonHTMLAttributes<HTMLButtonElement> & { tone?: "leaf" | "gray" | "coral"; label: string }) {
   // Pilihan warna tombol: leaf (hijau), gray (abu), coral (merah bata).
   const tones = {
     leaf: "bg-leaf/12 text-forest hover:bg-leaf/25",
@@ -173,13 +177,13 @@ export function IconButton({ tone = "leaf", label, children, className = "", ...
 // Inisial nama untuk avatar: "Bu Rani S." -> "RS", "Kel. Ahmad" -> "A".
 // Gelar yang dilewati saat membuat inisial.
 const TITLES = new Set(["bu", "ibu", "bpk", "bpk.", "pak", "kel", "kel."]);
-export function initials(name) {
+export function initials(name: string): string {
   const words = name.replace(/\./g, " ").split(/\s+/).filter((w) => w && !TITLES.has(w.toLowerCase()));
   return words.slice(0, 2).map((w) => w[0].toUpperCase()).join("");
 }
 
 // Lingkaran berisi inisial nama.
-export function Avatar({ name, size = 32, solid = false, className = "" }) {
+export function Avatar({ name, size = 32, solid = false, className = "" }: { name: string; size?: number; solid?: boolean; className?: string }) {
   return (
     <span style={{ width: size, height: size, fontSize: Math.round(size * 0.36) }} aria-hidden="true"
           className={`grid shrink-0 place-items-center rounded-full font-semibold ${solid ? "bg-forest text-white" : "bg-ink/[0.07] text-ink"} ${className}`}>
@@ -189,7 +193,7 @@ export function Avatar({ name, size = 32, solid = false, className = "" }) {
 }
 
 // Jendela dialog sederhana untuk form Tambah/Edit.
-export function Modal({ title, onClose, children }) {
+export function Modal({ title, onClose, children }: { title: string; onClose: () => void; children: ReactNode }) {
   // Klik di latar gelap menutup dialog, klik di dalam kotak putih tidak (stopPropagation).
   return (
     <div className="fixed inset-0 z-50 grid place-items-center bg-ink/40 p-4" role="dialog" aria-modal="true" aria-label={title}
@@ -203,7 +207,7 @@ export function Modal({ title, onClose, children }) {
 }
 
 // Tombol kedua (tanpa warna), misalnya Batal.
-export function SecondaryButton({ children, className = "", ...props }) {
+export function SecondaryButton({ children, className = "", ...props }: ButtonHTMLAttributes<HTMLButtonElement>) {
   return (
     <button type="button" {...props}
             className={`h-11 rounded-full px-5 text-sm font-semibold text-ink/70 transition hover:bg-paper ${className}`}>

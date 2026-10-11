@@ -19,7 +19,7 @@ const inputClass =
 export default function CheckoutPage() {
   const router = useRouter();
   const booking = useBooking();
-  const [errors, setErrors] = useState({});
+  const [errors, setErrors] = useState<{ name?: string; whatsapp?: string }>({});
 
   // Kalau keranjang kosong, tampilkan pesan dan tombol untuk memilih wahana dulu.
   if (booking.loaded && booking.items.length === 0) {
@@ -37,7 +37,7 @@ export default function CheckoutPage() {
   // Saat tombol Konfirmasi & Bayar ditekan: cek nama dan nomor WhatsApp. Kalau valid, buat kode booking lalu ke halaman pembayaran.
   const submit = (e) => {
     e.preventDefault();
-    const next = {};
+    const next: { name?: string; whatsapp?: string } = {};
     if (!booking.name.trim()) next.name = "Nama lengkap wajib diisi.";
     if (!WA_PATTERN.test(booking.whatsapp.replace(/[\s-]/g, ""))) next.whatsapp = "Masukkan nomor WhatsApp yang valid, mis. 081234567890.";
     setErrors(next);

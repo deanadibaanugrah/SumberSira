@@ -21,7 +21,16 @@ export const PARKIR = [
 
 // Tiket contoh hari ini dari pengunjung lain: [nama, jumlah orang, parkir, jam beli, jam masuk, jam keluar].
 // Yang masih di dalam berjumlah 186 orang = 62% kapasitas (Sedang), sama dengan angka di desain.
-const SEED_DI_DALAM = [
+// Satu baris data contoh: [nama, jumlah orang, parkir, jam beli, jam masuk?, jam keluar?].
+type SeedRow = [string, number, string, string, string?, string?];
+
+// Bentuk satu tiket masuk.
+export type Ticket = {
+  code: string; name: string; whatsapp: string; adults: number; kids: number; parking: string; total: number;
+  status: "Belum masuk" | "Di dalam" | "Keluar"; boughtAt: string; checkInAt: string | null; checkOutAt: string | null; mine: boolean;
+};
+
+const SEED_DI_DALAM: SeedRow[] = [
   ["Bu Rani S.", 4, "mobil", "06.41", "08.12"], ["Dimas P.", 2, "motor", "07.02", "08.15"],
   ["Kel. Ahmad", 6, "mobil", "06.55", "08.21"], ["Rombongan SMA X", 32, "bus", "05.30", "08.30"],
   ["Ibu Sari K.", 3, "motor", "07.20", "08.34"], ["Joko Didi", 2, "motor", "07.48", "08.40"],
@@ -37,22 +46,22 @@ const SEED_DI_DALAM = [
   ["Kel. Santoso", 5, "mobil", "09.33", "10.12"], ["Fajar M.", 2, "motor", "09.45", "10.17"],
   ["Kel. Kurniawan", 4, "mobil", "09.40", "10.21"], ["Rombongan Arisan RT 03", 0, "bus", "09.20", "10.26"],
 ];
-const SEED_BELUM_MASUK = [
+const SEED_BELUM_MASUK: SeedRow[] = [
   ["Kel. Hidayat", 4, "mobil", "09.50"], ["Andi S.", 2, "motor", "10.02"], ["Kel. Firmansyah", 6, "mobil", "10.08"],
   ["Rombongan PKK Putukrejo", 15, "bus", "10.11"], ["Nadia R.", 3, "motor", "10.19"],
 ];
-const SEED_KELUAR = [
+const SEED_KELUAR: SeedRow[] = [
   ["Kel. Saputra", 5, "mobil", "06.30", "07.58", "09.40"], ["Bagas W.", 2, "motor", "07.05", "08.03", "09.52"],
   ["Kel. Lestari", 4, "mobil", "07.10", "08.07", "10.05"], ["Pak Darto", 3, "motor", "07.25", "08.10", "10.14"],
 ];
 
 // Membuat data tiket contoh untuk hari ini, lengkap dengan kode TK-1001 dan seterusnya serta total harganya.
-function seedTickets() {
+function seedTickets(): Ticket[] {
   // Jumlah orang tiket terakhir di dalam diisi agar totalnya tepat 186.
-  const rows = SEED_DI_DALAM.map((r) => [...r]);
+  const rows = SEED_DI_DALAM.map((r) => [...r] as SeedRow);
   rows[rows.length - 1][1] = 186 - rows.slice(0, -1).reduce((sum, r) => sum + r[1], 0);
   // Mengubah satu baris data contoh menjadi objek tiket.
-  const make = (status) => ([name, people, parking, boughtAt, checkInAt = null, checkOutAt = null]) => {
+  const make = (status: Ticket["status"]) => ([name, people, parking, boughtAt, checkInAt = null, checkOutAt = null]: SeedRow) => {
     const kids = people >= 4 && parking === "mobil" ? 1 : 0; // keluarga biasanya membawa balita (gratis)
     return { name, adults: people - kids, kids, parking, boughtAt, checkInAt, checkOutAt, status, mine: false };
   };
@@ -98,7 +107,7 @@ const fresh = () => ({ date: tanggalHariIni(), updatedAt: null, tickets: seedTic
 // Dipakai saat render di server dan saat hydration, supaya angka awal sama dengan di browser.
 const SERVER = { date: null, updatedAt: null, tickets: seedTickets() };
 
-const listeners = new Set();
+const listeners = new Set<() => void>();
 let cache = null;
 
 // Membaca data tiket dari localStorage. Hasilnya disimpan di cache supaya tidak dibaca berulang kali.

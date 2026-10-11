@@ -2,6 +2,12 @@
 // Tiap batang tumbuh dari bawah secara berurutan (syarat dosen: animasi grafik), batang tertinggi diberi label.
 // data: [{ label: "08.00", value: 40 }]  ·  highlight: (item, index) => true untuk batang Hijau Tua (jam ramai).
 // Komponen grafik batang jumlah pengunjung per jam di dashboard admin.
+type Bar = { label: string; value: number };
+type BarChartProps = {
+  data: Bar[]; ticks?: number[]; height?: number; highlight?: (item: Bar, index: number) => boolean;
+  tooltip?: (item: Bar) => string | number; barClass?: string; highlightClass?: string;
+};
+
 export default function BarChart({
   data,
   ticks = [0, 40, 80, 120],
@@ -10,7 +16,7 @@ export default function BarChart({
   tooltip = (d) => d.value,
   barClass = "bg-leaf/35",
   highlightClass = "bg-forest",
-}) {
+}: BarChartProps) {
   // Nilai tertinggi sebagai skala 100%, dan batang tertinggi yang diberi label.
   const top = Math.max(...ticks, ...data.map((d) => d.value), 1);
   const peak = data.reduce((best, d) => (d.value > best.value ? d : best), data[0]);

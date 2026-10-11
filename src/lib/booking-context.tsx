@@ -1,6 +1,7 @@
 "use client";
 
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
+import type { ReactNode } from "react";
 
 import { SLOTS, WAHANA, bookingLabel } from "@/data/wahana";
 import { PAYMENT_METHODS } from "@/lib/payment";
@@ -11,16 +12,27 @@ export { PAYMENT_METHODS };
 
 // Keranjang booking dibagi ke halaman Booking -> Checkout -> Konfirmasi.
 // Disimpan di sessionStorage supaya tidak hilang saat halaman di-refresh.
-const BookingContext = createContext(null);
+// Isi keranjang yang disimpan.
+type BookingState = { slot: string; qty: Record<string, number>; name: string; whatsapp: string; payment: string; code: string | null; paid: boolean };
+// Satu baris item di keranjang.
+type BookingItem = { id: string; name: string; short: string; price: number; qty: number };
+// Semua yang dibagikan ke halaman: isi keranjang, hasil hitungan, dan fungsi pengubahnya.
+export type BookingValue = BookingState & {
+  items: BookingItem[]; total: number; slotInfo: (typeof SLOTS)[number]; loaded: boolean;
+  setSlot: (slotId: string) => void; add: (id: string) => void; remove: (id: string) => void;
+  update: (patch: Partial<BookingState>) => void; reset: () => void;
+};
+
+const BookingContext = createContext<BookingValue | null>(null);
 const STORAGE_KEY = "sumber-sira:booking";
 
 // paid: true hanya setelah pembayaran QRIS terverifikasi di /app/pembayaran,
 // sebelum itu halaman /app/konfirmasi menolak tampil (lihat guard di sana).
-const empty = { slot: SLOTS[0].id, qty: {}, name: "", whatsapp: "", payment: PAYMENT_METHODS[0], code: null, paid: false };
+const empty: BookingState = { slot: SLOTS[0].id, qty: {}, name: "", whatsapp: "", payment: PAYMENT_METHODS[0], code: null, paid: false };
 
 // Komponen pembungkus yang menyimpan keranjang booking (jam, jumlah item, data pemesan) untuk semua halaman aplikasi.
-export function BookingProvider({ children }) {
-  const [state, setState] = useState(empty);
+export function BookingProvider({ children }: { children: ReactNode }) {
+  const [state, setState] = useState<BookingState>(empty);
   const [loaded, setLoaded] = useState(false);
 
   // Saat aplikasi dibuka: ambil keranjang yang tersimpan di sessionStorage.
@@ -51,7 +63,7 @@ export function BookingProvider({ children }) {
   }, [state, loaded]);
 
   // Data yang dibagikan ke halaman: daftar item, total harga, jam kunjungan, dan fungsi untuk mengubahnya.
-  const value = useMemo(() => {
+  const value = useMemo<BookingValue>(() => {
     const items = WAHANA.filter((w) => state.qty[w.id] > 0).map((w) => ({
       id: w.id, name: bookingLabel(w), short: w.name, price: w.price, qty: state.qty[w.id],
     }));

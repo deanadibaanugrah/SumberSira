@@ -79,7 +79,7 @@ export default function GaleriPage() {
             </select>
           </label>
           <div className="flex rounded-full bg-white p-1" role="group" aria-label="Tampilan">
-            {[["grid", LayoutGrid, "Tampilan grid"], ["list", List, "Tampilan daftar"]].map(([key, Icon, label]) => (
+            {([["grid", LayoutGrid, "Tampilan grid"], ["list", List, "Tampilan daftar"]] as const).map(([key, Icon, label]) => (
               <button key={key} type="button" aria-label={label} aria-pressed={view === key} onClick={() => setView(key)}
                       className={`grid size-9 place-items-center rounded-full transition ${view === key ? "bg-forest text-white" : "text-ink hover:bg-paper"}`}>
                 <Icon size={18} />

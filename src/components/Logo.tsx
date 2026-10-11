@@ -6,12 +6,15 @@
 // ring = garis tepi putih tipis untuk dipasang di atas latar gelap atau foto (varian "latar gelap").
 // label kosong = logo hanya hiasan (mis. di samping tulisan "Sumber Sira"), jadi disembunyikan dari pembaca layar.
 // Pengaturan supaya animasi berputar dan bergeser dari titik tengah bentuknya sendiri.
-const fillBox = { transformBox: "fill-box", transformOrigin: "center" };
+import type { CSSProperties } from "react";
+
+const fillBox: CSSProperties = { transformBox: "fill-box", transformOrigin: "center" };
 // Memasang animasi CSS hanya kalau animated aktif.
-const anim = (on, value, extra = {}) => (on ? { ...fillBox, animation: value, ...extra } : undefined);
+const anim = (on: boolean, value: string): CSSProperties | undefined => (on ? { ...fillBox, animation: value } : undefined);
 
 // Komponen logo: lingkaran hijau berisi sawah, riak air, dan tetes air yang bergerak.
-export default function LogoMark({ size = 40, ring = false, animated = true, label = "Logo Sumber Sira", className = "" }) {
+type LogoProps = { size?: number; ring?: boolean; animated?: boolean; label?: string; className?: string };
+export default function LogoMark({ size = 40, ring = false, animated = true, label = "Logo Sumber Sira", className = "" }: LogoProps) {
   // Kalau label diisi, logo dibacakan pembaca layar. Kalau kosong, logo dianggap hiasan.
   const a11y = label ? { role: "img", "aria-label": label } : { "aria-hidden": true };
   return (

@@ -16,7 +16,7 @@ const ENHANCE = "saturate(1.45) contrast(1.12) brightness(1.06)";
 const COMMUNITY = FOTO.komunitas;
 
 // Komponen satu kartu foto (Sebelum atau Sesudah) dengan label dan badge AI Enhanced.
-function Photo({ src, label, filter, badge }) {
+function Photo({ src, label, filter, badge = false }: { src: string; label: string; filter: string; badge?: boolean }) {
   return (
     <figure className="relative aspect-[161/200] overflow-hidden rounded-[20px] border border-white/20">
       {/* Foto unggahan pengguna berupa blob URL, jadi pakai <img> biasa. */}

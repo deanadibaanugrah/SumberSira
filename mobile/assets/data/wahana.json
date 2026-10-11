@@ -1,0 +1,10 @@
+[
+  { "id": "ban-kecil", "name": "Ban Kecil/Sedang", "category": "Sewa Alat", "price": 5000, "unit": "" },
+  { "id": "ban-besar", "name": "Ban Besar", "category": "Sewa Alat", "price": 10000, "unit": "" },
+  { "id": "loker", "name": "Loker", "category": "Sewa Alat", "price": 5000, "unit": "" },
+  { "id": "kereta-sawah", "name": "Kereta Sawah", "category": "Wahana", "price": 10000, "unit": "kepala" },
+  { "id": "bebek-gayung", "name": "Bebek Gayung", "category": "Wahana", "price": 20000, "unit": "perahu" },
+  { "id": "atv", "name": "ATV", "category": "Wahana", "price": 25000, "unit": "15 menit" },
+  { "id": "flying-fox", "name": "Flying Fox", "category": "Wahana", "price": 15000, "unit": "" },
+  { "id": "komedi-putar", "name": "Komedi Putar Anak", "category": "Wahana", "price": 10000, "unit": "" }
+]

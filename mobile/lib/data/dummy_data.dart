@@ -2,11 +2,6 @@ import '../models/ticket.dart';
 
 // Data contoh (tanpa backend). Angkanya sama dengan desain Figma dan web admin.
 class DummyData {
-  // Akun demo untuk login simulasi.
-  static const demoEmail = 'pengunjung@sumbersira.id';
-  static const demoPassword = 'sira123';
-  static const demoName = 'Rani Susanti';
-
   // Prediksi keramaian per jam (persen kapasitas) untuk grafik di Home dan Live Crowd.
   static const forecast = [('08', 15), ('10', 50), ('12', 90), ('14', 85), ('16', 40)];
 

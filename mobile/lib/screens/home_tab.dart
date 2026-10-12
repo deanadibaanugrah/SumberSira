@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../data/app_state.dart';
 import '../theme/app_theme.dart';
 import '../utils/routes.dart';
 import '../widgets/app_background.dart';
@@ -61,10 +60,7 @@ class HomeTab extends StatelessWidget {
         const LogoMark(size: 32, ring: true),
         const SizedBox(width: 10),
         Expanded(child: Text('Sumber Sira', style: AppTheme.display(20))),
-        ListenableBuilder(
-          listenable: AppState.instance,
-          builder: (_, _) => Text('Hai, ${(AppState.instance.userName ?? 'Pengunjung').split(' ').first}', style: TextStyle(fontSize: 11, color: AppColors.white(.75))),
-        ),
+        Text('Halo, pengunjung!', style: TextStyle(fontSize: 11, color: AppColors.white(.75))),
       ]);
 
   Widget _hero() => ClipRRect(

@@ -4,7 +4,7 @@ import 'package:sumber_sira/models/ticket.dart';
 import 'package:sumber_sira/utils/format.dart';
 import 'package:sumber_sira/utils/validators.dart';
 
-// Uji fungsi-fungsi penting: format Rupiah, validasi form, login simulasi, dan Live Crowd.
+// Uji fungsi-fungsi penting: format Rupiah, validasi form, dan Live Crowd.
 void main() {
   test('format Rupiah', () {
     expect(rupiah(5000), 'Rp5.000');
@@ -18,10 +18,8 @@ void main() {
     expect(Validators.email('salah'), isNotNull);
   });
 
-  test('login demo, beli tiket, lalu scan menaikkan Live Crowd', () {
+  test('beli tiket lalu scan menaikkan Live Crowd', () {
     final s = AppState.instance;
-    expect(s.login('pengunjung@sumbersira.id', 'salah'), isFalse);
-    expect(s.login('pengunjung@sumbersira.id', 'sira123'), isTrue);
     expect(s.inside, 186);
     final t = s.buyTicket(name: 'Rani', whatsapp: '081234567890', adults: 2, kids: 0, parking: Parking.motor);
     expect(t.total, 13000);

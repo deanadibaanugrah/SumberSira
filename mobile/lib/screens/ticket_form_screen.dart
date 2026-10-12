@@ -22,7 +22,7 @@ class TicketFormScreen extends StatefulWidget {
 
 class _TicketFormScreenState extends State<TicketFormScreen> {
   final _formKey = GlobalKey<FormState>();
-  late final _name = TextEditingController(text: AppState.instance.userName ?? '');
+  final _name = TextEditingController();
   final _whatsapp = TextEditingController();
   int _adults = 2;
   int _kids = 0;

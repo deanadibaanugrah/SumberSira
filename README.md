@@ -51,16 +51,15 @@ Butuh Flutter SDK 3.4x atau lebih baru.
 cd mobile
 flutter pub get
 flutter run            # pilih perangkat: Android, Chrome, atau Windows
-flutter test           # uji format Rupiah, validasi form, login, dan Live Crowd
+flutter test           # uji format Rupiah, validasi form, dan Live Crowd
 flutter build web      # hasil build ada di mobile/build/web
 ```
 
-**Akun demo pengunjung** (login simulasi): `pengunjung@sumbersira.id`, password `sira123` (ada tombol "Isi otomatis").
+Aplikasi pengunjung **tanpa login**: dari Splash langsung masuk ke Beranda. Login hanya ada di web admin.
 
 | Layar | File | Isi |
 |---|---|---|
-| Splash | `screens/splash_screen.dart` | Foto bergerak, riak air dari logo, garis loading, lanjut otomatis 3,2 detik |
-| Login (simulasi) | `screens/login_screen.dart` | Form email + password dengan validasi, cek akun demo |
+| Splash | `screens/splash_screen.dart` | Foto bergerak, riak air dari logo, garis loading, lanjut otomatis 3,2 detik ke Beranda |
 | Beranda | `screens/home_tab.dart` | Banner, status keramaian, tombol beli tiket, menu cepat, rekomendasi jam |
 | Form beli tiket | `screens/ticket_form_screen.dart` | Jumlah pengunjung, parkir, nama, WhatsApp (divalidasi), bayar QRIS (simulasi) |
 | E-Tiket (hasil input) | `screens/eticket_screen.dart` | QR tiket, status, detail, simulasi scan petugas |
@@ -68,7 +67,7 @@ flutter build web      # hasil build ada di mobile/build/web
 | Live Crowd | `screens/crowd_tab.dart` | Persen keramaian dari tiket yang discan + prediksi per jam |
 | Sewa & Booking | `screens/booking_screen.dart` | Daftar wahana dari mock JSON `assets/data/wahana.json` |
 | AI Photo Studio | `screens/ai_photo_screen.dart` | Rancangan fitur AI (belum diimplementasikan) |
-| Profil | `screens/profile_tab.dart` | Data akun, info wisata, tombol keluar |
+| Profil | `screens/profile_tab.dart` | Ringkasan pengunjung dan info wisata |
 
 Struktur `mobile/lib`: `screens/` (layar), `widgets/` (komponen yang dipakai ulang: kartu kaca, logo bergerak, grafik,
 stepper), `models/` (Ticket, Wahana), `data/` (data contoh dan `AppState` berbasis ChangeNotifier), `theme/` (warna dan font),
@@ -88,12 +87,12 @@ Fitur AI lain yang sudah dirancang tampilannya: prediksi keramaian (AI Insight d
 
 | Ketentuan | Dashboard Web (Next.js + TypeScript) | Mobile Application (Flutter) |
 |---|---|---|
-| Halaman login (simulasi) | `/admin/login` | `login_screen.dart` |
+| Halaman login (simulasi) | `/admin/login` | Tidak memakai login (pengunjung langsung masuk dari Splash) |
 | Dashboard / halaman utama | `/admin` | `home_tab.dart` |
 | Data berbentuk tabel atau kartu | Tabel booking, tiket, wahana; kartu ringkasan | Kartu tiket, daftar wahana |
 | Pengelolaan data / form input | `/admin/wahana` (tambah, edit, hapus), `/admin/faq`, `/admin/tiket` | `ticket_form_screen.dart` |
 | Halaman hasil input | Tabel ikut berubah setelah aksi | `eticket_screen.dart`, `tickets_tab.dart` |
-| Navigasi dan validasi | Sidebar, redirect login, validasi form | Named routes, tab bawah, validasi email, password, nama, WhatsApp |
+| Navigasi dan validasi | Sidebar, redirect login, validasi form | Named routes, tab bawah, validasi nama dan WhatsApp |
 | Data | Data contoh + `localStorage` | Data contoh + mock JSON |
 | Rancangan AI | Lihat bagian Rancangan Fitur AI | Layar AI Photo Studio |
 
@@ -101,11 +100,11 @@ Fitur AI lain yang sudah dirancang tampilannya: prediksi keramaian (AI Insight d
 
 | Login admin | Dashboard admin | Tiket & Check-in |
 |---|---|---|
-| ![](docs/screenshots/web-login.png) | ![](docs/screenshots/web-dashboard.png) | ![](docs/screenshots/web-tiket.png) |
+| ![](desain/screenshot/web-login.png) | ![](desain/screenshot/web-dashboard.png) | ![](desain/screenshot/web-tiket.png) |
 
-| Login (Flutter) | Beranda (Flutter) | Beli tiket (Flutter) | Booking (Flutter) |
-|---|---|---|---|
-| ![](docs/screenshots/mobile-login.png) | ![](docs/screenshots/mobile-home.png) | ![](docs/screenshots/mobile-tiket.png) | ![](docs/screenshots/mobile-booking.png) |
+| Beranda (Flutter) | Beli tiket (Flutter) | Booking (Flutter) |
+|---|---|---|
+| ![](desain/screenshot/mobile-home.png) | ![](desain/screenshot/mobile-tiket.png) | ![](desain/screenshot/mobile-booking.png) |
 
 Ekspor desain Figma lengkap ada di folder `desain/`.
 

@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'screens/ai_photo_screen.dart';
 import 'screens/booking_screen.dart';
 import 'screens/eticket_screen.dart';
-import 'screens/login_screen.dart';
 import 'screens/main_shell.dart';
 import 'screens/splash_screen.dart';
 import 'screens/ticket_form_screen.dart';
@@ -28,7 +27,6 @@ class SumberSiraApp extends StatelessWidget {
       initialRoute: AppRoutes.splash,
       routes: {
         AppRoutes.splash: (_) => const SplashScreen(),
-        AppRoutes.login: (_) => const LoginScreen(),
         AppRoutes.main: (_) => const MainShell(),
         AppRoutes.buyTicket: (_) => const TicketFormScreen(),
         AppRoutes.booking: (_) => const BookingScreen(),

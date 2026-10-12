@@ -3,13 +3,12 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 
-import '../data/app_state.dart';
 import '../theme/app_theme.dart';
 import '../utils/routes.dart';
 import '../widgets/logo_mark.dart';
 
 // Layar pembuka: foto bergerak pelan, riak air dari logo, chip keunggulan, dan garis loading.
-// Setelah 3,2 detik pindah otomatis ke Login (atau Home kalau sudah login). Ketuk untuk lewati.
+// Setelah 3,2 detik pindah otomatis ke Beranda. Ketuk untuk lewati.
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
 
@@ -35,7 +34,7 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
     _timer?.cancel();
     // Hanya pindah kalau Splash masih layar paling atas (mis. tidak tertutup layar lain dari link langsung).
     if (!mounted || ModalRoute.of(context)?.isCurrent != true) return;
-    Navigator.pushReplacementNamed(context, AppState.instance.isLoggedIn ? AppRoutes.main : AppRoutes.login);
+    Navigator.pushReplacementNamed(context, AppRoutes.main);
   }
 
   @override

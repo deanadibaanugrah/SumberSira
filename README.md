@@ -68,9 +68,22 @@ Aplikasi pengunjung **tanpa login**: dari Splash langsung masuk ke Beranda. Logi
 
 Struktur `mobile/lib`: `screens/` (layar), `widgets/` (komponen yang dipakai ulang: kartu kaca, logo bergerak, grafik,
 stepper), `models/` (Ticket, Wahana), `data/` (data contoh dan `AppState` berbasis ChangeNotifier), `theme/` (warna dan font),
-`utils/` (rute, format Rupiah, validasi). Package: `google_fonts` (Fraunces, Inter, JetBrains Mono) dan `qr_flutter` (kode QR).
+`utils/` (rute, format Rupiah, validasi). Package: `google_fonts` (Fraunces, Inter, JetBrains Mono), `intl` (format Rupiah dan tanggal Indonesia), `qr_flutter` (kode QR),
+`shared_preferences` (menyimpan nomor WhatsApp terakhir dan pengaturan pengingat), dan `url_launcher` (membuka Google Maps).
 Responsif: isi halaman bisa digulir, lebar maksimal 480 px di tengah untuk tablet/web, ukuran mengikuti layar lewat
 `Expanded`, `Wrap`, `LayoutBuilder`, dan `SafeArea`, jadi tidak ada overflow saat layar kecil atau landscape.
+
+### Materi kuliah mobile yang diterapkan
+
+Di kode, bagian yang memakai materi kuliah diberi komentar penanda, misalnya `// [P4 Checkbox] ...`.
+
+| Pertemuan | Materi | Dipakai di |
+|---|---|---|
+| P2 | `var`, `final`, `const`, class dan object, null safety (`?`, `??`) | `models/ticket.dart`, `data/dummy_data.dart`, `data/app_state.dart` |
+| P3 | StatelessWidget, StatefulWidget, setState, Row, Column, Container, Padding, SizedBox, Stack, Positioned, Expanded | Semua layar, misalnya `home_tab.dart`, `ai_photo_screen.dart`, `widgets/common.dart` |
+| P4 | ElevatedButton, TextField + InputDecoration, TextEditingController, DropdownButton, Slider, Switch, Checkbox, RadioButton, Image.asset, Image.network | `ticket_form_screen.dart` (Dropdown, Radio, Checkbox), `ai_photo_screen.dart` (Slider, Switch, Image.network), `profile_tab.dart` (Switch) |
+| P5 | Navigator.push / pop, kirim data ke halaman lain, named route, navigasi tab, Drawer | `main.dart` (routes), `tickets_tab.dart` (push + data), `main_shell.dart` (tab bawah + Drawer) |
+| P6 | Package dan plugin (google_fonts, intl, shared_preferences, url_launcher), Form + TextFormField + validator | `utils/format.dart` (intl), `data/app_state.dart` (shared_preferences), `profile_tab.dart` (url_launcher), `ticket_form_screen.dart` (Form) |
 
 ## Rancangan Fitur AI
 

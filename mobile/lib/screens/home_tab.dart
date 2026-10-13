@@ -17,7 +17,7 @@ class HomeTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ResponsiveBody(children: [
-      _header(),
+      _header(context),
       const SizedBox(height: 18),
       _hero(),
       const SizedBox(height: 14),
@@ -56,7 +56,9 @@ class HomeTab extends StatelessWidget {
     ]);
   }
 
-  Widget _header() => Row(children: [
+  Widget _header(BuildContext context) => Row(children: [
+        // [P5 Drawer] Tombol menu membuka menu samping milik Scaffold induk (MainShell).
+        IconButton(tooltip: 'Menu', icon: const Icon(Icons.menu), onPressed: () => Scaffold.of(context).openDrawer()),
         const LogoMark(size: 32, ring: true),
         const SizedBox(width: 10),
         Expanded(child: Text('Sumber Sira', style: AppTheme.display(20))),
@@ -68,6 +70,7 @@ class HomeTab extends StatelessWidget {
         child: SizedBox(
           height: 170,
           child: Stack(fit: StackFit.expand, children: [
+            // [P4 Image.asset] Foto dari folder assets yang didaftarkan di pubspec.yaml.
             Image.asset('assets/images/hero-sawah.jpg', fit: BoxFit.cover),
             DecoratedBox(
               decoration: BoxDecoration(
@@ -106,7 +109,7 @@ class HomeTab extends StatelessWidget {
         ]),
       );
 
-  // Empat menu cepat. Dibuat dengan Expanded supaya lebarnya menyesuaikan layar.
+  // [P3 Row + Expanded] Empat menu cepat dibagi rata, lebarnya menyesuaikan layar.
   Widget _quickMenu(BuildContext context) {
     final items = [
       (Icons.calendar_month_outlined, 'Sewa & Booking', () => Navigator.pushNamed(context, AppRoutes.booking)),

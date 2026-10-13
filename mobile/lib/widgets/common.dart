@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../theme/app_theme.dart';
 
-// Kartu kaca (glassmorphism) yang dipakai hampir di semua layar. onTap opsional.
+// [P3 StatelessWidget] Kartu kaca (glassmorphism) yang dipakai hampir di semua layar. onTap opsional.
 class GlassCard extends StatelessWidget {
   const GlassCard({super.key, required this.child, this.padding = const EdgeInsets.all(16), this.radius = 20, this.onTap, this.color});
 
@@ -55,7 +55,8 @@ class PageHeader extends StatelessWidget {
   }
 }
 
-// Tombol utama berbentuk pill Hijau Daun. loading = tampil putaran saat proses.
+// [P4 ElevatedButton] Tombol utama berbentuk pill Hijau Daun; onPressed dijalankan saat ditekan.
+// loading = tampil putaran saat proses.
 class PrimaryButton extends StatelessWidget {
   const PrimaryButton({super.key, required this.label, required this.onPressed, this.icon, this.loading = false, this.height = 50});
 
@@ -70,8 +71,9 @@ class PrimaryButton extends StatelessWidget {
     return SizedBox(
       width: double.infinity,
       height: height,
-      child: FilledButton(
-        style: FilledButton.styleFrom(
+      child: ElevatedButton(
+        style: ElevatedButton.styleFrom(
+          elevation: 0,
           backgroundColor: AppColors.leaf,
           foregroundColor: Colors.white,
           disabledBackgroundColor: AppColors.leaf.withValues(alpha: .5),

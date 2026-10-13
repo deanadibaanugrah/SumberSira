@@ -9,6 +9,7 @@ import '../widgets/logo_mark.dart';
 
 // Layar pembuka: foto bergerak pelan, riak air dari logo, chip keunggulan, dan garis loading.
 // Setelah 3,2 detik pindah otomatis ke Beranda. Ketuk untuk lewati.
+// [P3 StatefulWidget] Punya state (animasi dan timer) yang berubah selama layar tampil.
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
 

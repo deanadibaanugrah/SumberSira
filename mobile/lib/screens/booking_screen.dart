@@ -24,7 +24,8 @@ class _BookingScreenState extends State<BookingScreen> {
   final Map<String, int> _qty = {};
   String _slot = _slots.first;
 
-  // Membaca assets/data/wahana.json lalu mengubahnya menjadi daftar objek Wahana.
+  // Membaca assets/data/wahana.json (mock JSON) lalu mengubahnya menjadi daftar objek Wahana.
+  // async/await karena membaca file butuh waktu; hasilnya ditampilkan lewat FutureBuilder.
   Future<List<Wahana>> _load() async {
     final raw = await rootBundle.loadString('assets/data/wahana.json');
     final list = jsonDecode(raw) as List<dynamic>;

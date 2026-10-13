@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:flutter/foundation.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../models/ticket.dart';
 import '../utils/format.dart';
@@ -16,6 +17,35 @@ class AppState extends ChangeNotifier {
 
   final List<Ticket> tickets = DummyData.seedTickets();
 
+  // Pengaturan yang disimpan di perangkat, tetap ada walau aplikasi ditutup.
+  static const _waKey = 'whatsapp_terakhir';
+  static const _reminderKey = 'pengingat_jam_sepi';
+  String savedWhatsapp = '';
+  bool quietReminder = false;
+
+  // [P6 Plugin shared_preferences] Membaca pengaturan tersimpan saat aplikasi dibuka.
+  // [P2 Null Safety] Operator ?? memberi nilai bawaan kalau data belum pernah disimpan.
+  Future<void> loadSettings() async {
+    final prefs = await SharedPreferences.getInstance();
+    savedWhatsapp = prefs.getString(_waKey) ?? '';
+    quietReminder = prefs.getBool(_reminderKey) ?? false;
+  }
+
+  // Menyimpan pilihan pengingat jam sepi (Switch di Profil).
+  Future<void> setQuietReminder(bool value) async {
+    quietReminder = value;
+    notifyListeners();
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_reminderKey, value);
+  }
+
+  // Menyimpan nomor WhatsApp terakhir supaya form tiket berikutnya terisi otomatis.
+  Future<void> saveWhatsapp(String value) async {
+    savedWhatsapp = value.trim();
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_waKey, savedWhatsapp);
+  }
+
   // Tiket yang dibeli lewat aplikasi ini, yang terbaru di atas.
   List<Ticket> get myTickets => tickets.where((t) => t.mine).toList().reversed.toList();
 
@@ -25,7 +55,7 @@ class AppState extends ChangeNotifier {
   String get crowdLabel => percent < 40 ? 'Sepi' : (percent <= 75 ? 'Sedang' : 'Ramai');
 
   // Membuat tiket baru dari form. Kodenya melanjutkan nomor tiket terakhir.
-  Ticket buyTicket({required String name, required String whatsapp, required int adults, required int kids, required Parking parking}) {
+  Ticket buyTicket({required String name, required String whatsapp, required int adults, required int kids, required Parking parking, PaymentMethod payment = PaymentMethod.qris, String arrival = ''}) {
     final next = tickets.map((t) => int.parse(t.code.substring(3))).reduce(max) + 1;
     final ticket = Ticket(
       code: 'TK-$next',
@@ -34,6 +64,8 @@ class AppState extends ChangeNotifier {
       adults: adults,
       kids: kids,
       parking: parking,
+      payment: payment,
+      arrival: arrival,
       boughtAt: jamSekarang(),
       mine: true,
     );

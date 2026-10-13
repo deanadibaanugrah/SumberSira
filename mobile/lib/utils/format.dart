@@ -1,16 +1,12 @@
-// Format angka ke Rupiah: 45000 -> "Rp45.000".
-String rupiah(int value) {
-  final digits = value.abs().toString();
-  final buffer = StringBuffer();
-  for (var i = 0; i < digits.length; i++) {
-    if (i > 0 && (digits.length - i) % 3 == 0) buffer.write('.');
-    buffer.write(digits[i]);
-  }
-  return '${value < 0 ? '-' : ''}Rp$buffer';
-}
+import 'package:intl/intl.dart';
+
+// [P6 Package intl] Format angka ke Rupiah: 45000 -> "Rp45.000".
+final _rupiah = NumberFormat.currency(locale: 'id_ID', symbol: 'Rp', decimalDigits: 0);
+String rupiah(int value) => _rupiah.format(value);
+
+// [P6 Package intl] Tanggal hari ini dalam Bahasa Indonesia, mis. "Senin, 12 Oktober 2026".
+// Butuh initializeDateFormatting('id_ID') yang sudah dipanggil di main().
+String tanggalHariIni() => DateFormat('EEEE, d MMMM yyyy', 'id_ID').format(DateTime.now());
 
 // Jam sekarang dengan format 10.42.
-String jamSekarang() {
-  final now = DateTime.now();
-  return '${now.hour.toString().padLeft(2, '0')}.${now.minute.toString().padLeft(2, '0')}';
-}
+String jamSekarang() => DateFormat('HH.mm').format(DateTime.now());

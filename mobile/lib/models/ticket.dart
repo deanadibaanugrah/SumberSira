@@ -8,6 +8,15 @@ enum TicketStatus {
   final String label;
 }
 
+// Metode pembayaran tiket.
+enum PaymentMethod {
+  qris('QRIS'),
+  cash('Tunai di loket');
+
+  const PaymentMethod(this.label);
+  final String label;
+}
+
 // Pilihan parkir beserta tarifnya.
 enum Parking {
   none('Tidak', 0),
@@ -20,6 +29,7 @@ enum Parking {
   final int price;
 }
 
+// [P2 Class dan Object] Class Ticket adalah cetakan; setiap tiket yang dibuat adalah object-nya.
 // Satu tiket masuk online. Harga tiket Rp5.000 per orang usia 3 tahun ke atas, balita gratis.
 class Ticket {
   Ticket({
@@ -29,6 +39,8 @@ class Ticket {
     this.kids = 0,
     this.whatsapp = '',
     this.parking = Parking.none,
+    this.payment = PaymentMethod.qris,
+    this.arrival = '',
     this.status = TicketStatus.waiting,
     required this.boughtAt,
     this.checkInAt,
@@ -43,9 +55,12 @@ class Ticket {
   final int adults;
   final int kids;
   final Parking parking;
+  final PaymentMethod payment;
+  final String arrival;
   final String boughtAt;
   final bool mine;
   TicketStatus status;
+  // [P2 Null Safety] Tanda ? artinya boleh kosong (null) selama tiket belum discan.
   String? checkInAt;
 
   int get people => adults + kids;

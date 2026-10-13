@@ -2,6 +2,9 @@ import '../models/ticket.dart';
 
 // Data contoh (tanpa backend). Angkanya sama dengan desain Figma dan web admin.
 class DummyData {
+  // Pilihan perkiraan jam datang di form tiket (DropdownButton).
+  static const arrivalSlots = ['08.00 - 10.00', '10.00 - 12.00', '12.00 - 14.00', '14.00 - 16.00'];
+
   // Prediksi keramaian per jam (persen kapasitas) untuk grafik di Home dan Live Crowd.
   static const forecast = [('08', 15), ('10', 50), ('12', 90), ('14', 85), ('16', 40)];
 
@@ -14,6 +17,7 @@ class DummyData {
       ('Joko Didi', 2, Parking.motor), ('Kel. Wijaya', 4, Parking.mobil), ('PKK Putukrejo', 20, Parking.bus),
       ('Kel. Prasetyo', 6, Parking.mobil), ('Kel. Susanto', 5, Parking.mobil), ('Arisan RT 03', 43, Parking.bus),
     ];
+    // [P2 var] Nilai n bisa berubah: bertambah satu untuk setiap kode tiket.
     var n = 1001;
     final list = <Ticket>[
       for (final t in inside)

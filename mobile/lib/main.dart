@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:intl/date_symbol_data_local.dart';
+
+import 'data/app_state.dart';
 
 import 'screens/ai_photo_screen.dart';
 import 'screens/booking_screen.dart';
@@ -10,7 +13,12 @@ import 'theme/app_theme.dart';
 import 'utils/routes.dart';
 
 // Titik awal aplikasi pengunjung Sumber Sira.
-void main() {
+// [P6] main() dibuat async: menyiapkan format tanggal Indonesia (intl) dan membaca pengaturan
+// yang tersimpan di perangkat (shared_preferences) sebelum aplikasi tampil.
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await initializeDateFormatting('id_ID');
+  await AppState.instance.loadSettings();
   runApp(const SumberSiraApp());
 }
 
@@ -24,6 +32,7 @@ class SumberSiraApp extends StatelessWidget {
       title: 'Sumber Sira',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.dark(),
+      // [P5 Named Route] initialRoute = layar pertama, routes = daftar nama rute dan halamannya.
       initialRoute: AppRoutes.splash,
       routes: {
         AppRoutes.splash: (_) => const SplashScreen(),

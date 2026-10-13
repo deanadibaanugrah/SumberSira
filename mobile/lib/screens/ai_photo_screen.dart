@@ -6,38 +6,107 @@ import '../widgets/common.dart';
 
 // Rancangan fitur AI (belum diimplementasikan): AI Underwater Photo Studio.
 // Tampilan "Sesudah" masih simulasi dengan filter warna; model AI dikerjakan pada tahap berikutnya.
-class AiPhotoScreen extends StatelessWidget {
+class AiPhotoScreen extends StatefulWidget {
   const AiPhotoScreen({super.key});
 
-  // Filter warna: foto bawah air yang kusam (sebelum) dan yang lebih jernih (simulasi sesudah).
+  @override
+  State<AiPhotoScreen> createState() => _AiPhotoScreenState();
+}
+
+class _AiPhotoScreenState extends State<AiPhotoScreen> {
+  // [P4 Slider] Kekuatan enhance 0 sampai 100 (nilai double).
+  double _strength = 60;
+  // [P4 Switch] Tampilkan perbandingan dengan foto asli (true) atau hanya hasilnya (false).
+  bool _compare = true;
+
+  static const _repo = 'https://raw.githubusercontent.com/deanadibaanugrah/SumberSira/main/mobile/assets/images';
+
+  // Filter warna foto asli yang kusam (sebelum di-enhance).
   static const _dull = ColorFilter.matrix([
     .45, .3, .1, 0, 0, //
     .2, .55, .15, 0, 0,
     .2, .3, .45, 0, 0,
     0, 0, 0, 1, 0,
   ]);
-  static const _vivid = ColorFilter.matrix([
-    1.25, 0, 0, 0, -10, //
-    0, 1.15, 0, 0, -5,
-    0, 0, 1.1, 0, 0,
-    0, 0, 0, 1, 0,
-  ]);
+
+  // Filter warna hasil: makin besar nilai Slider, warna makin cerah dan jernih (simulasi hasil AI).
+  ColorFilter _enhanced() {
+    final k = _strength / 100;
+    return ColorFilter.matrix([
+      1 + .3 * k, 0, 0, 0, -12 * k, //
+      0, 1 + .2 * k, 0, 0, -6 * k,
+      0, 0, 1 + .15 * k, 0, 0,
+      0, 0, 0, 1, 0,
+    ]);
+  }
 
   @override
   Widget build(BuildContext context) {
     const steps = [
       'Pengunjung mengunggah foto bawah air dari galeri HP.',
       'Model AI memperbaiki warna yang kebiruan, mengurangi kabut air, dan menajamkan detail.',
-      'Hasil tampil berdampingan dengan foto asli dan bisa disimpan atau dibagikan ke Galeri Komunitas.',
+      'Hasil tampil berdampingan dengan foto asli dan bisa dibagikan ke Galeri Komunitas.',
     ];
     return Scaffold(
       body: AppBackground(
         child: ResponsiveBody(children: [
           const PageHeader(title: 'AI Underwater Photo Studio'),
+          if (_compare)
+            Row(children: [
+              Expanded(child: _photo('Sebelum', _dull)),
+              const SizedBox(width: 12),
+              Expanded(child: _photo('Sesudah', _enhanced(), badge: true)),
+            ])
+          else
+            _photo('Sesudah', _enhanced(), badge: true),
+          const SizedBox(height: 14),
+          GlassCard(
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
+            child: Column(children: [
+              Row(children: [
+                const Text('Kekuatan enhance', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
+                const Spacer(),
+                Text('${_strength.round()}%', style: AppTheme.mono(12)),
+              ]),
+              // onChanged dijalankan selama Slider digeser; setState() memperbarui foto.
+              Slider(
+                value: _strength,
+                max: 100,
+                divisions: 20,
+                label: '${_strength.round()}%',
+                onChanged: (value) => setState(() => _strength = value),
+              ),
+              SwitchListTile(
+                contentPadding: EdgeInsets.zero,
+                value: _compare,
+                onChanged: (value) => setState(() => _compare = value),
+                title: const Text('Bandingkan dengan foto asli', style: TextStyle(fontSize: 12)),
+              ),
+            ]),
+          ),
+          const SizedBox(height: 16),
+          Text('Galeri Komunitas', style: AppTheme.display(16)),
+          const SizedBox(height: 10),
           Row(children: [
-            Expanded(child: _photo('Sebelum', _dull)),
-            const SizedBox(width: 12),
-            Expanded(child: _photo('Sesudah', _vivid, badge: true)),
+            for (var i = 1; i <= 3; i++)
+              Expanded(
+                child: Padding(
+                  padding: EdgeInsets.only(left: i == 1 ? 0 : 6, right: i == 3 ? 0 : 6),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(16),
+                    child: AspectRatio(
+                      aspectRatio: 1,
+                      // [P4 Image.network] Foto diambil langsung dari internet (repo GitHub proyek).
+                      // Kalau gagal dimuat (mis. tanpa internet), errorBuilder memakai foto lokal (Image.asset).
+                      child: Image.network(
+                        '$_repo/komunitas-$i.jpg',
+                        fit: BoxFit.cover,
+                        errorBuilder: (_, _, _) => Image.asset('assets/images/komunitas-$i.jpg', fit: BoxFit.cover),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
           ]),
           const SizedBox(height: 16),
           GlassCard(
@@ -68,6 +137,7 @@ class AiPhotoScreen extends StatelessWidget {
     );
   }
 
+  // [P3 Stack + Positioned] Foto dengan label yang ditumpuk di pojok bawah dan badge di pojok atas.
   Widget _photo(String label, ColorFilter filter, {bool badge = false}) => ClipRRect(
         borderRadius: BorderRadius.circular(20),
         child: AspectRatio(

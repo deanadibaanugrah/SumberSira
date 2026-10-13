@@ -14,6 +14,8 @@ import '../widgets/crowd_widgets.dart';
 class ETicketScreen extends StatelessWidget {
   const ETicketScreen({super.key, required this.code});
 
+  // [P5 Kirim data antar halaman] Kode tiket diterima lewat constructor dari halaman sebelumnya.
+
   final String code;
 
   // Pesan di bawah QR sesuai status tiket.
@@ -41,8 +43,11 @@ class ETicketScreen extends StatelessWidget {
               ('Nama', t.name),
               ('Pengunjung', '${t.adults} orang${t.kids > 0 ? ' + ${t.kids} balita' : ''}'),
               ('Parkir', t.parking.label),
-              ('Dibeli', 'Hari ini, ${t.boughtAt}'),
-              ('Total dibayar', rupiah(t.total)),
+              ('Jam datang', t.arrival.isEmpty ? '-' : t.arrival),
+              ('Berlaku', tanggalHariIni()),
+              ('Dibeli', 'Pukul ${t.boughtAt}'),
+              ('Pembayaran', t.payment == PaymentMethod.cash ? 'Tunai di loket' : 'QRIS, lunas'),
+              ('Total', rupiah(t.total)),
             ];
             return ResponsiveBody(children: [
               const PageHeader(title: 'E-Tiket Masuk'),

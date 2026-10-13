@@ -34,6 +34,7 @@ class _LiveDotState extends State<LiveDot> with SingleTickerProviderStateMixin {
 }
 
 // Pill di Home: "Crowd saat ini: Sedang". Angkanya ikut berubah saat ada tiket yang discan.
+// ListenableBuilder membangun ulang widget setiap AppState memanggil notifyListeners().
 class CrowdPill extends StatelessWidget {
   const CrowdPill({super.key, required this.onTap});
 

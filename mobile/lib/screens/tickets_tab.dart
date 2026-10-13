@@ -7,6 +7,7 @@ import '../utils/routes.dart';
 import '../widgets/app_background.dart';
 import '../widgets/common.dart';
 import '../widgets/crowd_widgets.dart';
+import 'eticket_screen.dart';
 
 // Tab Tiket Saya: menampilkan data hasil input form (tiket yang sudah dibeli).
 class TicketsTab extends StatelessWidget {
@@ -38,7 +39,8 @@ class TicketsTab extends StatelessWidget {
               Padding(
                 padding: const EdgeInsets.only(bottom: 10),
                 child: GlassCard(
-                  onTap: () => Navigator.pushNamed(context, AppRoutes.eticket, arguments: t.code),
+                  // [P5 Navigator.push] Membuka e-tiket dan mengirim kode lewat constructor ETicketScreen.
+                  onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => ETicketScreen(code: t.code))),
                   child: Row(children: [
                     CircleAvatar(radius: 20, backgroundColor: AppColors.leaf.withValues(alpha: .45), child: const Icon(Icons.qr_code_2, size: 20, color: Colors.white)),
                     const SizedBox(width: 12),

@@ -7,8 +7,6 @@ Tugas kelompok (UTS, fokus frontend). Satu rancangan sistem dengan dua antarmuka
 | **Mobile Application** | Pengunjung | **Flutter** (Dart) | `mobile/` |
 | **Dashboard Web** | Admin / pengelola | **Next.js 16 (App Router) + TypeScript + Tailwind CSS 4** | `src/` |
 
-Versi web aplikasi pengunjung (`/app`) tetap ada di Next.js sebagai pembanding desain.
-
 Sumber Sira adalah wisata kolam mata air di Desa Putukrejo, Malang. Aplikasi ini untuk booking sewa alat
 dan wahana, cek keramaian, foto AI bawah air, chatbot, dan ulasan. Panel admin dipakai pengelola.
 
@@ -26,7 +24,6 @@ Buka <http://localhost:3000>:
 | Alamat | Isi |
 |---|---|
 | `/` | Halaman perkenalan web (introduction web) |
-| `/app` | Aplikasi pengunjung, mulai dari splash. Paling pas dibuka di DevTools mode ponsel (375 × 812) |
 | `/admin` | Panel admin (wajib login, lihat akun demo di bawah). Desainnya untuk layar 1440 × 900 |
 
 **Akun demo admin** (tahap frontend, belum ada backend): email `admin@sumbersira.id`, password `sumbersira`.
@@ -110,24 +107,6 @@ Ekspor desain Figma lengkap ada di folder `desain/`.
 
 ## Halaman
 
-### Aplikasi pengunjung
-
-| Rute | Layar Figma |
-|---|---|
-| `/app` | Splash (otomatis lanjut ke Tentang setelah 2,6 detik, atau ketuk) |
-| `/app/tentang` | Tentang Sumber Sira (introduction app) |
-| `/app/onboarding` | Onboarding 1-3: bisa digeser (swipe/drag) **dan** pakai tombol Kembali/Lanjut |
-| `/app/home` | Home |
-| `/app/booking` | Booking Sewa & Wahana |
-| `/app/checkout` | Checkout (Ringkasan Booking) |
-| `/app/konfirmasi` | Konfirmasi & E-Voucher (QR + kirim invoice ke WhatsApp) |
-| `/app/crowd` | Live Crowd Tracker (AI) |
-| `/app/ai-photo` | AI Underwater Photo Studio |
-| `/app/chat` | Chatbot Tanya Sira |
-| `/app/ulasan` | Ulasan & Rating |
-| `/app/tiket` | Tiket masuk online (tambahan, belum ada di Figma): pilih jumlah orang dan parkir, bayar QRIS, dapat e-tiket |
-| `/app/tiket/[kode]` | E-tiket QR, statusnya ikut berubah saat discan petugas |
-
 ### Panel admin
 
 | Rute | Halaman |
@@ -149,12 +128,12 @@ baris tabel membulat, dan status berbentuk pill. Warnanya tetap dua hijau yang s
 
 Angka Live Crowd dihitung dari tiket masuk online: jumlah orang dari tiket yang sudah discan di pintu masuk dan
 belum keluar, dibagi kapasitas 300 orang (di bawah 40% Sepi, sampai 75% Sedang, di atasnya Ramai).
-Karena belum ada backend, tiket disimpan di `localStorage` browser (`src/lib/tiket-store.ts`), jadi aplikasi
-pengunjung dan admin di browser yang sama memakai data yang sama, termasuk antar-tab.
+Karena belum ada backend, web admin menyimpan tiket di `localStorage` browser (`src/lib/tiket-store.ts`) dan aplikasi
+Flutter menyimpan tiketnya di memori (`mobile/lib/data/app_state.dart`).
 
-Cara demo: buka `/app/tiket` di satu tab, beli tiket (pembayaran QRIS disimulasikan), lalu buka `/admin/tiket` di
-tab lain dan masukkan kode tiketnya (mis. `TK-1038` atau cukup `1038`). E-tiket berubah jadi "Di dalam" dan angka di
-Live Crowd, Home, dan dashboard admin langsung naik. Tombol "Kembalikan data contoh hari ini" mengembalikan data awal.
+Cara demo di web admin: buka `/admin/tiket`, ketik kode tiket yang masih "Belum masuk" (mis. `1036`) lalu tekan Check-in.
+Angka di halaman Tiket dan dashboard langsung naik. Tombol "Kembalikan data contoh hari ini" mengembalikan data awal.
+Di aplikasi Flutter: beli tiket, lalu tekan "Simulasi scan petugas" di e-tiket.
 
 ## Syarat dosen dan letaknya
 
@@ -163,29 +142,24 @@ Live Crowd, Home, dan dashboard admin langsung naik. Tombol "Kembalikan data con
 | Gunakan Next.js | Next.js 16 App Router + TypeScript (`src/app`) |
 | UTS fokus frontend web, minimal 3 slide (admin) | 6 halaman admin di `src/app/admin` |
 | Animasi grafik di admin | `src/components/charts/`: batang pill tumbuh dari bawah (`BarChart`), garis prediksi digambar kiri ke kanan (`AreaChart`), donat sentimen muncul (`DonutChart`), batang keluhan mengisi (`ProgressBar`) |
-| Onboarding pakai tombol atau swipe | `src/app/app/onboarding/page.tsx`: keduanya ada, plus tombol titik dan panah keyboard |
-| Introduction web dan app | Web: `src/app/page.tsx`. App: splash + `src/app/app/tentang/page.tsx` |
-| Setelah bayar, invoice terkirim ke WhatsApp user | `src/lib/whatsapp.ts` + halaman konfirmasi. Lihat bagian "Tahap backend" |
+| Introduction web | `src/app/page.tsx` |
 
 ## Struktur folder
 
 ```
+mobile/                Aplikasi pengunjung (Flutter), lihat bagian Aplikasi Mobile
 desain/                PNG ekspor dari Figma (acuan tampilan: mobile 2×, admin 1,25×)
   foto/                Foto asli Sumber Sira yang dipakai aplikasi (di-import lewat src/lib/foto.ts)
 src/app/               Halaman (App Router)
   page.tsx              Intro web
-  app/                 Aplikasi pengunjung (layout lebar maks 430 px)
   admin/               Panel admin (layout sidebar)
 src/components/
-  charts/              BarChart, AreaChart, DonutChart, Heatmap (admin), LineChart (mobile), ProgressBar (beranimasi)
-  mobile/              PageHeader, BottomNav
+  charts/              BarChart, AreaChart, DonutChart, Heatmap (admin), ProgressBar (beranimasi)
   admin/               AdminShell (cek login), Sidebar, DashboardLive, Today, ui.tsx (AdminHeader, Card, StatCard, ...)
-  mobile/LiveCrowd.tsx  Pill, kartu, dan banner Live Crowd yang ikut data tiket
   Logo.tsx              Logo Sumber Sira (tetes air + sawah bertingkat), juga dipakai di src/app/icon.svg
   WahanaIcon.tsx        Ikon per wahana
 src/data/              Data dummy (wahana.ts, dummy.ts). Tahap backend: ganti dengan data API
 src/lib/
-  booking-context.tsx   Keranjang booking (disimpan di sessionStorage)
   tiket-store.ts       Tiket masuk online + angka Live Crowd (disimpan di localStorage)
   admin-auth.ts        Login admin dengan akun demo (simulasi frontend)
   whatsapp.ts          Pesan invoice WhatsApp
@@ -205,22 +179,18 @@ src/lib/
 - Foto aplikasi ada di `desain/foto/` (folder `public/` tidak dipakai lagi) dan di-import lewat `src/lib/foto.ts`,
   jadi Next.js memprosesnya sebagai gambar statis. Foto baru: taruh di `desain/foto/`, lalu tambahkan di `foto.ts`. Semua foto adalah foto asli Sumber Sira; foto galeri admin
   memakai foto yang sama dengan potongan berbeda (`pos` di `src/data/dummy.ts`).
-- Logo Sumber Sira ada di `src/components/Logo.tsx` (Splash, header Home dan Tentang, sidebar admin, intro web)
+- Logo Sumber Sira ada di `src/components/Logo.tsx` (sidebar dan login admin, intro web), versi Flutter di `mobile/lib/widgets/logo_mark.dart`,
   dan sebagai ikon tab browser di `src/app/icon.svg`.
-- Yang tidak ada di Figma dan sengaja ditambahkan: halaman intro web, tombol "Kirim Invoice ke WhatsApp",
-  pesan validasi form, stepper jumlah di Booking, dan modal Tambah/Edit di admin.
-- Ikon profil di navigasi bawah sementara menuju Ulasan & Rating, karena halaman Profil belum didesain.
+- Yang tidak ada di Figma dan sengaja ditambahkan: halaman intro web, pesan validasi form, dan modal Tambah/Edit di admin.
 
 ## Masih simulasi dan perlu dikerjakan di tahap backend
 
 | Fitur | Sekarang (frontend) | Tahap backend |
 |---|---|---|
-| Invoice WhatsApp | Tombol membuka `wa.me` dengan teks invoice terisi otomatis | Buat `POST /api/invoice` yang mengirim otomatis lewat WhatsApp Cloud API (Meta) atau gateway. Panggil setelah pembayaran sukses |
 | Data (wahana, booking, keramaian, FAQ, ulasan, galeri) | Konstanta di `src/data/` | Ambil dari API/database |
 | Booking & pembayaran | Kode booking dibuat di browser, pembayaran tidak diproses | Simpan booking di server. QRIS lewat payment gateway |
-| AI Photo enhance | Filter CSS sebagai simulasi | Kirim foto ke layanan AI, tampilkan hasilnya |
-| Chatbot Tanya Sira | Jawaban berdasar kata kunci | Hubungkan ke data FAQ admin dan/atau layanan AI |
-| Tiket online & Live Crowd | Tiket dan scan disimpan di `localStorage` browser, pembayaran QRIS disimulasikan | Simpan tiket di database, scan QR lewat aplikasi petugas, Live Crowd dihitung server |
+| AI Photo enhance | Filter warna sebagai simulasi (aplikasi Flutter) | Kirim foto ke layanan AI, tampilkan hasilnya |
+| Tiket online & Live Crowd | Tiket disimpan di `localStorage` (web admin) dan di memori (Flutter), pembayaran QRIS disimulasikan | Simpan tiket di database, scan QR lewat aplikasi petugas, Live Crowd dihitung server |
 | Login admin | Akun demo dicek di browser, sesi di `localStorage`/`sessionStorage` (hanya simulasi tampilan) | Cek akun di server, sesi di cookie httpOnly, lindungi `/admin` di server, jangan simpan password di kode |
 
 **Keamanan untuk tahap backend:**

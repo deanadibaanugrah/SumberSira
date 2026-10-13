@@ -4,7 +4,7 @@ import { useSyncExternalStore } from "react";
 
 // Tiket masuk online (tahap frontend, belum ada backend).
 // Data disimpan di localStorage supaya aplikasi pengunjung dan panel admin di browser yang sama
-// memakai data yang sama: tiket dibeli di /app/tiket, discan petugas di /admin/tiket,
+// memakai data yang sama: tiket discan petugas di /admin/tiket,
 // lalu angka Live Crowd langsung ikut berubah (juga di tab lain lewat event "storage").
 // Live Crowd = jumlah orang dari tiket yang sudah discan masuk dan belum keluar, dibagi kapasitas.
 // Tahap backend: simpan tiket di database dan ganti fungsi-fungsi di bawah dengan panggilan API.

@@ -43,9 +43,27 @@ class Ticket {
     this.arrival = '',
     this.status = TicketStatus.waiting,
     required this.boughtAt,
+    this.date = '',
     this.checkInAt,
     this.mine = false,
   });
+
+  // Membaca tiket yang tersimpan di perangkat (kebalikan dari toJson).
+  factory Ticket.fromJson(Map<String, dynamic> json) => Ticket(
+        code: json['code'] as String,
+        name: json['name'] as String,
+        whatsapp: (json['whatsapp'] as String?) ?? '',
+        adults: json['adults'] as int,
+        kids: (json['kids'] as int?) ?? 0,
+        parking: Parking.values.byName(json['parking'] as String),
+        payment: PaymentMethod.values.byName(json['payment'] as String),
+        arrival: (json['arrival'] as String?) ?? '',
+        status: TicketStatus.values.byName(json['status'] as String),
+        boughtAt: json['boughtAt'] as String,
+        date: (json['date'] as String?) ?? '',
+        checkInAt: json['checkInAt'] as String?,
+        mine: true,
+      );
 
   static const int pricePerPerson = 5000;
 
@@ -58,6 +76,8 @@ class Ticket {
   final PaymentMethod payment;
   final String arrival;
   final String boughtAt;
+  // Tanggal berlaku tiket. Kosong untuk data contoh, artinya hari ini.
+  final String date;
   final bool mine;
   TicketStatus status;
   // [P2 Null Safety] Tanda ? artinya boleh kosong (null) selama tiket belum discan.
@@ -65,4 +85,20 @@ class Ticket {
 
   int get people => adults + kids;
   int get total => adults * pricePerPerson + parking.price;
+
+  // Mengubah tiket menjadi Map supaya bisa disimpan sebagai JSON di shared_preferences.
+  Map<String, dynamic> toJson() => {
+        'code': code,
+        'name': name,
+        'whatsapp': whatsapp,
+        'adults': adults,
+        'kids': kids,
+        'parking': parking.name,
+        'payment': payment.name,
+        'arrival': arrival,
+        'status': status.name,
+        'boughtAt': boughtAt,
+        'date': date,
+        'checkInAt': checkInAt,
+      };
 }

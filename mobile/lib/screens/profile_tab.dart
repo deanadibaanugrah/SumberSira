@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 import '../data/app_state.dart';
 import '../theme/app_theme.dart';
+import '../utils/launcher.dart';
 import '../widgets/app_background.dart';
 import '../widgets/common.dart';
 
@@ -12,19 +12,6 @@ class ProfileTab extends StatelessWidget {
 
   static const _maps = 'https://www.google.com/maps/search/?api=1&query=Sumber+Sira+Putukrejo+Malang';
   static const _route = 'https://www.google.com/maps/dir/?api=1&destination=Sumber+Sira+Putukrejo+Malang';
-
-  // [P6 Plugin url_launcher] Meminta sistem membuka tautan di aplikasi lain (Google Maps / browser).
-  Future<void> _open(BuildContext context, String url) async {
-    var ok = false;
-    try {
-      ok = await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
-    } catch (_) {
-      ok = false;
-    }
-    if (!ok && context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Tautan tidak bisa dibuka di perangkat ini.')));
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -49,7 +36,10 @@ class ProfileTab extends StatelessWidget {
               Expanded(
                 child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                   const Text('Pengunjung', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
-                  Text('${s.myTickets.length} tiket dibeli hari ini', style: TextStyle(fontSize: 11, color: AppColors.white(.7))),
+                  // Tanpa login: identitas pengunjung cukup nomor WhatsApp terakhir yang dipakai.
+                  Text(s.savedWhatsapp.isEmpty ? 'Belum ada nomor WhatsApp tersimpan' : 'WhatsApp ${s.savedWhatsapp}',
+                      style: TextStyle(fontSize: 11, color: AppColors.white(.7))),
+                  Text('${s.myTickets.length} tiket dibeli dari perangkat ini', style: TextStyle(fontSize: 11, color: AppColors.white(.7))),
                 ]),
               ),
             ]),
@@ -81,7 +71,7 @@ class ProfileTab extends StatelessWidget {
             ]),
           ),
           const SizedBox(height: 16),
-          PrimaryButton(label: 'Buka Lokasi di Google Maps', icon: Icons.map_outlined, height: 46, onPressed: () => _open(context, _maps)),
+          PrimaryButton(label: 'Buka Lokasi di Google Maps', icon: Icons.map_outlined, height: 46, onPressed: () => bukaTautan(context, _maps)),
           const SizedBox(height: 10),
           OutlinedButton.icon(
             style: OutlinedButton.styleFrom(
@@ -90,7 +80,7 @@ class ProfileTab extends StatelessWidget {
               side: BorderSide(color: AppColors.white(.3)),
               shape: const StadiumBorder(),
             ),
-            onPressed: () => _open(context, _route),
+            onPressed: () => bukaTautan(context, _route),
             icon: const Icon(Icons.directions_outlined, size: 18),
             label: const Text('Petunjuk Arah'),
           ),

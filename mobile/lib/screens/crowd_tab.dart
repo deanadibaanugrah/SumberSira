@@ -12,24 +12,15 @@ class CrowdTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ResponsiveBody(children: [
-      Text('Live Crowd Tracker', style: AppTheme.display(22)),
+      Text('Live Crowd Tracker (AI)', style: AppTheme.display(22)),
       const SizedBox(height: 16),
       const CrowdStatusCard(),
       const SizedBox(height: 16),
-      GlassCard(
+      const GlassCard(
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          const Text('Prediksi Keramaian Hari Ini', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
-          const SizedBox(height: 14),
-          const ForecastBars(height: 120),
-          const SizedBox(height: 10),
-          Row(children: [
-            for (final (label, color) in [('Sepi', AppColors.leaf), ('Ramai', Colors.white)]) ...[
-              Container(width: 9, height: 9, decoration: BoxDecoration(color: color, shape: BoxShape.circle)),
-              const SizedBox(width: 6),
-              Text(label, style: const TextStyle(fontSize: 10)),
-              const SizedBox(width: 16),
-            ],
-          ]),
+          Text('Prediksi Keramaian Hari Ini', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
+          SizedBox(height: 14),
+          ForecastLine(height: 140),
         ]),
       ),
       const SizedBox(height: 16),
@@ -47,6 +38,8 @@ class CrowdTab extends StatelessWidget {
           ),
         ]),
       ),
+      const SizedBox(height: 14),
+      const CrowdLegend(),
     ]);
   }
 }

@@ -3,9 +3,11 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../models/booking.dart';
 import '../models/wahana.dart';
 import '../theme/app_theme.dart';
 import '../utils/format.dart';
+import '../utils/routes.dart';
 import '../widgets/app_background.dart';
 import '../widgets/common.dart';
 
@@ -34,34 +36,19 @@ class _BookingScreenState extends State<BookingScreen> {
 
   int _total(List<Wahana> items) => items.fold(0, (sum, w) => sum + (_qty[w.id] ?? 0) * w.price);
 
-  // Tombol Pesan: minimal satu item, lalu tampilkan ringkasan booking.
-  void _order(List<Wahana> items) {
+  // Tombol Lanjut Booking: minimal satu item, lalu buka Checkout sambil membawa isi booking.
+  void _next(List<Wahana> items) {
     final chosen = items.where((w) => (_qty[w.id] ?? 0) > 0).toList();
     if (chosen.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Pilih minimal satu wahana dulu.')));
       return;
     }
-    showDialog<void>(
-      context: context,
-      builder: (_) => AlertDialog(
-        backgroundColor: AppColors.forest,
-        title: Text('Booking Berhasil!', style: AppTheme.display(18)),
-        content: Text(
-          'Jam $_slot\n${chosen.map((w) => '${_qty[w.id]}x ${w.name}').join('\n')}\n\nTotal ${rupiah(_total(items))}',
-          style: const TextStyle(fontSize: 13),
-        ),
-        actions: [
-          FilledButton(
-            style: FilledButton.styleFrom(backgroundColor: AppColors.leaf),
-            onPressed: () {
-              Navigator.pop(context);
-              setState(_qty.clear);
-            },
-            child: const Text('Oke'),
-          ),
-        ],
-      ),
+    final draft = BookingDraft(
+      slot: _slot,
+      lines: [for (final w in chosen) BookingLine(name: w.label, qty: _qty[w.id]!, price: w.price)],
     );
+    // [P5 Kirim data antar halaman] Isi booking dikirim sebagai arguments ke rute Checkout.
+    Navigator.pushNamed(context, AppRoutes.checkout, arguments: draft);
   }
 
   @override
@@ -137,7 +124,7 @@ class _BookingScreenState extends State<BookingScreen> {
                     Text(rupiah(_total(items)), style: AppTheme.mono(15, weight: FontWeight.w600)),
                   ]),
                 ),
-                SizedBox(width: 170, child: PrimaryButton(label: 'Pesan Sekarang', height: 44, onPressed: () => _order(items))),
+                SizedBox(width: 170, child: PrimaryButton(label: 'Lanjut Booking', height: 44, onPressed: () => _next(items))),
               ]),
             ),
           ),

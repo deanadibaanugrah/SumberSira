@@ -5,6 +5,7 @@ import '../data/app_state.dart';
 import '../models/ticket.dart';
 import '../theme/app_theme.dart';
 import '../utils/format.dart';
+import '../utils/launcher.dart';
 import '../utils/routes.dart';
 import '../widgets/app_background.dart';
 import '../widgets/common.dart';
@@ -25,6 +26,17 @@ class ETicketScreen extends StatelessWidget {
     TicketStatus.out: 'Tiket sudah dipakai. Terima kasih sudah berkunjung!',
   };
 
+  // Isi pesan WhatsApp berisi ringkasan e-tiket.
+  String _waMessage(Ticket t) => [
+        'E-Tiket Sumber Sira',
+        'Kode: ${t.code}',
+        'Nama: ${t.name}',
+        'Pengunjung: ${t.people} orang',
+        'Berlaku: ${t.date.isEmpty ? tanggalHariIni() : t.date}',
+        'Total: ${rupiah(t.total)}',
+        'Tunjukkan kode ini ke petugas di pintu masuk.',
+      ].join('\n');
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -44,7 +56,8 @@ class ETicketScreen extends StatelessWidget {
               ('Pengunjung', '${t.adults} orang${t.kids > 0 ? ' + ${t.kids} balita' : ''}'),
               ('Parkir', t.parking.label),
               ('Jam datang', t.arrival.isEmpty ? '-' : t.arrival),
-              ('Berlaku', tanggalHariIni()),
+              ('WhatsApp', t.whatsapp.isEmpty ? '-' : t.whatsapp),
+              ('Berlaku', t.date.isEmpty ? tanggalHariIni() : t.date),
               ('Dibeli', 'Pukul ${t.boughtAt}'),
               ('Pembayaran', t.payment == PaymentMethod.cash ? 'Tunai di loket' : 'QRIS, lunas'),
               ('Total', rupiah(t.total)),
@@ -102,6 +115,24 @@ class ETicketScreen extends StatelessWidget {
                   label: const Text('Simulasi scan petugas (demo)'),
                 ),
                 const SizedBox(height: 10),
+              ],
+              // Tanpa login: e-tiket dikirim ke WhatsApp pemesan dan riwayatnya dicari lewat nomor itu.
+              if (t.whatsapp.isNotEmpty) ...[
+                OutlinedButton.icon(
+                  style: OutlinedButton.styleFrom(
+                    minimumSize: const Size.fromHeight(44),
+                    foregroundColor: Colors.white,
+                    side: BorderSide(color: AppColors.white(.3)),
+                    shape: const StadiumBorder(),
+                  ),
+                  onPressed: () => kirimWhatsApp(context, t.whatsapp, _waMessage(t)),
+                  icon: const Icon(Icons.chat_outlined, size: 18),
+                  label: const Text('Kirim E-Tiket ke WhatsApp'),
+                ),
+                const SizedBox(height: 6),
+                Text('Riwayat tiket ini tersimpan di nomor ${t.whatsapp}. Buka Tiket Saya untuk melihatnya lagi.',
+                    textAlign: TextAlign.center, style: TextStyle(fontSize: 10, color: AppColors.white(.65))),
+                const SizedBox(height: 12),
               ],
               PrimaryButton(
                 label: 'Kembali ke Beranda',

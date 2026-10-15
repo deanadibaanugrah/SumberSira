@@ -14,7 +14,7 @@ class BookingLine {
   Map<String, dynamic> toJson() => {'name': name, 'qty': qty, 'price': price};
 }
 
-// Isi booking yang dibawa dari layar Sewa & Booking ke layar Checkout (belum ada data pemesan).
+// Isi booking yang dibawa dari bagian Sewa & Booking ke layar Checkout (belum ada data pemesan).
 class BookingDraft {
   const BookingDraft({required this.slot, required this.lines});
 
@@ -24,7 +24,17 @@ class BookingDraft {
   int get total => lines.fold(0, (sum, l) => sum + l.subtotal);
 }
 
-// Booking yang sudah dikonfirmasi. Kodenya dipakai sebagai isi QR e-voucher.
+// Pesanan yang sudah diisi nama dan WhatsApp di Checkout, dibawa ke layar bayar QRIS.
+// Baru disimpan menjadi Booking setelah pembayaran QRIS selesai.
+class BookingRequest {
+  const BookingRequest({required this.draft, required this.name, required this.whatsapp});
+
+  final BookingDraft draft;
+  final String name;
+  final String whatsapp;
+}
+
+// Booking yang sudah dibayar lewat QRIS. Kodenya dipakai sebagai isi QR di invoice.
 class Booking {
   const Booking({
     required this.code,
@@ -32,7 +42,6 @@ class Booking {
     required this.whatsapp,
     required this.slot,
     required this.lines,
-    required this.cash,
     required this.orderedAt,
     this.date = '',
   });
@@ -43,7 +52,6 @@ class Booking {
         whatsapp: json['whatsapp'] as String,
         slot: json['slot'] as String,
         lines: [for (final l in json['lines'] as List<dynamic>) BookingLine.fromJson(l as Map<String, dynamic>)],
-        cash: json['cash'] as bool,
         orderedAt: json['orderedAt'] as String,
         date: (json['date'] as String?) ?? '',
       );
@@ -53,8 +61,6 @@ class Booking {
   final String whatsapp;
   final String slot;
   final List<BookingLine> lines;
-  // true = bayar tunai di lokasi, false = QRIS.
-  final bool cash;
   final String orderedAt;
   final String date;
 
@@ -69,7 +75,6 @@ class Booking {
         'whatsapp': whatsapp,
         'slot': slot,
         'lines': [for (final l in lines) l.toJson()],
-        'cash': cash,
         'orderedAt': orderedAt,
         'date': date,
       };

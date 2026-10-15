@@ -1,3 +1,5 @@
+import 'package:flutter/material.dart';
+
 // Satu alat sewa atau wahana, dibaca dari mock JSON (assets/data/wahana.json).
 class Wahana {
   const Wahana({required this.id, required this.name, required this.category, required this.price, this.unit = ''});
@@ -22,4 +24,16 @@ class Wahana {
     if (unit.isEmpty) return name;
     return unit.contains('menit') ? '$name ($unit)' : '$name (per $unit)';
   }
+
+  // Ikon yang sesuai dengan nama item, mirip ikon di web admin (pelampung, gembok, kereta, dst.).
+  IconData get icon => switch (id) {
+        'ban-kecil' || 'ban-besar' => Icons.support,
+        'loker' => Icons.lock_outline,
+        'kereta-sawah' => Icons.train_outlined,
+        'bebek-gayung' => Icons.sailing_outlined,
+        'atv' => Icons.two_wheeler,
+        'flying-fox' => Icons.paragliding,
+        'komedi-putar' => Icons.attractions,
+        _ => Icons.local_activity_outlined,
+      };
 }

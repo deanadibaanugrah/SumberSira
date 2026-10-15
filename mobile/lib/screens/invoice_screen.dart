@@ -10,21 +10,21 @@ import '../utils/routes.dart';
 import '../widgets/app_background.dart';
 import '../widgets/common.dart';
 
-// Konfirmasi & E-Voucher: tampil setelah Checkout, berisi QR kode booking dan ringkasan pesanan.
-// Juga dibuka dari riwayat di Tiket Saya.
-class VoucherScreen extends StatelessWidget {
-  const VoucherScreen({super.key, required this.code});
+// Booking Berhasil & Invoice: tampil setelah pembayaran QRIS, berisi QR kode booking dan rincian
+// yang sudah dibayar. Juga dibuka dari riwayat invoice di Tiket & Booking.
+class InvoiceScreen extends StatelessWidget {
+  const InvoiceScreen({super.key, required this.code});
 
   final String code;
 
-  // Isi pesan WhatsApp berisi ringkasan e-voucher.
+  // Isi pesan WhatsApp berisi ringkasan invoice.
   String _waMessage(Booking b) => [
-        'E-Voucher Sumber Sira',
+        'Invoice Sumber Sira',
         'Kode: ${b.code}',
         'Nama: ${b.name}',
         'Jam: ${labelJam(b.slot)}',
         'Item: ${b.itemsText}',
-        'Total: ${rupiah(b.total)} (${b.cash ? 'bayar tunai di lokasi' : 'QRIS, lunas'})',
+        'Total: ${rupiah(b.total)} (QRIS, lunas)',
       ].join('\n');
 
   @override
@@ -34,7 +34,7 @@ class VoucherScreen extends StatelessWidget {
       body: AppBackground(
         child: b == null
             ? ResponsiveBody(children: [
-                const PageHeader(title: 'E-Voucher'),
+                const PageHeader(title: 'Invoice'),
                 GlassCard(child: Text('Booking $code tidak ditemukan.')),
               ])
             : ResponsiveBody(children: [
@@ -54,9 +54,10 @@ class VoucherScreen extends StatelessWidget {
                 const SizedBox(height: 18),
                 Text('Booking Berhasil!', textAlign: TextAlign.center, style: AppTheme.display(26)),
                 const SizedBox(height: 6),
-                Text('Tunjukkan QR ini di pintu masuk', textAlign: TextAlign.center, style: TextStyle(fontSize: 12, color: AppColors.white(.75))),
+                Text('Pembayaran QRIS diterima. Tunjukkan QR ini di pintu masuk.',
+                    textAlign: TextAlign.center, style: TextStyle(fontSize: 12, color: AppColors.white(.75))),
                 const SizedBox(height: 4),
-                Text('Kode: ${b.code}', textAlign: TextAlign.center, style: AppTheme.mono(11)),
+                Text('Invoice ${b.code}', textAlign: TextAlign.center, style: AppTheme.mono(11)),
                 const SizedBox(height: 18),
                 Center(
                   child: Container(
@@ -74,8 +75,9 @@ class VoucherScreen extends StatelessWidget {
                       ('Nama Pemesan', b.name),
                       ('Waktu Kunjungan', labelJam(b.slot)),
                       ('Item', b.itemsText),
-                      ('Pembayaran', b.cash ? 'Cash di lokasi' : 'QRIS, lunas'),
-                      (b.cash ? 'Total Dibayar di Lokasi' : 'Total Dibayar', rupiah(b.total)),
+                      ('Dibayar', '${b.date.isEmpty ? tanggalHariIni() : b.date}, ${b.orderedAt}'),
+                      ('Pembayaran', 'QRIS, lunas'),
+                      ('Total Dibayar', rupiah(b.total)),
                     ])
                       Padding(
                         padding: const EdgeInsets.symmetric(vertical: 6),
@@ -96,14 +98,14 @@ class VoucherScreen extends StatelessWidget {
                   ),
                   onPressed: () => kirimWhatsApp(context, b.whatsapp, _waMessage(b)),
                   icon: const Icon(Icons.chat_outlined, size: 18),
-                  label: const Text('Kirim E-Voucher ke WhatsApp'),
+                  label: const Text('Kirim Invoice ke WhatsApp'),
                 ),
                 const SizedBox(height: 6),
-                Text('Riwayat booking tersimpan di nomor ${b.whatsapp}.',
+                Text('Riwayat invoice tersimpan di nomor ${b.whatsapp}.',
                     textAlign: TextAlign.center, style: TextStyle(fontSize: 10, color: AppColors.white(.65))),
                 const SizedBox(height: 12),
                 PrimaryButton(
-                  label: 'Kembali ke Beranda',
+                  label: 'Selesai',
                   onPressed: () => Navigator.popUntil(context, ModalRoute.withName(AppRoutes.main)),
                 ),
               ]),

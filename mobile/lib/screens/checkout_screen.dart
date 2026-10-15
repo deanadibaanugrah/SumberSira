@@ -9,12 +9,12 @@ import '../utils/validators.dart';
 import '../widgets/app_background.dart';
 import '../widgets/common.dart';
 
-// Checkout (Ringkasan Booking): menampilkan jam dan item dari layar Booking, lalu meminta
-// nama, nomor WhatsApp, dan metode pembayaran. Nomor WhatsApp menjadi kunci riwayat booking.
+// Checkout (Ringkasan Booking): menampilkan jam dan item dari bagian Sewa & Booking, lalu meminta
+// nama dan nomor WhatsApp. Pembayaran hanya QRIS. Nomor WhatsApp menjadi kunci riwayat booking.
 class CheckoutScreen extends StatefulWidget {
   const CheckoutScreen({super.key, required this.draft});
 
-  // [P5 Kirim data antar halaman] Isi booking diterima dari BookingScreen lewat arguments.
+  // [P5 Kirim data antar halaman] Isi booking diterima dari BookingSection lewat arguments.
   final BookingDraft draft;
 
   @override
@@ -25,8 +25,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   final _formKey = GlobalKey<FormState>();
   final _name = TextEditingController();
   late final _whatsapp = TextEditingController(text: AppState.instance.savedWhatsapp);
-  // true = Cash di Lokasi, false = QRIS.
-  bool _cash = true;
 
   @override
   void dispose() {
@@ -35,12 +33,13 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     super.dispose();
   }
 
-  // Konfirmasi & Bayar: cek validator, simpan booking, lalu ganti layar ini dengan e-voucher.
-  void _confirm() {
+  // Bayar dengan QRIS: cek validator, lalu buka halaman scan QRIS sambil membawa pesanan.
+  // Booking baru disimpan setelah pembayaran QRIS selesai.
+  void _pay() {
     if (!_formKey.currentState!.validate()) return;
-    final booking = AppState.instance.addBooking(draft: widget.draft, name: _name.text, whatsapp: _whatsapp.text, cash: _cash);
     AppState.instance.saveWhatsapp(_whatsapp.text);
-    Navigator.pushReplacementNamed(context, AppRoutes.voucher, arguments: booking.code);
+    final request = BookingRequest(draft: widget.draft, name: _name.text, whatsapp: _whatsapp.text);
+    Navigator.pushNamed(context, AppRoutes.payment, arguments: request);
   }
 
   @override
@@ -92,25 +91,25 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
               validator: Validators.whatsapp,
             ),
             const SizedBox(height: 4),
-            Text('E-voucher dikirim ke nomor ini dan riwayatnya bisa dicari di Tiket Saya.',
+            Text('Invoice dikirim ke nomor ini dan riwayatnya bisa dicari di Tiket Saya.',
                 style: TextStyle(fontSize: 10, color: AppColors.white(.65))),
             const SectionLabel('Metode Pembayaran'),
-            // [P4 ChoiceChip] Pilih satu metode pembayaran; pilihan aktif berwarna Hijau Daun.
-            Wrap(spacing: 10, children: [
-              for (final (cash, label) in [(true, 'Cash di Lokasi'), (false, 'QRIS')])
-                ChoiceChip(
-                  label: Text(label),
-                  selected: _cash == cash,
-                  showCheckmark: false,
-                  onSelected: (_) => setState(() => _cash = cash),
-                  selectedColor: AppColors.leaf.withValues(alpha: .7),
-                  backgroundColor: AppColors.white(.1),
-                  side: BorderSide(color: AppColors.white(.25)),
-                  shape: const StadiumBorder(),
-                  labelStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Colors.white),
-                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+            // Pembayaran sewa dan wahana hanya lewat QRIS.
+            GlassCard(
+              color: AppColors.leaf.withValues(alpha: .3),
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+              child: Row(children: [
+                const CircleAvatar(radius: 18, backgroundColor: Colors.white, child: Icon(Icons.qr_code_2, color: AppColors.forest, size: 20)),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                    const Text('QRIS', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
+                    Text('Scan pakai aplikasi bank atau e-wallet', style: TextStyle(fontSize: 10, color: AppColors.white(.75))),
+                  ]),
                 ),
-            ]),
+                const Icon(Icons.check_circle, color: Colors.white, size: 20),
+              ]),
+            ),
           ]),
         ),
       ),
@@ -127,7 +126,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                   Text(rupiah(draft.total), style: AppTheme.mono(15, weight: FontWeight.w600)),
                 ]),
               ),
-              SizedBox(width: 200, child: PrimaryButton(label: 'Konfirmasi & Bayar', height: 44, onPressed: _confirm)),
+              SizedBox(width: 200, child: PrimaryButton(label: 'Bayar dengan QRIS', height: 44, onPressed: _pay)),
             ]),
           ),
         ),

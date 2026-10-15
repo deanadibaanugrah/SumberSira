@@ -99,7 +99,10 @@ class AppState extends ChangeNotifier {
   // Live Crowd = jumlah orang dari tiket yang sudah discan masuk, dibagi kapasitas.
   int get inside => tickets.where((t) => t.status == TicketStatus.inside).fold(0, (sum, t) => sum + t.people);
   int get percent => (inside / capacity * 100).round();
-  String get crowdLabel => percent < 40 ? 'Sepi' : (percent <= 75 ? 'Sedang' : 'Ramai');
+  String get crowdLabel => labelFor(percent);
+
+  // Label keramaian dari persen kapasitas: di bawah 40% Sepi, sampai 75% Sedang, di atasnya Ramai.
+  static String labelFor(int percent) => percent < 40 ? 'Sepi' : (percent <= 75 ? 'Sedang' : 'Ramai');
 
   // Membuat tiket baru dari form. Kodenya melanjutkan nomor tiket terakhir.
   Ticket buyTicket({required String name, required String whatsapp, required int adults, required int kids, required Parking parking, PaymentMethod payment = PaymentMethod.qris, String arrival = ''}) {
@@ -123,15 +126,14 @@ class AppState extends ChangeNotifier {
     return ticket;
   }
 
-  // Menyimpan booking dari layar Checkout. Kode: SS-tanggal-nomor urut, mis. SS-20261014-043.
-  Booking addBooking({required BookingDraft draft, required String name, required String whatsapp, required bool cash}) {
+  // Menyimpan booking setelah pembayaran QRIS selesai. Kode: SS-tanggal-nomor urut, mis. SS-20261014-043.
+  Booking addBooking(BookingRequest request) {
     final booking = Booking(
       code: 'SS-${tanggalKode()}-${(43 + bookings.length).toString().padLeft(3, '0')}',
-      name: name.trim(),
-      whatsapp: nomorWa(whatsapp),
-      slot: draft.slot,
-      lines: draft.lines,
-      cash: cash,
+      name: request.name.trim(),
+      whatsapp: nomorWa(request.whatsapp),
+      slot: request.draft.slot,
+      lines: request.draft.lines,
       orderedAt: jamSekarang(),
       date: tanggalHariIni(),
     );

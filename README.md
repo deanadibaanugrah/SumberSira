@@ -48,15 +48,18 @@ Butuh Flutter SDK 3.4x atau lebih baru.
 cd mobile
 flutter pub get
 flutter run            # pilih perangkat: Android atau Chrome
-flutter test           # uji format Rupiah, validasi form, Live Crowd, dan riwayat per WhatsApp
+flutter test           # uji format Rupiah, validasi form, Live Crowd, jam booking, dan riwayat per WhatsApp
 flutter build web      # hasil build ada di mobile/build/web
 flutter build apk      # APK Android ada di mobile/build/app/outputs/flutter-apk/app-release.apk
 ```
 
 Aplikasi pengunjung **tanpa login**. Login hanya ada di web admin. Sebagai gantinya, **riwayat tiket dan booking
-disimpan per nomor WhatsApp**: nomor yang dipakai saat membeli menjadi kunci riwayat. Di Tiket Saya pengunjung cukup
-mengetik nomor WhatsApp lalu menekan Cari (nomor terakhir terisi otomatis), dan e-tiket bisa dikirim ke WhatsApp
-dari layar E-Tiket. Pertama kali dibuka alurnya Splash, Tentang, Onboarding, lalu Beranda. Berikutnya Splash langsung ke Beranda.
+disimpan per nomor WhatsApp**: nomor yang dipakai saat membeli menjadi kunci riwayat. Di Tiket & Booking pengunjung cukup
+mengetik nomor WhatsApp lalu menekan Cari (nomor terakhir terisi otomatis), dan e-tiket atau invoice bisa dikirim ke WhatsApp.
+Pertama kali dibuka alurnya Splash, Tentang, Onboarding, lalu Beranda. Berikutnya Splash langsung ke Beranda.
+
+Navigasi bawah berisi 4 tab: **Beranda, Tiket & Booking, Galeri, Profil**. Tidak ada menu samping (garis tiga);
+isinya dipindah menjadi tombol di Beranda, dan chatbot Tanya Sira mengambang di Beranda.
 
 Coba riwayat dengan nomor contoh `081234567890`.
 
@@ -65,23 +68,24 @@ Coba riwayat dengan nomor contoh `081234567890`.
 | Splash | `screens/splash_screen.dart` | Foto bergerak, riak air dari logo, garis loading, lanjut otomatis 3,2 detik |
 | Tentang | `screens/about_screen.dart` | Foto lokasi, fasilitas, jam buka, harga tiket, parkir, pembayaran |
 | Onboarding | `screens/onboarding_screen.dart` | 3 halaman yang bisa digeser (PageView), tombol Kembali/Lanjut, Lewati |
-| Beranda | `screens/home_tab.dart` | Banner, lonceng notifikasi, status keramaian, tombol beli tiket, menu cepat, rekomendasi jam |
+| Beranda | `screens/home_tab.dart` | Bar atas dengan garis pembatas, banner foto selebar layar yang bisa digeser (5 foto, teks berbeda), status crowd, tombol AI Photo / Ulasan / Tentang, grafik garis jumlah pengunjung per jam |
+| Chatbot Tanya Sira | `widgets/floating_chat.dart` | Lingkaran kepala robot mengambang di Beranda, bisa digeser ke mana saja; diketuk membesar jadi kotak chat (bukan layar penuh) |
+| Tiket & Booking | `screens/tickets_tab.dart`, `widgets/booking_section.dart` | Beli tiket, Tiket Saya (riwayat tiket dan invoice per nomor WhatsApp), lalu Sewa & Booking: jam selang 1 jam, daftar wahana dari mock JSON `assets/data/wahana.json` dengan ikon sesuai item |
 | Form beli tiket | `screens/ticket_form_screen.dart` | Jumlah pengunjung, jam datang, parkir, nama, WhatsApp (divalidasi), bayar QRIS atau tunai |
 | E-Tiket (hasil input) | `screens/eticket_screen.dart` | QR tiket, status, detail, kirim e-tiket ke WhatsApp, simulasi scan petugas |
-| Tiket Saya | `screens/tickets_tab.dart` | Cari riwayat tiket dan voucher booking lewat nomor WhatsApp |
-| Live Crowd | `screens/crowd_tab.dart` | Persen keramaian dari tiket yang discan + grafik garis prediksi per jam |
-| Sewa & Booking | `screens/booking_screen.dart` | Daftar wahana dari mock JSON `assets/data/wahana.json`, pilih jam dan jumlah |
-| Checkout | `screens/checkout_screen.dart` | Ringkasan booking, nama, WhatsApp, metode pembayaran |
-| Konfirmasi & E-Voucher | `screens/voucher_screen.dart` | QR kode booking, ringkasan, kirim e-voucher ke WhatsApp |
-| Tanya Sira | `screens/chatbot_screen.dart` | Chatbot yang menjawab dari FAQ (kata kunci), pertanyaan cepat |
+| Checkout | `screens/checkout_screen.dart` | Ringkasan booking, nama, WhatsApp, pembayaran QRIS |
+| Bayar QRIS | `screens/payment_screen.dart` | QR pembayaran, total, batas waktu 15 menit, cara bayar, tombol Saya Sudah Bayar (simulasi) |
+| Booking Berhasil & Invoice | `screens/invoice_screen.dart` | QR kode booking, rincian yang sudah dibayar, kirim invoice ke WhatsApp |
+| Galeri | `screens/gallery_tab.dart` | Foto pengunjung 2 kolom (GridView), ketuk untuk melihat besar dan zoom |
 | Ulasan & Rating | `screens/reviews_screen.dart` | Rata-rata bintang, tulis ulasan (pilih bintang + validasi), ulasan terbaru |
 | AI Photo Studio | `screens/ai_photo_screen.dart` | Rancangan fitur AI (belum diimplementasikan) |
 | Profil | `screens/profile_tab.dart` | Nomor WhatsApp tersimpan, pengingat jam sepi, info wisata, Google Maps |
 
-Menu samping (Drawer) membuka Sewa & Booking, Rencana Fitur AI, Tanya Sira, Ulasan & Rating, dan Tentang.
+Alur booking: Tiket & Booking (pilih jam dan item), Lanjut Booking, Checkout, Bayar dengan QRIS (halaman scan), Saya Sudah Bayar,
+lalu Booking Berhasil & Invoice. Booking baru tersimpan setelah pembayaran.
 
-Struktur `mobile/lib`: `screens/` (layar), `widgets/` (komponen yang dipakai ulang: kartu kaca, logo bergerak, grafik,
-stepper), `models/` (Ticket, Booking, Review, Wahana), `data/` (data contoh dan `AppState` berbasis ChangeNotifier), `theme/` (warna dan font),
+Struktur `mobile/lib`: `screens/` (layar), `widgets/` (komponen yang dipakai ulang: kartu kaca, logo bergerak, grafik per jam,
+chatbot mengambang, bagian booking, stepper), `models/` (Ticket, Booking, Review, Wahana), `data/` (data contoh dan `AppState` berbasis ChangeNotifier), `theme/` (warna dan font),
 `utils/` (rute, format Rupiah dan nomor WhatsApp, validasi, pembuka tautan). Package: `google_fonts` (Fraunces, Inter, JetBrains Mono), `intl` (format Rupiah dan tanggal Indonesia), `qr_flutter` (kode QR),
 `shared_preferences` (menyimpan nomor WhatsApp terakhir, riwayat tiket dan booking, tanda onboarding, dan pengaturan pengingat), dan `url_launcher` (membuka Google Maps dan WhatsApp).
 Responsif: isi halaman bisa digulir, lebar maksimal 480 px di tengah untuk tablet/web, ukuran mengikuti layar lewat
@@ -94,10 +98,10 @@ Di kode, bagian yang memakai materi kuliah diberi komentar penanda, misalnya `//
 | Pertemuan | Materi | Dipakai di |
 |---|---|---|
 | P2 | `var`, `final`, `const`, class dan object, null safety (`?`, `??`) | `models/ticket.dart`, `data/dummy_data.dart`, `data/app_state.dart` |
-| P3 | StatelessWidget, StatefulWidget, setState, Row, Column, Container, Padding, SizedBox, Stack, Positioned, Expanded | Semua layar, misalnya `home_tab.dart`, `ai_photo_screen.dart`, `widgets/common.dart` |
-| P4 | ElevatedButton, TextField + InputDecoration, TextEditingController, DropdownButton, Slider, Switch, Checkbox, RadioButton, Image.asset, Image.network | `ticket_form_screen.dart` (Dropdown, Radio, Checkbox), `checkout_screen.dart` (ChoiceChip), `ai_photo_screen.dart` (Slider, Switch, Image.network), `profile_tab.dart` (Switch) |
-| P5 | Navigator.push / pop, kirim data ke halaman lain, named route, navigasi tab, Drawer | `main.dart` (routes + onGenerateRoute), `booking_screen.dart` (kirim isi booking ke Checkout), `tickets_tab.dart` (push + data), `main_shell.dart` (tab bawah + Drawer) |
-| P6 | Package dan plugin (google_fonts, intl, shared_preferences, url_launcher), Form + TextFormField + validator | `utils/format.dart` (intl), `data/app_state.dart` (shared_preferences: riwayat per WhatsApp), `utils/launcher.dart` (url_launcher: Maps dan WhatsApp), `ticket_form_screen.dart`, `checkout_screen.dart`, `tickets_tab.dart` (Form) |
+| P3 | StatelessWidget, StatefulWidget, setState, Row, Column, Container, Padding, SizedBox, Stack, Positioned, Expanded, GridView | Semua layar, misalnya `home_tab.dart` (Stack untuk chatbot mengambang), `gallery_tab.dart` (GridView), `widgets/common.dart` |
+| P4 | ElevatedButton, TextField + InputDecoration, TextEditingController, DropdownButton, Slider, Switch, Checkbox, RadioButton, Image.asset, Image.network | `ticket_form_screen.dart` (Dropdown, Radio, Checkbox), `home_tab.dart` dan `gallery_tab.dart` (Image.asset), `ai_photo_screen.dart` (Slider, Switch, Image.network), `profile_tab.dart` (Switch) |
+| P5 | Navigator.push / pop, kirim data ke halaman lain, named route, navigasi tab | `main.dart` (routes + onGenerateRoute), `widgets/booking_section.dart` (kirim isi booking ke Checkout), `checkout_screen.dart` (kirim pesanan ke Bayar QRIS), `main_shell.dart` (tab bawah) |
+| P6 | Package dan plugin (google_fonts, intl, shared_preferences, url_launcher, qr_flutter), Form + TextFormField + validator | `utils/format.dart` (intl), `data/app_state.dart` (shared_preferences: riwayat per WhatsApp), `utils/launcher.dart` (url_launcher: Maps dan WhatsApp), `payment_screen.dart` (qr_flutter), `ticket_form_screen.dart`, `checkout_screen.dart`, `tickets_tab.dart` (Form) |
 
 ## Rancangan Fitur AI
 
@@ -113,10 +117,10 @@ Fitur AI lain yang sudah dirancang tampilannya: prediksi keramaian (AI Insight d
 |---|---|---|
 | Halaman login (simulasi) | `/admin/login` | Tidak memakai login. Riwayat tiket dan booking dicari lewat nomor WhatsApp |
 | Dashboard / halaman utama | `/admin` | `home_tab.dart` |
-| Data berbentuk tabel atau kartu | Tabel booking, tiket, wahana; kartu ringkasan | Kartu tiket, voucher, daftar wahana, ulasan |
+| Data berbentuk tabel atau kartu | Tabel booking, tiket, wahana; kartu ringkasan | Kartu tiket, invoice, daftar wahana, galeri, ulasan |
 | Pengelolaan data / form input | `/admin/wahana` (tambah, edit, hapus), `/admin/faq`, `/admin/tiket` | `ticket_form_screen.dart`, `checkout_screen.dart`, `reviews_screen.dart` |
-| Halaman hasil input | Tabel ikut berubah setelah aksi | `eticket_screen.dart`, `voucher_screen.dart`, `tickets_tab.dart` |
-| Navigasi dan validasi | Sidebar, redirect login, validasi form | Named routes, tab bawah, Drawer, validasi nama dan WhatsApp |
+| Halaman hasil input | Tabel ikut berubah setelah aksi | `eticket_screen.dart`, `invoice_screen.dart`, `tickets_tab.dart` |
+| Navigasi dan validasi | Sidebar, redirect login, validasi form | Named routes, tab bawah, validasi nama dan WhatsApp |
 | Data | Data contoh + `localStorage` | Data contoh + mock JSON |
 | Rancangan AI | Lihat bagian Rancangan Fitur AI | Layar AI Photo Studio |
 
@@ -132,17 +136,21 @@ Aplikasi pengunjung (Flutter):
 |---|---|---|
 | ![](desain/screenshot/mobile-tentang.png) | ![](desain/screenshot/mobile-onboarding.png) | ![](desain/screenshot/mobile-home.png) |
 
-| Beli tiket | E-Tiket | Tiket Saya (riwayat per WhatsApp) |
+| Tanya Sira (mengambang di Beranda) | Tiket & Booking (riwayat per WhatsApp) | Sewa & Booking (di bawah Tiket Saya) |
 |---|---|---|
-| ![](desain/screenshot/mobile-tiket.png) | ![](desain/screenshot/mobile-etiket.png) | ![](desain/screenshot/mobile-riwayat.png) |
+| ![](desain/screenshot/mobile-chatbot.png) | ![](desain/screenshot/mobile-riwayat.png) | ![](desain/screenshot/mobile-booking.png) |
 
-| Sewa & Booking | Checkout | Konfirmasi & E-Voucher |
+| Beli tiket | E-Tiket | Checkout |
 |---|---|---|
-| ![](desain/screenshot/mobile-booking.png) | ![](desain/screenshot/mobile-checkout.png) | ![](desain/screenshot/mobile-voucher.png) |
+| ![](desain/screenshot/mobile-tiket.png) | ![](desain/screenshot/mobile-etiket.png) | ![](desain/screenshot/mobile-checkout.png) |
 
-| Live Crowd | Tanya Sira | Ulasan & Rating |
+| Bayar QRIS | Booking Berhasil & Invoice | Galeri |
 |---|---|---|
-| ![](desain/screenshot/mobile-crowd.png) | ![](desain/screenshot/mobile-chatbot.png) | ![](desain/screenshot/mobile-ulasan.png) |
+| ![](desain/screenshot/mobile-bayar.png) | ![](desain/screenshot/mobile-invoice.png) | ![](desain/screenshot/mobile-galeri.png) |
+
+| Ulasan & Rating |
+|---|
+| ![](desain/screenshot/mobile-ulasan.png) |
 
 Ekspor desain Figma lengkap ada di folder `desain/`.
 

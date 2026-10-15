@@ -135,7 +135,7 @@ class ETicketScreen extends StatelessWidget {
                 const SizedBox(height: 12),
               ],
               PrimaryButton(
-                label: 'Kembali ke Beranda',
+                label: 'Selesai',
                 onPressed: () => Navigator.popUntil(context, ModalRoute.withName(AppRoutes.main)),
               ),
             ]);

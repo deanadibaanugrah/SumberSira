@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sumber_sira/data/app_state.dart';
+import 'package:sumber_sira/data/dummy_data.dart';
 import 'package:sumber_sira/models/booking.dart';
 import 'package:sumber_sira/models/ticket.dart';
 import 'package:sumber_sira/utils/format.dart';
@@ -49,11 +50,19 @@ void main() {
     expect(s.ticketsFor('081299998888').length, before + 1);
     expect(s.ticketsFor('080000000000'), isEmpty);
 
-    final draft = BookingDraft(slot: '08-10', lines: const [BookingLine(name: 'Ban Besar', qty: 2, price: 10000), BookingLine(name: 'ATV', qty: 1, price: 25000)]);
-    final b = s.addBooking(draft: draft, name: 'Dewi', whatsapp: '6281299998888', cash: true);
+    final draft = BookingDraft(slot: '08-09', lines: const [BookingLine(name: 'Ban Besar', qty: 2, price: 10000), BookingLine(name: 'ATV', qty: 1, price: 25000)]);
+    final b = s.addBooking(BookingRequest(draft: draft, name: 'Dewi', whatsapp: '6281299998888'));
     expect(b.total, 45000);
     expect(b.itemsText, '2x Ban Besar, 1x ATV');
     expect(s.bookingsFor('081299998888').single.code, b.code);
+  });
+
+  test('jam booking selang 1 jam dan label keramaian', () {
+    expect(DummyData.bookingSlots.length, 8);
+    expect(labelJam(DummyData.bookingSlots.first), '08.00 - 09.00');
+    expect(AppState.labelFor(10), 'Sepi');
+    expect(AppState.labelFor(62), 'Sedang');
+    expect(AppState.labelFor(95), 'Ramai');
   });
 
   test('tiket bisa disimpan lalu dibaca lagi (JSON)', () {

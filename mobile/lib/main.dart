@@ -5,16 +5,15 @@ import 'data/app_state.dart';
 import 'models/booking.dart';
 import 'screens/about_screen.dart';
 import 'screens/ai_photo_screen.dart';
-import 'screens/booking_screen.dart';
-import 'screens/chatbot_screen.dart';
 import 'screens/checkout_screen.dart';
 import 'screens/eticket_screen.dart';
+import 'screens/invoice_screen.dart';
 import 'screens/main_shell.dart';
 import 'screens/onboarding_screen.dart';
+import 'screens/payment_screen.dart';
 import 'screens/reviews_screen.dart';
 import 'screens/splash_screen.dart';
 import 'screens/ticket_form_screen.dart';
-import 'screens/voucher_screen.dart';
 import 'theme/app_theme.dart';
 import 'utils/routes.dart';
 
@@ -46,20 +45,19 @@ class SumberSiraApp extends StatelessWidget {
         AppRoutes.onboarding: (_) => const OnboardingScreen(),
         AppRoutes.main: (_) => const MainShell(),
         AppRoutes.buyTicket: (_) => const TicketFormScreen(),
-        AppRoutes.booking: (_) => const BookingScreen(),
         AppRoutes.aiPhoto: (_) => const AiPhotoScreen(),
-        AppRoutes.chatbot: (_) => const ChatbotScreen(),
         AppRoutes.reviews: (_) => const ReviewsScreen(),
       },
-      // Rute yang membawa data lewat arguments: kode tiket, isi booking, atau kode booking.
+      // Rute yang membawa data lewat arguments: kode tiket, isi booking, pesanan yang dibayar, atau kode booking.
       // Kode juga bisa dikirim lewat tautan, mis. /tiket/detail?kode=TK-1019.
       onGenerateRoute: (settings) {
         final uri = Uri.parse(settings.name ?? '');
         final args = settings.arguments ?? uri.queryParameters['kode'];
         return switch (uri.path) {
-          AppRoutes.eticket when args is String => MaterialPageRoute(builder: (_) => ETicketScreen(code: args)),
-          AppRoutes.checkout when args is BookingDraft => MaterialPageRoute(builder: (_) => CheckoutScreen(draft: args)),
-          AppRoutes.voucher when args is String => MaterialPageRoute(builder: (_) => VoucherScreen(code: args)),
+          AppRoutes.eticket when args is String => MaterialPageRoute(settings: settings, builder: (_) => ETicketScreen(code: args)),
+          AppRoutes.checkout when args is BookingDraft => MaterialPageRoute(settings: settings, builder: (_) => CheckoutScreen(draft: args)),
+          AppRoutes.payment when args is BookingRequest => MaterialPageRoute(settings: settings, builder: (_) => PaymentScreen(request: args)),
+          AppRoutes.invoice when args is String => MaterialPageRoute(settings: settings, builder: (_) => InvoiceScreen(code: args)),
           _ => null,
         };
       },

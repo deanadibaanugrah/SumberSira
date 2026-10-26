@@ -32,9 +32,9 @@ export default function IntroPage() {
             dan foto AI bawah air dalam satu aplikasi.
           </p>
           <div className="mt-8 flex flex-wrap gap-4">
-            <span className="flex h-14 items-center gap-2.5 rounded-full bg-leaf px-7 font-semibold shadow-lg shadow-black/25">
+            <Link href="/mobile" className="flex h-14 items-center gap-2.5 rounded-full bg-leaf px-7 font-semibold shadow-lg shadow-black/25 transition hover:bg-leaf/90">
               <Smartphone size={20} /> Aplikasi pengunjung: Android (Flutter)
-            </span>
+            </Link>
             <Link href="/admin" className="glass flex h-14 items-center gap-2.5 rounded-full px-7 font-semibold transition hover:bg-white/15">
               <LayoutGrid size={20} /> Masuk Admin Panel
             </Link>

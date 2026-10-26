@@ -90,27 +90,38 @@
   50% { transform: translateY(-10px); }
 }
 
-/* ---------- Logo bergerak (src/components/Logo.js), satuan = satuan viewBox logo (120) ---------- */
-@keyframes logo-bob {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-6px); }
+/* ---------- Logo baru bergerak (src/components/Logo.tsx) ---------- */
+@keyframes logo-drop-anim {
+  0%, 2%    { opacity: 0; transform: translateY(-95px) scale(.85,1.15); animation-timing-function: ease-out; }
+  4%        { opacity: 1; transform: translateY(-88px) scale(.9,1.1);  animation-timing-function: cubic-bezier(.55,0,.9,.5); }
+  14%       { opacity: 1; transform: translateY(0) scale(.92,1.14);    animation-timing-function: ease-out; }
+  16.5%     { opacity: 1; transform: translateY(0) scale(1.1,.9);      animation-timing-function: ease-in-out; }
+  20%       { opacity: 1; transform: translateY(0) scale(.97,1.04); }
+  23%, 100% { opacity: 1; transform: translateY(0) scale(1,1); }
 }
-
-@keyframes logo-sway-a {
-  0%, 100% { transform: translateX(0); }
-  50% { transform: translateX(-8px); }
+@keyframes logo-splash-l {
+  0%, 14%   { opacity: 0; transform: translate(26px,10px) scale(.15); }
+  16%       { opacity: 1; }
+  24%, 100% { opacity: 1; transform: translate(0,0) scale(1); }
 }
-
-@keyframes logo-sway-b {
-  0%, 100% { transform: translateX(0); }
-  50% { transform: translateX(8px); }
+@keyframes logo-splash-r {
+  0%, 14%   { opacity: 0; transform: translate(-26px,10px) scale(.15); }
+  16%       { opacity: 1; }
+  24%, 100% { opacity: 1; transform: translate(0,0) scale(1); }
 }
-
-/* Riak air: muncul tepat saat tetes air turun, lalu melebar dan memudar. */
-@keyframes logo-ripple {
-  0% { transform: scale(0.3); opacity: 0; }
-  10% { opacity: 1; }
-  70%, 100% { transform: scale(1.7); opacity: 0; }
+@keyframes logo-ripple-mid {
+  0%, 14.5% { opacity: 0; transform: scale(.08); }
+  18%       { opacity: 1; }
+  26%, 100% { opacity: 1; transform: scale(1); }
+}
+@keyframes logo-ripple-out {
+  0%, 17%   { opacity: 0; transform: scale(.08); }
+  21%       { opacity: 1; }
+  31%, 100% { opacity: 1; transform: scale(1); }
+}
+@keyframes logo-text-fade {
+  0%, 33%   { opacity: 0; }
+  47%, 100% { opacity: 1; }
 }
 
 /* Kilau yang lewat di tombol saat disorot. */

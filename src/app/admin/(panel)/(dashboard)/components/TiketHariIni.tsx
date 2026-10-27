@@ -1,10 +1,10 @@
 "use client";
 
-import { ArrowRight, Users } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import Link from "next/link";
 
 import ProgressBar from "@/components/charts/ProgressBar";
-import { Avatar, StatCard } from "@/components/admin/ui";
+import { Avatar } from "@/components/admin/ui";
 import { KAPASITAS, jumlahOrang, useTiket } from "@/lib/tiket-store";
 
 // Bagian dashboard yang ikut berubah saat tiket discan (data dari src/lib/tiket-store.js).
@@ -12,7 +12,7 @@ import { KAPASITAS, jumlahOrang, useTiket } from "@/lib/tiket-store";
 const BAR = { Sepi: "bg-leaf", Sedang: "bg-forest", Ramai: "bg-coral" };
 
 // Label kecil Live dengan titik berdenyut.
-export function LiveDot() {
+function LiveDot() {
   return (
     <span className="flex h-8 items-center gap-2 rounded-full bg-leaf/12 px-3 text-[13px] font-semibold text-forest">
       <span className="relative flex size-2">
@@ -24,14 +24,8 @@ export function LiveDot() {
   );
 }
 
-// Kartu Tingkat Keramaian di dashboard, angkanya dari tiket yang sudah discan.
-export function LiveCrowdStat() {
-  const t = useTiket();
-  return <StatCard variant="tall" icon={Users} value={t.label} label="Tingkat Keramaian" note={`${t.percent}% kapasitas · ${t.inside} orang`} />;
-}
-
 // Kartu Tiket Online Hari Ini: jumlah orang di dalam, terjual, belum datang, keluar, dan check-in terbaru.
-export function TiketHariIniCard() {
+export default function TiketHariIni() {
   const t = useTiket();
   // Tiga pengunjung terakhir yang masih di dalam.
   const masuk = t.recent.filter((x) => x.status === "Di dalam").slice(0, 3);

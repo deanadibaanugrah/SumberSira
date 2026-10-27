@@ -1,11 +1,10 @@
-import AdminShell from "@/components/admin/AdminShell";
-
 // Judul tab untuk halaman admin.
 export const metadata = {
   title: "Admin Panel · Sumber Sira",
 };
 
-// Kerangka semua halaman admin (URL /admin/...): wajib login, lalu sidebar kartu di kiri + isi halaman.
+// Kerangka paling luar URL /admin/... Halaman login tampil sendiri; halaman yang wajib login
+// ada di grup (panel) yang punya sidebar dan pengecekan sesi.
 export default function AdminLayout({ children }) {
-  return <AdminShell>{children}</AdminShell>;
+  return children;
 }

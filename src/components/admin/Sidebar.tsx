@@ -2,39 +2,37 @@
 
 import { CalendarCheck, ChevronLeft, ChevronRight, Clock, Image as ImageIcon, LayoutGrid, LogOut, Menu, MessageCircle, Sparkles, Tag, Ticket, X } from "lucide-react";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { useState } from "react";
 
 import LogoMark from "@/components/Logo";
-import { logout } from "@/lib/admin-auth";
+import { logoutAction } from "@/lib/auth/actions";
+import type { AdminProfile } from "@/lib/auth/dal";
+import { can, type Permission } from "@/lib/auth/roles";
 
-// Daftar menu sidebar admin: alamat halaman, nama menu, dan ikon.
-export const ADMIN_MENU = [
-  { href: "/admin", label: "Dashboard", icon: LayoutGrid },
-  { href: "/admin/booking", label: "Booking Sewa & Wahana", icon: CalendarCheck },
-  { href: "/admin/tiket", label: "Tiket & Check-in", icon: Ticket },
-  { href: "/admin/insight", label: "AI Insight", icon: Sparkles },
-  { href: "/admin/galeri", label: "Galeri & Konten", icon: ImageIcon },
-  { href: "/admin/faq", label: "Chatbot & FAQ", icon: MessageCircle },
-  { href: "/admin/wahana", label: "Wahana & Harga", icon: Tag },
+// Daftar menu sidebar admin: alamat halaman, nama menu, ikon, dan izin yang dibutuhkan.
+export const ADMIN_MENU: { href: string; label: string; icon: typeof LayoutGrid; permission: Permission }[] = [
+  { href: "/admin", label: "Dashboard", icon: LayoutGrid, permission: "dashboard" },
+  { href: "/admin/booking", label: "Booking Sewa & Wahana", icon: CalendarCheck, permission: "booking" },
+  { href: "/admin/tiket", label: "Tiket & Check-in", icon: Ticket, permission: "tiket" },
+  { href: "/admin/insight", label: "AI Insight", icon: Sparkles, permission: "insight" },
+  { href: "/admin/galeri", label: "Galeri & Konten", icon: ImageIcon, permission: "galeri" },
+  { href: "/admin/faq", label: "Chatbot & FAQ", icon: MessageCircle, permission: "faq" },
+  { href: "/admin/wahana", label: "Wahana & Harga", icon: Tag, permission: "wahana:lihat" },
 ];
 
 // Sidebar berbentuk kartu putih yang melayang (desain admin terbaru). Menu aktif = pill Hijau Tua.
-// Di layar kecil disembunyikan dan dibuka lewat tombol menu. session = admin yang sedang login.
-export default function Sidebar({ session }) {
+// Di layar kecil disembunyikan dan dibuka lewat tombol menu. admin = akun yang sedang login (dari server).
+// Menu yang tidak diizinkan untuk perannya disembunyikan. Ini hanya tampilan: halamannya tetap dicek di server.
+export default function Sidebar({ admin }: { admin: AdminProfile }) {
   const pathname = usePathname();
-  const router = useRouter();
   // open = sidebar sedang terbuka di layar HP atau tidak.
   const [open, setOpen] = useState(false);
   // collapsed = sidebar desktop diperkecil; label menu tampil sebagai tooltip saat ikon diarahkan.
   const [collapsed, setCollapsed] = useState(false);
   const hideWhenCollapsed = collapsed ? "lg:hidden" : "";
   const alignWhenCollapsed = collapsed ? "lg:justify-center" : "";
-  // Tombol keluar: hapus sesi login lalu kembali ke halaman login.
-  const signOut = () => {
-    logout();
-    router.replace("/admin/login");
-  };
+  const menu = ADMIN_MENU.filter((item) => can(admin.role, item.permission));
 
   return (
     <>
@@ -68,7 +66,7 @@ export default function Sidebar({ session }) {
         <p className={`mt-[34px] overflow-hidden whitespace-nowrap px-3 font-mono text-[10px] uppercase tracking-[0.18em] text-ink/60 ${hideWhenCollapsed}`}>Menu utama</p>
         <nav aria-label="Menu admin" className="mt-2">
           <ul className="space-y-2">
-            {ADMIN_MENU.map(({ href, label, icon: Icon }) => {
+            {menu.map(({ href, label, icon: Icon }) => {
               // Menu aktif: Dashboard harus sama persis, menu lain cukup diawali alamatnya.
               const active = href === "/admin" ? pathname === "/admin" : pathname.startsWith(href);
               return (
@@ -103,20 +101,26 @@ export default function Sidebar({ session }) {
             </span>
           </div>
           <div className={`flex min-h-[68px] items-center gap-2.5 rounded-[20px] bg-leaf/[0.08] py-2 pl-3 pr-1.5 ${alignWhenCollapsed}`}>
+            {/* Kartu profil: klik nama untuk membuka Akun & Sesi */}
+            <Link href="/admin/akun" onClick={() => setOpen(false)} title="Akun & Sesi" className={`flex min-w-0 flex-1 items-center gap-2.5 ${alignWhenCollapsed}`}>
             <span className="relative grid size-11 shrink-0 place-items-center rounded-full bg-forest text-base font-semibold text-white">
               {/* Inisial nama admin, misalnya Pak Yono jadi PY */}
-              {session.name.split(" ").map((w) => w[0]).join("").slice(0, 2).toUpperCase()}
+              {admin.name.split(" ").map((w) => w[0]).join("").slice(0, 2).toUpperCase()}
               <span className="absolute -right-1 -top-1 grid size-[18px] place-items-center rounded-full bg-coral text-[10px] font-semibold ring-2 ring-white"
                     aria-label="3 notifikasi">3</span>
             </span>
             <span className={`min-w-[108px] flex-1 overflow-hidden whitespace-nowrap ${hideWhenCollapsed}`}>
-              <span className="block truncate text-[15px] font-semibold text-ink">{session.name}</span>
-              <span className="block text-[11px] leading-tight text-ink/60">{session.role}</span>
+              <span className="block truncate text-[15px] font-semibold text-ink">{admin.name}</span>
+              <span className="block text-[11px] leading-tight text-ink/60">{admin.roleLabel}</span>
             </span>
-            <button type="button" onClick={signOut} aria-label="Keluar dari admin" title="Keluar"
-                    className={`grid size-8 shrink-0 place-items-center rounded-full text-ink/70 transition hover:bg-coral/12 hover:text-coral ${collapsed ? "lg:hidden" : ""}`}>
-              <LogOut size={17} />
-            </button>
+            </Link>
+            {/* Tombol keluar: Server Action logoutAction menghapus sesi di server dan cookie di browser */}
+            <form action={logoutAction} className={collapsed ? "lg:hidden" : ""}>
+              <button type="submit" aria-label="Keluar dari admin" title="Keluar"
+                      className="grid size-8 shrink-0 place-items-center rounded-full text-ink/70 transition hover:bg-coral/12 hover:text-coral">
+                <LogOut size={17} />
+              </button>
+            </form>
           </div>
         </div>
       </aside>

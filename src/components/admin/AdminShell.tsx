@@ -1,45 +1,12 @@
-"use client";
-
-import { usePathname, useRouter } from "next/navigation";
-import { useEffect } from "react";
-
-import LogoMark from "@/components/Logo";
 import Sidebar from "@/components/admin/Sidebar";
-import { useAdminSession } from "@/lib/admin-auth";
+import type { AdminProfile } from "@/lib/auth/dal";
 
-// Kerangka panel admin: halaman /admin/login tampil sendiri, halaman lain wajib login
-// lalu tampil dengan sidebar. Belum login = diarahkan ke halaman login.
-export default function AdminShell({ children }) {
-  // Ambil alamat halaman sekarang dan status login admin.
-  const pathname = usePathname();
-  const router = useRouter();
-  const session = useAdminSession();
-  const onLogin = pathname === "/admin/login";
-
-  // Kalau belum login dan bukan di halaman login, pindahkan ke halaman login (alamat asal dibawa lewat ?next=).
-  useEffect(() => {
-    if (!onLogin && session === null) router.replace(`/admin/login?next=${encodeURIComponent(pathname)}`);
-  }, [onLogin, session, pathname, router]);
-
-  // Halaman login tampil tanpa sidebar.
-  if (onLogin) return children;
-
-  // Selama status login belum terbaca, tampilkan layar memeriksa sesi.
-  if (!session || session === "loading") {
-    return (
-      <div className="grid min-h-dvh place-items-center bg-paper text-ink" role="status">
-        <div className="flex flex-col items-center gap-3">
-          <LogoMark size={52} className="animate-pop" />
-          <p className="text-sm text-ink/60">Memeriksa sesi admin...</p>
-        </div>
-      </div>
-    );
-  }
-
-  // Sudah login: tampilkan sidebar di kiri dan isi halaman di kanan.
+// Kerangka panel admin: sidebar di kiri dan isi halaman di kanan.
+// Data admin (nama, peran) sudah dicek di server lalu dikirim lewat props.
+export default function AdminShell({ admin, children }: { admin: AdminProfile; children: React.ReactNode }) {
   return (
     <div className="min-h-dvh bg-paper text-ink lg:flex lg:gap-6 lg:p-4">
-      <Sidebar session={session} />
+      <Sidebar admin={admin} />
       <div className="min-w-0 flex-1 px-4 pb-8 pt-4 lg:px-0 lg:pb-4 lg:pr-2 lg:pt-3">{children}</div>
     </div>
   );

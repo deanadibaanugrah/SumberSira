@@ -247,6 +247,7 @@ src/app/               Halaman (App Router). Tiap halaman punya folder component
   (intro)/             Intro web, alamat /
     page.tsx
     components/        Hero, Fitur, InfoKunjungan, Footer
+  mobile/page.tsx      Halaman info aplikasi pengunjung (cara menjalankan Flutter dan contoh layar), alamat /mobile
   admin/login/         Halaman login admin, alamat /admin/login
     page.tsx           Server: cek sesi lalu susun section
     components/        LoginBackdrop, LoginIntro, LoginWidgets, BrandMobile, LoginForm, WidgetTablet
@@ -267,7 +268,7 @@ src/proxy.ts           Cek kasar cookie sesi sebelum masuk /admin (dulu middlewa
 src/components/        Komponen yang dipakai banyak halaman
   charts/              BarChart, AreaChart, DonutChart, Heatmap (admin), ProgressBar (beranimasi)
   admin/               AdminShell, Sidebar (menu sesuai peran), ui.tsx (AdminHeader, Card, StatCard, ...)
-  Logo.tsx              Logo Sumber Sira (tetes air + sawah bertingkat), juga dipakai di src/app/icon.svg
+  Logo.tsx              Logo Sumber Sira (lingkaran hijau tua: tetes air, percikan, riak, tulisan SUMBER SIRA), juga di src/app/icon.svg
   WahanaIcon.tsx        Ikon per wahana
 src/data/              Data dummy (wahana.ts, dummy.ts). Tahap backend: ganti dengan data API
 src/lib/
@@ -295,8 +296,9 @@ src/lib/
 - Foto aplikasi ada di `desain/foto/` (folder `public/` tidak dipakai lagi) dan di-import lewat `src/lib/foto.ts`,
   jadi Next.js memprosesnya sebagai gambar statis. Foto baru: taruh di `desain/foto/`, lalu tambahkan di `foto.ts`. Semua foto adalah foto asli Sumber Sira; foto galeri admin
   memakai foto yang sama dengan potongan berbeda (`pos` di `src/data/dummy.ts`).
-- Logo Sumber Sira ada di `src/components/Logo.tsx` (sidebar dan login admin, intro web), versi Flutter di `mobile/lib/widgets/logo_mark.dart`,
-  dan sebagai ikon tab browser di `src/app/icon.svg`.
+- Logo Sumber Sira ada di `src/components/Logo.tsx` (sidebar dan login admin, intro web), versi Flutter di `mobile/lib/widgets/logo_mark.dart`
+  (Splash, Beranda, Tentang), dan sebagai ikon tab browser di `src/app/icon.svg`. Animasinya: tetes air jatuh dan memantul, percikan,
+  riak melebar, lalu tulisan SUMBER SIRA muncul (siklus 9 detik, keyframe `logo-*` di `src/app/globals.css`).
 - Yang tidak ada di Figma dan sengaja ditambahkan: halaman intro web, pesan validasi form, dan modal Tambah/Edit di admin.
 
 ## Masih simulasi dan perlu dikerjakan di tahap backend

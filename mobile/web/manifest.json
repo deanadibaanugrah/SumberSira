@@ -1,11 +1,11 @@
 {
-    "name": "sumber_sira",
-    "short_name": "sumber_sira",
+    "name": "Sumber Sira",
+    "short_name": "Sumber Sira",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#0175C2",
-    "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "background_color": "#1B4332",
+    "theme_color": "#1B4332",
+    "description": "Aplikasi booking wahana, cek keramaian, dan foto AI bawah air untuk wisata mata air Sumber Sira, Desa Putukrejo, Malang.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

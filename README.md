@@ -301,6 +301,8 @@ src/lib/
   riak melebar, lalu tulisan SUMBER SIRA muncul (siklus 9 detik, keyframe `logo-*` di `src/app/globals.css`).
 - Ikon aplikasi juga memakai logo baru: Android di `mobile/android/app/src/main/res/mipmap-*` (ikon adaptif di `mipmap-anydpi-v26`,
   latar `#1A3E2F` di `values/ic_launcher_background.xml`) dan web di `mobile/web/favicon.png` serta `mobile/web/icons/`.
+- Nama aplikasi di HP dan browser: Sumber Sira (`android:label` di `AndroidManifest.xml`, `name` di `mobile/web/manifest.json`).
+  Warna tema web dan latar layar pembuka saat di-install dari browser: Hijau Tua `#1B4332`, sama dengan `AppColors.forest`.
 - Yang tidak ada di Figma dan sengaja ditambahkan: halaman intro web, pesan validasi form, dan modal Tambah/Edit di admin.
 
 ## Masih simulasi dan perlu dikerjakan di tahap backend

@@ -299,6 +299,8 @@ src/lib/
 - Logo Sumber Sira ada di `src/components/Logo.tsx` (sidebar dan login admin, intro web), versi Flutter di `mobile/lib/widgets/logo_mark.dart`
   (Splash, Beranda, Tentang), dan sebagai ikon tab browser di `src/app/icon.svg`. Animasinya: tetes air jatuh dan memantul, percikan,
   riak melebar, lalu tulisan SUMBER SIRA muncul (siklus 9 detik, keyframe `logo-*` di `src/app/globals.css`).
+- Ikon aplikasi juga memakai logo baru: Android di `mobile/android/app/src/main/res/mipmap-*` (ikon adaptif di `mipmap-anydpi-v26`,
+  latar `#1A3E2F` di `values/ic_launcher_background.xml`) dan web di `mobile/web/favicon.png` serta `mobile/web/icons/`.
 - Yang tidak ada di Figma dan sengaja ditambahkan: halaman intro web, pesan validasi form, dan modal Tambah/Edit di admin.
 
 ## Masih simulasi dan perlu dikerjakan di tahap backend

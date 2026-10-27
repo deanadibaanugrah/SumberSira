@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Ikon adaptif (Android 8 ke atas): latar hijau tua seperti lingkaran logo, di depannya gambar putih logo Sumber Sira.
+     Lapisan yang sama dipakai untuk ikon bertema (monochrome) di Android 13 ke atas. -->
+<adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
+    <background android:drawable="@color/ic_launcher_background" />
+    <foreground android:drawable="@mipmap/ic_launcher_foreground" />
+    <monochrome android:drawable="@mipmap/ic_launcher_foreground" />
+</adaptive-icon>

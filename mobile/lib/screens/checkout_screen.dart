@@ -46,91 +46,100 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   Widget build(BuildContext context) {
     final draft = widget.draft;
     return Scaffold(
+      appBar: const PageAppBar(title: 'Ringkasan Booking'),
       body: AppBackground(
         child: Form(
           key: _formKey,
           child: ResponsiveBody(children: [
-            const PageHeader(title: 'Ringkasan Booking'),
-            const SectionLabel('Waktu Kunjungan', top: 0),
-            Align(
-              alignment: Alignment.centerLeft,
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 9),
-                decoration: BoxDecoration(
-                  color: AppColors.leaf.withValues(alpha: .45),
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: AppColors.white(.25)),
+            // Ringkasan pesanan: jam kunjungan lalu item yang dipesan.
+            AppCard(
+              padding: EdgeInsets.zero,
+              child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+                Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Row(children: [
+                    const IconBadge(Icons.schedule_rounded),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                        const Text('Waktu Kunjungan', style: TextStyle(fontSize: 12.5, color: AppColors.muted)),
+                        const SizedBox(height: 2),
+                        Text(labelJam(draft.slot), style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.forest)),
+                      ]),
+                    ),
+                  ]),
                 ),
-                child: Text(labelJam(draft.slot), style: AppTheme.mono(12)),
-              ),
+                const Divider(),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 14, 16, 8),
+                  child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+                    const Text('Item Dipesan', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700)),
+                    const SizedBox(height: 6),
+                    for (final l in draft.lines)
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 7),
+                        child: Row(children: [
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                            decoration: BoxDecoration(color: AppColors.mint, borderRadius: BorderRadius.circular(8)),
+                            child: Text('${l.qty}x', style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w700, color: AppColors.forest)),
+                          ),
+                          const SizedBox(width: 10),
+                          Expanded(child: Text(l.name, style: const TextStyle(fontSize: 14))),
+                          Text(rupiah(l.subtotal), style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
+                        ]),
+                      ),
+                  ]),
+                ),
+              ]),
             ),
-            const SectionLabel('Item Dipesan'),
-            for (final l in draft.lines)
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 6),
-                child: Row(children: [
-                  Expanded(child: Text('${l.qty}x ${l.name}', style: const TextStyle(fontSize: 13))),
-                  Text(rupiah(l.subtotal), style: AppTheme.mono(12)),
-                ]),
-              ),
-            const SizedBox(height: 8),
-            Divider(color: AppColors.white(.15)),
-            const SectionLabel('Data Pemesan', top: 8),
+            const SectionLabel('Data Pemesan'),
             // [P6 TextFormField + validator] Nama wajib diisi, nomor WhatsApp harus format Indonesia.
             TextFormField(
               controller: _name,
               textInputAction: TextInputAction.next,
-              decoration: const InputDecoration(labelText: 'Nama Lengkap', hintText: 'Masukkan nama lengkap'),
+              decoration: const InputDecoration(labelText: 'Nama Lengkap', hintText: 'Masukkan nama lengkap', prefixIcon: Icon(Icons.person_outline_rounded, size: 20)),
               validator: (v) => Validators.required(v, 'Nama'),
             ),
             const SizedBox(height: 10),
             TextFormField(
               controller: _whatsapp,
               keyboardType: TextInputType.phone,
-              decoration: const InputDecoration(labelText: 'No. WhatsApp', hintText: '08xxxxxxxxxx'),
+              decoration: const InputDecoration(labelText: 'No. WhatsApp', hintText: '08xxxxxxxxxx', prefixIcon: Icon(Icons.phone_outlined, size: 20)),
               validator: Validators.whatsapp,
             ),
-            const SizedBox(height: 4),
-            Text('Invoice dikirim ke nomor ini dan riwayatnya bisa dicari di Tiket Saya.',
-                style: TextStyle(fontSize: 10, color: AppColors.white(.65))),
+            const SizedBox(height: 8),
+            const Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Icon(Icons.info_outline_rounded, size: 16, color: AppColors.muted),
+              SizedBox(width: 6),
+              Expanded(
+                child: Text('Invoice dikirim ke nomor ini dan riwayatnya bisa dicari di Tiket Saya.', style: TextStyle(fontSize: 12.5, color: AppColors.muted)),
+              ),
+            ]),
             const SectionLabel('Metode Pembayaran'),
             // Pembayaran sewa dan wahana hanya lewat QRIS.
-            GlassCard(
-              color: AppColors.leaf.withValues(alpha: .3),
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+            const AppCard(
+              color: AppColors.mint,
+              borderColor: AppColors.leaf,
+              shadow: false,
+              padding: EdgeInsets.symmetric(horizontal: 14, vertical: 14),
               child: Row(children: [
-                const CircleAvatar(radius: 18, backgroundColor: Colors.white, child: Icon(Icons.qr_code_2, color: AppColors.forest, size: 20)),
-                const SizedBox(width: 12),
+                IconBadge(Icons.qr_code_2_rounded, background: Colors.white),
+                SizedBox(width: 12),
                 Expanded(
                   child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                    const Text('QRIS', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
-                    Text('Scan pakai aplikasi bank atau e-wallet', style: TextStyle(fontSize: 10, color: AppColors.white(.75))),
+                    Text('QRIS', style: TextStyle(fontSize: 14.5, fontWeight: FontWeight.w700, color: AppColors.forest)),
+                    SizedBox(height: 2),
+                    Text('Scan pakai aplikasi bank atau e-wallet', style: TextStyle(fontSize: 12.5, color: AppColors.muted)),
                   ]),
                 ),
-                const Icon(Icons.check_circle, color: Colors.white, size: 20),
+                Icon(Icons.check_circle_rounded, color: AppColors.leaf, size: 24),
               ]),
             ),
           ]),
         ),
       ),
-      bottomNavigationBar: Container(
-        decoration: BoxDecoration(color: AppColors.ink, border: Border(top: BorderSide(color: AppColors.white(.15)))),
-        child: SafeArea(
-          top: false,
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(20, 10, 20, 10),
-            child: Row(children: [
-              Expanded(
-                child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
-                  Text('Total', style: TextStyle(fontSize: 10, color: AppColors.white(.7))),
-                  Text(rupiah(draft.total), style: AppTheme.mono(15, weight: FontWeight.w600)),
-                ]),
-              ),
-              SizedBox(width: 200, child: PrimaryButton(label: 'Bayar dengan QRIS', height: 44, onPressed: _pay)),
-            ]),
-          ),
-        ),
-      ),
+      bottomNavigationBar: TotalBar(label: 'Total', amount: draft.total, button: 'Bayar dengan QRIS', onPressed: _pay),
     );
   }
 }

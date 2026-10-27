@@ -78,10 +78,10 @@ class _FloatingChatState extends State<FloatingChat> {
             curve: Curves.easeOutCubic,
             clipBehavior: Clip.antiAlias,
             decoration: BoxDecoration(
-              color: _open ? AppColors.forest : AppColors.leaf,
-              borderRadius: BorderRadius.circular(_open ? 22 : _size / 2),
-              border: Border.all(color: AppColors.white(_open ? .25 : .5), width: _open ? 1 : 2),
-              boxShadow: const [BoxShadow(color: Color(0x66000000), blurRadius: 18, offset: Offset(0, 8))],
+              color: _open ? Colors.white : AppColors.forest,
+              borderRadius: BorderRadius.circular(_open ? 24 : _size / 2),
+              border: Border.all(color: _open ? AppColors.line : AppColors.white(.9), width: _open ? 1 : 3),
+              boxShadow: const [BoxShadow(color: Color(0x401B4332), blurRadius: 22, offset: Offset(0, 8))],
             ),
             child: _open
                 // OverflowBox: isi kotak chat langsung disusun ukuran penuh, jadi tidak berantakan selama animasi membesar.
@@ -168,20 +168,24 @@ class _ChatPanelState extends State<_ChatPanel> {
     return Material(
       color: Colors.transparent,
       child: Column(children: [
-        // Header kotak chat dengan tombol tutup.
+        // Header kotak chat (hijau tua) dengan tombol tutup.
         Container(
-          padding: const EdgeInsets.fromLTRB(14, 10, 6, 10),
-          decoration: BoxDecoration(border: Border(bottom: BorderSide(color: AppColors.white(.15)))),
+          padding: const EdgeInsets.fromLTRB(14, 12, 6, 12),
+          color: AppColors.forest,
           child: Row(children: [
-            const CircleAvatar(radius: 17, backgroundColor: AppColors.leaf, child: Icon(Icons.smart_toy, color: Colors.white, size: 18)),
+            CircleAvatar(radius: 18, backgroundColor: AppColors.white(.15), child: const Icon(Icons.smart_toy, color: Colors.white, size: 19)),
             const SizedBox(width: 10),
             Expanded(
               child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                Text('Tanya Sira', style: AppTheme.display(16)),
-                Text('AI Assistant • Online', style: TextStyle(fontSize: 10, color: AppColors.white(.7))),
+                Text('Tanya Sira', style: AppTheme.display(17, color: Colors.white)),
+                Row(children: [
+                  Container(width: 7, height: 7, decoration: const BoxDecoration(color: AppColors.lightLeaf, shape: BoxShape.circle)),
+                  const SizedBox(width: 5),
+                  Text('AI Assistant • Online', style: TextStyle(fontSize: 11, color: AppColors.white(.8))),
+                ]),
               ]),
             ),
-            IconButton(tooltip: 'Tutup chat', onPressed: widget.onClose, icon: const Icon(Icons.close, color: Colors.white, size: 20)),
+            IconButton(tooltip: 'Tutup chat', onPressed: widget.onClose, icon: const Icon(Icons.close_rounded, color: Colors.white, size: 21)),
           ]),
         ),
         Expanded(
@@ -194,15 +198,15 @@ class _ChatPanelState extends State<_ChatPanel> {
                 // Pertanyaan cepat tampil di bawah sapaan pertama.
                 if (i == 0)
                   Padding(
-                    padding: const EdgeInsets.only(left: 30, bottom: 10),
+                    padding: const EdgeInsets.only(left: 32, bottom: 12),
                     child: Wrap(spacing: 6, runSpacing: 6, children: [
                       for (final q in DummyData.quickQuestions)
                         ActionChip(
-                          label: Text(q, style: const TextStyle(fontSize: 10.5, color: Colors.white)),
+                          label: Text(q, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.forest)),
                           onPressed: () => _send(q),
                           visualDensity: VisualDensity.compact,
-                          backgroundColor: AppColors.leaf.withValues(alpha: .35),
-                          side: BorderSide(color: AppColors.white(.25)),
+                          backgroundColor: Colors.white,
+                          side: const BorderSide(color: AppColors.pale, width: 1.3),
                           shape: const StadiumBorder(),
                         ),
                     ]),
@@ -211,27 +215,30 @@ class _ChatPanelState extends State<_ChatPanel> {
             ],
           ),
         ),
-        Padding(
-          padding: const EdgeInsets.fromLTRB(12, 4, 12, 12),
+        Container(
+          padding: const EdgeInsets.fromLTRB(12, 10, 12, 12),
+          decoration: const BoxDecoration(border: Border(top: BorderSide(color: AppColors.line))),
           child: Row(children: [
             Expanded(
               child: TextField(
                 controller: _input,
                 textInputAction: TextInputAction.send,
                 onSubmitted: (_) => _send(),
-                style: const TextStyle(fontSize: 12.5),
+                style: const TextStyle(fontSize: 13.5),
                 decoration: InputDecoration(
                   hintText: 'Tulis pertanyaan...',
                   isDense: true,
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(24), borderSide: BorderSide(color: AppColors.white(.25))),
-                  enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(24), borderSide: BorderSide(color: AppColors.white(.25))),
+                  fillColor: AppColors.surface,
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(24), borderSide: BorderSide.none),
+                  enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(24), borderSide: BorderSide.none),
+                  focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(24), borderSide: const BorderSide(color: AppColors.leaf, width: 1.4)),
                 ),
               ),
             ),
             const SizedBox(width: 8),
             IconButton.filled(
               tooltip: 'Kirim',
-              style: IconButton.styleFrom(backgroundColor: AppColors.leaf, fixedSize: const Size(42, 42)),
+              style: IconButton.styleFrom(backgroundColor: AppColors.forest, fixedSize: const Size(44, 44)),
               onPressed: _send,
               icon: const Icon(Icons.send_rounded, color: Colors.white, size: 18),
             ),
@@ -241,7 +248,7 @@ class _ChatPanelState extends State<_ChatPanel> {
     );
   }
 
-  // Gelembung pesan: bot di kiri (kaca + avatar), pengunjung di kanan (Hijau Daun).
+  // Gelembung pesan: bot di kiri (mint + avatar), pengunjung di kanan (Hijau Tua).
   Widget _bubble(ChatMessage m) => Padding(
         padding: const EdgeInsets.only(bottom: 10),
         child: Row(
@@ -249,18 +256,22 @@ class _ChatPanelState extends State<_ChatPanel> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             if (m.fromBot) ...[
-              CircleAvatar(radius: 11, backgroundColor: AppColors.leaf.withValues(alpha: .8), child: const Icon(Icons.smart_toy, size: 12, color: Colors.white)),
-              const SizedBox(width: 6),
+              const CircleAvatar(radius: 12, backgroundColor: AppColors.pale, child: Icon(Icons.smart_toy, size: 13, color: AppColors.forest)),
+              const SizedBox(width: 8),
             ],
             Flexible(
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 9),
                 decoration: BoxDecoration(
-                  color: m.fromBot ? AppColors.white(.12) : AppColors.leaf,
-                  borderRadius: BorderRadius.circular(16),
-                  border: m.fromBot ? Border.all(color: AppColors.white(.22)) : null,
+                  color: m.fromBot ? AppColors.mint : AppColors.forest,
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(m.fromBot ? 4 : 18),
+                    topRight: Radius.circular(m.fromBot ? 18 : 4),
+                    bottomLeft: const Radius.circular(18),
+                    bottomRight: const Radius.circular(18),
+                  ),
                 ),
-                child: Text(m.text, style: const TextStyle(fontSize: 12, height: 1.35)),
+                child: Text(m.text, style: TextStyle(fontSize: 13, height: 1.4, color: m.fromBot ? AppColors.ink : Colors.white)),
               ),
             ),
           ],

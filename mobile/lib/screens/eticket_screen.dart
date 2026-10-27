@@ -40,6 +40,7 @@ class ETicketScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: const PageAppBar(title: 'E-Tiket Masuk'),
       body: AppBackground(
         child: ListenableBuilder(
           listenable: AppState.instance,
@@ -47,8 +48,7 @@ class ETicketScreen extends StatelessWidget {
             final t = AppState.instance.find(code);
             if (t == null) {
               return ResponsiveBody(children: [
-                const PageHeader(title: 'E-Tiket Masuk'),
-                GlassCard(child: Text('Tiket $code tidak ditemukan.')),
+                AppCard(child: Text('Tiket $code tidak ditemukan.')),
               ]);
             }
             final rows = [
@@ -62,77 +62,69 @@ class ETicketScreen extends StatelessWidget {
               ('Pembayaran', t.payment == PaymentMethod.cash ? 'Tunai di loket' : 'QRIS, lunas'),
               ('Total', rupiah(t.total)),
             ];
+            final last = rows.length - 1;
             return ResponsiveBody(children: [
-              const PageHeader(title: 'E-Tiket Masuk'),
-              GlassCard(
+              // Kartu e-tiket: pita hijau tua di atas, QR dan status, sobekan tiket, lalu rincian pesanan.
+              AppCard(
                 radius: 24,
-                padding: const EdgeInsets.fromLTRB(20, 24, 20, 20),
-                child: Column(children: [
-                  Opacity(
-                    opacity: t.status == TicketStatus.waiting ? 1 : .6,
-                    child: Container(
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20)),
-                      child: QrImageView(data: t.code, size: 170),
-                    ),
+                padding: EdgeInsets.zero,
+                child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+                  Container(
+                    color: AppColors.forest,
+                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+                    child: Row(children: [
+                      const Icon(Icons.confirmation_number_outlined, size: 19, color: AppColors.lightLeaf),
+                      const SizedBox(width: 8),
+                      const Expanded(child: Text('Tiket Masuk Sumber Sira', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: Colors.white))),
+                    ]),
                   ),
-                  const SizedBox(height: 16),
-                  Text(t.code, style: AppTheme.mono(20, weight: FontWeight.w600)),
-                  const SizedBox(height: 8),
-                  TicketStatusChip(t.status),
-                  const SizedBox(height: 12),
-                  Text(_messages[t.status]!, textAlign: TextAlign.center, style: TextStyle(fontSize: 11, color: AppColors.white(.8))),
-                  if (t.checkInAt != null) ...[
-                    const SizedBox(height: 4),
-                    Text('Masuk ${t.checkInAt}', style: AppTheme.mono(10, color: AppColors.white(.65))),
-                  ],
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(20, 22, 20, 10),
+                    child: Column(children: [
+                      Opacity(
+                        opacity: t.status == TicketStatus.waiting ? 1 : .5,
+                        child: Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(18), border: Border.all(color: AppColors.pale, width: 1.5)),
+                          child: QrImageView(data: t.code, size: 180),
+                        ),
+                      ),
+                      const SizedBox(height: 14),
+                      Text(t.code, style: AppTheme.mono(22, weight: FontWeight.w700, color: AppColors.forest)),
+                      const SizedBox(height: 8),
+                      TicketStatusChip(t.status),
+                      const SizedBox(height: 12),
+                      Text(_messages[t.status]!, textAlign: TextAlign.center, style: const TextStyle(fontSize: 13, color: AppColors.muted, height: 1.4)),
+                      if (t.checkInAt != null) ...[
+                        const SizedBox(height: 4),
+                        Text('Masuk ${t.checkInAt}', style: AppTheme.mono(12, weight: FontWeight.w600, color: AppColors.leaf)),
+                      ],
+                    ]),
+                  ),
+                  const TicketDivider(),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(20, 4, 20, 14),
+                    child: Column(children: [
+                      for (final (i, (label, value)) in rows.indexed) ...[
+                        if (i == last) const Divider(height: 18),
+                        DetailRow(label, value, strong: i == last),
+                      ],
+                    ]),
+                  ),
                 ]),
               ),
-              const SizedBox(height: 14),
-              GlassCard(
-                child: Column(children: [
-                  for (final (label, value) in rows)
-                    Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 5),
-                      child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                        SizedBox(width: 110, child: Text(label, style: TextStyle(fontSize: 11, color: AppColors.white(.7)))),
-                        Expanded(child: Text(value, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600))),
-                      ]),
-                    ),
-                ]),
-              ),
-              const SizedBox(height: 14),
+              const SizedBox(height: 16),
               if (t.status == TicketStatus.waiting) ...[
-                OutlinedButton.icon(
-                  style: OutlinedButton.styleFrom(
-                    minimumSize: const Size.fromHeight(44),
-                    foregroundColor: Colors.white,
-                    side: BorderSide(color: AppColors.white(.3)),
-                    shape: const StadiumBorder(),
-                  ),
-                  onPressed: () => AppState.instance.checkIn(t.code),
-                  icon: const Icon(Icons.qr_code_scanner, size: 18),
-                  label: const Text('Simulasi scan petugas (demo)'),
-                ),
+                OutlineAction(label: 'Simulasi scan petugas (demo)', icon: Icons.qr_code_scanner_rounded, onPressed: () => AppState.instance.checkIn(t.code)),
                 const SizedBox(height: 10),
               ],
               // Tanpa login: e-tiket dikirim ke WhatsApp pemesan dan riwayatnya dicari lewat nomor itu.
               if (t.whatsapp.isNotEmpty) ...[
-                OutlinedButton.icon(
-                  style: OutlinedButton.styleFrom(
-                    minimumSize: const Size.fromHeight(44),
-                    foregroundColor: Colors.white,
-                    side: BorderSide(color: AppColors.white(.3)),
-                    shape: const StadiumBorder(),
-                  ),
-                  onPressed: () => kirimWhatsApp(context, t.whatsapp, _waMessage(t)),
-                  icon: const Icon(Icons.chat_outlined, size: 18),
-                  label: const Text('Kirim E-Tiket ke WhatsApp'),
-                ),
-                const SizedBox(height: 6),
+                OutlineAction(label: 'Kirim E-Tiket ke WhatsApp', icon: Icons.chat_outlined, onPressed: () => kirimWhatsApp(context, t.whatsapp, _waMessage(t))),
+                const SizedBox(height: 8),
                 Text('Riwayat tiket ini tersimpan di nomor ${t.whatsapp}. Buka Tiket Saya untuk melihatnya lagi.',
-                    textAlign: TextAlign.center, style: TextStyle(fontSize: 10, color: AppColors.white(.65))),
-                const SizedBox(height: 12),
+                    textAlign: TextAlign.center, style: const TextStyle(fontSize: 12, color: AppColors.muted, height: 1.4)),
+                const SizedBox(height: 14),
               ],
               PrimaryButton(
                 label: 'Selesai',

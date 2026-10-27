@@ -42,32 +42,37 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: const PageAppBar(title: 'Ulasan & Rating'),
       body: AppBackground(
         child: ListenableBuilder(
           listenable: AppState.instance,
           builder: (context, _) {
             final s = AppState.instance;
             return ResponsiveBody(children: [
-              const PageHeader(title: 'Ulasan & Rating'),
-              GlassCard(
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+              // Ringkasan rating di kartu hijau tua.
+              AppCard(
+                color: AppColors.forest,
+                borderColor: AppColors.forest,
+                padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 20),
                 child: Row(children: [
-                  Text(s.rating.toStringAsFixed(1), style: AppTheme.display(40)),
+                  Text(s.rating.toStringAsFixed(1), style: AppTheme.display(46, color: Colors.white)),
                   const SizedBox(width: 18),
-                  Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                    _starsRow(s.rating.round(), 20),
-                    const SizedBox(height: 4),
-                    Text('dari ${s.reviewCount} ulasan', style: TextStyle(fontSize: 11, color: AppColors.white(.75))),
-                  ]),
+                  Expanded(
+                    child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                      _starsRow(s.rating.round(), 24),
+                      const SizedBox(height: 6),
+                      Text('dari ${s.reviewCount} ulasan', style: TextStyle(fontSize: 13, color: AppColors.white(.8))),
+                    ]),
+                  ),
                 ]),
               ),
-              const SizedBox(height: 14),
+              const SectionLabel('Tulis Ulasan'),
               Form(
                 key: _formKey,
-                child: GlassCard(
+                child: AppCard(
                   child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                    const Text('Tulis Ulasan', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
-                    const SizedBox(height: 6),
+                    const Text('Beri nilai kunjunganmu', style: TextStyle(fontSize: 13, color: AppColors.muted)),
+                    const SizedBox(height: 4),
                     // Ketuk bintang untuk memberi nilai 1 sampai 5.
                     Row(children: [
                       for (var i = 1; i <= 5; i++)
@@ -76,40 +81,43 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
                           visualDensity: VisualDensity.compact,
                           padding: EdgeInsets.zero,
                           onPressed: () => setState(() => _stars = i),
-                          icon: Icon(i <= _stars ? Icons.star_rounded : Icons.star_outline_rounded, size: 30, color: Colors.white),
+                          icon: Icon(i <= _stars ? Icons.star_rounded : Icons.star_outline_rounded, size: 36, color: i <= _stars ? AppColors.sun : AppColors.pale),
                         ),
                     ]),
-                    const SizedBox(height: 6),
+                    const SizedBox(height: 8),
                     TextFormField(
                       controller: _text,
-                      minLines: 2,
-                      maxLines: 4,
+                      minLines: 3,
+                      maxLines: 5,
                       decoration: const InputDecoration(hintText: 'Ceritakan pengalamanmu...'),
                       validator: (v) => (v ?? '').trim().length < 10 ? 'Tulis minimal 10 huruf.' : null,
                     ),
-                    const SizedBox(height: 12),
-                    SizedBox(width: 160, child: PrimaryButton(label: 'Kirim Ulasan', height: 42, onPressed: _submit)),
+                    const SizedBox(height: 14),
+                    PrimaryButton(label: 'Kirim Ulasan', icon: Icons.send_rounded, height: 48, onPressed: _submit),
                   ]),
                 ),
               ),
-              const SizedBox(height: 20),
-              Text('Ulasan Terbaru', style: AppTheme.display(17)),
-              const SizedBox(height: 10),
+              const SectionTitle('Ulasan Terbaru'),
               for (final r in s.reviews)
                 Padding(
                   padding: const EdgeInsets.only(bottom: 10),
-                  child: GlassCard(
+                  child: AppCard(
                     child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                       Row(children: [
-                        CircleAvatar(radius: 18, backgroundColor: AppColors.leaf.withValues(alpha: .7), child: Text(r.initial, style: const TextStyle(color: Colors.white))),
+                        CircleAvatar(
+                          radius: 20,
+                          backgroundColor: AppColors.pale,
+                          child: Text(r.initial, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: AppColors.forest)),
+                        ),
                         const SizedBox(width: 12),
                         Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                          Text(r.name, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
-                          _starsRow(r.stars, 13),
+                          Text(r.name, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700)),
+                          const SizedBox(height: 2),
+                          _starsRow(r.stars, 16),
                         ]),
                       ]),
                       const SizedBox(height: 10),
-                      Text(r.text, style: TextStyle(fontSize: 12, color: AppColors.white(.8))),
+                      Text(r.text, style: const TextStyle(fontSize: 13.5, height: 1.45)),
                     ]),
                   ),
                 ),
@@ -120,8 +128,8 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
     );
   }
 
-  // Deretan 5 bintang: penuh sebanyak nilai, sisanya garis.
+  // Deretan 5 bintang kuning: penuh sebanyak nilai, sisanya garis.
   Widget _starsRow(int stars, double size) => Row(mainAxisSize: MainAxisSize.min, children: [
-        for (var i = 1; i <= 5; i++) Icon(i <= stars ? Icons.star_rounded : Icons.star_outline_rounded, size: size, color: Colors.white),
+        for (var i = 1; i <= 5; i++) Icon(i <= stars ? Icons.star_rounded : Icons.star_outline_rounded, size: size, color: AppColors.sun),
       ]);
 }

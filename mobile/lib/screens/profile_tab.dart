@@ -16,9 +16,9 @@ class ProfileTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     const info = [
-      (Icons.schedule, 'Jam buka', 'Weekday 08.00-16.00 · Weekend s/d 17.00'),
+      (Icons.schedule_rounded, 'Jam buka', 'Weekday 08.00-16.00 · Weekend s/d 17.00'),
       (Icons.confirmation_number_outlined, 'Tiket masuk', 'Rp5.000 per orang (usia 3 tahun ke atas)'),
-      (Icons.local_parking, 'Parkir', 'Motor 3rb · Mobil 10rb · Bus 20rb'),
+      (Icons.local_parking_rounded, 'Parkir', 'Motor 3rb · Mobil 10rb · Bus 20rb'),
       (Icons.payments_outlined, 'Pembayaran', 'Tunai & QRIS'),
       (Icons.place_outlined, 'Lokasi', 'Desa Putukrejo, Malang'),
     ];
@@ -26,65 +26,94 @@ class ProfileTab extends StatelessWidget {
       listenable: AppState.instance,
       builder: (context, _) {
         final s = AppState.instance;
-        return ResponsiveBody(children: [
-          Text('Profil', style: AppTheme.display(22)),
-          const SizedBox(height: 18),
-          GlassCard(
+        return TabBody(
+          header: TabHeader(
+            title: 'Profil',
             child: Row(children: [
-              const CircleAvatar(radius: 26, backgroundColor: AppColors.leaf, child: Icon(Icons.person, color: Colors.white)),
+              CircleAvatar(
+                radius: 30,
+                backgroundColor: AppColors.white(.15),
+                child: const Icon(Icons.person_rounded, color: Colors.white, size: 32),
+              ),
               const SizedBox(width: 14),
               Expanded(
                 child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                  const Text('Pengunjung', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
+                  const Text('Pengunjung', style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700, color: Colors.white)),
+                  const SizedBox(height: 3),
                   // Tanpa login: identitas pengunjung cukup nomor WhatsApp terakhir yang dipakai.
                   Text(s.savedWhatsapp.isEmpty ? 'Belum ada nomor WhatsApp tersimpan' : 'WhatsApp ${s.savedWhatsapp}',
-                      style: TextStyle(fontSize: 11, color: AppColors.white(.7))),
-                  Text('${s.myTickets.length} tiket dibeli dari perangkat ini', style: TextStyle(fontSize: 11, color: AppColors.white(.7))),
+                      style: TextStyle(fontSize: 13, color: AppColors.white(.85))),
+                  const SizedBox(height: 8),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                    decoration: BoxDecoration(color: AppColors.white(.14), borderRadius: BorderRadius.circular(14)),
+                    child: Text('${s.myTickets.length} tiket dibeli dari perangkat ini',
+                        style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Colors.white)),
+                  ),
                 ]),
               ),
             ]),
           ),
-          const SizedBox(height: 16),
-          GlassCard(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-            // [P4 Switch + P6 shared_preferences] Pilihan ON/OFF yang tersimpan di perangkat.
-            child: SwitchListTile(
-              contentPadding: EdgeInsets.zero,
-              value: s.quietReminder,
-              onChanged: s.setQuietReminder,
-              secondary: const Icon(Icons.notifications_active_outlined),
-              title: const Text('Ingatkan saat sepi', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
-              subtitle: Text(s.quietReminder ? 'Aktif, tersimpan di perangkat' : 'Nonaktif', style: TextStyle(fontSize: 11, color: AppColors.white(.7))),
+          children: [
+            const SectionTitle('Pengaturan', top: 4),
+            AppCard(
+              padding: const EdgeInsets.fromLTRB(16, 6, 10, 6),
+              // [P4 Switch + P6 shared_preferences] Pilihan ON/OFF yang tersimpan di perangkat.
+              child: SwitchListTile(
+                contentPadding: EdgeInsets.zero,
+                value: s.quietReminder,
+                onChanged: s.setQuietReminder,
+                secondary: const IconBadge(Icons.notifications_active_outlined, size: 40),
+                title: const Text('Ingatkan saat sepi', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
+                subtitle: Text(s.quietReminder ? 'Aktif, tersimpan di perangkat' : 'Nonaktif', style: const TextStyle(fontSize: 12.5, color: AppColors.muted)),
+              ),
             ),
-          ),
-          const SizedBox(height: 16),
-          GlassCard(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-            child: Column(children: [
-              for (final (icon, title, text) in info)
-                ListTile(
-                  contentPadding: EdgeInsets.zero,
-                  leading: CircleAvatar(radius: 16, backgroundColor: AppColors.leaf.withValues(alpha: .35), child: Icon(icon, size: 15, color: Colors.white)),
-                  title: Text(title, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
-                  subtitle: Text(text, style: TextStyle(fontSize: 11, color: AppColors.white(.7))),
+            const SectionTitle('Info Kunjungan'),
+            AppCard(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+              child: Column(children: [
+                for (final (i, (icon, title, text)) in info.indexed) ...[
+                  if (i > 0) const Divider(),
+                  InfoRow(icon: icon, title: title, text: text),
+                ],
+              ]),
+            ),
+            const SectionTitle('Lokasi & Arah'),
+            // Kartu lokasi: foto Sumber Sira lalu tombol ke Google Maps.
+            AppCard(
+              padding: EdgeInsets.zero,
+              child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+                SizedBox(
+                  height: 130,
+                  child: Stack(fit: StackFit.expand, children: [
+                    Image.asset('assets/images/hero-sawah.jpg', fit: BoxFit.cover),
+                    Positioned(
+                      left: 12,
+                      bottom: 12,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                        decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(14)),
+                        child: const Row(mainAxisSize: MainAxisSize.min, children: [
+                          Icon(Icons.place_rounded, size: 15, color: AppColors.coral),
+                          SizedBox(width: 4),
+                          Text('Desa Putukrejo, Malang', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
+                        ]),
+                      ),
+                    ),
+                  ]),
                 ),
-            ]),
-          ),
-          const SizedBox(height: 16),
-          PrimaryButton(label: 'Buka Lokasi di Google Maps', icon: Icons.map_outlined, height: 46, onPressed: () => bukaTautan(context, _maps)),
-          const SizedBox(height: 10),
-          OutlinedButton.icon(
-            style: OutlinedButton.styleFrom(
-              minimumSize: const Size.fromHeight(46),
-              foregroundColor: Colors.white,
-              side: BorderSide(color: AppColors.white(.3)),
-              shape: const StadiumBorder(),
+                Padding(
+                  padding: const EdgeInsets.all(14),
+                  child: Column(children: [
+                    PrimaryButton(label: 'Buka Lokasi di Google Maps', icon: Icons.map_outlined, height: 50, onPressed: () => bukaTautan(context, _maps)),
+                    const SizedBox(height: 10),
+                    OutlineAction(label: 'Petunjuk Arah', icon: Icons.directions_outlined, onPressed: () => bukaTautan(context, _route)),
+                  ]),
+                ),
+              ]),
             ),
-            onPressed: () => bukaTautan(context, _route),
-            icon: const Icon(Icons.directions_outlined, size: 18),
-            label: const Text('Petunjuk Arah'),
-          ),
-        ]);
+          ],
+        );
       },
     );
   }

@@ -69,29 +69,36 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
               ),
             ),
           ),
+          // Semua teks dan ikon di atas foto berwarna putih.
           SafeArea(
-            child: LayoutBuilder(
-              // Tinggi minimal 560 supaya di layar pendek / landscape bisa digulir, tidak overflow.
-              builder: (context, box) => SingleChildScrollView(
-                child: SizedBox(
-                  height: max(box.maxHeight, 560),
-                  child: Column(children: [
-                    const SizedBox(height: 24),
-                    _locationPill(),
-                    const Spacer(flex: 2),
-                    _rippleLogo(),
-                    const SizedBox(height: 28),
-                    Text('Sumber Sira', style: AppTheme.display(34)),
-                    const SizedBox(height: 6),
-                    Text('Kunjungan Jernih Tanpa Antre', style: TextStyle(fontSize: 13, color: AppColors.white(.85))),
-                    const SizedBox(height: 18),
-                    Wrap(spacing: 8, runSpacing: 8, alignment: WrapAlignment.center, children: [
-                      for (final chip in const ['Air jernih', 'Tanpa antre', 'Live Crowd']) _chip(chip),
-                    ]),
-                    const Spacer(flex: 3),
-                    _loadingBar(),
-                    const SizedBox(height: 40),
-                  ]),
+            child: DefaultTextStyle.merge(
+              style: const TextStyle(color: Colors.white),
+              child: IconTheme(
+                data: const IconThemeData(color: Colors.white),
+                child: LayoutBuilder(
+                  // Tinggi minimal 560 supaya di layar pendek / landscape bisa digulir, tidak overflow.
+                  builder: (context, box) => SingleChildScrollView(
+                    child: SizedBox(
+                      height: max(box.maxHeight, 560),
+                      child: Column(children: [
+                        const SizedBox(height: 24),
+                        _locationPill(),
+                        const Spacer(flex: 2),
+                        _rippleLogo(),
+                        const SizedBox(height: 28),
+                        Text('Sumber Sira', style: AppTheme.display(34, color: Colors.white)),
+                        const SizedBox(height: 6),
+                        Text('Kunjungan Jernih Tanpa Antre', style: TextStyle(fontSize: 14, color: AppColors.white(.85))),
+                        const SizedBox(height: 18),
+                        Wrap(spacing: 8, runSpacing: 8, alignment: WrapAlignment.center, children: [
+                          for (final chip in const ['Air jernih', 'Tanpa antre', 'Live Crowd']) _chip(chip),
+                        ]),
+                        const Spacer(flex: 3),
+                        _loadingBar(),
+                        const SizedBox(height: 40),
+                      ]),
+                    ),
+                  ),
                 ),
               ),
             ),
@@ -105,9 +112,9 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
         decoration: BoxDecoration(color: AppColors.white(.12), borderRadius: BorderRadius.circular(20), border: Border.all(color: AppColors.white(.25))),
         child: const Row(mainAxisSize: MainAxisSize.min, children: [
-          Icon(Icons.place_outlined, size: 13),
+          Icon(Icons.place_outlined, size: 15),
           SizedBox(width: 6),
-          Text('Desa Putukrejo, Malang', style: TextStyle(fontSize: 10, fontWeight: FontWeight.w500)),
+          Text('Desa Putukrejo, Malang', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500)),
         ]),
       );
 
@@ -139,7 +146,7 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
         child: Row(mainAxisSize: MainAxisSize.min, children: [
           Container(width: 6, height: 6, decoration: const BoxDecoration(color: AppColors.leaf, shape: BoxShape.circle)),
           const SizedBox(width: 6),
-          Text(label, style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w500)),
+          Text(label, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500)),
         ]),
       );
 
@@ -156,8 +163,8 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
           ),
         ),
         const SizedBox(height: 10),
-        Text('Menyiapkan kunjunganmu...', style: TextStyle(fontSize: 10, color: AppColors.white(.75))),
+        Text('Menyiapkan kunjunganmu...', style: TextStyle(fontSize: 12.5, color: AppColors.white(.75))),
         const SizedBox(height: 4),
-        Text('Ketuk di mana saja untuk lanjut', style: TextStyle(fontSize: 9, color: AppColors.white(.5))),
+        Text('Ketuk di mana saja untuk lanjut', style: TextStyle(fontSize: 11, color: AppColors.white(.5))),
       ]);
 }

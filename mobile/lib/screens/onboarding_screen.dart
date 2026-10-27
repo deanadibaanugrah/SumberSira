@@ -66,11 +66,18 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 padding: const EdgeInsets.fromLTRB(20, 4, 20, 20),
                 child: Column(children: [
                   SizedBox(
-                    height: 44,
-                    child: Align(
-                      alignment: Alignment.centerRight,
-                      child: _isLast ? null : TextButton(onPressed: _finish, child: Text('Lewati', style: TextStyle(color: AppColors.white(.8)))),
-                    ),
+                    height: 48,
+                    child: Row(children: [
+                      // Penanda halaman ke berapa dari 3.
+                      Text('${_page + 1} / ${_pages.length}', style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.muted)),
+                      const Spacer(),
+                      if (!_isLast)
+                        TextButton(
+                          style: TextButton.styleFrom(foregroundColor: AppColors.forest, backgroundColor: AppColors.mint, shape: const StadiumBorder()),
+                          onPressed: _finish,
+                          child: const Text('Lewati', style: TextStyle(fontWeight: FontWeight.w600)),
+                        ),
+                    ]),
                   ),
                   Expanded(
                     child: PageView.builder(
@@ -88,10 +95,10 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                           ? const SizedBox()
                           : OutlinedButton(
                               style: OutlinedButton.styleFrom(
-                                minimumSize: const Size.fromHeight(50),
-                                foregroundColor: Colors.white,
-                                backgroundColor: AppColors.white(.1),
-                                side: BorderSide(color: AppColors.white(.3)),
+                                minimumSize: const Size.fromHeight(52),
+                                foregroundColor: AppColors.forest,
+                                backgroundColor: Colors.white,
+                                side: const BorderSide(color: AppColors.pale, width: 1.4),
                                 shape: const StadiumBorder(),
                               ),
                               onPressed: () => _goTo(_page - 1),
@@ -121,9 +128,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
           AnimatedContainer(
             duration: const Duration(milliseconds: 250),
             margin: const EdgeInsets.symmetric(horizontal: 4),
-            width: i == _page ? 20 : 8,
+            width: i == _page ? 24 : 8,
             height: 8,
-            decoration: BoxDecoration(color: i == _page ? AppColors.leaf : AppColors.white(.3), borderRadius: BorderRadius.circular(4)),
+            decoration: BoxDecoration(color: i == _page ? AppColors.leaf : AppColors.pale, borderRadius: BorderRadius.circular(4)),
           ),
       ]);
 }
@@ -140,16 +147,19 @@ class _OnboardingPage extends StatelessWidget {
     return LayoutBuilder(
       builder: (context, box) => SingleChildScrollView(
         child: Column(children: [
-          ClipRRect(
-            borderRadius: BorderRadius.circular(28),
-            child: Image.asset(page.image, height: box.maxHeight * .58, width: double.infinity, fit: BoxFit.cover),
+          DecoratedBox(
+            decoration: BoxDecoration(borderRadius: BorderRadius.circular(32), boxShadow: AppShadows.card),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(32),
+              child: Image.asset(page.image, height: box.maxHeight * .58, width: double.infinity, fit: BoxFit.cover),
+            ),
           ),
-          const SizedBox(height: 22),
+          const SizedBox(height: 24),
           dots,
-          const SizedBox(height: 22),
-          Text(page.title, textAlign: TextAlign.center, style: AppTheme.display(24)),
+          const SizedBox(height: 20),
+          Text(page.title, textAlign: TextAlign.center, style: AppTheme.display(26)),
           const SizedBox(height: 12),
-          Text(page.text, textAlign: TextAlign.center, style: TextStyle(fontSize: 13, color: AppColors.white(.75), height: 1.4)),
+          Text(page.text, textAlign: TextAlign.center, style: const TextStyle(fontSize: 14.5, color: AppColors.muted, height: 1.5)),
         ]),
       ),
     );

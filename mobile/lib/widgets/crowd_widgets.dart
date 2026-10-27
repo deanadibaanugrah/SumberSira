@@ -4,11 +4,10 @@ import '../data/app_state.dart';
 import '../data/dummy_data.dart';
 import '../models/ticket.dart';
 import '../theme/app_theme.dart';
-import 'common.dart';
 
-// Titik hijau berkedip tanda data live.
+// Titik berkedip tanda data live.
 class LiveDot extends StatefulWidget {
-  const LiveDot({super.key, this.color = Colors.white});
+  const LiveDot({super.key, this.color = AppColors.leaf});
 
   final Color color;
 
@@ -29,18 +28,20 @@ class _LiveDotState extends State<LiveDot> with SingleTickerProviderStateMixin {
   @override
   Widget build(BuildContext context) => FadeTransition(
         opacity: _controller,
-        child: Container(width: 8, height: 8, decoration: BoxDecoration(color: widget.color, shape: BoxShape.circle)),
+        child: Container(width: 9, height: 9, decoration: BoxDecoration(color: widget.color, shape: BoxShape.circle)),
       );
 }
 
-// Warna tiap tingkat keramaian, sama dengan keterangan grafik: Sepi hijau, Sedang putih, Ramai coral.
-Color crowdColor(String label) => switch (label) {
-      'Sepi' => const Color(0xFF7FD1A8),
+// Warna tiap tingkat keramaian, sama dengan keterangan grafik: Sepi hijau, Sedang kuning, Ramai coral.
+// onDark = dipakai di atas latar hijau tua, hijaunya dibuat lebih muda supaya tetap terlihat.
+Color crowdColor(String label, {bool onDark = false}) => switch (label) {
+      'Sepi' => onDark ? AppColors.lightLeaf : AppColors.leaf,
       'Ramai' => AppColors.coral,
-      _ => Colors.white,
+      _ => AppColors.sun,
     };
 
-// Pill di Beranda: "Crowd saat ini: Sedang (62%)" dan jumlah orang di dalam (hanya info, tidak bisa diklik).
+// Kartu status keramaian di header Beranda: "Crowd saat ini", tingkat keramaian, persen kapasitas,
+// garis kapasitas, dan jumlah orang di dalam (hanya info, tidak bisa diklik).
 // ListenableBuilder membangun ulang widget setiap AppState memanggil notifyListeners().
 class CrowdPill extends StatelessWidget {
   const CrowdPill({super.key});
@@ -51,14 +52,36 @@ class CrowdPill extends StatelessWidget {
       listenable: AppState.instance,
       builder: (context, _) {
         final s = AppState.instance;
-        return GlassCard(
-          radius: 24,
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          child: Row(children: [
-            LiveDot(color: crowdColor(s.crowdLabel)),
-            const SizedBox(width: 8),
-            Expanded(child: Text('Crowd saat ini: ${s.crowdLabel} (${s.percent}%)', style: const TextStyle(fontSize: 12))),
-            Text('${s.inside}/${AppState.capacity} orang', style: AppTheme.mono(11, color: AppColors.white(.8))),
+        final color = crowdColor(s.crowdLabel, onDark: true);
+        return Container(
+          padding: const EdgeInsets.fromLTRB(16, 14, 16, 16),
+          decoration: BoxDecoration(
+            color: AppColors.white(.1),
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: AppColors.white(.16)),
+          ),
+          child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+            Row(children: [
+              LiveDot(color: color),
+              const SizedBox(width: 8),
+              Text('Crowd saat ini', style: TextStyle(fontSize: 12.5, color: AppColors.white(.8))),
+              const Spacer(),
+              Text('${s.inside}/${AppState.capacity} orang', style: TextStyle(fontSize: 12.5, color: AppColors.white(.8))),
+            ]),
+            const SizedBox(height: 8),
+            Row(crossAxisAlignment: CrossAxisAlignment.end, children: [
+              Text(s.crowdLabel, style: AppTheme.display(26, color: Colors.white)),
+              const SizedBox(width: 8),
+              Padding(
+                padding: const EdgeInsets.only(bottom: 4),
+                child: Text('${s.percent}% kapasitas', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: color)),
+              ),
+            ]),
+            const SizedBox(height: 12),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(6),
+              child: LinearProgressIndicator(value: (s.percent / 100).clamp(0, 1).toDouble(), minHeight: 8, backgroundColor: AppColors.white(.14), color: color),
+            ),
           ]),
         );
       },
@@ -101,13 +124,13 @@ class _HourlyChartPainter extends CustomPainter {
   final double progress;
   final int nowHour;
 
-  static const _left = 34.0, _bottom = 24.0, _top = 18.0;
+  static const _left = 34.0, _bottom = 24.0, _top = 22.0;
   static const _yTicks = [0, 100, 200, 300];
 
   // Menulis teks kecil (label sumbu) di kanvas.
-  void _text(Canvas canvas, String s, Offset at, {TextAlign align = TextAlign.center, Color? color}) {
+  void _text(Canvas canvas, String s, Offset at, {TextAlign align = TextAlign.center, Color color = AppColors.muted, FontWeight weight = FontWeight.w500}) {
     final tp = TextPainter(
-      text: TextSpan(text: s, style: AppTheme.mono(9, color: color ?? AppColors.white(.65))),
+      text: TextSpan(text: s, style: TextStyle(fontSize: 10.5, color: color, fontWeight: weight)),
       textDirection: TextDirection.ltr,
     )..layout();
     final dx = switch (align) { TextAlign.right => at.dx - tp.width, TextAlign.center => at.dx - tp.width / 2, _ => at.dx };
@@ -125,7 +148,7 @@ class _HourlyChartPainter extends CustomPainter {
 
     // Garis bantu dan angka jumlah pengunjung di sumbu kiri.
     final grid = Paint()
-      ..color = Colors.white.withValues(alpha: .12)
+      ..color = AppColors.line
       ..strokeWidth = 1;
     for (final v in _yTicks) {
       final gy = _top + chartH - chartH * v / AppState.capacity;
@@ -138,9 +161,9 @@ class _HourlyChartPainter extends CustomPainter {
     if (nowIndex >= 0) {
       canvas.drawRRect(
         RRect.fromRectAndRadius(Rect.fromLTWH(x(nowIndex) - step / 2, _top - 6, step, chartH + 6), const Radius.circular(8)),
-        Paint()..color = Colors.white.withValues(alpha: .08),
+        Paint()..color = AppColors.mint,
       );
-      _text(canvas, 'Sekarang', Offset(x(nowIndex), _top - 12), color: Colors.white);
+      _text(canvas, 'Sekarang', Offset(x(nowIndex), _top - 14), color: AppColors.forest, weight: FontWeight.w700);
     }
 
     // Area lembut di bawah garis, lalu garisnya.
@@ -158,13 +181,13 @@ class _HourlyChartPainter extends CustomPainter {
         ..shader = LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
-          colors: [AppColors.leaf.withValues(alpha: .45), AppColors.leaf.withValues(alpha: 0)],
+          colors: [AppColors.leaf.withValues(alpha: .28), AppColors.leaf.withValues(alpha: 0)],
         ).createShader(Rect.fromLTWH(0, _top, size.width, chartH)),
     );
     canvas.drawPath(
       Path()..addPolygon(points, false),
       Paint()
-        ..color = Colors.white
+        ..color = AppColors.forest
         ..strokeWidth = 2.5
         ..style = PaintingStyle.stroke
         ..strokeJoin = StrokeJoin.round,
@@ -173,9 +196,9 @@ class _HourlyChartPainter extends CustomPainter {
     // Titik berwarna sesuai tingkat keramaian, dan jam di sumbu bawah.
     for (var i = 0; i < data.length; i++) {
       final label = AppState.labelFor((data[i].$2 * 100 / AppState.capacity).round());
-      canvas.drawCircle(points[i], 5, Paint()..color = AppColors.ink);
-      canvas.drawCircle(points[i], 3.5, Paint()..color = crowdColor(label));
-      _text(canvas, data[i].$1, Offset(x(i), size.height - _bottom / 2));
+      canvas.drawCircle(points[i], 6, Paint()..color = Colors.white);
+      canvas.drawCircle(points[i], 4.5, Paint()..color = crowdColor(label));
+      _text(canvas, data[i].$1, Offset(x(i), size.height - _bottom / 2), color: i == nowIndex ? AppColors.forest : AppColors.muted);
     }
   }
 
@@ -192,15 +215,15 @@ class CrowdLegend extends StatelessWidget {
     return Wrap(spacing: 16, runSpacing: 6, children: [
       for (final label in ['Sepi', 'Sedang', 'Ramai'])
         Row(mainAxisSize: MainAxisSize.min, children: [
-          Container(width: 9, height: 9, decoration: BoxDecoration(color: crowdColor(label), shape: BoxShape.circle)),
+          Container(width: 10, height: 10, decoration: BoxDecoration(color: crowdColor(label), shape: BoxShape.circle)),
           const SizedBox(width: 6),
-          Text(label, style: const TextStyle(fontSize: 10)),
+          Text(label, style: const TextStyle(fontSize: 12, color: AppColors.muted)),
         ]),
     ]);
   }
 }
 
-// Label status tiket: Belum masuk, Di dalam, atau Keluar.
+// Label status tiket: Belum masuk (kuning), Di dalam (hijau), atau Keluar (abu-abu).
 class TicketStatusChip extends StatelessWidget {
   const TicketStatusChip(this.status, {super.key});
 
@@ -208,15 +231,19 @@ class TicketStatusChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bg = switch (status) {
-      TicketStatus.inside => AppColors.leaf,
-      TicketStatus.waiting => AppColors.white(.15),
-      TicketStatus.out => AppColors.white(.1),
+    final (bg, fg) = switch (status) {
+      TicketStatus.inside => (AppColors.pale, AppColors.forest),
+      TicketStatus.waiting => (AppColors.sun.withValues(alpha: .2), AppColors.sunDark),
+      TicketStatus.out => (AppColors.line, AppColors.muted),
     };
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       decoration: BoxDecoration(color: bg, borderRadius: BorderRadius.circular(12)),
-      child: Text(status.label, style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w600)),
+      child: Row(mainAxisSize: MainAxisSize.min, children: [
+        Container(width: 6, height: 6, decoration: BoxDecoration(color: fg, shape: BoxShape.circle)),
+        const SizedBox(width: 6),
+        Text(status.label, style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.w600, color: fg)),
+      ]),
     );
   }
 }

@@ -81,75 +81,93 @@ class _BookingSectionState extends State<BookingSection> {
       future: _items,
       builder: (context, snapshot) {
         final items = snapshot.data ?? const <Wahana>[];
+        // Daftar dikelompokkan per kategori dari JSON (Sewa Alat, Wahana) supaya mudah dicari.
+        final categories = {for (final w in items) w.category};
         return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-          const SectionLabel('Pilih Jam Kunjungan', top: 0),
+          const SectionLabel('Pilih Jam Kunjungan', top: 0, step: 1),
           // Jam booking selang 1 jam, bisa digeser ke samping.
           SizedBox(
-            height: 38,
+            height: 44,
             child: ListView.separated(
               scrollDirection: Axis.horizontal,
               itemCount: DummyData.bookingSlots.length,
-              separatorBuilder: (_, _) => const SizedBox(width: 6),
+              separatorBuilder: (_, _) => const SizedBox(width: 8),
               itemBuilder: (_, i) {
                 final s = DummyData.bookingSlots[i];
-                return GlassCard(
-                  radius: 18,
-                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
-                  color: s == _slot ? AppColors.leaf.withValues(alpha: .8) : null,
+                final active = s == _slot;
+                return AppCard(
+                  radius: 22,
+                  shadow: false,
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 11),
+                  color: active ? AppColors.forest : Colors.white,
+                  borderColor: active ? AppColors.forest : AppColors.line,
                   onTap: () => setState(() => _slot = s),
-                  child: Text(labelJam(s), style: AppTheme.mono(11)),
+                  child: Text(
+                    labelJam(s),
+                    style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: active ? Colors.white : AppColors.ink),
+                  ),
                 );
               },
             ),
           ),
-          const SectionLabel('Daftar Sewa & Wahana'),
+          const SectionLabel('Daftar Sewa & Wahana', step: 2),
           if (snapshot.connectionState != ConnectionState.done)
             const Center(child: Padding(padding: EdgeInsets.all(24), child: CircularProgressIndicator()))
           else
-            for (final w in items)
+            for (final c in categories) ...[
               Padding(
-                padding: const EdgeInsets.only(bottom: 8),
-                child: GlassCard(
-                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                  child: Row(children: [
-                    CircleAvatar(
-                      radius: 20,
-                      backgroundColor: AppColors.leaf.withValues(alpha: .35),
-                      child: Icon(w.icon, size: 19, color: Colors.white),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                        Text(w.label, style: const TextStyle(fontSize: 12)),
-                        const SizedBox(height: 3),
-                        Text(rupiah(w.price), style: AppTheme.mono(11)),
-                      ]),
-                    ),
-                    StepperControl(
-                      value: _qty[w.id] ?? 0,
-                      label: w.name,
-                      onChanged: (v) => setState(() => _qty[w.id] = v),
-                    ),
-                  ]),
-                ),
+                padding: const EdgeInsets.only(top: 4, bottom: 8),
+                child: Text(c.toUpperCase(), style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.w700, letterSpacing: .8, color: AppColors.muted)),
               ),
-          const SizedBox(height: 4),
+              for (final w in items.where((w) => w.category == c)) _itemCard(w),
+            ],
+          const SizedBox(height: 8),
           // Total dan tombol lanjut di akhir daftar.
-          GlassCard(
-            color: AppColors.leaf.withValues(alpha: .25),
-            padding: const EdgeInsets.fromLTRB(16, 12, 12, 12),
+          AppCard(
+            color: AppColors.forest,
+            borderColor: AppColors.forest,
+            padding: const EdgeInsets.fromLTRB(18, 16, 14, 16),
             child: Row(children: [
               Expanded(
                 child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                  Text('Total · ${labelJam(_slot)}', style: TextStyle(fontSize: 10, color: AppColors.white(.75))),
-                  Text(rupiah(_total(items)), style: AppTheme.mono(15, weight: FontWeight.w600)),
+                  Text('Total · ${labelJam(_slot)}', style: TextStyle(fontSize: 12, color: AppColors.white(.8))),
+                  const SizedBox(height: 2),
+                  Text(rupiah(_total(items)), style: AppTheme.price(20, color: Colors.white)),
                 ]),
               ),
-              SizedBox(width: 160, child: PrimaryButton(label: 'Lanjut Booking', height: 44, onPressed: () => _next(items))),
+              SizedBox(width: 156, child: PrimaryButton(label: 'Lanjut Booking', height: 48, inverted: true, onPressed: () => _next(items))),
             ]),
           ),
         ]);
       },
+    );
+  }
+
+  // Satu kartu alat sewa atau wahana. Kartu yang sudah dipilih diberi garis hijau.
+  Widget _itemCard(Wahana w) {
+    final qty = _qty[w.id] ?? 0;
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 10),
+      child: AppCard(
+        padding: const EdgeInsets.fromLTRB(12, 12, 10, 12),
+        borderColor: qty > 0 ? AppColors.leaf : AppColors.line,
+        child: Row(children: [
+          IconBadge(w.icon, size: 46),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Text(w.label, style: const TextStyle(fontSize: 13.5, fontWeight: FontWeight.w600)),
+              const SizedBox(height: 3),
+              Text(rupiah(w.price), style: AppTheme.price(13.5)),
+            ]),
+          ),
+          StepperControl(
+            value: qty,
+            label: w.name,
+            onChanged: (v) => setState(() => _qty[w.id] = v),
+          ),
+        ]),
+      ),
     );
   }
 }

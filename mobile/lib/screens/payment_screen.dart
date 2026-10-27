@@ -67,59 +67,75 @@ class _PaymentScreenState extends State<PaymentScreen> {
       'Pastikan nama merchant Sumber Sira dan nominalnya sama, lalu bayar.',
     ];
     return Scaffold(
+      appBar: const PageAppBar(title: 'Bayar dengan QRIS'),
       body: AppBackground(
         child: ResponsiveBody(children: [
-          const PageHeader(title: 'Bayar dengan QRIS'),
-          GlassCard(
+          AppCard(
             radius: 24,
             padding: const EdgeInsets.fromLTRB(20, 20, 20, 18),
             child: Column(children: [
-              Text('Sumber Sira · BUMDes Putukrejo', style: TextStyle(fontSize: 11, color: AppColors.white(.75))),
-              const SizedBox(height: 4),
-              Text(rupiah(total), style: AppTheme.mono(26, weight: FontWeight.w600)),
-              const SizedBox(height: 14),
+              Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+                const Icon(Icons.storefront_outlined, size: 16, color: AppColors.muted),
+                const SizedBox(width: 6),
+                Text('Sumber Sira · BUMDes Putukrejo', style: const TextStyle(fontSize: 12.5, color: AppColors.muted)),
+              ]),
+              const SizedBox(height: 6),
+              Text(rupiah(total), style: AppTheme.price(30)),
+              const SizedBox(height: 16),
               Opacity(
                 opacity: expired ? .3 : 1,
                 child: Container(
                   padding: const EdgeInsets.all(14),
-                  decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20)),
+                  decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20), border: Border.all(color: AppColors.pale, width: 1.5)),
                   // Package qr_flutter: QR berisi nama merchant dan nominal (simulasi QRIS).
-                  child: QrImageView(data: 'QRIS SUMBER SIRA ${widget.request.whatsapp} $total', size: 190),
+                  child: QrImageView(data: 'QRIS SUMBER SIRA ${widget.request.whatsapp} $total', size: 200),
                 ),
               ),
-              const SizedBox(height: 12),
-              Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-                Icon(Icons.timer_outlined, size: 15, color: expired ? AppColors.coral : Colors.white),
-                const SizedBox(width: 6),
-                Text(expired ? 'Waktu bayar habis, kembali lalu ulangi.' : 'Bayar sebelum $mm:$ss',
-                    style: TextStyle(fontSize: 12, color: expired ? AppColors.coral : Colors.white)),
-              ]),
+              const SizedBox(height: 16),
+              // Sisa waktu bayar: hijau saat masih berlaku, coral saat habis.
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                decoration: BoxDecoration(
+                  color: expired ? AppColors.coral.withValues(alpha: .14) : AppColors.mint,
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Row(mainAxisSize: MainAxisSize.min, children: [
+                  Icon(Icons.timer_outlined, size: 17, color: expired ? AppColors.coralDark : AppColors.forest),
+                  const SizedBox(width: 6),
+                  Flexible(
+                    child: Text(expired ? 'Waktu bayar habis, kembali lalu ulangi.' : 'Bayar sebelum $mm:$ss',
+                        style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: expired ? AppColors.coralDark : AppColors.forest)),
+                  ),
+                ]),
+              ),
             ]),
           ),
-          const SizedBox(height: 14),
-          GlassCard(
+          const SectionLabel('Cara Bayar'),
+          AppCard(
             child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              const Text('Cara bayar', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
-              const SizedBox(height: 8),
               for (final (i, step) in steps.indexed)
                 Padding(
-                  padding: const EdgeInsets.only(bottom: 6),
+                  padding: const EdgeInsets.only(bottom: 12),
                   child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                    CircleAvatar(radius: 9, backgroundColor: AppColors.leaf, child: Text('${i + 1}', style: const TextStyle(fontSize: 10, color: Colors.white))),
-                    const SizedBox(width: 10),
-                    Expanded(child: Text(step, style: TextStyle(fontSize: 11, color: AppColors.white(.85)))),
+                    CircleAvatar(radius: 12, backgroundColor: AppColors.forest, child: Text('${i + 1}', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: Colors.white))),
+                    const SizedBox(width: 12),
+                    Expanded(child: Text(step, style: const TextStyle(fontSize: 13.5, height: 1.4))),
                   ]),
                 ),
-              const SizedBox(height: 4),
+              const Divider(),
+              const SizedBox(height: 10),
               Text('${widget.request.draft.lines.length} item · ${labelJam(widget.request.draft.slot)} · a.n. ${widget.request.name}',
-                  style: TextStyle(fontSize: 10, color: AppColors.white(.65))),
+                  style: const TextStyle(fontSize: 12.5, color: AppColors.muted)),
             ]),
           ),
-          const SizedBox(height: 16),
+        ]),
+      ),
+      bottomNavigationBar: BottomBar(
+        child: Column(mainAxisSize: MainAxisSize.min, children: [
           PrimaryButton(label: 'Saya Sudah Bayar', loading: _checking, onPressed: expired ? null : _paid),
           const SizedBox(height: 8),
-          Text('Simulasi: belum terhubung ke bank. Tekan tombol di atas untuk melanjutkan.',
-              textAlign: TextAlign.center, style: TextStyle(fontSize: 10, color: AppColors.white(.55))),
+          const Text('Simulasi: belum terhubung ke bank. Tekan tombol di atas untuk melanjutkan.',
+              textAlign: TextAlign.center, style: TextStyle(fontSize: 11.5, color: AppColors.muted)),
         ]),
       ),
     );

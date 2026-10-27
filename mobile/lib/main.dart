@@ -36,7 +36,7 @@ class SumberSiraApp extends StatelessWidget {
     return MaterialApp(
       title: 'Sumber Sira',
       debugShowCheckedModeBanner: false,
-      theme: AppTheme.dark(),
+      theme: AppTheme.light(),
       // [P5 Named Route] initialRoute = layar pertama, routes = daftar nama rute dan halamannya.
       initialRoute: AppRoutes.splash,
       routes: {

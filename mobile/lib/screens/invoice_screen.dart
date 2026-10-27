@@ -30,85 +30,73 @@ class InvoiceScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final b = AppState.instance.findBooking(code);
+    if (b == null) {
+      return Scaffold(
+        appBar: const PageAppBar(title: 'Invoice'),
+        body: AppBackground(child: ResponsiveBody(children: [AppCard(child: Text('Booking $code tidak ditemukan.'))])),
+      );
+    }
     return Scaffold(
       body: AppBackground(
-        child: b == null
-            ? ResponsiveBody(children: [
-                const PageHeader(title: 'Invoice'),
-                GlassCard(child: Text('Booking $code tidak ditemukan.')),
-              ])
-            : ResponsiveBody(children: [
-                const SizedBox(height: 16),
-                Center(
-                  child: Container(
-                    width: 96,
-                    height: 96,
-                    decoration: BoxDecoration(
-                      color: AppColors.leaf.withValues(alpha: .45),
-                      shape: BoxShape.circle,
-                      border: Border.all(color: AppColors.white(.3)),
-                    ),
-                    child: const Icon(Icons.check_rounded, size: 52),
-                  ),
-                ),
-                const SizedBox(height: 18),
-                Text('Booking Berhasil!', textAlign: TextAlign.center, style: AppTheme.display(26)),
-                const SizedBox(height: 6),
-                Text('Pembayaran QRIS diterima. Tunjukkan QR ini di pintu masuk.',
-                    textAlign: TextAlign.center, style: TextStyle(fontSize: 12, color: AppColors.white(.75))),
-                const SizedBox(height: 4),
-                Text('Invoice ${b.code}', textAlign: TextAlign.center, style: AppTheme.mono(11)),
-                const SizedBox(height: 18),
-                Center(
-                  child: Container(
-                    padding: const EdgeInsets.all(14),
-                    decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(22)),
+        child: ResponsiveBody(children: [
+          const SizedBox(height: 20),
+          Center(
+            child: Container(
+              width: 92,
+              height: 92,
+              decoration: BoxDecoration(color: AppColors.pale, shape: BoxShape.circle, border: Border.all(color: AppColors.mint, width: 8)),
+              child: const Icon(Icons.check_rounded, size: 48, color: AppColors.forest),
+            ),
+          ),
+          const SizedBox(height: 18),
+          Text('Booking Berhasil!', textAlign: TextAlign.center, style: AppTheme.display(28)),
+          const SizedBox(height: 6),
+          const Text('Pembayaran QRIS diterima. Tunjukkan QR ini di pintu masuk.',
+              textAlign: TextAlign.center, style: TextStyle(fontSize: 13.5, color: AppColors.muted, height: 1.4)),
+          const SizedBox(height: 20),
+          // Kartu invoice berbentuk tiket: QR di atas, sobekan, lalu rincian pembayaran.
+          AppCard(
+            radius: 24,
+            padding: EdgeInsets.zero,
+            child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 20, 20, 8),
+                child: Column(children: [
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(18), border: Border.all(color: AppColors.pale, width: 1.5)),
                     // Package qr_flutter: QR berisi kode booking yang discan petugas.
-                    child: QrImageView(data: b.code, size: 150),
+                    child: QrImageView(data: b.code, size: 160),
                   ),
-                ),
-                const SizedBox(height: 18),
-                GlassCard(
-                  padding: const EdgeInsets.fromLTRB(20, 14, 20, 14),
-                  child: Column(children: [
-                    for (final (label, value) in [
-                      ('Nama Pemesan', b.name),
-                      ('Waktu Kunjungan', labelJam(b.slot)),
-                      ('Item', b.itemsText),
-                      ('Dibayar', '${b.date.isEmpty ? tanggalHariIni() : b.date}, ${b.orderedAt}'),
-                      ('Pembayaran', 'QRIS, lunas'),
-                      ('Total Dibayar', rupiah(b.total)),
-                    ])
-                      Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 6),
-                        child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                          Expanded(child: Text(label, style: TextStyle(fontSize: 11, color: AppColors.white(.7)))),
-                          Expanded(child: Text(value, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600))),
-                        ]),
-                      ),
-                  ]),
-                ),
-                const SizedBox(height: 14),
-                OutlinedButton.icon(
-                  style: OutlinedButton.styleFrom(
-                    minimumSize: const Size.fromHeight(44),
-                    foregroundColor: Colors.white,
-                    side: BorderSide(color: AppColors.white(.3)),
-                    shape: const StadiumBorder(),
-                  ),
-                  onPressed: () => kirimWhatsApp(context, b.whatsapp, _waMessage(b)),
-                  icon: const Icon(Icons.chat_outlined, size: 18),
-                  label: const Text('Kirim Invoice ke WhatsApp'),
-                ),
-                const SizedBox(height: 6),
-                Text('Riwayat invoice tersimpan di nomor ${b.whatsapp}.',
-                    textAlign: TextAlign.center, style: TextStyle(fontSize: 10, color: AppColors.white(.65))),
-                const SizedBox(height: 12),
-                PrimaryButton(
-                  label: 'Selesai',
-                  onPressed: () => Navigator.popUntil(context, ModalRoute.withName(AppRoutes.main)),
-                ),
-              ]),
+                  const SizedBox(height: 12),
+                  Text('Invoice ${b.code}', textAlign: TextAlign.center, style: AppTheme.mono(14, weight: FontWeight.w700, color: AppColors.forest)),
+                ]),
+              ),
+              const TicketDivider(),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 4, 20, 14),
+                child: Column(children: [
+                  DetailRow('Nama Pemesan', b.name),
+                  DetailRow('Waktu Kunjungan', labelJam(b.slot)),
+                  DetailRow('Item', b.itemsText),
+                  DetailRow('Dibayar', '${b.date.isEmpty ? tanggalHariIni() : b.date}, ${b.orderedAt}'),
+                  const DetailRow('Pembayaran', 'QRIS, lunas'),
+                  const Divider(height: 18),
+                  DetailRow('Total Dibayar', rupiah(b.total), strong: true),
+                ]),
+              ),
+            ]),
+          ),
+          const SizedBox(height: 16),
+          OutlineAction(label: 'Kirim Invoice ke WhatsApp', icon: Icons.chat_outlined, onPressed: () => kirimWhatsApp(context, b.whatsapp, _waMessage(b))),
+          const SizedBox(height: 8),
+          Text('Riwayat invoice tersimpan di nomor ${b.whatsapp}.', textAlign: TextAlign.center, style: const TextStyle(fontSize: 12, color: AppColors.muted)),
+          const SizedBox(height: 14),
+          PrimaryButton(
+            label: 'Selesai',
+            onPressed: () => Navigator.popUntil(context, ModalRoute.withName(AppRoutes.main)),
+          ),
+        ]),
       ),
     );
   }

@@ -48,9 +48,9 @@ class _AiPhotoScreenState extends State<AiPhotoScreen> {
       'Hasil tampil berdampingan dengan foto asli dan bisa dibagikan ke Galeri Komunitas.',
     ];
     return Scaffold(
+      appBar: const PageAppBar(title: 'AI Underwater Photo Studio'),
       body: AppBackground(
         child: ResponsiveBody(children: [
-          const PageHeader(title: 'AI Underwater Photo Studio'),
           if (_compare)
             Row(children: [
               Expanded(child: _photo('Sebelum', _dull)),
@@ -60,13 +60,19 @@ class _AiPhotoScreenState extends State<AiPhotoScreen> {
           else
             _photo('Sesudah', _enhanced(), badge: true),
           const SizedBox(height: 14),
-          GlassCard(
-            padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
+          AppCard(
+            padding: const EdgeInsets.fromLTRB(16, 14, 16, 4),
             child: Column(children: [
               Row(children: [
-                const Text('Kekuatan enhance', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
+                const Icon(Icons.tune_rounded, size: 19, color: AppColors.leaf),
+                const SizedBox(width: 8),
+                const Text('Kekuatan enhance', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
                 const Spacer(),
-                Text('${_strength.round()}%', style: AppTheme.mono(12)),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  decoration: BoxDecoration(color: AppColors.mint, borderRadius: BorderRadius.circular(12)),
+                  child: Text('${_strength.round()}%', style: AppTheme.price(13)),
+                ),
               ]),
               // onChanged dijalankan selama Slider digeser; setState() memperbarui foto.
               Slider(
@@ -76,17 +82,16 @@ class _AiPhotoScreenState extends State<AiPhotoScreen> {
                 label: '${_strength.round()}%',
                 onChanged: (value) => setState(() => _strength = value),
               ),
+              const Divider(),
               SwitchListTile(
                 contentPadding: EdgeInsets.zero,
                 value: _compare,
                 onChanged: (value) => setState(() => _compare = value),
-                title: const Text('Bandingkan dengan foto asli', style: TextStyle(fontSize: 12)),
+                title: const Text('Bandingkan dengan foto asli', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
               ),
             ]),
           ),
-          const SizedBox(height: 16),
-          Text('Galeri Komunitas', style: AppTheme.display(16)),
-          const SizedBox(height: 10),
+          const SectionTitle('Galeri Komunitas', top: 24),
           Row(children: [
             for (var i = 1; i <= 3; i++)
               Expanded(
@@ -108,28 +113,29 @@ class _AiPhotoScreenState extends State<AiPhotoScreen> {
                 ),
               ),
           ]),
-          const SizedBox(height: 16),
-          GlassCard(
-            color: AppColors.leaf.withValues(alpha: .2),
+          const SizedBox(height: 18),
+          AppCard(
+            color: AppColors.mint,
+            borderColor: AppColors.pale,
+            shadow: false,
             child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
               Row(children: [
-                const Icon(Icons.auto_awesome, size: 18),
-                const SizedBox(width: 8),
-                Text('Rencana Fitur AI', style: AppTheme.display(16)),
+                const IconBadge(Icons.auto_awesome, size: 38, background: Colors.white, color: AppColors.leaf),
+                const SizedBox(width: 10),
+                Text('Rencana Fitur AI', style: AppTheme.display(18)),
               ]),
-              const SizedBox(height: 10),
+              const SizedBox(height: 14),
               for (var i = 0; i < steps.length; i++)
                 Padding(
-                  padding: const EdgeInsets.only(bottom: 8),
+                  padding: const EdgeInsets.only(bottom: 12),
                   child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                    Text('${i + 1}.', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.leaf)),
-                    const SizedBox(width: 8),
-                    Expanded(child: Text(steps[i], style: const TextStyle(fontSize: 12))),
+                    CircleAvatar(radius: 12, backgroundColor: AppColors.forest, child: Text('${i + 1}', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: Colors.white))),
+                    const SizedBox(width: 12),
+                    Expanded(child: Text(steps[i], style: const TextStyle(fontSize: 13.5, height: 1.4))),
                   ]),
                 ),
-              const SizedBox(height: 4),
-              Text('Belum diimplementasikan. Tahap berikutnya: model image enhancement bawah air yang dipanggil lewat API.',
-                  style: TextStyle(fontSize: 11, color: AppColors.white(.7))),
+              const Text('Belum diimplementasikan. Tahap berikutnya: model image enhancement bawah air yang dipanggil lewat API.',
+                  style: TextStyle(fontSize: 12.5, color: AppColors.muted, height: 1.4)),
             ]),
           ),
         ]),
@@ -148,9 +154,9 @@ class _AiPhotoScreenState extends State<AiPhotoScreen> {
               left: 10,
               bottom: 10,
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                decoration: BoxDecoration(color: AppColors.ink.withValues(alpha: .6), borderRadius: BorderRadius.circular(12)),
-                child: Text(label, style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w600)),
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                decoration: BoxDecoration(color: AppColors.ink.withValues(alpha: .65), borderRadius: BorderRadius.circular(12)),
+                child: Text(label, style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.w600, color: Colors.white)),
               ),
             ),
             if (badge)
@@ -160,7 +166,7 @@ class _AiPhotoScreenState extends State<AiPhotoScreen> {
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12)),
-                  child: const Text('AI Enhanced', style: TextStyle(fontSize: 9, fontWeight: FontWeight.w600, color: AppColors.forest)),
+                  child: const Text('AI Enhanced', style: TextStyle(fontSize: 10.5, fontWeight: FontWeight.w700, color: AppColors.forest)),
                 ),
               ),
           ]),

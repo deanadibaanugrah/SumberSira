@@ -38,9 +38,9 @@ export default function SesiList({ sessions }: { sessions: Sesi[] }) {
             <span className="grid size-9 shrink-0 place-items-center rounded-full bg-white text-forest"><Laptop size={17} /></span>
             <span className="min-w-0 flex-1">
               <span className="block text-sm font-semibold text-ink">
-                {s.device} {s.current && <span className="ml-1 rounded-full bg-leaf/15 px-2 py-0.5 text-[11px] text-forest">Sesi ini</span>}
+                {s.device} {s.current && <span className="ml-1 rounded-full bg-leaf/12 px-2 py-0.5 text-[11px] text-forest">Sesi ini</span>}
               </span>
-              <span className="block text-xs text-ink/60">Masuk {waktu(s.createdAt)} · berlaku sampai {waktu(s.expiresAt)}</span>
+              <span className="block text-xs text-abu">Masuk {waktu(s.createdAt)} · berlaku sampai {waktu(s.expiresAt)}</span>
             </span>
             {!s.current && (
               <button type="button" disabled={pending} onClick={() => revoke(s.id)}
@@ -57,7 +57,7 @@ export default function SesiList({ sessions }: { sessions: Sesi[] }) {
           <LogOut size={16} /> Keluar dari semua perangkat lain
         </button>
       )}
-      {message && <p role="status" className="mt-3 text-sm text-ink/70">{message}</p>}
+      {message && <p role="status" className="mt-3 text-sm text-abu">{message}</p>}
     </div>
   );
 }

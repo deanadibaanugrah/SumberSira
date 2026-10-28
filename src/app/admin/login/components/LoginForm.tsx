@@ -51,7 +51,7 @@ export default function LoginForm({ next }: { next: string }) {
     // action = Server Action loginAction; isian dikirim sebagai FormData ke server
     <form action={formAction} onSubmit={cekSebelumKirim} noValidate
           className="relative w-full max-w-[440px] overflow-hidden rounded-[32px] border border-white/60 bg-white/90 p-6 shadow-[0_30px_80px_rgba(8,28,21,0.45)] backdrop-blur-2xl animate-fade-up sm:p-10">
-      <span className="pointer-events-none absolute -right-16 -top-16 size-48 rounded-full bg-leaf/15 blur-2xl" aria-hidden="true" />
+      <span className="pointer-events-none absolute -right-16 -top-16 size-48 rounded-full bg-leaf/12 blur-2xl" aria-hidden="true" />
       <div className="relative">
         {/* Data tersembunyi: halaman tujuan setelah login dan pilihan Ingat saya */}
         <input type="hidden" name="next" value={next} />
@@ -60,10 +60,10 @@ export default function LoginForm({ next }: { next: string }) {
           <ShieldCheck size={14} /> Khusus pengelola
         </span>
         <h2 className="mt-4 font-display text-[28px] font-semibold leading-tight sm:text-[32px]">Selamat datang kembali</h2>
-        <p className="mt-1.5 text-sm text-ink/60">Masuk untuk mengelola wisata Sumber Sira.</p>
+        <p className="mt-1.5 text-sm text-abu">Masuk untuk mengelola wisata Sumber Sira.</p>
 
         {/* Kolom email */}
-        <label className="mt-7 block text-[13px] font-semibold text-ink/80" htmlFor="email">Email</label>
+        <label className="mt-7 block text-[13px] font-semibold text-ink" htmlFor="email">Email</label>
         <div className={`mt-1.5 ${field} ${emailError ? "border-coral!" : ""}`}>
           <span className={iconBox}><Mail size={16} aria-hidden="true" /></span>
           <input id="email" name="email" type="email" value={email} autoComplete="username" placeholder="nama@sumbersira.id"
@@ -75,20 +75,20 @@ export default function LoginForm({ next }: { next: string }) {
         {emailError && <p id="email-error" role="alert" className="mt-1.5 text-[13px] text-coral">{emailError}</p>}
 
         {/* Kolom password dengan tombol mata untuk melihat atau menyembunyikan */}
-        <label className="mt-4 block text-[13px] font-semibold text-ink/80" htmlFor="password">Password</label>
+        <label className="mt-4 block text-[13px] font-semibold text-ink" htmlFor="password">Password</label>
         <div className={`mt-1.5 ${field}`}>
           <span className={iconBox}><Lock size={16} aria-hidden="true" /></span>
           <input id="password" name="password" type={show ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)}
                  autoComplete="current-password" placeholder="Masukkan password" className="w-full bg-transparent text-sm outline-none placeholder:text-ink/40" />
           <button type="button" onClick={() => setShow((v) => !v)} aria-label={show ? "Sembunyikan password" : "Tampilkan password"}
-                  className="grid size-8 shrink-0 place-items-center rounded-full text-ink/60 hover:bg-ink/5">
+                  className="grid size-8 shrink-0 place-items-center rounded-full text-abu hover:bg-ink/5">
             {show ? <EyeOff size={17} /> : <Eye size={17} />}
           </button>
         </div>
 
         {/* Saklar Ingat saya: aktif = cookie 7 hari, mati = cookie hilang saat browser ditutup (sesi maks 8 jam) */}
         <button type="button" role="switch" aria-checked={remember} onClick={() => setRemember((v) => !v)}
-                className="mt-4 flex items-center gap-3 text-sm text-ink/80">
+                className="mt-4 flex items-center gap-3 text-sm text-ink">
           <span className={`relative h-6 w-11 rounded-full transition ${remember ? "bg-forest" : "bg-ink/15"}`}>
             <span className={`absolute top-1 size-4 rounded-full bg-white shadow transition-all ${remember ? "left-6" : "left-1"}`} />
           </span>
@@ -108,12 +108,12 @@ export default function LoginForm({ next }: { next: string }) {
         </button>
 
         {/* Kotak akun demo untuk presentasi: Admin (semua menu) dan Petugas (menu terbatas) */}
-        <div className="mt-6 rounded-2xl border border-dashed border-leaf/40 bg-leaf/[0.06] p-3.5">
+        <div className="mt-6 rounded-2xl border border-dashed border-leaf/40 bg-leaf/12 p-3.5">
           <p className="flex items-center gap-2 text-[13px] font-semibold text-forest"><Sparkles size={15} /> Akun demo</p>
           {DEMO_ACCOUNTS.map((akun) => (
             <div key={akun.email} className="mt-2.5 flex items-center gap-3">
-              <span className="w-16 shrink-0 text-[12px] font-semibold text-ink/80">{akun.label}</span>
-              <p className="min-w-0 flex-1 break-all font-mono text-[11px] leading-snug text-ink/70">{akun.email}<br />{akun.password}</p>
+              <span className="w-16 shrink-0 text-[12px] font-semibold text-ink">{akun.label}</span>
+              <p className="min-w-0 flex-1 break-all font-mono text-[11px] leading-snug text-abu">{akun.email}<br />{akun.password}</p>
               <button type="button" onClick={() => isiAkunDemo(akun)}
                       className="h-8 shrink-0 rounded-full bg-white px-3.5 text-[12px] font-semibold text-forest shadow-sm transition hover:bg-forest hover:text-white">
                 Isi
@@ -122,7 +122,7 @@ export default function LoginForm({ next }: { next: string }) {
           ))}
         </div>
 
-        <Link href="/" className="mt-6 flex w-fit items-center gap-2 text-sm text-ink/60 hover:text-forest">
+        <Link href="/" className="mt-6 flex w-fit items-center gap-2 text-sm text-abu hover:text-forest">
           <ArrowLeft size={16} /> Kembali ke halaman utama
         </Link>
       </div>

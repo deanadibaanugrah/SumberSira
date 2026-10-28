@@ -34,7 +34,7 @@ export default function DetailBooking({ selected, onStatus }: DetailBookingProps
 
   return (
     <Card className="flex flex-col pt-5!">
-      <CardTitle right={selected && <span className="rounded-full bg-paper px-3 py-1.5 font-mono text-xs text-ink/80">{selected.code}</span>}>
+      <CardTitle right={selected && <span className="rounded-full bg-paper px-3 py-1.5 font-mono text-xs text-ink">{selected.code}</span>}>
         Detail Booking
       </CardTitle>
       {selected ? (
@@ -43,17 +43,17 @@ export default function DetailBooking({ selected, onStatus }: DetailBookingProps
             <Avatar name={selected.name} size={52} solid />
             <div className="min-w-0 flex-1">
               <p className="text-base font-semibold text-ink">{selected.name}</p>
-              <p className="text-[13px] text-ink/60">Pesan lewat aplikasi · {selected.orderedAt}</p>
+              <p className="text-[13px] text-abu">Pesan lewat aplikasi · {selected.orderedAt}</p>
             </div>
             <StatusPill status={selected.status} />
           </div>
 
           <dl className="mt-4 space-y-3">
-            <div><dt className="text-[13px] text-ink/60">Waktu kunjungan</dt><dd className="mt-0.5 text-base font-semibold text-ink">{selected.visit}</dd></div>
-            <div><dt className="text-[13px] text-ink/60">Kontak WhatsApp</dt><dd className="mt-0.5 text-base font-semibold text-ink">{selected.phone}</dd></div>
+            <div><dt className="text-[13px] text-abu">Waktu kunjungan</dt><dd className="mt-0.5 text-base font-semibold text-ink">{selected.visit}</dd></div>
+            <div><dt className="text-[13px] text-abu">Kontak WhatsApp</dt><dd className="mt-0.5 text-base font-semibold text-ink">{selected.phone}</dd></div>
           </dl>
 
-          <p className="mt-4 text-[13px] text-ink/60">Item disewa</p>
+          <p className="mt-4 text-[13px] text-abu">Item disewa</p>
           <ul className="mt-2 space-y-2.5">
             {lines.map((l) => (
               <li key={l.key} className="flex h-[52px] items-center gap-3 rounded-2xl bg-paper px-3">
@@ -66,10 +66,10 @@ export default function DetailBooking({ selected, onStatus }: DetailBookingProps
 
           <div className="mt-5 flex items-end justify-between gap-3 border-t border-ink/10 pt-4">
             <div>
-              <p className="text-[13px] text-ink/60">Total pembayaran</p>
-              <p className="mt-1 font-mono text-[28px] font-medium leading-none text-ink">{rupiah(total)}</p>
+              <p className="text-[13px] text-abu">Total pembayaran</p>
+              <p className="mt-1 font-display text-[28px] font-semibold leading-none tabular-nums text-forest">{rupiah(total)}</p>
             </div>
-            <span className={`inline-flex h-7 items-center gap-1.5 rounded-full px-3 text-xs font-semibold ${selected.payment.includes("QRIS") ? "bg-leaf/15 text-forest" : "bg-ink/[0.07] text-ink/75"}`}>
+            <span className={`inline-flex h-7 items-center gap-1.5 rounded-full px-3 text-xs font-semibold ${selected.payment.includes("QRIS") ? "bg-leaf/12 text-forest" : "bg-paper text-abu"}`}>
               <span className={`size-1.5 rounded-full ${selected.payment.includes("QRIS") ? "bg-leaf" : "bg-ink/50"}`} />{selected.payment}
             </span>
           </div>
@@ -87,7 +87,7 @@ export default function DetailBooking({ selected, onStatus }: DetailBookingProps
             </button>
           </div>
         </>
-      ) : <p className="mt-4 text-sm text-ink/60">Pilih booking di tabel.</p>}
+      ) : <p className="mt-4 text-sm text-abu">Pilih booking di tabel.</p>}
     </Card>
   );
 }

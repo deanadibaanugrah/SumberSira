@@ -225,7 +225,7 @@ Cara mencoba:
 5. DevTools, tab Application, lalu Cookies: cookie `ss_admin_session` bertanda HttpOnly, Secure, SameSite Lax.
 6. Buka `/api/admin/me` tanpa login: `401`. Halaman Akun & Sesi: cabut sesi perangkat lain, perangkat itu langsung keluar.
 7. Di form login, ketik email seperti `admin@sumbersira` atau `ad(min)@sumbersira.id`: pesan muncul di bawah kolom email dan form tidak dikirim.
-8. Postman: jalankan `npm run dev`, impor `postman/sumber-sira-admin.postman_collection.json`, lalu Run koleksinya. Isinya 10 request berurutan:
+8. Postman: jalankan `npm run dev`, lalu jalankan request berikut berurutan (koleksi Postman disimpan lokal di folder `postman/`, folder itu tidak ikut di-commit):
    login dapat token (`200`), data admin pakai token (`200`), tanpa token (`401`), akun salah (`401`), empat email salah format (`400`),
    logout (`200`), lalu token lama ditolak (`401`). Token hasil login otomatis disimpan ke variabel `{{token}}`.
 
@@ -248,7 +248,6 @@ Login Google (OAuth) dan MFA belum dibuat karena butuh akun penyedia (Google Clo
 mobile/                Aplikasi pengunjung (Flutter), lihat bagian Aplikasi Mobile
 desain/                PNG ekspor dari Figma (acuan tampilan: mobile 2×, admin 1,25×)
   foto/                Foto asli Sumber Sira yang dipakai aplikasi (di-import lewat src/lib/foto.ts)
-postman/               Koleksi Postman untuk uji token login dan validasi email API admin
 src/app/               Halaman (App Router). Tiap halaman punya folder components/ berisi section-nya,
                        page.tsx hanya menyusun section. Folder (nama) = route group, tidak mengubah alamat
   (intro)/             Intro web, alamat /
@@ -308,7 +307,13 @@ src/lib/
 - Ikon gaya SF Symbols dari `cupertino_icons`: garis untuk keadaan biasa, versi penuh (fill) untuk yang aktif, tanpa kotak latar
   (kotak Hijau Daun 12% hanya untuk menu cepat Beranda). Ikon kendaraan dan wahana yang tidak ada padanannya memakai ikon garis Material.
   Jarak antar bagian 28, padding kartu 16, margin layar 20, area sentuh minimal 44 x 44.
-- Warna dan font ada di `src/app/globals.css` (`@theme`): `forest` dan `leaf` (hanya dua hijau, sama dengan papan Color Palette di Figma), `ink`, `paper`, `coral`. Warna yang lebih muda dibuat dengan transparansi, mis. `bg-leaf/15`, bukan token baru.
+- Panel admin web diseragamkan dengan aplikasi mobile: sidebar dan header halaman berupa kaca terang yang melayang (kelas `glass-light`:
+  Putih 72% + blur, garis tepi Putih 50%, bayangan 0 8 24 Ink 10%), header ikut menempel di atas saat digulir, isi halaman tetap kartu putih solid.
+  Menu aktif berupa kapsul Hijau Daun 12% dengan ikon Hijau Daun seperti tab bar mobile, ikon menu lain polos berwarna Abu.
+  Angka besar memakai Fraunces Hijau Tua, chip status putih bergaris Ink 10% dengan titik warna, titik notifikasi Hijau Daun,
+  dan panel gelap memakai gradasi Hijau Tua ke Ink seperti header mobile.
+- Warna dan font ada di `src/app/globals.css` (`@theme`): `forest` dan `leaf` (hanya dua hijau, sama dengan papan Color Palette di Figma), `ink`, `abu` (teks sekunder), `paper` (Abu Muda), `coral`.
+  Warna yang lebih muda dibuat dengan transparansi palet yang sama dengan mobile, mis. `bg-leaf/12`, `bg-leaf/30`, `border-ink/10`, bukan token baru.
   Pakai lewat kelas Tailwind, misalnya `bg-forest` dan `text-leaf`.
 - Font dipasang dari npm (Fontsource): Fraunces (judul), Inter (teks), JetBrains Mono (angka/harga).
 - Foto aplikasi ada di `desain/foto/` (folder `public/` tidak dipakai lagi) dan di-import lewat `src/lib/foto.ts`,

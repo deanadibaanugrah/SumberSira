@@ -6,7 +6,7 @@ export default function PesanAkses({ canEdit, error }: { canEdit: boolean; error
   return (
     <>
       {!canEdit && (
-        <p className="mt-5 flex items-start gap-2 rounded-2xl bg-leaf/[0.08] px-4 py-3 text-sm text-forest">
+        <p className="mt-5 flex items-start gap-2 rounded-2xl bg-leaf/12 px-4 py-3 text-sm text-forest">
           <Lock size={16} className="mt-0.5 shrink-0" />
           Akun Petugas Loket hanya bisa melihat daftar harga. Tombol ubah tetap ditampilkan untuk demo:
           server akan menolaknya dengan FORBIDDEN.

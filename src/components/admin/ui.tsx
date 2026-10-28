@@ -136,13 +136,13 @@ export function StatusPill({ status, className = "" }: { status: string; classNa
   );
 }
 
-// Tab filter seperti chip pilihan di mobile: yang aktif Hijau Tua, sisanya Abu Muda.
+// Tab filter seperti chip pilihan di mobile: yang aktif Hijau Tua, sisanya putih bergaris Ink 10%.
 export function FilterPills({ options, value, onChange, label = "Filter" }: { options: string[]; value: string; onChange: (value: string) => void; label?: string }) {
   return (
     <div className="flex flex-wrap gap-2.5" role="tablist" aria-label={label}>
       {options.map((o) => (
         <button key={o} type="button" role="tab" aria-selected={value === o} onClick={() => onChange(o)}
-                className={`h-10 rounded-full px-5 text-sm transition ${value === o ? "bg-forest font-semibold text-white" : "bg-paper text-ink hover:bg-leaf/12"}`}>
+                className={`h-10 rounded-full border px-5 text-sm transition ${value === o ? "border-forest bg-forest font-semibold text-white" : "border-ink/10 bg-white text-ink hover:bg-leaf/12"}`}>
           {o}
         </button>
       ))}

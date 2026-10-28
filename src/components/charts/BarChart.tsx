@@ -27,7 +27,7 @@ export default function BarChart({
   return (
     <div className="flex gap-3">
       {/* Label angka di sumbu kiri */}
-      <div className="relative w-8 shrink-0 font-mono text-[11px] text-ink/60" style={{ height }} aria-hidden="true">
+      <div className="relative w-8 shrink-0 font-mono text-[11px] text-abu" style={{ height }} aria-hidden="true">
         {ticks.map((t) => (
           <span key={t} className="absolute left-0 leading-none" style={{ bottom: `calc(${pct(t)} - 5px)` }}>{t}</span>
         ))}
@@ -55,7 +55,7 @@ export default function BarChart({
             ))}
           </div>
         </div>
-        <div className="mt-3 grid font-mono text-xs text-ink/60" style={grid} aria-hidden="true">
+        <div className="mt-3 grid font-mono text-xs text-abu" style={grid} aria-hidden="true">
           {data.map((d) => <span key={d.label} className="text-center">{d.label}</span>)}
         </div>
       </div>

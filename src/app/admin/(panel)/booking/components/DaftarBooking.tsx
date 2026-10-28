@@ -31,7 +31,7 @@ export default function DaftarBooking({ visible, selectedId, onSelect, filter, o
       <div className="mt-4 overflow-x-auto">
         {/* Tabel booking, klik satu baris untuk melihat detailnya */}
         <table className="w-full min-w-[600px] border-separate border-spacing-y-2.5 text-left text-sm">
-          <thead className="text-[13px] text-ink/60">
+          <thead className="text-[13px] text-abu">
             <tr>
               <th className="pl-[44px] font-normal">Pemesan</th>
               <th className="font-normal">Item</th>
@@ -46,7 +46,7 @@ export default function DaftarBooking({ visible, selectedId, onSelect, filter, o
                 <tr key={r.id} onClick={() => onSelect(r.id)} tabIndex={0} aria-label={`Lihat detail booking ${r.name}`}
                     onKeyDown={(e) => e.key === "Enter" && onSelect(r.id)}
                     className={`cursor-pointer outline-none transition [&>td:first-child]:rounded-l-2xl [&>td:last-child]:rounded-r-2xl [&>td]:border-y-[1.5px] [&>td:first-child]:border-l-[1.5px] [&>td:last-child]:border-r-[1.5px] focus-visible:[&>td]:border-leaf ${
-                      active ? "bg-leaf/[0.08] [&>td]:border-leaf" : "bg-paper hover:bg-leaf/[0.06] [&>td]:border-transparent"}`}>
+                      active ? "bg-leaf/12 [&>td]:border-leaf" : "bg-paper hover:bg-leaf/12 [&>td]:border-transparent"}`}>
                   <td className="h-[60px] pl-4">
                     <span className="flex items-center gap-3">
                       <span aria-hidden="true" className={`grid size-4 shrink-0 place-items-center rounded-[5px] border-[1.5px] ${active ? "border-forest bg-forest text-white" : "border-ink/30 bg-white"}`}>
@@ -55,7 +55,7 @@ export default function DaftarBooking({ visible, selectedId, onSelect, filter, o
                       <Avatar name={r.name} size={32} />
                       <span>
                         <span className="block font-semibold leading-tight text-ink">{r.name}</span>
-                        <span className="block text-xs text-ink/60">{r.qty}</span>
+                        <span className="block text-xs text-abu">{r.qty}</span>
                       </span>
                     </span>
                   </td>
@@ -66,14 +66,14 @@ export default function DaftarBooking({ visible, selectedId, onSelect, filter, o
               );
             })}
             {visible.length === 0 && (
-              <tr><td colSpan={4} className="rounded-2xl bg-paper px-5 py-10 text-center text-ink/60">Tidak ada booking yang cocok.</td></tr>
+              <tr><td colSpan={4} className="rounded-2xl bg-paper px-5 py-10 text-center text-abu">Tidak ada booking yang cocok.</td></tr>
             )}
           </tbody>
         </table>
       </div>
 
       <div className="mt-auto flex flex-wrap items-center justify-between gap-3 px-2 pt-6">
-        <p className="text-sm text-ink/60">Menampilkan {visible.length} dari {BOOKING_TOTALS.hariIni} booking</p>
+        <p className="text-sm text-abu">Menampilkan {visible.length} dari {BOOKING_TOTALS.hariIni} booking</p>
         {/* Data contoh hanya satu halaman; nomor halaman lain ditampilkan sebagai gambaran. */}
         <div className="flex gap-2 text-sm font-semibold" aria-label="Halaman">
           {[1, 2, 3, 4].map((n) => (

@@ -6,7 +6,7 @@ import { Card, CardTitle, PrimaryButton } from "@/components/admin/ui";
 import { KAPASITAS, type useTiket } from "@/lib/tiket-store";
 
 // Warna batang kapasitas sesuai status keramaian.
-const BAR = { Sepi: "bg-leaf", Sedang: "bg-forest", Ramai: "bg-coral" };
+const BAR = { Sepi: "bg-leaf", Sedang: "bg-leaf/30", Ramai: "bg-coral" };
 
 type ScanTiketProps = {
   tiket: ReturnType<typeof useTiket>;
@@ -49,15 +49,17 @@ export default function ScanTiket({ tiket, kode, onKode, onScan, inputRef, hasil
       <div className="mt-6 rounded-2xl bg-paper p-5">
         <div className="flex flex-wrap items-end justify-between gap-3">
           <div>
-            <p className="text-[13px] text-ink/60">Pengunjung di dalam sekarang</p>
-            <p className="mt-1 text-[32px] font-semibold leading-none">{tiket.inside}<span className="ml-1.5 text-base font-normal text-ink/60">/ {KAPASITAS} orang</span></p>
+            <p className="text-[13px] text-abu">Pengunjung di dalam sekarang</p>
+            <p className="mt-1 font-display text-[32px] font-semibold leading-none tabular-nums text-forest">{tiket.inside}<span className="ml-1.5 font-sans text-base font-normal text-abu">/ {KAPASITAS} orang</span></p>
           </div>
-          <span className={`rounded-full px-3 py-1.5 text-xs font-semibold text-white ${BAR[tiket.label]}`}>{tiket.label} · {tiket.percent}%</span>
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-ink/10 bg-white px-3 py-1.5 text-xs font-semibold text-ink">
+            <span className={`size-1.5 rounded-full ${BAR[tiket.label]}`} aria-hidden="true" />{tiket.label} · {tiket.percent}%
+          </span>
         </div>
         <div className="mt-4">
-          <ProgressBar value={tiket.percent} fillClass={BAR[tiket.label]} trackClass="bg-ink/[0.07]" height="h-3" />
+          <ProgressBar value={tiket.percent} fillClass={BAR[tiket.label]} trackClass="bg-ink/10" height="h-3" />
         </div>
-        <p className="mt-3 text-xs text-ink/60">
+        <p className="mt-3 text-xs text-abu">
           Angka ini tampil di Live Crowd aplikasi pengunjung{tiket.updatedAt ? `, terakhir berubah pukul ${tiket.updatedAt}` : ""}.
         </p>
       </div>

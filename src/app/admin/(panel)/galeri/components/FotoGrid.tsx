@@ -19,7 +19,7 @@ export default function FotoGrid({ visible, onSet }: { visible: typeof GALLERY; 
           </div>
           <div className="px-1">
             <p className="mt-3 text-[15px] font-semibold text-ink">{p.owner}</p>
-            <p className="mt-0.5 text-[13px] text-ink/60">{formatDate(p.date)}</p>
+            <p className="mt-0.5 text-[13px] text-abu">{formatDate(p.date)}</p>
             <div className="mt-4 flex items-center justify-between">
               <StatusPill status={p.status} />
               <AksiFoto photo={p} onSet={onSet} />

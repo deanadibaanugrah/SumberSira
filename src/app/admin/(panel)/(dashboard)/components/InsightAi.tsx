@@ -9,7 +9,7 @@ const NOTIF_ICONS = { trend: TrendingUp, chat: MessageCircle, box: Package };
 // Kartu hijau Insight AI: notifikasi singkat dan tombol ke halaman AI Insight.
 export default function InsightAi() {
   return (
-    <section className="flex flex-col rounded-3xl bg-forest p-6 text-white">
+    <section className="flex flex-col rounded-3xl bg-gradient-to-b from-forest to-ink p-6 text-white">
       <div className="flex items-center gap-3">
         <span className="grid size-10 place-items-center rounded-full bg-white/12"><Sparkles size={18} aria-hidden="true" /></span>
         <div>

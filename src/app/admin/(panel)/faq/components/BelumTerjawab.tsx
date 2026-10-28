@@ -8,14 +8,14 @@ type BelumTerjawabProps = {
 // Kartu pertanyaan pengunjung yang belum bisa dijawab chatbot.
 export default function BelumTerjawab({ pending, onAnswer }: BelumTerjawabProps) {
   return (
-    <section className="flex flex-col rounded-3xl bg-forest p-5 text-white">
+    <section className="flex flex-col rounded-3xl bg-gradient-to-b from-forest to-ink p-5 text-white">
       <div className="flex items-start justify-between gap-3 px-1">
         <div>
           <h2 className="text-lg font-semibold leading-tight">Belum Terjawab</h2>
           <p className="mt-1.5 text-[13px] text-white/70">Pertanyaan yang belum bisa dijawab Tanya Sira</p>
         </div>
         {pending.length > 0 && (
-          <span className="shrink-0 rounded-full bg-coral px-3 py-1.5 text-xs font-semibold leading-none">{pending.length} pertanyaan</span>
+          <span className="shrink-0 rounded-full border border-white/12 bg-white/12 px-3 py-1.5 text-xs font-semibold leading-none">{pending.length} pertanyaan</span>
         )}
       </div>
       <ul className="mt-5 space-y-3">

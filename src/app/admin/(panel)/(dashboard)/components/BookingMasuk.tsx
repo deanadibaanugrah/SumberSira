@@ -14,7 +14,7 @@ export default function BookingMasuk() {
       </CardTitle>
       <div className="mt-2 overflow-x-auto">
         <table className="w-full min-w-[640px] border-separate border-spacing-y-2 text-left text-sm">
-          <thead className="text-[13px] text-ink/60">
+          <thead className="text-[13px] text-abu">
             <tr>
               <th className="pl-[52px] font-normal">Pemesan</th>
               <th className="font-normal">Item</th>
@@ -33,7 +33,7 @@ export default function BookingMasuk() {
                 <td className="font-mono text-ink">{b.time}</td>
                 <td><StatusPill status={b.status} /></td>
                 <td className="pr-3 text-right">
-                  <Link href="/admin/booking" aria-label={`Buka booking ${b.name}`} className="inline-grid size-8 place-items-center rounded-full text-ink/70 hover:bg-white">
+                  <Link href="/admin/booking" aria-label={`Buka booking ${b.name}`} className="inline-grid size-8 place-items-center rounded-full text-abu hover:bg-white">
                     <Ellipsis size={18} />
                   </Link>
                 </td>

@@ -15,16 +15,16 @@ export default function WahanaPopuler() {
           const item = WAHANA.find((x) => x.id === w.id);
           return (
             <li key={w.id} className="flex items-center gap-3">
-              <span className={`grid size-7 shrink-0 place-items-center rounded-full text-xs font-semibold ${i === 0 ? "bg-forest text-white" : "bg-paper text-ink/70"}`}>{i + 1}</span>
+              <span className={`grid size-7 shrink-0 place-items-center rounded-full text-xs font-semibold ${i === 0 ? "bg-forest text-white" : "bg-paper text-abu"}`}>{i + 1}</span>
               <span className="grid size-9 shrink-0 place-items-center rounded-full bg-leaf/12 text-forest"><WahanaIcon name={item.icon} variant="admin" size={16} /></span>
               <div className="min-w-0 flex-1">
                 <div className="flex items-center justify-between text-sm">
                   <span className="font-semibold">{item.name}</span>
-                  <span className="text-ink/60">{w.count} booking</span>
+                  <span className="text-abu">{w.count} booking</span>
                 </div>
                 <div className="mt-1.5">
                   <ProgressBar value={Math.round((w.count / WAHANA_POPULER[0].count) * 100)} fillClass={i === 0 ? "bg-forest" : "bg-leaf"}
-                               trackClass="bg-ink/[0.06]" height="h-2" delay={i * 120} />
+                               trackClass="bg-paper" height="h-2" delay={i * 120} />
                 </div>
               </div>
             </li>

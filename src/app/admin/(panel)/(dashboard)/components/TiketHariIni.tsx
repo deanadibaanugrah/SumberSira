@@ -9,7 +9,7 @@ import { KAPASITAS, jumlahOrang, useTiket } from "@/lib/tiket-store";
 
 // Bagian dashboard yang ikut berubah saat tiket discan (data dari src/lib/tiket-store.js).
 // Warna batang keramaian sesuai status.
-const BAR = { Sepi: "bg-leaf", Sedang: "bg-forest", Ramai: "bg-coral" };
+const BAR = { Sepi: "bg-leaf", Sedang: "bg-leaf/30", Ramai: "bg-coral" };
 
 // Label kecil Live dengan titik berdenyut.
 function LiveDot() {
@@ -34,35 +34,35 @@ export default function TiketHariIni() {
       <div className="flex items-start justify-between gap-3">
         <div>
           <h2 className="text-lg font-semibold leading-tight">Tiket Online Hari Ini</h2>
-          <p className="mt-1.5 text-[13px] text-ink/60">Dasar perhitungan Live Crowd</p>
+          <p className="mt-1.5 text-[13px] text-abu">Dasar perhitungan Live Crowd</p>
         </div>
         <LiveDot />
       </div>
 
       <p className="mt-5 flex items-end gap-2">
-        <span className="text-[40px] font-semibold leading-none tracking-tight">{t.inside}</span>
-        <span className="pb-1 text-sm text-ink/60">/ {KAPASITAS} orang di dalam</span>
+        <span className="font-display text-[40px] font-semibold leading-none tabular-nums text-forest">{t.inside}</span>
+        <span className="pb-1 text-sm text-abu">/ {KAPASITAS} orang di dalam</span>
       </p>
       <div className="mt-3">
-        <ProgressBar value={t.percent} fillClass={BAR[t.label]} trackClass="bg-ink/[0.07]" height="h-3" />
+        <ProgressBar value={t.percent} fillClass={BAR[t.label]} trackClass="bg-ink/10" height="h-3" />
       </div>
 
       <dl className="mt-4 grid grid-cols-3 gap-2 text-center">
         {[["Terjual", `${t.sold} tiket`], ["Belum datang", `${t.waiting} orang`], ["Sudah keluar", `${t.out} orang`]].map(([k, v]) => (
           <div key={k} className="rounded-2xl bg-paper px-2 py-2.5">
-            <dt className="text-[11px] text-ink/60">{k}</dt>
+            <dt className="text-[11px] text-abu">{k}</dt>
             <dd className="mt-0.5 text-sm font-semibold">{v}</dd>
           </div>
         ))}
       </dl>
 
-      <p className="mt-4 text-[13px] text-ink/60">Check-in terbaru</p>
+      <p className="mt-4 text-[13px] text-abu">Check-in terbaru</p>
       <ul className="mt-2 space-y-2">
         {masuk.map((x) => (
           <li key={x.code} className="flex items-center gap-3 animate-fade-up">
             <Avatar name={x.name} size={30} />
             <span className="min-w-0 flex-1 truncate text-sm font-medium">{x.name}</span>
-            <span className="text-xs text-ink/60">{jumlahOrang(x)} orang</span>
+            <span className="text-xs text-abu">{jumlahOrang(x)} orang</span>
             <span className="w-11 text-right font-mono text-xs">{x.checkInAt}</span>
           </li>
         ))}

@@ -18,7 +18,7 @@ export default function FotoList({ visible, onSet }: { visible: typeof GALLERY; 
           </div>
           <div className="min-w-0 flex-1">
             <p className="text-[15px] font-semibold text-ink">{p.owner}</p>
-            <p className="text-[13px] text-ink/60">{formatDate(p.date)}</p>
+            <p className="text-[13px] text-abu">{formatDate(p.date)}</p>
           </div>
           <AiBadge className="hidden bg-leaf/12! sm:inline-flex" />
           <StatusPill status={p.status} />

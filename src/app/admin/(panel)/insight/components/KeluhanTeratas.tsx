@@ -19,16 +19,16 @@ export default function KeluhanTeratas() {
           <li key={t.label}>
             <div className="flex items-center justify-between text-[15px] text-ink">
               <span className="font-medium">{t.label}</span>
-              <span className="font-mono text-sm text-ink/80">{t.count} ulasan</span>
+              <span className="font-mono text-sm text-ink">{t.count} ulasan</span>
             </div>
             <div className="mt-2.5">
               <ProgressBar value={Math.round((t.count / maxComplaint) * 100)} fillClass={COMPLAINT_FILL[i] ?? "bg-coral/50"}
-                           trackClass="bg-ink/[0.06]" height="h-3" delay={i * 150} />
+                           trackClass="bg-paper" height="h-3" delay={i * 150} />
             </div>
           </li>
         ))}
       </ul>
-      <p className="mt-auto flex items-center gap-2.5 rounded-full bg-leaf/10 px-4 py-2.5 text-sm text-ink max-xl:mt-6">
+      <p className="mt-auto flex items-center gap-2.5 rounded-full bg-leaf/12 px-4 py-2.5 text-sm text-ink max-xl:mt-6">
         <Sparkles size={16} className="shrink-0 text-forest" aria-hidden="true" /> {COMPLAINT_TIP}
       </p>
     </Card>

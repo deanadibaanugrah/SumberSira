@@ -6,7 +6,7 @@ import { FORECAST_SUMMARY } from "@/data/dummy";
 export default function RingkasanAi() {
   const s = FORECAST_SUMMARY;
   return (
-    <section className="rounded-3xl bg-forest p-6 text-white">
+    <section className="rounded-3xl bg-gradient-to-b from-forest to-ink p-6 text-white">
       <div className="flex items-center gap-3">
         <span className="grid size-10 place-items-center rounded-full bg-white/12"><Sparkles size={18} aria-hidden="true" /></span>
         <div>

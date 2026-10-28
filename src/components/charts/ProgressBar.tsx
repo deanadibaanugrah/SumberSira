@@ -1,6 +1,6 @@
 // Batang progres beranimasi (mengisi dari kiri). value: 0-100.
 // Lebar bagian yang terisi mengikuti value (persen), dengan animasi saat muncul dan saat berubah.
-export default function ProgressBar({ value, fillClass = "bg-leaf", trackClass = "bg-leaf/15", height = "h-2.5", delay = 0 }) {
+export default function ProgressBar({ value, fillClass = "bg-leaf", trackClass = "bg-leaf/12", height = "h-2.5", delay = 0 }) {
   return (
     <div className={`w-full overflow-hidden rounded-full ${trackClass} ${height}`} role="progressbar"
          aria-valuenow={value} aria-valuemin={0} aria-valuemax={100}>

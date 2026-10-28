@@ -40,7 +40,7 @@ export default function GaleriView() {
 
       {/* Tampilan grid (kartu foto) atau list (baris foto), sesuai tombol yang dipilih */}
       {view === "grid" ? <FotoGrid visible={visible} onSet={setStatus} /> : <FotoList visible={visible} onSet={setStatus} />}
-      {visible.length === 0 && <p className="mt-6 text-center text-sm text-ink/60">Tidak ada foto di kategori ini.</p>}
+      {visible.length === 0 && <p className="mt-6 text-center text-sm text-abu">Tidak ada foto di kategori ini.</p>}
     </>
   );
 }

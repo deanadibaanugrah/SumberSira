@@ -19,7 +19,7 @@ export default function UlasanTerbaru() {
                   <Star key={n} size={13} className={n <= r.stars ? "fill-leaf text-leaf" : "text-ink/25"} aria-hidden="true" />
                 ))}
               </p>
-              <p className="mt-1.5 text-[13.5px] leading-snug text-ink/80">{r.text}</p>
+              <p className="mt-1.5 text-[13.5px] leading-snug text-ink">{r.text}</p>
             </div>
           </li>
         ))}

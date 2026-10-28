@@ -31,7 +31,7 @@ export default function DaftarTiket({ tiket, visible, filter, onFilter, query, o
       </div>
       <div className="mt-4 overflow-x-auto">
         <table className="w-full min-w-[820px] border-separate border-spacing-y-2 text-left text-sm">
-          <thead className="text-[13px] text-ink/60">
+          <thead className="text-[13px] text-abu">
             <tr>
               <th className="pl-4 font-normal">Kode</th>
               <th className="font-normal">Pemesan</th>
@@ -45,13 +45,13 @@ export default function DaftarTiket({ tiket, visible, filter, onFilter, query, o
           </thead>
           <tbody>
             {visible.map((t) => (
-              <tr key={t.code} className={`[&>td:first-child]:rounded-l-2xl [&>td:last-child]:rounded-r-2xl ${t.mine ? "bg-leaf/[0.08]" : "bg-paper"}`}>
+              <tr key={t.code} className={`[&>td:first-child]:rounded-l-2xl [&>td:last-child]:rounded-r-2xl ${t.mine ? "bg-leaf/12" : "bg-paper"}`}>
                 <td className="h-12 pl-4 font-mono font-medium">{t.code}</td>
                 <td>
                   <span className="font-semibold">{t.name}</span>
                   {t.mine && <span className="ml-2 rounded-full bg-white px-2 py-0.5 text-[11px] text-forest">dari aplikasi</span>}
                 </td>
-                <td>{jumlahOrang(t)}{t.kids > 0 && <span className="text-ink/50"> ({t.kids} balita)</span>}</td>
+                <td>{jumlahOrang(t)}{t.kids > 0 && <span className="text-abu"> ({t.kids} balita)</span>}</td>
                 <td>{PARKIR_LABEL[t.parking]}</td>
                 <td className="font-mono">{t.boughtAt}</td>
                 <td className="font-mono">{t.checkInAt ?? "-"}</td>
@@ -71,17 +71,17 @@ export default function DaftarTiket({ tiket, visible, filter, onFilter, query, o
                       <LogOut size={14} /> Keluar
                     </button>
                   )}
-                  {t.status === "Keluar" && <span className="text-xs text-ink/50">{t.checkOutAt}</span>}
+                  {t.status === "Keluar" && <span className="text-xs text-abu">{t.checkOutAt}</span>}
                 </td>
               </tr>
             ))}
             {visible.length === 0 && (
-              <tr><td colSpan={8} className="rounded-2xl bg-paper px-5 py-10 text-center text-ink/60">Tidak ada tiket yang cocok.</td></tr>
+              <tr><td colSpan={8} className="rounded-2xl bg-paper px-5 py-10 text-center text-abu">Tidak ada tiket yang cocok.</td></tr>
             )}
           </tbody>
         </table>
       </div>
-      <p className="px-2 pb-2 pt-3 text-xs text-ink/60">
+      <p className="px-2 pb-2 pt-3 text-xs text-abu">
         Total {tiket.sold} tiket · nilai penjualan {rupiah(tiket.tickets.reduce((sum, t) => sum + t.total, 0))}
       </p>
     </Card>

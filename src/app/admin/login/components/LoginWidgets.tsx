@@ -15,7 +15,7 @@ function Ping() {
   return (
     <span className="relative flex size-2">
       <span className="absolute inline-flex size-full animate-ping rounded-full bg-leaf opacity-70" />
-      <span className="relative size-2 rounded-full bg-[#7fd1a8]" />
+      <span className="relative size-2 rounded-full bg-leaf" />
     </span>
   );
 }
@@ -50,7 +50,7 @@ export function TiketWidget({ className = "" }) {
   return (
     <div className={`${glass} ${className}`} style={{ animation: "float-y 7s ease-in-out 1.2s infinite" }}>
       <p className="flex items-center gap-2 text-xs text-white/75"><Ticket size={14} /> Tiket online hari ini</p>
-      <p className="mt-2 text-[28px] font-semibold leading-none">{t.sold}<span className="ml-1 text-sm font-normal text-white/70">tiket</span></p>
+      <p className="mt-2 font-display text-[28px] font-semibold leading-none tabular-nums">{t.sold}<span className="ml-1 font-sans text-sm font-normal text-white/70">tiket</span></p>
       <div className="mt-3 flex h-10 items-end gap-1.5" aria-hidden="true">
         {bars.map((h, i) => (
           <span key={i} className={`flex-1 origin-bottom rounded-[4px] animate-grow-up ${i === bars.length - 1 ? "bg-white" : "bg-white/30"}`}
@@ -68,11 +68,11 @@ export function RatingWidget({ className = "" }) {
       <div className="flex items-center gap-1" aria-label="Rating 4,8 dari 5">
         {[1, 2, 3, 4, 5].map((n) => <Star key={n} size={15} className="fill-white text-white" aria-hidden="true" />)}
       </div>
-      <p className="mt-2 text-[28px] font-semibold leading-none">4.8<span className="ml-1 text-sm font-normal text-white/70">/ 5</span></p>
+      <p className="mt-2 font-display text-[28px] font-semibold leading-none tabular-nums">4.8<span className="ml-1 font-sans text-sm font-normal text-white/70">/ 5</span></p>
       <div className="mt-3 flex items-center gap-2">
         <div className="flex -space-x-1.5" aria-hidden="true">
           {["RS", "DP", "KA"].map((x) => (
-            <span key={x} className="grid size-8 place-items-center rounded-full border-2 border-[#2d5a46] bg-white text-[10px] font-semibold text-forest">{x}</span>
+            <span key={x} className="grid size-8 place-items-center rounded-full border-2 border-forest bg-white text-[10px] font-semibold text-forest">{x}</span>
           ))}
         </div>
         <span className="text-xs text-white/75">132 ulasan pengunjung</span>

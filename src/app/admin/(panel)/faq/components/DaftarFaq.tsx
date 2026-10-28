@@ -21,7 +21,7 @@ export default function DaftarFaq({ faqs, onEdit, onRemove }: DaftarFaqProps) {
             <span className="grid size-8 shrink-0 place-items-center rounded-full bg-leaf/12 text-sm font-semibold text-forest">{i + 1}</span>
             <div className="min-w-0 flex-1">
               <p className="text-[15px] font-semibold leading-snug text-ink">{f.q}</p>
-              <p className="mt-1 text-sm text-ink/70">{f.a}</p>
+              <p className="mt-1 text-sm text-abu">{f.a}</p>
             </div>
             {/* Tombol edit dan hapus FAQ */}
             <IconButton label={`Edit FAQ: ${f.q}`} onClick={() => onEdit(f)}><Pencil size={16} /></IconButton>
@@ -31,7 +31,7 @@ export default function DaftarFaq({ faqs, onEdit, onRemove }: DaftarFaqProps) {
           </li>
         ))}
       </ol>
-      {faqs.length === 0 && <p className="mt-4 px-2 text-sm text-ink/60">Belum ada FAQ. Tambahkan lewat tombol Tambah FAQ.</p>}
+      {faqs.length === 0 && <p className="mt-4 px-2 text-sm text-abu">Belum ada FAQ. Tambahkan lewat tombol Tambah FAQ.</p>}
     </Card>
   );
 }

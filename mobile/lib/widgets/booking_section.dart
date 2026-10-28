@@ -11,27 +11,68 @@ import '../theme/app_theme.dart';
 import '../utils/format.dart';
 import '../utils/routes.dart';
 import 'common.dart';
+import 'glass.dart';
 
-// Bagian Sewa & Booking di menu Tiket & Booking: pilih jam (selang 1 jam), jumlah tiap alat sewa
-// atau wahana (dibaca dari mock JSON), lalu Lanjut Booking ke Checkout.
-class BookingSection extends StatefulWidget {
-  const BookingSection({super.key});
-
-  @override
-  State<BookingSection> createState() => _BookingSectionState();
-}
-
-class _BookingSectionState extends State<BookingSection> {
-  late final Future<List<Wahana>> _items = _load();
-  final Map<String, int> _qty = {};
-  String _slot = DummyData.bookingSlots.first;
-  late int _bookingCount;
-
-  @override
-  void initState() {
-    super.initState();
+// Isi Sewa & Booking: jam kunjungan (selang 1 jam) dan jumlah tiap alat sewa atau wahana (dibaca dari mock JSON).
+// Disimpan di controller supaya daftar (BookingSection) dan bar total mengambang (BookingBar) memakai data yang sama.
+class BookingController extends ChangeNotifier {
+  BookingController() {
     _bookingCount = AppState.instance.bookings.length;
     AppState.instance.addListener(_onStateChanged);
+  }
+
+  late final Future<List<Wahana>> items = _load();
+  List<Wahana> _loaded = const [];
+  final Map<String, int> qty = {};
+  String slot = DummyData.bookingSlots.first;
+  late int _bookingCount;
+
+  // Membaca assets/data/wahana.json (mock JSON) lalu mengubahnya menjadi daftar objek Wahana.
+  // async/await karena membaca file butuh waktu; hasilnya ditampilkan lewat FutureBuilder.
+  Future<List<Wahana>> _load() async {
+    final raw = await rootBundle.loadString('assets/data/wahana.json');
+    final list = jsonDecode(raw) as List<dynamic>;
+    _loaded = list.map((e) => Wahana.fromJson(e as Map<String, dynamic>)).toList();
+    notifyListeners();
+    return _loaded;
+  }
+
+  int get total => _loaded.fold(0, (sum, w) => sum + (qty[w.id] ?? 0) * w.price);
+
+  void setSlot(String value) {
+    slot = value;
+    notifyListeners();
+  }
+
+  void setQty(String id, int value) {
+    qty[id] = value;
+    notifyListeners();
+  }
+
+  // Tombol Lanjut Booking: minimal satu item, lalu buka Checkout sambil membawa isi booking.
+  void next(BuildContext context) {
+    final chosen = _loaded.where((w) => (qty[w.id] ?? 0) > 0).toList();
+    if (chosen.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Pilih minimal satu wahana dulu.'), margin: EdgeInsets.fromLTRB(16, 0, 16, 84)),
+      );
+      return;
+    }
+    final draft = BookingDraft(
+      slot: slot,
+      lines: [for (final w in chosen) BookingLine(name: w.label, qty: qty[w.id]!, price: w.price)],
+    );
+    // [P5 Kirim data antar halaman] Isi booking dikirim sebagai arguments ke rute Checkout.
+    Navigator.pushNamed(context, AppRoutes.checkout, arguments: draft);
+  }
+
+  // Setelah booking berhasil dibayar, pilihan item dikosongkan lagi.
+  void _onStateChanged() {
+    final count = AppState.instance.bookings.length;
+    if (count == _bookingCount) return;
+    _bookingCount = count;
+    qty.clear();
+    notifyListeners();
   }
 
   @override
@@ -39,135 +80,89 @@ class _BookingSectionState extends State<BookingSection> {
     AppState.instance.removeListener(_onStateChanged);
     super.dispose();
   }
+}
 
-  // Setelah booking berhasil dibayar, pilihan item dikosongkan lagi.
-  void _onStateChanged() {
-    final count = AppState.instance.bookings.length;
-    if (count == _bookingCount) return;
-    setState(() {
-      _bookingCount = count;
-      _qty.clear();
-    });
-  }
+// Daftar Sewa & Booking: pilihan jam di atas, lalu list per kategori (Sewa Alat, Wahana) dengan stepper.
+class BookingSection extends StatelessWidget {
+  const BookingSection({super.key, required this.controller});
 
-  // Membaca assets/data/wahana.json (mock JSON) lalu mengubahnya menjadi daftar objek Wahana.
-  // async/await karena membaca file butuh waktu; hasilnya ditampilkan lewat FutureBuilder.
-  Future<List<Wahana>> _load() async {
-    final raw = await rootBundle.loadString('assets/data/wahana.json');
-    final list = jsonDecode(raw) as List<dynamic>;
-    return list.map((e) => Wahana.fromJson(e as Map<String, dynamic>)).toList();
-  }
-
-  int _total(List<Wahana> items) => items.fold(0, (sum, w) => sum + (_qty[w.id] ?? 0) * w.price);
-
-  // Tombol Lanjut Booking: minimal satu item, lalu buka Checkout sambil membawa isi booking.
-  void _next(List<Wahana> items) {
-    final chosen = items.where((w) => (_qty[w.id] ?? 0) > 0).toList();
-    if (chosen.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Pilih minimal satu wahana dulu.')));
-      return;
-    }
-    final draft = BookingDraft(
-      slot: _slot,
-      lines: [for (final w in chosen) BookingLine(name: w.label, qty: _qty[w.id]!, price: w.price)],
-    );
-    // [P5 Kirim data antar halaman] Isi booking dikirim sebagai arguments ke rute Checkout.
-    Navigator.pushNamed(context, AppRoutes.checkout, arguments: draft);
-  }
+  final BookingController controller;
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<List<Wahana>>(
-      future: _items,
-      builder: (context, snapshot) {
-        final items = snapshot.data ?? const <Wahana>[];
-        // Daftar dikelompokkan per kategori dari JSON (Sewa Alat, Wahana) supaya mudah dicari.
-        final categories = {for (final w in items) w.category};
-        return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-          const SectionLabel('Pilih Jam Kunjungan', top: 0, step: 1),
-          // Jam booking selang 1 jam, bisa digeser ke samping.
-          SizedBox(
-            height: 44,
-            child: ListView.separated(
-              scrollDirection: Axis.horizontal,
-              itemCount: DummyData.bookingSlots.length,
-              separatorBuilder: (_, _) => const SizedBox(width: 8),
-              itemBuilder: (_, i) {
-                final s = DummyData.bookingSlots[i];
-                final active = s == _slot;
-                return AppCard(
-                  radius: 22,
-                  shadow: false,
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 11),
-                  color: active ? AppColors.forest : Colors.white,
-                  borderColor: active ? AppColors.forest : AppColors.line,
-                  onTap: () => setState(() => _slot = s),
-                  child: Text(
-                    labelJam(s),
-                    style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: active ? Colors.white : AppColors.ink),
-                  ),
-                );
-              },
+    return ListenableBuilder(
+      listenable: controller,
+      builder: (context, _) => FutureBuilder<List<Wahana>>(
+        future: controller.items,
+        builder: (context, snapshot) {
+          final items = snapshot.data ?? const <Wahana>[];
+          // Daftar dikelompokkan per kategori dari JSON supaya mudah dicari.
+          final categories = {for (final w in items) w.category};
+          return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+            const SectionLabel('Jam kunjungan', top: 20),
+            // Jam booking selang 1 jam, bisa digeser ke samping. Yang dipilih berwarna Hijau Tua.
+            SizedBox(
+              height: 44,
+              child: ListView.separated(
+                scrollDirection: Axis.horizontal,
+                itemCount: DummyData.bookingSlots.length,
+                separatorBuilder: (_, _) => const SizedBox(width: 8),
+                itemBuilder: (_, i) {
+                  final s = DummyData.bookingSlots[i];
+                  final active = s == controller.slot;
+                  return Pressable(
+                    onTap: () => controller.setSlot(s),
+                    semanticLabel: 'Jam ${labelJam(s)}',
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 180),
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(color: active ? AppColors.forest : Colors.white, borderRadius: BorderRadius.circular(22)),
+                      child: Text(labelJam(s), style: AppText.number(15, color: active ? Colors.white : AppColors.ink)),
+                    ),
+                  );
+                },
+              ),
             ),
-          ),
-          const SectionLabel('Daftar Sewa & Wahana', step: 2),
-          if (snapshot.connectionState != ConnectionState.done)
-            const Center(child: Padding(padding: EdgeInsets.all(24), child: CircularProgressIndicator()))
-          else
-            for (final c in categories) ...[
-              Padding(
-                padding: const EdgeInsets.only(top: 4, bottom: 8),
-                child: Text(c.toUpperCase(), style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.w700, letterSpacing: .8, color: AppColors.muted)),
-              ),
-              for (final w in items.where((w) => w.category == c)) _itemCard(w),
-            ],
-          const SizedBox(height: 8),
-          // Total dan tombol lanjut di akhir daftar.
-          AppCard(
-            color: AppColors.forest,
-            borderColor: AppColors.forest,
-            padding: const EdgeInsets.fromLTRB(18, 16, 14, 16),
-            child: Row(children: [
-              Expanded(
-                child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                  Text('Total · ${labelJam(_slot)}', style: TextStyle(fontSize: 12, color: AppColors.white(.8))),
-                  const SizedBox(height: 2),
-                  Text(rupiah(_total(items)), style: AppTheme.price(20, color: Colors.white)),
-                ]),
-              ),
-              SizedBox(width: 156, child: PrimaryButton(label: 'Lanjut Booking', height: 48, inverted: true, onPressed: () => _next(items))),
-            ]),
-          ),
-        ]);
-      },
-    );
-  }
-
-  // Satu kartu alat sewa atau wahana. Kartu yang sudah dipilih diberi garis hijau.
-  Widget _itemCard(Wahana w) {
-    final qty = _qty[w.id] ?? 0;
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 10),
-      child: AppCard(
-        padding: const EdgeInsets.fromLTRB(12, 12, 10, 12),
-        borderColor: qty > 0 ? AppColors.leaf : AppColors.line,
-        child: Row(children: [
-          IconBadge(w.icon, size: 46),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Text(w.label, style: const TextStyle(fontSize: 13.5, fontWeight: FontWeight.w600)),
-              const SizedBox(height: 3),
-              Text(rupiah(w.price), style: AppTheme.price(13.5)),
-            ]),
-          ),
-          StepperControl(
-            value: qty,
-            label: w.name,
-            onChanged: (v) => setState(() => _qty[w.id] = v),
-          ),
-        ]),
+            if (snapshot.connectionState != ConnectionState.done)
+              const Center(child: Padding(padding: EdgeInsets.all(24), child: CircularProgressIndicator()))
+            else
+              for (final c in categories)
+                GroupedList(header: c, children: [for (final w in items.where((w) => w.category == c)) _itemRow(w)]),
+          ]);
+        },
       ),
     );
   }
+
+  // Satu baris alat sewa atau wahana: ikon tanpa wadah, nama, harga, dan stepper jumlah.
+  Widget _itemRow(Wahana w) {
+    final qty = controller.qty[w.id] ?? 0;
+    return ListRow(
+      icon: w.icon,
+      title: w.label,
+      subtitle: rupiah(w.price),
+      subtitleStyle: AppText.number(13, weight: qty > 0 ? FontWeight.w700 : FontWeight.w500, color: qty > 0 ? AppColors.forest : AppColors.abu),
+      trailing: StepperControl(value: qty, label: w.name, onChanged: (v) => controller.setQty(w.id, v)),
+    );
+  }
+}
+
+// Bar kaca mengambang di atas tab bar: total dan jam yang dipilih, lalu tombol Lanjut Booking.
+class BookingBar extends StatelessWidget {
+  const BookingBar({super.key, required this.controller});
+
+  final BookingController controller;
+
+  @override
+  Widget build(BuildContext context) => ListenableBuilder(
+        listenable: controller,
+        builder: (context, _) => TotalBar(
+          label: 'Total · ${labelJam(controller.slot)}',
+          amount: controller.total,
+          button: 'Lanjut Booking',
+          buttonWidth: 172,
+          onPressed: () => controller.next(context),
+        ),
+      );
 }

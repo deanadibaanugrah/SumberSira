@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import '../data/app_state.dart';
@@ -9,7 +10,7 @@ import '../utils/validators.dart';
 import '../widgets/app_background.dart';
 import '../widgets/common.dart';
 
-// Checkout (Ringkasan Booking): menampilkan jam dan item dari bagian Sewa & Booking, lalu meminta
+// Checkout (Ringkasan Booking): menampilkan jam dan item dari bagian Sewa & Wahana, lalu meminta
 // nama dan nomor WhatsApp. Pembayaran hanya QRIS. Nomor WhatsApp menjadi kunci riwayat booking.
 class CheckoutScreen extends StatefulWidget {
   const CheckoutScreen({super.key, required this.draft});
@@ -46,6 +47,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   Widget build(BuildContext context) {
     final draft = widget.draft;
     return Scaffold(
+      extendBodyBehindAppBar: true,
+      extendBody: true,
       appBar: const PageAppBar(title: 'Ringkasan Booking'),
       body: AppBackground(
         child: Form(
@@ -56,86 +59,75 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
               padding: EdgeInsets.zero,
               child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
                 Padding(
-                  padding: const EdgeInsets.all(16),
+                  padding: const EdgeInsets.all(AppSpace.card),
                   child: Row(children: [
-                    const IconBadge(Icons.schedule_rounded),
-                    const SizedBox(width: 12),
+                    const Icon(CupertinoIcons.clock, size: 22, color: AppColors.leaf),
+                    const SizedBox(width: 14),
                     Expanded(
                       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                        const Text('Waktu Kunjungan', style: TextStyle(fontSize: 12.5, color: AppColors.muted)),
+                        const Text('Waktu kunjungan', style: AppText.footnote),
                         const SizedBox(height: 2),
-                        Text(labelJam(draft.slot), style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.forest)),
+                        Text(labelJam(draft.slot), style: AppText.number(20, weight: FontWeight.w700, color: AppColors.forest)),
                       ]),
                     ),
                   ]),
                 ),
-                const Divider(),
+                const Divider(indent: 16),
                 Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 14, 16, 8),
+                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
                   child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-                    const Text('Item Dipesan', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700)),
-                    const SizedBox(height: 6),
+                    const Text('Item dipesan', style: AppText.footnote),
+                    const SizedBox(height: 4),
                     for (final l in draft.lines)
                       Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 7),
+                        padding: const EdgeInsets.symmetric(vertical: 8),
                         child: Row(children: [
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                            decoration: BoxDecoration(color: AppColors.mint, borderRadius: BorderRadius.circular(8)),
-                            child: Text('${l.qty}x', style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w700, color: AppColors.forest)),
+                            decoration: BoxDecoration(color: AppColors.leaf12, borderRadius: BorderRadius.circular(8)),
+                            child: Text('${l.qty}x', style: AppText.number(13, weight: FontWeight.w700, color: AppColors.forest)),
                           ),
-                          const SizedBox(width: 10),
-                          Expanded(child: Text(l.name, style: const TextStyle(fontSize: 14))),
-                          Text(rupiah(l.subtotal), style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
+                          const SizedBox(width: 12),
+                          Expanded(child: Text(l.name, style: AppText.body)),
+                          Text(rupiah(l.subtotal), style: AppText.number(15)),
                         ]),
                       ),
                   ]),
                 ),
               ]),
             ),
-            const SectionLabel('Data Pemesan'),
+            const SectionLabel('Data pemesan'),
             // [P6 TextFormField + validator] Nama wajib diisi, nomor WhatsApp harus format Indonesia.
             TextFormField(
               controller: _name,
               textInputAction: TextInputAction.next,
-              decoration: const InputDecoration(labelText: 'Nama Lengkap', hintText: 'Masukkan nama lengkap', prefixIcon: Icon(Icons.person_outline_rounded, size: 20)),
+              decoration: const InputDecoration(labelText: 'Nama Lengkap', hintText: 'Masukkan nama lengkap', prefixIcon: Icon(CupertinoIcons.person, size: 20)),
               validator: (v) => Validators.required(v, 'Nama'),
             ),
             const SizedBox(height: 10),
             TextFormField(
               controller: _whatsapp,
               keyboardType: TextInputType.phone,
-              decoration: const InputDecoration(labelText: 'No. WhatsApp', hintText: '08xxxxxxxxxx', prefixIcon: Icon(Icons.phone_outlined, size: 20)),
+              decoration: const InputDecoration(labelText: 'No. WhatsApp', hintText: '08xxxxxxxxxx', prefixIcon: Icon(CupertinoIcons.phone, size: 20)),
               validator: Validators.whatsapp,
             ),
-            const SizedBox(height: 8),
-            const Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Icon(Icons.info_outline_rounded, size: 16, color: AppColors.muted),
-              SizedBox(width: 6),
-              Expanded(
-                child: Text('Invoice dikirim ke nomor ini dan riwayatnya bisa dicari di Tiket Saya.', style: TextStyle(fontSize: 12.5, color: AppColors.muted)),
-              ),
-            ]),
-            const SectionLabel('Metode Pembayaran'),
-            // Pembayaran sewa dan wahana hanya lewat QRIS.
-            const AppCard(
-              color: AppColors.mint,
-              borderColor: AppColors.leaf,
-              shadow: false,
-              padding: EdgeInsets.symmetric(horizontal: 14, vertical: 14),
-              child: Row(children: [
-                IconBadge(Icons.qr_code_2_rounded, background: Colors.white),
-                SizedBox(width: 12),
-                Expanded(
-                  child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                    Text('QRIS', style: TextStyle(fontSize: 14.5, fontWeight: FontWeight.w700, color: AppColors.forest)),
-                    SizedBox(height: 2),
-                    Text('Scan pakai aplikasi bank atau e-wallet', style: TextStyle(fontSize: 12.5, color: AppColors.muted)),
-                  ]),
-                ),
-                Icon(Icons.check_circle_rounded, color: AppColors.leaf, size: 24),
+            const Padding(
+              padding: EdgeInsets.fromLTRB(16, 10, 16, 0),
+              child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                Icon(CupertinoIcons.info_circle, size: 15, color: AppColors.abu),
+                SizedBox(width: 6),
+                Expanded(child: Text('Invoice dikirim ke nomor ini dan riwayatnya bisa dicari di Tiket & Booking.', style: AppText.footnote)),
               ]),
             ),
+            // Pembayaran sewa dan wahana hanya lewat QRIS.
+            const GroupedList(header: 'Metode pembayaran', children: [
+              ListRow(
+                icon: CupertinoIcons.qrcode,
+                title: 'QRIS',
+                subtitle: 'Scan pakai aplikasi bank atau e-wallet',
+                trailing: Icon(CupertinoIcons.checkmark_circle_fill, color: AppColors.leaf, size: 24),
+              ),
+            ]),
           ]),
         ),
       ),

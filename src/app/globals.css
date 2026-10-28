@@ -11,7 +11,8 @@
   --color-forest: #1b4332;      /* Hijau Tua: latar app, sidebar admin, judul, sorotan grafik */
   --color-leaf: #40916c;        /* Hijau Daun: tombol, menu aktif, ikon, grafik, status Sepi */
   --color-ink: #172321;         /* teks admin, kode QR, ujung gradasi latar */
-  --color-paper: #f5f6f5;       /* latar halaman admin */
+  --color-abu: #4b5a57;         /* teks sekunder (sama dengan Abu di aplikasi mobile) */
+  --color-paper: #f5f6f5;       /* latar halaman admin (Abu Muda) */
   --color-coral: #e07a5f;       /* satu-satunya aksen: ramai, tolak, keluhan */
 
   --font-display: "Fraunces Variable", Georgia, serif;
@@ -78,12 +79,6 @@
   to { transform: translateX(-50%); }
 }
 
-/* Riak air dari logo di layar Splash: lingkaran melebar lalu hilang. */
-@keyframes splash-ring {
-  0% { transform: scale(1); opacity: 0.7; }
-  100% { transform: scale(2.3); opacity: 0; }
-}
-
 /* Widget kaca melayang naik turun. */
 @keyframes float-y {
   0%, 100% { transform: translateY(0); }
@@ -142,17 +137,33 @@ body {
     linear-gradient(160deg, #1b4332 0%, #172321 100%);
 }
 
-/* Kartu kaca (glassmorphism) yang dipakai di hampir semua layar mobile. */
+/* Kaca gelap di atas latar hijau tua (intro dan halaman aplikasi mobile): Putih 12% + blur, garis tepi Putih 12%. */
 .glass {
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0.06));
-  border: 1px solid rgba(255, 255, 255, 0.22);
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.12);
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
 }
 
-/* Sembunyikan scrollbar horizontal pada baris yang bisa digeser. */
-.no-scrollbar::-webkit-scrollbar { display: none; }
-.no-scrollbar { scrollbar-width: none; }
+/* Kaca terang (Liquid Glass) untuk lapisan navigasi admin, sama dengan aplikasi mobile:
+   Putih 72% + blur, garis tepi Putih 50%, bayangan 0 8 24 Ink 10%. Isi halaman tetap kartu putih solid. */
+.glass-light {
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  box-shadow: 0 8px 24px rgba(23, 35, 33, 0.1);
+  backdrop-filter: blur(28px) saturate(1.4);
+  -webkit-backdrop-filter: blur(28px) saturate(1.4);
+}
+
+/* Bila pengguna meminta transparansi dikurangi, kaca jadi permukaan solid. */
+@media (prefers-reduced-transparency: reduce) {
+  .glass { background: #1b4332; backdrop-filter: none; -webkit-backdrop-filter: none; }
+  .glass-light { background: #ffffff; backdrop-filter: none; -webkit-backdrop-filter: none; }
+}
+
+/* Edge menambah tombol mata sendiri di kolom password, padahal form login sudah punya tombol lihat password. */
+input::-ms-reveal,
+input::-ms-clear { display: none; }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {

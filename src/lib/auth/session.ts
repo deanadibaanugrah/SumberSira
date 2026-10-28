@@ -7,6 +7,7 @@ import { SESSION_COOKIE } from "./constants";
 
 // Sesi berbasis server (cocok untuk panel admin karena bisa dicabut seketika):
 // - Server menyimpan catatan sesi; browser hanya memegang ID acak di cookie.
+//   Klien API (mis. Postman) memegang ID acak yang sama sebagai token di header "Authorization: Bearer".
 // - Yang disimpan di server adalah hash dari ID itu, jadi kalau datanya bocor ID aslinya tetap tidak diketahui.
 // - Cookie: HttpOnly (tidak bisa dibaca JavaScript, mencegah pencurian lewat XSS), Secure (hanya lewat HTTPS,
 //   localhost tetap boleh), SameSite=Lax (tidak ikut terkirim di sebagian besar request lintas situs, mencegah CSRF).
@@ -30,21 +31,29 @@ const store = (globalStore.__sumberSiraSessions ??= new Map<string, SessionRecor
 
 const hashToken = (token: string) => createHash("sha256").update(token).digest("hex");
 
-// Ringkasan perangkat dari User-Agent, mis. "Chrome · Windows", untuk daftar sesi.
+// Ringkasan perangkat dari User-Agent, mis. "Chrome · Windows", untuk daftar sesi. Login lewat Postman tercatat "Postman".
 function describeDevice(userAgent: string): string {
+  if (/PostmanRuntime\//.test(userAgent)) return "Postman · API";
   const browser = /Edg\//.test(userAgent) ? "Edge" : /Chrome\//.test(userAgent) ? "Chrome" : /Firefox\//.test(userAgent) ? "Firefox" : /Safari\//.test(userAgent) ? "Safari" : "Browser";
   const os = /Windows/.test(userAgent) ? "Windows" : /Android/.test(userAgent) ? "Android" : /iPhone|iPad/.test(userAgent) ? "iOS" : /Mac OS/.test(userAgent) ? "macOS" : /Linux/.test(userAgent) ? "Linux" : "Perangkat lain";
   return `${browser} · ${os}`;
 }
 
-// Membuat sesi baru setelah login berhasil. ID selalu baru setiap login (mencegah session fixation).
-export async function createSession(userId: string, remember: boolean): Promise<void> {
+// Membuat sesi baru dan mengembalikan token-nya. ID selalu baru setiap login (mencegah session fixation).
+// Login lewat form menyimpan token di cookie (createSession); login lewat API mengirim token di body
+// supaya klien seperti Postman bisa memakainya di header "Authorization: Bearer <token>".
+export async function issueSession(userId: string, remember: boolean): Promise<{ token: string; expiresAt: number }> {
   const token = randomBytes(32).toString("base64url");
   const now = Date.now();
   const expiresAt = now + (remember ? LONG_SESSION_MS : SHORT_SESSION_MS);
   const userAgent = (await headers()).get("user-agent") ?? "";
   store.set(hashToken(token), { publicId: randomBytes(6).toString("hex"), userId, createdAt: now, expiresAt, device: describeDevice(userAgent) });
+  return { token, expiresAt };
+}
 
+// Login lewat form: sesi baru disimpan di cookie HttpOnly.
+export async function createSession(userId: string, remember: boolean): Promise<void> {
+  const { token, expiresAt } = await issueSession(userId, remember);
   (await cookies()).set(SESSION_COOKIE, token, {
     httpOnly: true,
     secure: true,
@@ -55,9 +64,16 @@ export async function createSession(userId: string, remember: boolean): Promise<
   });
 }
 
-// Membaca sesi dari cookie. Mengembalikan null bila tidak ada, tidak dikenal, atau sudah kedaluwarsa.
+// Token sesi dari header "Authorization: Bearer" (klien API seperti Postman) atau dari cookie (browser).
+async function currentToken(): Promise<string | undefined> {
+  const auth = (await headers()).get("authorization");
+  if (auth?.startsWith("Bearer ")) return auth.slice(7).trim() || undefined;
+  return (await cookies()).get(SESSION_COOKIE)?.value;
+}
+
+// Membaca sesi dari token. Mengembalikan null bila tidak ada, tidak dikenal, atau sudah kedaluwarsa.
 export async function readSession(): Promise<SessionRecord | null> {
-  const token = (await cookies()).get(SESSION_COOKIE)?.value;
+  const token = await currentToken();
   if (!token) return null;
   const key = hashToken(token);
   const record = store.get(key);
@@ -69,12 +85,11 @@ export async function readSession(): Promise<SessionRecord | null> {
   return record;
 }
 
-// Logout: hapus catatan sesi di server lalu hapus cookie di browser.
+// Logout: hapus catatan sesi di server lalu hapus cookie di browser. Token yang sama langsung ditolak setelahnya.
 export async function deleteCurrentSession(): Promise<void> {
-  const cookieStore = await cookies();
-  const token = cookieStore.get(SESSION_COOKIE)?.value;
+  const token = await currentToken();
   if (token) store.delete(hashToken(token));
-  cookieStore.delete(SESSION_COOKIE);
+  (await cookies()).delete(SESSION_COOKIE);
 }
 
 // Daftar sesi aktif milik satu akun saja (query dibatasi ke pemiliknya).

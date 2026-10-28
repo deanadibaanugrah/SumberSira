@@ -65,35 +65,35 @@ disimpan per nomor WhatsApp**: nomor yang dipakai saat membeli menjadi kunci riw
 mengetik nomor WhatsApp lalu menekan Cari (nomor terakhir terisi otomatis), dan e-tiket atau invoice bisa dikirim ke WhatsApp.
 Pertama kali dibuka alurnya Splash, Tentang, Onboarding, lalu Beranda. Berikutnya Splash langsung ke Beranda.
 
-Navigasi bawah berisi 4 tab: **Beranda, Tiket & Booking, Galeri, Profil**. Tidak ada menu samping (garis tiga);
+Tab bar kaca yang mengambang berisi 4 tab: **Beranda, Tiket & Booking, Galeri, Profil**. Tidak ada menu samping (garis tiga);
 isinya dipindah menjadi tombol di Beranda, dan chatbot Tanya Sira mengambang di Beranda.
 
 Coba riwayat dengan nomor contoh `081234567890`.
 
 | Layar | File | Isi |
 |---|---|---|
-| Splash | `screens/splash_screen.dart` | Foto bergerak, riak air dari logo, garis loading, lanjut otomatis 3,2 detik |
-| Tentang | `screens/about_screen.dart` | Foto lokasi, fasilitas, jam buka, harga tiket, parkir, pembayaran |
-| Onboarding | `screens/onboarding_screen.dart` | 3 halaman yang bisa digeser (PageView), tombol Kembali/Lanjut, Lewati |
-| Beranda | `screens/home_tab.dart` | Bar atas dengan garis pembatas, banner foto selebar layar yang bisa digeser (5 foto, teks berbeda), status crowd, tombol AI Photo / Ulasan / Tentang, grafik garis jumlah pengunjung per jam |
-| Chatbot Tanya Sira | `widgets/floating_chat.dart` | Lingkaran kepala robot mengambang di Beranda, bisa digeser ke mana saja; diketuk membesar jadi kotak chat (bukan layar penuh) |
-| Tiket & Booking | `screens/tickets_tab.dart`, `widgets/booking_section.dart` | Beli tiket, Tiket Saya (riwayat tiket dan invoice per nomor WhatsApp), lalu Sewa & Booking: jam selang 1 jam, daftar wahana dari mock JSON `assets/data/wahana.json` dengan ikon sesuai item |
-| Form beli tiket | `screens/ticket_form_screen.dart` | Jumlah pengunjung, jam datang, parkir, nama, WhatsApp (divalidasi), bayar QRIS atau tunai |
+| Splash | `screens/splash_screen.dart` | Foto bergerak di atas, lembar gelap berisi logo dengan riak air, garis loading, lanjut otomatis 3,2 detik |
+| Tentang | `screens/about_screen.dart` | Foto besar dengan panel kaca, carousel daya tarik, info jam buka, harga tiket, parkir, pembayaran |
+| Onboarding | `screens/onboarding_screen.dart` | 3 halaman yang bisa digeser (PageView), pindah sendiri tiap 3 detik (titik aktif terisi sebagai penanda waktu, berhenti di halaman terakhir), tombol Kembali/Lanjut, Lewati |
+| Beranda | `screens/home_tab.dart` | Header gelap dengan hero keramaian (angka persen besar), menu cepat AI Photo / Ulasan / Tentang, carousel foto (5 foto, teks berbeda), grafik batang jumlah pengunjung per jam |
+| Chatbot Tanya Sira | `widgets/floating_chat.dart` | Gelembung kaca mengambang di Beranda, bisa digeser ke mana saja; diketuk membesar jadi panel chat kaca (bukan layar penuh) |
+| Tiket & Booking | `screens/tickets_tab.dart`, `widgets/booking_section.dart` | Tiga segmen: Tiket Masuk (beli tiket), Sewa & Wahana (jam selang 1 jam, daftar wahana dari mock JSON `assets/data/wahana.json`, total dan Lanjut Booking mengambang), Riwayat (tiket dan invoice per nomor WhatsApp) |
+| Beli Tiket Masuk | `screens/ticket_form_screen.dart` | Jumlah pengunjung, jam datang, parkir, nama, WhatsApp (divalidasi), bayar QRIS (sheet) atau tunai |
 | E-Tiket (hasil input) | `screens/eticket_screen.dart` | QR tiket, status, detail, kirim e-tiket ke WhatsApp, simulasi scan petugas |
-| Checkout | `screens/checkout_screen.dart` | Ringkasan booking, nama, WhatsApp, pembayaran QRIS |
-| Bayar QRIS | `screens/payment_screen.dart` | QR pembayaran, total, batas waktu 15 menit, cara bayar, tombol Saya Sudah Bayar (simulasi) |
+| Ringkasan Booking | `screens/checkout_screen.dart` | Ringkasan booking, nama, WhatsApp, pembayaran QRIS |
+| Bayar Booking QRIS | `screens/payment_screen.dart` | QR pembayaran, total, batas waktu 15 menit, cara bayar, tombol Saya Sudah Bayar (simulasi) |
 | Booking Berhasil & Invoice | `screens/invoice_screen.dart` | QR kode booking, rincian yang sudah dibayar, kirim invoice ke WhatsApp |
-| Galeri | `screens/gallery_tab.dart` | Foto pengunjung 2 kolom (GridView), ketuk untuk melihat besar dan zoom |
+| Galeri | `screens/gallery_tab.dart` | Foto utama besar lalu grid 2 kolom (GridView), ketuk untuk melihat layar penuh dan zoom |
 | Ulasan & Rating | `screens/reviews_screen.dart` | Rata-rata bintang, tulis ulasan (pilih bintang + validasi), ulasan terbaru |
 | AI Photo Studio | `screens/ai_photo_screen.dart` | Rancangan fitur AI (belum diimplementasikan) |
 | Profil | `screens/profile_tab.dart` | Nomor WhatsApp tersimpan, pengingat jam sepi, info wisata, Google Maps |
 
-Alur booking: Tiket & Booking (pilih jam dan item), Lanjut Booking, Checkout, Bayar dengan QRIS (halaman scan), Saya Sudah Bayar,
+Alur booking: Tiket & Booking segmen Sewa & Wahana (pilih jam dan item), Lanjut Booking, Ringkasan Booking, Bayar Booking QRIS, Saya Sudah Bayar,
 lalu Booking Berhasil & Invoice. Booking baru tersimpan setelah pembayaran.
 
-Struktur `mobile/lib`: `screens/` (layar), `widgets/` (komponen yang dipakai ulang: kartu putih, header hijau tua, bar bawah, logo bergerak, grafik per jam,
-chatbot mengambang, bagian booking, stepper), `models/` (Ticket, Booking, Review, Wahana), `data/` (data contoh dan `AppState` berbasis ChangeNotifier), `theme/` (warna dan font),
-`utils/` (rute, format Rupiah dan nomor WhatsApp, validasi, pembuka tautan). Package: `google_fonts` (Fraunces, Inter, JetBrains Mono), `intl` (format Rupiah dan tanggal Indonesia), `qr_flutter` (kode QR),
+Struktur `mobile/lib`: `screens/` (layar), `widgets/` (komponen yang dipakai ulang: kaca Liquid Glass, tab bar dan bar mengambang, kartu konten,
+list inset grouped, header tab, logo bergerak, grafik per jam, chatbot mengambang, bagian booking, stepper), `models/` (Ticket, Booking, Review, Wahana), `data/` (data contoh dan `AppState` berbasis ChangeNotifier), `theme/` (warna dan font),
+`utils/` (rute, format Rupiah dan nomor WhatsApp, validasi, pembuka tautan). Package: `google_fonts` (Fraunces, Inter), `cupertino_icons` (ikon gaya SF Symbols), `intl` (format Rupiah dan tanggal Indonesia), `qr_flutter` (kode QR),
 `shared_preferences` (menyimpan nomor WhatsApp terakhir, riwayat tiket dan booking, tanda onboarding, dan pengaturan pengingat), dan `url_launcher` (membuka Google Maps dan WhatsApp).
 Responsif: isi halaman bisa digulir, lebar maksimal 480 px di tengah untuk tablet/web, ukuran mengikuti layar lewat
 `Expanded`, `Wrap`, `LayoutBuilder`, dan `SafeArea`, jadi tidak ada overflow saat layar kecil atau landscape.
@@ -143,15 +143,15 @@ Aplikasi pengunjung (Flutter):
 |---|---|---|
 | ![](desain/screenshot/mobile-tentang.png) | ![](desain/screenshot/mobile-onboarding.png) | ![](desain/screenshot/mobile-home.png) |
 
-| Tanya Sira (mengambang di Beranda) | Tiket & Booking (riwayat per WhatsApp) | Sewa & Booking (di bawah Tiket Saya) |
+| Tanya Sira (mengambang di Beranda) | Tiket & Booking · Riwayat | Tiket & Booking · Sewa & Wahana |
 |---|---|---|
 | ![](desain/screenshot/mobile-chatbot.png) | ![](desain/screenshot/mobile-riwayat.png) | ![](desain/screenshot/mobile-booking.png) |
 
-| Beli tiket | E-Tiket | Checkout |
+| Beli Tiket Masuk | E-Tiket | Ringkasan Booking |
 |---|---|---|
 | ![](desain/screenshot/mobile-tiket.png) | ![](desain/screenshot/mobile-etiket.png) | ![](desain/screenshot/mobile-checkout.png) |
 
-| Bayar QRIS | Booking Berhasil & Invoice | Galeri |
+| Bayar Booking QRIS | Booking Berhasil & Invoice | Galeri |
 |---|---|---|
 | ![](desain/screenshot/mobile-bayar.png) | ![](desain/screenshot/mobile-invoice.png) | ![](desain/screenshot/mobile-galeri.png) |
 
@@ -204,7 +204,9 @@ akun itu (peran admin atau petugas).
 | Hash password | Password disimpan sebagai hash scrypt + salt, dibandingkan dengan `timingSafeEqual` | `src/lib/auth/users.ts` |
 | Session berbasis server | Server menyimpan sesi, browser hanya memegang ID acak (yang disimpan server adalah hash-nya). ID baru setiap login, sesi bisa dicabut seketika | `src/lib/auth/session.ts` |
 | Cookie aman | `HttpOnly`, `Secure`, `SameSite=Lax`. "Ingat saya" = 7 hari, tanpa itu cookie hilang saat browser ditutup (maks 8 jam) | `createSession()` di `session.ts` |
-| Login lewat Server Action | Validasi isian, batas 5 kali salah lalu dikunci 1 menit, pesan error sama untuk email/password salah | `src/lib/auth/actions.ts`, `src/app/admin/login/` |
+| Login lewat Server Action | Validasi isian, batas 5 kali salah lalu dikunci 1 menit, pesan error sama untuk email/password salah | `src/lib/auth/login.ts`, `actions.ts`, `src/app/admin/login/` |
+| Login lewat API (token) | `POST /api/auth/login` dengan body JSON email + password mengembalikan token `Bearer`. Token dipakai di header `Authorization: Bearer <token>` (mis. `GET /api/admin/me`), `POST /api/auth/logout` mencabutnya. Validasi dan batas percobaan sama dengan form | `src/app/api/auth/`, `src/lib/auth/login.ts`, `session.ts` |
+| Validasi email | Wajib satu tanda @ dan ada titik setelah @, hanya huruf, angka, titik, garis bawah, dan tanda hubung. Karakter seperti `( : & " '` dan spasi ditolak. Dicek di browser (pesan di bawah kolom email, form tidak dikirim) dan dicek ulang di server (form maupun API, API membalas `400`) | `src/lib/validation/email.ts`, `LoginForm.tsx`, `login.ts` |
 | proxy.ts | Cek kasar: tanpa cookie sesi diarahkan ke `/admin/login?next=...`. Cookie ada belum tentu valid | `src/proxy.ts` |
 | DAL (Data Access Layer) | Satu pintu cek sesi dan peran: `server-only`, `cache()`, data admin dikirim tanpa hash password | `src/lib/auth/dal.ts` |
 | Layout / page | Layout `(panel)` hanya mengambil data untuk sidebar; setiap `page.tsx` cek izin sendiri lewat DAL | `src/app/admin/(panel)/` |
@@ -222,6 +224,10 @@ Cara mencoba:
 4. Masuk sebagai Admin: semua menu terbuka dan harga bisa diubah.
 5. DevTools, tab Application, lalu Cookies: cookie `ss_admin_session` bertanda HttpOnly, Secure, SameSite Lax.
 6. Buka `/api/admin/me` tanpa login: `401`. Halaman Akun & Sesi: cabut sesi perangkat lain, perangkat itu langsung keluar.
+7. Di form login, ketik email seperti `admin@sumbersira` atau `ad(min)@sumbersira.id`: pesan muncul di bawah kolom email dan form tidak dikirim.
+8. Postman: jalankan `npm run dev`, impor `postman/sumber-sira-admin.postman_collection.json`, lalu Run koleksinya. Isinya 10 request berurutan:
+   login dapat token (`200`), data admin pakai token (`200`), tanpa token (`401`), akun salah (`401`), empat email salah format (`400`),
+   logout (`200`), lalu token lama ditolak (`401`). Token hasil login otomatis disimpan ke variabel `{{token}}`.
 
 Catatan tahap ini: sesi dan data wahana disimpan di memori server (hilang bila server dimatikan) karena belum ada database.
 Login Google (OAuth) dan MFA belum dibuat karena butuh akun penyedia (Google Cloud) dan database.
@@ -242,6 +248,7 @@ Login Google (OAuth) dan MFA belum dibuat karena butuh akun penyedia (Google Clo
 mobile/                Aplikasi pengunjung (Flutter), lihat bagian Aplikasi Mobile
 desain/                PNG ekspor dari Figma (acuan tampilan: mobile 2×, admin 1,25×)
   foto/                Foto asli Sumber Sira yang dipakai aplikasi (di-import lewat src/lib/foto.ts)
+postman/               Koleksi Postman untuk uji token login dan validasi email API admin
 src/app/               Halaman (App Router). Tiap halaman punya folder components/ berisi section-nya,
                        page.tsx hanya menyusun section. Folder (nama) = route group, tidak mengubah alamat
   (intro)/             Intro web, alamat /
@@ -263,7 +270,8 @@ src/app/               Halaman (App Router). Tiap halaman punya folder component
     faq/components/      FaqView, StatFaq, DaftarFaq, BelumTerjawab, FormFaq
     wahana/components/   WahanaView, PesanAkses, StatWahana, DaftarWahana, FormWahana (Server Action di wahana/actions.ts)
     akun/components/     Profil, SesiLogin, SesiList
-  api/admin/me/        Route Handler contoh yang dilindungi (401 bila belum login)
+  api/admin/me/        Route Handler contoh yang dilindungi (401 bila belum login atau token tidak berlaku)
+  api/auth/            login (token Bearer untuk Postman) dan logout lewat API
 src/proxy.ts           Cek kasar cookie sesi sebelum masuk /admin (dulu middleware.ts)
 src/components/        Komponen yang dipakai banyak halaman
   charts/              BarChart, AreaChart, DonutChart, Heatmap (admin), ProgressBar (beranimasi)
@@ -274,7 +282,9 @@ src/data/              Data dummy (wahana.ts, dummy.ts). Tahap backend: ganti de
 src/lib/
   tiket-store.ts       Tiket masuk online + angka Live Crowd (disimpan di localStorage)
   auth/                Autentikasi & otorisasi admin: users.ts (hash password), session.ts (sesi + cookie),
-                       dal.ts (Data Access Layer), roles.ts (peran dan izin), actions.ts (login, logout, cabut sesi)
+                       dal.ts (Data Access Layer), roles.ts (peran dan izin), actions.ts (login, logout, cabut sesi),
+                       login.ts (alur login yang sama untuk form dan API)
+  validation/email.ts  Aturan email yang dipakai form di browser dan pengecekan di server
   server/wahana-store.ts  Data wahana di server untuk Server Action khusus admin
   whatsapp.ts          Pesan invoice WhatsApp
   format.ts            Format Rupiah dan kode booking
@@ -286,10 +296,18 @@ src/lib/
 - Ukuran mengikuti Figma: frame mobile **375 × 812** dan admin **1440 × 900**. PNG mobile di `desain/`
   diekspor 2× (1 px di kode = 2 px di PNG), PNG admin diekspor 1,25× (1 px di kode = 1,25 px di PNG).
   Ukuran teks, jarak, dan kartu diukur dari PNG.
-- Tampilan mobile memakai tema terang seperti aplikasi wisata dan booking pada umumnya: header hijau tua di setiap tab,
-  isi berupa kartu putih di latar hijau sangat muda, foto besar untuk bagian informatif, nomor langkah di form, dan tombol aksi
-  yang menempel di bawah. Teks minimal 11 px (isi 13-14 px) dan tombol minimal 44 px supaya nyaman disentuh.
-  Warna tambahan (`surface`, `mint`, `pale`, `line`, `muted`, `sun` untuk status Sedang dan bintang) ada di `mobile/lib/theme/app_theme.dart`.
+- Tampilan mobile mengikuti gaya iOS 27 (Liquid Glass), hanya mode terang, dengan dua lapisan yang jelas:
+  lapisan navigasi (tab bar, nav bar saat digulir, CTA mengambang, sheet) dari kaca, lapisan konten (kartu, list, foto, form) permukaan putih solid.
+  Kaca terang = Putih 72% + blur + garis tepi Putih 50% + bayangan 0 8 24 Ink 10%; kaca gelap = Putih 12% + blur; CTA primer = Hijau Tua 85%.
+  Bila "tingkatkan kontras" aktif di perangkat, kaca berubah menjadi warna solid tanpa blur. Teks di atas foto memakai kaca terang dan teks Ink supaya tetap terbaca.
+- Palet mobile terkunci, sama dengan papan Color Palette di Figma: Hijau Tua `#1B4332`, Hijau Daun `#40916C`, Putih, Ink `#172321`,
+  Abu `#4B5A57`, Abu Muda `#F5F6F5`, Coral `#E07A5F` (hanya untuk Ramai, tolak, dan keluhan). Turunannya hanya transparansi:
+  gradien Latar Mobile (Hijau Tua ke Ink), Putih 12% dan 72%, Hijau Daun 30% dan 12%, Ink 10% untuk garis. Semua ada di `mobile/lib/theme/app_theme.dart`.
+- Huruf: Inter untuk teks (pengganti SF Pro) dengan skala Dynamic Type iOS (Large Title 34, Title 2 22, Headline/Body 17, Subheadline 15,
+  Footnote 13, Caption 12), angka harga dan jam memakai digit sama lebar. Serif Fraunces hanya untuk judul besar tab dan angka hero (mis. 62%, Rp25.000, 4.8).
+- Ikon gaya SF Symbols dari `cupertino_icons`: garis untuk keadaan biasa, versi penuh (fill) untuk yang aktif, tanpa kotak latar
+  (kotak Hijau Daun 12% hanya untuk menu cepat Beranda). Ikon kendaraan dan wahana yang tidak ada padanannya memakai ikon garis Material.
+  Jarak antar bagian 28, padding kartu 16, margin layar 20, area sentuh minimal 44 x 44.
 - Warna dan font ada di `src/app/globals.css` (`@theme`): `forest` dan `leaf` (hanya dua hijau, sama dengan papan Color Palette di Figma), `ink`, `paper`, `coral`. Warna yang lebih muda dibuat dengan transparansi, mis. `bg-leaf/15`, bukan token baru.
   Pakai lewat kelas Tailwind, misalnya `bg-forest` dan `text-leaf`.
 - Font dipasang dari npm (Fontsource): Fraunces (judul), Inter (teks), JetBrains Mono (angka/harga).

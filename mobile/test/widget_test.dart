@@ -27,6 +27,19 @@ void main() {
     expect(Validators.email('salah'), isNotNull);
   });
 
+  test('email wajib @ dan titik, karakter seperti ( : & " \' ditolak', () {
+    expect(Validators.email('admin@sumbersira.id'), isNull);
+    expect(Validators.email('kel.hidayat_01@mail.co.id'), isNull);
+    expect(Validators.email('adminsumbersira.id'), 'Email harus memakai tanda @.');
+    expect(Validators.email('admin@sumbersira'), 'Bagian setelah @ harus memakai titik, contoh: nama@sumbersira.id.');
+    for (final salah in ['ad(min)@sumbersira.id', 'admin:1@sumbersira.id', 'a&b@sumbersira.id', '"admin"@sumbersira.id', "admin'@sumbersira.id", 'ad min@sumbersira.id']) {
+      expect(Validators.email(salah), contains('hanya boleh berisi huruf, angka'), reason: salah);
+    }
+    expect(Validators.email('admin@@sumbersira.id'), 'Email hanya boleh punya satu tanda @.');
+    expect(Validators.email('admin..sira@sumbersira.id'), isNotNull);
+    expect(Validators.email('.admin@sumbersira.id'), isNotNull);
+  });
+
   test('nomor WhatsApp beda format dianggap sama', () {
     expect(nomorWa('+62 812-3456-7890'), '081234567890');
     expect(nomorWa('6281234567890'), '081234567890');

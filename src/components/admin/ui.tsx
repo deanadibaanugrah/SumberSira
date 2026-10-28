@@ -1,33 +1,35 @@
 // Komponen kecil yang dipakai berulang di halaman admin.
-// Gaya mengikuti desain admin terbaru di Figma: kartu putih membulat (24 px), tombol dan status berbentuk pill,
-// ikon di dalam lingkaran, dan hanya dua hijau (forest untuk menu aktif dan tombol, leaf untuk aksen).
+// Gaya diseragamkan dengan aplikasi mobile (Liquid Glass): lapisan navigasi (sidebar dan header) dari kaca terang,
+// isi halaman berupa kartu putih solid membulat, angka besar memakai Fraunces, dan warna hanya dari palet
+// (Hijau Tua, Hijau Daun, Ink, Abu, Abu Muda, Coral untuk ramai/tolak/keluhan).
 import { Bell, Search } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import type { ButtonHTMLAttributes, ElementType, ReactNode } from "react";
 
-// Judul halaman (Fraunces) + subjudul, lalu tombol aksi, kotak cari, dan lonceng di kanan.
+// Header halaman berupa bar kaca yang menempel di atas saat digulir: judul (Fraunces) + subjudul,
+// lalu tombol aksi, kotak cari, dan lonceng di kanan. Isi halaman lewat di bawahnya dan tampak buram.
 // search: { value, onChange, placeholder } bila halaman ingin memakai kotak cari untuk menyaring data.
 type SearchProps = { value: string; onChange: (value: string) => void; placeholder?: string };
 export function AdminHeader({ title, subtitle, action, search }: { title: ReactNode; subtitle?: ReactNode; action?: ReactNode; search?: SearchProps }) {
   // Kalau halaman mengirim search, kotak cari dihubungkan ke state halaman itu.
   const searchProps = search?.onChange ? { value: search.value, onChange: (e) => search.onChange(e.target.value) } : {};
   return (
-    <header className="flex flex-wrap items-start justify-between gap-x-6 gap-y-4 pl-14 lg:pl-0">
+    <header className="glass-light sticky top-3 z-30 flex flex-wrap items-center justify-between gap-x-6 gap-y-3 rounded-[28px] py-3 pl-[72px] pr-3 lg:top-4 lg:pl-6">
       <div className="min-w-0">
-        <h1 className="font-display text-[28px] font-semibold leading-[1.15] text-ink sm:text-[32px]">{title}</h1>
-        {subtitle && <p className="mt-1.5 text-sm text-ink/60">{subtitle}</p>}
+        <h1 className="font-display text-[26px] font-semibold leading-[1.15] text-ink sm:text-[28px]">{title}</h1>
+        {subtitle && <p className="mt-1 text-[13px] text-abu">{subtitle}</p>}
       </div>
-      <div className="flex items-center gap-3 sm:gap-4">
+      <div className="flex items-center gap-3">
         {action}
-        <label className="hidden h-12 w-[300px] items-center gap-3 rounded-full bg-white px-4 md:flex">
-          <Search size={18} className="shrink-0 text-ink/70" aria-hidden="true" />
+        <label className="hidden h-12 w-[280px] items-center gap-3 rounded-full border border-ink/10 bg-white px-4 md:flex">
+          <Search size={18} className="shrink-0 text-abu" aria-hidden="true" />
           <span className="sr-only">Cari</span>
           <input {...searchProps} placeholder={search?.placeholder ?? "Cari booking, wahana, ulasan..."}
                  className="w-full bg-transparent text-sm text-ink outline-none placeholder:text-ink/55" />
         </label>
-        <button type="button" aria-label="Notifikasi (ada yang baru)" className="relative grid size-12 place-items-center rounded-full bg-white text-ink">
+        <button type="button" aria-label="Notifikasi (ada yang baru)" className="relative grid size-12 place-items-center rounded-full border border-ink/10 bg-white text-ink">
           <Bell size={20} />
-          <span className="absolute right-3 top-2.5 size-2 rounded-full bg-coral ring-2 ring-white" />
+          <span className="absolute right-3 top-2.5 size-2.5 rounded-full bg-leaf ring-2 ring-white" />
         </button>
       </div>
     </header>
@@ -45,7 +47,7 @@ export function CardTitle({ children, sub, right, className = "" }: { children: 
     <div className={`flex flex-wrap items-start justify-between gap-3 ${className}`}>
       <div>
         <h2 className="text-lg font-semibold leading-tight text-ink">{children}</h2>
-        {sub && <p className="mt-1.5 text-[13px] text-ink/60">{sub}</p>}
+        {sub && <p className="mt-1.5 text-[13px] text-abu">{sub}</p>}
       </div>
       {right}
     </div>
@@ -63,7 +65,7 @@ export function IconCircle({ icon: Icon, solid = false, size = 44, iconSize = 20
 }
 
 // Kartu angka. "tall" = dashboard (ikon di atas, angka besar, label + catatan).
-// "compact" = halaman lain (ikon di kiri, angka dan label di kanan).
+// "compact" = halaman lain (ikon di kiri, angka dan label di kanan). Angka memakai Fraunces seperti angka hero di mobile.
 type StatCardProps = { icon: LucideIcon; value: ReactNode; label: string; note?: string; trend?: string; trendIcon?: LucideIcon; solid?: boolean; variant?: "tall" | "compact" };
 export function StatCard({ icon, value, label, note, trend, trendIcon: TrendIcon, solid = false, variant = "compact" }: StatCardProps) {
   // Varian tall dipakai di dashboard.
@@ -78,9 +80,9 @@ export function StatCard({ icon, value, label, note, trend, trendIcon: TrendIcon
             </span>
           )}
         </div>
-        <p className="mt-3 text-[32px] font-semibold leading-none tracking-tight text-ink">{value}</p>
-        <p className="mt-1.5 text-sm text-ink">{label}</p>
-        {note && <p className="mt-0.5 text-xs text-ink/60">{note}</p>}
+        <p className="mt-3 font-display text-[32px] font-semibold leading-none tabular-nums text-forest">{value}</p>
+        <p className="mt-2 text-sm text-ink">{label}</p>
+        {note && <p className="mt-0.5 text-xs text-abu">{note}</p>}
       </section>
     );
   }
@@ -89,57 +91,58 @@ export function StatCard({ icon, value, label, note, trend, trendIcon: TrendIcon
     <section className="flex h-24 items-center gap-4 rounded-3xl bg-white px-5 animate-fade-up">
       <IconCircle icon={icon} solid={solid} />
       <div className="min-w-0">
-        <p className="text-[28px] font-semibold leading-none tracking-tight text-ink">{value}</p>
-        <p className="mt-2 truncate text-sm text-ink/70">{label}</p>
+        <p className="font-display text-[28px] font-semibold leading-none tabular-nums text-forest">{value}</p>
+        <p className="mt-2 truncate text-sm text-abu">{label}</p>
       </div>
     </section>
   );
 }
 
-// Warna latar dan teks status (Baru, Diproses, Selesai, Di dalam, dan lainnya).
+// Chip status seperti di aplikasi mobile: latar putih bergaris Ink 10% dengan titik warna di depannya.
+// Baru dan Di dalam memakai latar Hijau Daun 12% supaya menonjol; Coral hanya untuk Ditolak.
 const PILL = {
-  Baru: "bg-leaf/15 text-forest",
-  Diproses: "bg-forest/10 text-forest",
-  Selesai: "bg-ink/[0.07] text-ink/75",
-  Ditolak: "bg-coral/12 text-coral",
-  Ditampilkan: "bg-leaf/12 text-forest",
-  Aktif: "bg-leaf/12 text-forest",
-  Nonaktif: "bg-coral/12 text-coral",
-  "Di dalam": "bg-leaf/15 text-forest",
-  "Belum masuk": "bg-ink/[0.07] text-ink/75",
-  Keluar: "bg-forest/10 text-forest",
+  Baru: "border-transparent bg-leaf/12 text-forest",
+  Diproses: "border-ink/10 bg-white text-ink",
+  Selesai: "border-ink/10 bg-white text-abu",
+  Ditolak: "border-ink/10 bg-white text-ink",
+  Ditampilkan: "border-ink/10 bg-white text-ink",
+  Aktif: "border-ink/10 bg-white text-ink",
+  Nonaktif: "border-ink/10 bg-white text-abu",
+  "Di dalam": "border-transparent bg-leaf/12 text-forest",
+  "Belum masuk": "border-ink/10 bg-white text-ink",
+  Keluar: "border-ink/10 bg-white text-abu",
 };
 // Warna titik kecil di depan teks status.
 const DOT = {
   Baru: "bg-leaf",
   Diproses: "bg-forest",
-  Selesai: "bg-ink/50",
+  Selesai: "bg-abu",
   Ditolak: "bg-coral",
   Ditampilkan: "bg-leaf",
   Aktif: "bg-leaf",
-  Nonaktif: "bg-coral",
+  Nonaktif: "bg-abu",
   "Di dalam": "bg-leaf",
-  "Belum masuk": "bg-ink/50",
-  Keluar: "bg-forest",
+  "Belum masuk": "bg-leaf",
+  Keluar: "bg-abu",
 };
 
 // Status berbentuk pill dengan titik warna di depannya.
 export function StatusPill({ status, className = "" }: { status: string; className?: string }) {
   return (
-    <span className={`inline-flex h-7 items-center gap-1.5 whitespace-nowrap rounded-full px-3 text-xs font-semibold leading-none ${PILL[status] ?? PILL.Selesai} ${className}`}>
+    <span className={`inline-flex h-7 items-center gap-1.5 whitespace-nowrap rounded-full border px-3 text-xs font-semibold leading-none ${PILL[status] ?? PILL.Selesai} ${className}`}>
       <span className={`size-1.5 rounded-full ${DOT[status] ?? DOT.Selesai}`} aria-hidden="true" />
       {status}
     </span>
   );
 }
 
-// Tab filter: yang aktif Hijau Tua, sisanya abu muda.
+// Tab filter seperti chip pilihan di mobile: yang aktif Hijau Tua, sisanya Abu Muda.
 export function FilterPills({ options, value, onChange, label = "Filter" }: { options: string[]; value: string; onChange: (value: string) => void; label?: string }) {
   return (
     <div className="flex flex-wrap gap-2.5" role="tablist" aria-label={label}>
       {options.map((o) => (
         <button key={o} type="button" role="tab" aria-selected={value === o} onClick={() => onChange(o)}
-                className={`h-10 rounded-full px-5 text-sm transition ${value === o ? "bg-forest font-semibold text-white" : "bg-ink/[0.05] text-ink hover:bg-ink/10"}`}>
+                className={`h-10 rounded-full px-5 text-sm transition ${value === o ? "bg-forest font-semibold text-white" : "bg-paper text-ink hover:bg-leaf/12"}`}>
           {o}
         </button>
       ))}
@@ -160,10 +163,10 @@ export function PrimaryButton({ icon: Icon, children, className = "", ...props }
 
 // Tombol ikon bulat: abu/hijau untuk setujui atau edit, coral untuk tolak atau hapus.
 export function IconButton({ tone = "leaf", label, children, className = "", ...props }: ButtonHTMLAttributes<HTMLButtonElement> & { tone?: "leaf" | "gray" | "coral"; label: string }) {
-  // Pilihan warna tombol: leaf (hijau), gray (abu), coral (merah bata).
+  // Pilihan warna tombol: leaf (hijau), gray (Abu Muda), coral (merah bata).
   const tones = {
-    leaf: "bg-leaf/12 text-forest hover:bg-leaf/25",
-    gray: "bg-ink/[0.07] text-ink hover:bg-ink/15",
+    leaf: "bg-leaf/12 text-forest hover:bg-leaf/30",
+    gray: "bg-paper text-ink hover:bg-ink/10",
     coral: "bg-coral/12 text-coral hover:bg-coral/25",
   };
   return (
@@ -186,7 +189,7 @@ export function initials(name: string): string {
 export function Avatar({ name, size = 32, solid = false, className = "" }: { name: string; size?: number; solid?: boolean; className?: string }) {
   return (
     <span style={{ width: size, height: size, fontSize: Math.round(size * 0.36) }} aria-hidden="true"
-          className={`grid shrink-0 place-items-center rounded-full font-semibold ${solid ? "bg-forest text-white" : "bg-ink/[0.07] text-ink"} ${className}`}>
+          className={`grid shrink-0 place-items-center rounded-full font-semibold ${solid ? "bg-forest text-white" : "bg-leaf/12 text-forest"} ${className}`}>
       {initials(name)}
     </span>
   );
@@ -210,12 +213,12 @@ export function Modal({ title, onClose, children }: { title: string; onClose: ()
 export function SecondaryButton({ children, className = "", ...props }: ButtonHTMLAttributes<HTMLButtonElement>) {
   return (
     <button type="button" {...props}
-            className={`h-11 rounded-full px-5 text-sm font-semibold text-ink/70 transition hover:bg-paper ${className}`}>
+            className={`h-11 rounded-full px-5 text-sm font-semibold text-abu transition hover:bg-paper ${className}`}>
       {children}
     </button>
   );
 }
 
 // Gaya kolom isian dan label yang dipakai di form admin.
-export const inputClass = "h-11 w-full rounded-xl border border-black/10 bg-white px-4 text-sm text-ink outline-none focus:border-leaf focus:ring-2 focus:ring-leaf/20";
-export const labelClass = "block text-[13px] text-ink/70";
+export const inputClass = "h-11 w-full rounded-xl border border-ink/10 bg-white px-4 text-sm text-ink outline-none focus:border-leaf focus:ring-2 focus:ring-leaf/30";
+export const labelClass = "block text-[13px] text-abu";

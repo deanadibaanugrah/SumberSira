@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 // Satu alat sewa atau wahana, dibaca dari mock JSON (assets/data/wahana.json).
@@ -25,15 +26,15 @@ class Wahana {
     return unit.contains('menit') ? '$name ($unit)' : '$name (per $unit)';
   }
 
-  // Ikon yang sesuai dengan nama item, mirip ikon di web admin (pelampung, gembok, kereta, dst.).
+  // Ikon garis yang sesuai dengan nama item (gaya SF Symbols bila ada padanannya).
   IconData get icon => switch (id) {
-        'ban-kecil' || 'ban-besar' => Icons.support,
-        'loker' => Icons.lock_outline,
-        'kereta-sawah' => Icons.train_outlined,
-        'bebek-gayung' => Icons.sailing_outlined,
-        'atv' => Icons.two_wheeler,
-        'flying-fox' => Icons.paragliding,
-        'komedi-putar' => Icons.attractions,
-        _ => Icons.local_activity_outlined,
+        'ban-kecil' || 'ban-besar' => CupertinoIcons.smallcircle_circle,
+        'loker' => CupertinoIcons.lock,
+        'kereta-sawah' => CupertinoIcons.tram_fill,
+        'bebek-gayung' => Icons.rowing_outlined,
+        'atv' => Icons.two_wheeler_outlined,
+        'flying-fox' => Icons.paragliding_outlined,
+        'komedi-putar' => Icons.attractions_outlined,
+        _ => CupertinoIcons.ticket,
       };
 }

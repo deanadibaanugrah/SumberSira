@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 
@@ -10,9 +11,10 @@ import '../utils/format.dart';
 import '../utils/routes.dart';
 import '../widgets/app_background.dart';
 import '../widgets/common.dart';
+import '../widgets/glass.dart';
 
-// Halaman bayar QRIS (simulasi): tampil setelah Checkout, sebelum Booking Berhasil.
-// Berisi QR pembayaran, total, batas waktu bayar, dan langkah pembayaran.
+// Halaman bayar QRIS booking (simulasi): tampil setelah Checkout, sebelum Booking Berhasil.
+// Berisi QR pembayaran dan total (hero), batas waktu bayar, dan langkah pembayaran.
 class PaymentScreen extends StatefulWidget {
   const PaymentScreen({super.key, required this.request});
 
@@ -67,75 +69,76 @@ class _PaymentScreenState extends State<PaymentScreen> {
       'Pastikan nama merchant Sumber Sira dan nominalnya sama, lalu bayar.',
     ];
     return Scaffold(
-      appBar: const PageAppBar(title: 'Bayar dengan QRIS'),
+      extendBodyBehindAppBar: true,
+      extendBody: true,
+      appBar: const PageAppBar(title: 'Bayar Booking QRIS'),
       body: AppBackground(
         child: ResponsiveBody(children: [
           AppCard(
             radius: 24,
-            padding: const EdgeInsets.fromLTRB(20, 20, 20, 18),
+            padding: const EdgeInsets.fromLTRB(20, 20, 20, 20),
             child: Column(children: [
-              Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-                const Icon(Icons.storefront_outlined, size: 16, color: AppColors.muted),
-                const SizedBox(width: 6),
-                Text('Sumber Sira · BUMDes Putukrejo', style: const TextStyle(fontSize: 12.5, color: AppColors.muted)),
+              const Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+                Icon(CupertinoIcons.building_2_fill, size: 15, color: AppColors.abu),
+                SizedBox(width: 6),
+                Text('Sumber Sira · BUMDes Putukrejo', style: AppText.footnote),
               ]),
               const SizedBox(height: 6),
-              Text(rupiah(total), style: AppTheme.price(30)),
-              const SizedBox(height: 16),
+              Text(rupiah(total), style: AppText.hero(40)),
+              const SizedBox(height: 18),
               Opacity(
                 opacity: expired ? .3 : 1,
                 child: Container(
                   padding: const EdgeInsets.all(14),
-                  decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20), border: Border.all(color: AppColors.pale, width: 1.5)),
+                  decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(22), border: Border.all(color: AppColors.line)),
                   // Package qr_flutter: QR berisi nama merchant dan nominal (simulasi QRIS).
-                  child: QrImageView(data: 'QRIS SUMBER SIRA ${widget.request.whatsapp} $total', size: 200),
+                  child: QrImageView(
+                    data: 'QRIS SUMBER SIRA ${widget.request.whatsapp} $total',
+                    size: 210,
+                    eyeStyle: const QrEyeStyle(eyeShape: QrEyeShape.square, color: AppColors.ink),
+                    dataModuleStyle: const QrDataModuleStyle(dataModuleShape: QrDataModuleShape.square, color: AppColors.ink),
+                  ),
                 ),
               ),
               const SizedBox(height: 16),
-              // Sisa waktu bayar: hijau saat masih berlaku, coral saat habis.
+              // Sisa waktu bayar: Hijau Daun 12% saat masih berlaku, Coral saat habis.
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                decoration: BoxDecoration(
-                  color: expired ? AppColors.coral.withValues(alpha: .14) : AppColors.mint,
-                  borderRadius: BorderRadius.circular(20),
-                ),
+                decoration: BoxDecoration(color: expired ? AppColors.coral : AppColors.leaf12, borderRadius: BorderRadius.circular(20)),
                 child: Row(mainAxisSize: MainAxisSize.min, children: [
-                  Icon(Icons.timer_outlined, size: 17, color: expired ? AppColors.coralDark : AppColors.forest),
+                  Icon(CupertinoIcons.timer, size: 17, color: expired ? AppColors.ink : AppColors.forest),
                   const SizedBox(width: 6),
                   Flexible(
                     child: Text(expired ? 'Waktu bayar habis, kembali lalu ulangi.' : 'Bayar sebelum $mm:$ss',
-                        style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: expired ? AppColors.coralDark : AppColors.forest)),
+                        style: AppText.number(13, color: expired ? AppColors.ink : AppColors.forest)),
                   ),
                 ]),
               ),
             ]),
           ),
-          const SectionLabel('Cara Bayar'),
-          AppCard(
-            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          GroupedList(
+            header: 'Cara bayar',
+            footer: '${widget.request.draft.lines.length} item · ${labelJam(widget.request.draft.slot)} · a.n. ${widget.request.name}',
+            children: [
               for (final (i, step) in steps.indexed)
                 Padding(
-                  padding: const EdgeInsets.only(bottom: 12),
+                  padding: const EdgeInsets.fromLTRB(16, 13, 16, 13),
                   child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                    CircleAvatar(radius: 12, backgroundColor: AppColors.forest, child: Text('${i + 1}', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: Colors.white))),
-                    const SizedBox(width: 12),
-                    Expanded(child: Text(step, style: const TextStyle(fontSize: 13.5, height: 1.4))),
+                    SizedBox(width: 20, child: Text('${i + 1}', style: AppText.number(17, weight: FontWeight.w700, color: AppColors.forest))),
+                    const SizedBox(width: 16),
+                    Expanded(child: Text(step, style: AppText.subheadline.copyWith(color: AppColors.ink))),
                   ]),
                 ),
-              const Divider(),
-              const SizedBox(height: 10),
-              Text('${widget.request.draft.lines.length} item · ${labelJam(widget.request.draft.slot)} · a.n. ${widget.request.name}',
-                  style: const TextStyle(fontSize: 12.5, color: AppColors.muted)),
-            ]),
+            ],
           ),
         ]),
       ),
-      bottomNavigationBar: BottomBar(
+      bottomNavigationBar: FloatingBar(
+        padding: const EdgeInsets.fromLTRB(12, 12, 12, 10),
         child: Column(mainAxisSize: MainAxisSize.min, children: [
-          PrimaryButton(label: 'Saya Sudah Bayar', loading: _checking, onPressed: expired ? null : _paid),
+          PrimaryButton(label: 'Saya Sudah Bayar', glass: true, loading: _checking, onPressed: expired ? null : _paid),
           const SizedBox(height: 8),
-          const Text('Simulasi: belum terhubung ke bank. Tekan tombol di atas untuk melanjutkan.',
-              textAlign: TextAlign.center, style: TextStyle(fontSize: 11.5, color: AppColors.muted)),
+          const Text('Simulasi: belum terhubung ke bank. Tekan tombol di atas untuk melanjutkan.', textAlign: TextAlign.center, style: AppText.caption),
         ]),
       ),
     );

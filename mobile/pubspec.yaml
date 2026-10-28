@@ -9,6 +9,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  cupertino_icons: ^1.0.9
   google_fonts: ^6.2.1
   intl: ^0.20.3
   qr_flutter: ^4.1.0

@@ -5,9 +5,11 @@ import Link from "next/link";
 import { useActionState, useState } from "react";
 
 import { loginAction } from "@/lib/auth/actions";
+import { validateEmail } from "@/lib/validation/email";
 
-// Form masuk panel admin. Form dikirim ke Server Action loginAction:
-// email dan password dicek di server (hash scrypt), lalu sesi disimpan di cookie HttpOnly.
+// Form masuk panel admin. Format email dicek dulu di browser (validateEmail), lalu form dikirim ke Server Action
+// loginAction: email dicek ulang dengan aturan yang sama, password dicek di server (hash scrypt),
+// lalu sesi disimpan di cookie HttpOnly.
 // Gaya kolom isian dan kotak ikon di dalamnya.
 const field = "flex h-12 items-center gap-3 rounded-2xl border border-transparent bg-paper pl-1.5 pr-3 transition focus-within:border-leaf focus-within:bg-white focus-within:ring-4 focus-within:ring-leaf/15";
 const iconBox = "grid size-9 shrink-0 place-items-center rounded-xl bg-white text-forest shadow-sm";
@@ -27,17 +29,27 @@ export default function LoginForm({ next }: { next: string }) {
   const [password, setPassword] = useState("");
   const [remember, setRemember] = useState(true);
   const [show, setShow] = useState(false);
+  // Pesan salah format email dari pengecekan di browser, tampil di bawah kolom email.
+  const [emailError, setEmailError] = useState<string | null>(null);
   const error = state?.error;
 
   // Tombol Isi: mengisi email dan password salah satu akun demo.
   const isiAkunDemo = (akun: (typeof DEMO_ACCOUNTS)[number]) => {
     setEmail(akun.email);
     setPassword(akun.password);
+    setEmailError(null);
+  };
+
+  // Sebelum dikirim: email yang salah format tidak dikirim ke server, pesannya muncul di bawah kolom email.
+  const cekSebelumKirim = (e: React.FormEvent<HTMLFormElement>) => {
+    const pesan = validateEmail(email);
+    setEmailError(pesan);
+    if (pesan) e.preventDefault();
   };
 
   return (
     // action = Server Action loginAction; isian dikirim sebagai FormData ke server
-    <form action={formAction} noValidate
+    <form action={formAction} onSubmit={cekSebelumKirim} noValidate
           className="relative w-full max-w-[440px] overflow-hidden rounded-[32px] border border-white/60 bg-white/90 p-6 shadow-[0_30px_80px_rgba(8,28,21,0.45)] backdrop-blur-2xl animate-fade-up sm:p-10">
       <span className="pointer-events-none absolute -right-16 -top-16 size-48 rounded-full bg-leaf/15 blur-2xl" aria-hidden="true" />
       <div className="relative">
@@ -52,11 +64,15 @@ export default function LoginForm({ next }: { next: string }) {
 
         {/* Kolom email */}
         <label className="mt-7 block text-[13px] font-semibold text-ink/80" htmlFor="email">Email</label>
-        <div className={`mt-1.5 ${field}`}>
+        <div className={`mt-1.5 ${field} ${emailError ? "border-coral!" : ""}`}>
           <span className={iconBox}><Mail size={16} aria-hidden="true" /></span>
-          <input id="email" name="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} autoComplete="username"
-                 placeholder="nama@sumbersira.id" className="w-full bg-transparent text-sm outline-none placeholder:text-ink/40" />
+          <input id="email" name="email" type="email" value={email} autoComplete="username" placeholder="nama@sumbersira.id"
+                 onChange={(e) => { setEmail(e.target.value); if (emailError) setEmailError(null); }}
+                 onBlur={() => email && setEmailError(validateEmail(email))}
+                 aria-invalid={emailError ? true : undefined} aria-describedby={emailError ? "email-error" : undefined}
+                 className="w-full bg-transparent text-sm outline-none placeholder:text-ink/40" />
         </div>
+        {emailError && <p id="email-error" role="alert" className="mt-1.5 text-[13px] text-coral">{emailError}</p>}
 
         {/* Kolom password dengan tombol mata untuk melihat atau menyembunyikan */}
         <label className="mt-4 block text-[13px] font-semibold text-ink/80" htmlFor="password">Password</label>

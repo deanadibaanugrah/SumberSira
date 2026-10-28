@@ -2,17 +2,6 @@
 // Tahap backend: ganti setiap konstanta di sini dengan data dari API.
 import { FOTO } from "@/lib/foto";
 
-// Keramaian per jam (persen kapasitas, skala 0-100), dipakai Home dan Live Crowd (aplikasi mobile).
-// Nilai dibaca dari posisi titik grafik di desain Live Crowd Tracker.
-export const CROWD_TODAY = [
-  { hour: "08", value: 15 },
-  { hour: "10", value: 50 },
-  { hour: "12", value: 90 },
-  { hour: "14", value: 85 },
-  { hour: "16", value: 40 },
-  { hour: "18", value: 15 },
-];
-
 // Jumlah pengunjung per jam untuk grafik "Live Crowd Monitor" di dashboard admin (dibaca dari desain).
 export const VISITORS_TODAY = [
   { label: "08.00", value: 40 },

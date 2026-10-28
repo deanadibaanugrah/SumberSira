@@ -1,121 +1,97 @@
 import 'dart:async';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import '../data/app_state.dart';
 import '../data/dummy_data.dart';
 import '../theme/app_theme.dart';
 import '../utils/routes.dart';
+import '../widgets/app_background.dart';
 import '../widgets/common.dart';
 import '../widgets/crowd_widgets.dart';
 import '../widgets/floating_chat.dart';
+import '../widgets/glass.dart';
 import '../widgets/logo_mark.dart';
 
-// Tab Beranda: header hijau tua berisi logo, lokasi, lonceng notifikasi, dan status keramaian,
-// lalu banner foto yang bisa digeser, menu cepat, rekomendasi kunjungan per jam,
+// Tab Beranda: header gelap berisi logo, lokasi, notifikasi, dan hero keramaian (angka besar),
+// lalu menu cepat, carousel foto, grafik rekomendasi kunjungan per jam,
 // dan chatbot Tanya Sira yang mengambang.
 class HomeTab extends StatelessWidget {
   const HomeTab({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Align(
-      alignment: Alignment.topCenter,
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 480),
-        // [P3 Stack] Chatbot mengambang ditumpuk di atas isi Beranda.
-        child: Stack(children: [
-          ListView(
-            padding: const EdgeInsets.only(bottom: 100),
-            children: [
-              _header(context),
-              const SizedBox(height: 20),
-              const _HeroCarousel(),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-                  const SectionTitle('Jelajahi', top: 24),
-                  _quickMenu(context),
-                  const SectionTitle('Rekomendasi Kunjungan', subtitle: 'Prediksi jumlah pengunjung per jam hari ini'),
-                  _recommendation(),
-                ]),
-              ),
-            ],
-          ),
-          const Positioned.fill(child: SafeArea(child: FloatingChat())),
-        ]),
-      ),
+    return TabPage(
+      title: 'Sumber Sira',
+      header: _header(context),
+      // [P3 Stack] Chatbot mengambang ditumpuk di atas isi Beranda.
+      overlay: const Positioned.fill(child: SafeArea(child: FloatingChat())),
+      children: [
+        const SizedBox(height: 20),
+        _quickMenu(context),
+        const SectionTitle('Jelajahi'),
+        const FullBleed(child: _HeroCarousel()),
+        const SectionTitle('Rekomendasi Kunjungan', subtitle: 'Prediksi jumlah pengunjung per jam hari ini'),
+        _recommendation(),
+      ],
     );
   }
 
-  // Header hijau tua yang ikut tergulir: logo, nama, lokasi, lonceng, dan kartu Crowd saat ini.
+  // Header gelap yang ikut tergulir: logo, nama, lokasi, lonceng, lalu hero Crowd saat ini.
   Widget _header(BuildContext context) => Container(
-        padding: EdgeInsets.fromLTRB(20, MediaQuery.paddingOf(context).top + 14, 12, 22),
-        decoration: const BoxDecoration(
-          borderRadius: BorderRadius.vertical(bottom: Radius.circular(28)),
-          gradient: LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight, colors: [AppColors.forest, Color(0xFF245A43)]),
-        ),
+        margin: const EdgeInsets.only(bottom: 4),
+        padding: EdgeInsets.fromLTRB(AppSpace.margin, MediaQuery.paddingOf(context).top + 12, 16, 20),
+        decoration: const BoxDecoration(gradient: AppColors.headerGradient, borderRadius: BorderRadius.vertical(bottom: Radius.circular(32))),
         child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
           Row(children: [
             const LogoMark(size: 42, ring: true),
             const SizedBox(width: 12),
             Expanded(
               child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                Text('Sumber Sira', style: AppTheme.display(21, color: Colors.white)),
+                Text('Sumber Sira', style: AppText.headline.copyWith(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w700)),
                 const SizedBox(height: 2),
                 Row(children: [
-                  Icon(Icons.place_outlined, size: 14, color: AppColors.white(.75)),
+                  const Icon(CupertinoIcons.location_solid, size: 13, color: AppColors.putih72),
                   const SizedBox(width: 4),
-                  Text('Desa Putukrejo, Malang', style: TextStyle(fontSize: 12.5, color: AppColors.white(.75))),
+                  Text('Desa Putukrejo, Malang', style: AppText.footnote.copyWith(color: AppColors.putih72)),
                 ]),
               ]),
             ),
-            // Lonceng notifikasi dengan titik coral.
-            IconButton(
-              tooltip: 'Notifikasi',
-              style: IconButton.styleFrom(backgroundColor: AppColors.white(.12), fixedSize: const Size(44, 44)),
-              onPressed: () => _showNotifications(context),
-              icon: const Badge(smallSize: 9, backgroundColor: AppColors.coral, child: Icon(Icons.notifications_none_rounded, color: Colors.white)),
-            ),
+            // Lonceng notifikasi dengan titik Hijau Daun.
+            GlassIconButton(icon: CupertinoIcons.bell, tooltip: 'Notifikasi', tone: GlassTone.dark, badge: true, onPressed: () => _showNotifications(context)),
           ]),
-          const SizedBox(height: 18),
-          const Padding(padding: EdgeInsets.only(right: 8), child: CrowdPill()),
+          const SizedBox(height: 20),
+          const CrowdHero(),
         ]),
       );
 
-  // [P5 Modal Bottom Sheet] Lembar notifikasi yang muncul dari bawah layar.
+  // [P5 Modal Bottom Sheet] Lembar kaca notifikasi yang muncul dari bawah layar.
   void _showNotifications(BuildContext context) {
     final s = AppState.instance;
     final items = [
-      (Icons.bar_chart_rounded, 'Crowd sekarang ${s.crowdLabel} (${s.percent}%)', 'Jam sepi terbaik 08.00-09.00 atau setelah 15.00'),
-      (Icons.chat_outlined, 'E-tiket dan invoice dikirim lewat WhatsApp', 'Riwayat dicari dengan nomor WhatsApp di Tiket & Booking'),
-      (Icons.notifications_active_outlined, s.quietReminder ? 'Pengingat jam sepi aktif' : 'Pengingat jam sepi nonaktif', 'Atur di menu Profil'),
+      (CupertinoIcons.chart_bar, 'Crowd sekarang ${s.crowdLabel} (${s.percent}%)', 'Jam sepi terbaik 08.00-09.00 atau setelah 15.00'),
+      (CupertinoIcons.chat_bubble_text, 'E-tiket dan invoice dikirim lewat WhatsApp', 'Riwayat dicari dengan nomor WhatsApp di Tiket & Booking'),
+      (CupertinoIcons.bell, s.quietReminder ? 'Pengingat jam sepi aktif' : 'Pengingat jam sepi nonaktif', 'Atur di menu Profil'),
     ];
-    showModalBottomSheet<void>(
-      context: context,
-      showDragHandle: true,
-      builder: (_) => SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
-          child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Text('Notifikasi', style: AppTheme.display(20)),
-            const SizedBox(height: 8),
-            for (final (i, (icon, title, text)) in items.indexed) ...[
-              if (i > 0) const Divider(),
-              InfoRow(icon: icon, title: title, text: text),
-            ],
-          ]),
-        ),
-      ),
+    showGlassSheet<void>(
+      context,
+      builder: (_) => Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+        const Text('Notifikasi', style: AppText.title2),
+        const SizedBox(height: 14),
+        GroupedList(children: [
+          for (final (icon, title, text) in items) ListRow(icon: icon, title: title, subtitle: text, titleStyle: AppText.subheadline.copyWith(color: AppColors.ink, fontWeight: FontWeight.w600)),
+        ]),
+      ]),
     );
   }
 
-  // [P3 Row + Expanded] Menu cepat dibagi rata. Isinya pengganti menu samping (garis tiga) yang dihapus.
+  // [P3 Row + Expanded] Menu cepat dibagi rata. Satu-satunya grup ikon berwadah (Hijau Daun 12%) di layar ini.
   Widget _quickMenu(BuildContext context) {
     final items = [
-      (Icons.photo_camera_outlined, 'AI Photo Studio', AppRoutes.aiPhoto),
-      (Icons.star_outline_rounded, 'Ulasan & Rating', AppRoutes.reviews),
-      (Icons.info_outline_rounded, 'Tentang Sumber Sira', AppRoutes.about),
+      (CupertinoIcons.camera, 'AI Photo Studio', AppRoutes.aiPhoto),
+      (CupertinoIcons.star, 'Ulasan & Rating', AppRoutes.reviews),
+      (CupertinoIcons.info_circle, 'Tentang Sumber Sira', AppRoutes.about),
     ];
     return Row(children: [
       for (final (i, (icon, label, route)) in items.indexed) ...[
@@ -125,11 +101,12 @@ class HomeTab extends StatelessWidget {
             padding: const EdgeInsets.fromLTRB(8, 16, 8, 12),
             onTap: () => Navigator.pushNamed(context, route),
             child: Column(children: [
-              IconBadge(icon, size: 50),
+              IconBadge(icon),
               const SizedBox(height: 10),
               SizedBox(
-                height: 34,
-                child: Text(label, textAlign: TextAlign.center, maxLines: 2, style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w600, height: 1.3)),
+                height: 36,
+                child: Text(label,
+                    textAlign: TextAlign.center, maxLines: 2, style: AppText.footnote.copyWith(color: AppColors.ink, fontWeight: FontWeight.w600, height: 1.35)),
               ),
             ]),
           ),
@@ -138,46 +115,33 @@ class HomeTab extends StatelessWidget {
     ]);
   }
 
-  // Rekomendasi kunjungan: grafik garis jumlah pengunjung per jam (isi menu Live Crowd yang dipindah ke sini).
-  Widget _recommendation() => Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-        AppCard(
-          padding: const EdgeInsets.fromLTRB(12, 16, 14, 14),
-          child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-            const Padding(
-              padding: EdgeInsets.only(left: 4),
-              child: Text('Pengunjung (orang)', style: TextStyle(fontSize: 12, color: AppColors.muted)),
-            ),
-            const SizedBox(height: 6),
-            const HourlyCrowdChart(height: 230),
-            const SizedBox(height: 6),
-            Row(children: const [
-              SizedBox(width: 4),
-              Expanded(child: CrowdLegend()),
-              Text('Jam', style: TextStyle(fontSize: 12, color: AppColors.muted)),
-            ]),
-          ]),
-        ),
-        const SizedBox(height: 12),
-        const AppCard(
-          color: AppColors.mint,
-          borderColor: AppColors.pale,
-          shadow: false,
-          child: Row(children: [
-            IconBadge(Icons.timer_outlined, background: Colors.white, color: AppColors.leaf),
-            SizedBox(width: 14),
+  // Rekomendasi kunjungan: grafik batang jumlah pengunjung per jam dan waktu terbaik berkunjung.
+  Widget _recommendation() => AppCard(
+        padding: const EdgeInsets.fromLTRB(14, 16, 16, 14),
+        child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+          const Padding(padding: EdgeInsets.only(left: 2), child: Text('Pengunjung (orang)', style: AppText.caption)),
+          const SizedBox(height: 4),
+          const HourlyCrowdChart(height: 200),
+          const SizedBox(height: 10),
+          const Padding(padding: EdgeInsets.only(left: 2), child: CrowdLegend()),
+          const Padding(padding: EdgeInsets.symmetric(vertical: 14), child: Divider()),
+          Row(children: [
+            const SizedBox(width: 2),
+            const Icon(CupertinoIcons.clock, size: 20, color: AppColors.leaf),
+            const SizedBox(width: 14),
             Expanded(
               child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                Text('Waktu terbaik berkunjung', style: TextStyle(fontSize: 13.5, fontWeight: FontWeight.w700, color: AppColors.forest)),
-                SizedBox(height: 2),
-                Text('08.00-09.00 atau setelah 15.00', style: TextStyle(fontSize: 13)),
+                Text('Waktu terbaik berkunjung', style: AppText.subheadline.copyWith(color: AppColors.ink, fontWeight: FontWeight.w600)),
+                const SizedBox(height: 2),
+                Text('08.00-09.00 atau setelah 15.00', style: AppText.number(15, weight: FontWeight.w500, color: AppColors.abu)),
               ]),
             ),
           ]),
-        ),
-      ]);
+        ]),
+      );
 }
 
-// Banner foto yang bisa digeser kiri-kanan (PageView), tiap foto punya teks sendiri.
+// Carousel foto yang bisa digeser kiri-kanan (PageView), tiap foto punya teks sendiri di panel kaca.
 // Kartu berikutnya sedikit terlihat di tepi supaya jelas bisa digeser.
 // Berganti otomatis setiap 5 detik, titik di bawah menandai foto yang sedang tampil.
 class _HeroCarousel extends StatefulWidget {
@@ -188,7 +152,7 @@ class _HeroCarousel extends StatefulWidget {
 }
 
 class _HeroCarouselState extends State<_HeroCarousel> {
-  final _controller = PageController(viewportFraction: .9);
+  final _controller = PageController(viewportFraction: .86);
   int _page = 0;
   Timer? _timer;
 
@@ -213,7 +177,7 @@ class _HeroCarouselState extends State<_HeroCarousel> {
   Widget build(BuildContext context) {
     return Column(children: [
       SizedBox(
-        height: 200,
+        height: 236,
         child: PageView.builder(
           controller: _controller,
           itemCount: DummyData.slides.length,
@@ -221,35 +185,29 @@ class _HeroCarouselState extends State<_HeroCarousel> {
           itemBuilder: (_, i) {
             final s = DummyData.slides[i];
             return Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 5),
+              padding: const EdgeInsets.symmetric(horizontal: 6),
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(24),
                 child: Stack(fit: StackFit.expand, children: [
                   // [P4 Image.asset] Foto dari folder assets yang didaftarkan di pubspec.yaml.
                   Image.asset(s.image, fit: BoxFit.cover),
-                  DecoratedBox(
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        colors: [AppColors.ink.withValues(alpha: .05), AppColors.ink.withValues(alpha: .8)],
-                        stops: const [.25, 1],
-                      ),
+                  Positioned(
+                    left: 12,
+                    right: 12,
+                    bottom: 12,
+                    // Kaca terang + teks Ink supaya tetap terbaca di foto yang terang.
+                    child: Glass(
+                      radius: 18,
+                      shadow: false,
+                      padding: const EdgeInsets.fromLTRB(14, 11, 14, 12),
+                      child: Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisSize: MainAxisSize.min, children: [
+                        Text(s.label, style: AppText.caption.copyWith(color: AppColors.forest, letterSpacing: .6, fontWeight: FontWeight.w600)),
+                        const SizedBox(height: 3),
+                        Text(s.title, maxLines: 1, overflow: TextOverflow.ellipsis, style: AppText.headline),
+                        const SizedBox(height: 2),
+                        Text(s.text, maxLines: 1, overflow: TextOverflow.ellipsis, style: AppText.footnote),
+                      ]),
                     ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(18, 16, 18, 18),
-                    child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                        decoration: BoxDecoration(color: AppColors.white(.22), borderRadius: BorderRadius.circular(20)),
-                        child: Text(s.label, style: AppTheme.mono(10, weight: FontWeight.w600, color: Colors.white)),
-                      ),
-                      const Spacer(),
-                      Text(s.title, style: AppTheme.display(21, color: Colors.white)),
-                      const SizedBox(height: 4),
-                      Text(s.text, maxLines: 2, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 12.5, color: AppColors.white(.88))),
-                    ]),
                   ),
                 ]),
               ),
@@ -265,7 +223,7 @@ class _HeroCarouselState extends State<_HeroCarousel> {
             margin: const EdgeInsets.symmetric(horizontal: 3),
             width: i == _page ? 20 : 7,
             height: 7,
-            decoration: BoxDecoration(color: i == _page ? AppColors.leaf : AppColors.pale, borderRadius: BorderRadius.circular(4)),
+            decoration: BoxDecoration(color: i == _page ? AppColors.leaf : AppColors.leaf30, borderRadius: BorderRadius.circular(4)),
           ),
       ]),
     ]);

@@ -155,28 +155,11 @@ export function useTiket() {
   return { ...data, ...ringkasan(data.tickets), ready: data !== SERVER };
 }
 
-// Dibaca langsung (tanpa hook), mis. untuk jawaban chatbot.
-export function ringkasanSekarang() {
-  return ringkasan(load().tickets);
-}
-
 // Merapikan kode yang diketik petugas: 1038, tk1038, atau TK 1038 semuanya jadi TK-1038.
 export function normalisasiKode(raw) {
   const text = String(raw || "").toUpperCase().replace(/\s/g, "");
   if (/^\d+$/.test(text)) return `TK-${text}`;
   return text.startsWith("TK") && !text.startsWith("TK-") ? `TK-${text.slice(2)}` : text;
-}
-
-// Membuat tiket baru dari form aplikasi: kode berikutnya, status Belum masuk, lalu disimpan.
-export function beliTiket({ name, whatsapp, adults, kids, parking }) {
-  const data = load();
-  const next = Math.max(1000, ...data.tickets.map((t) => Number(t.code.slice(3)) || 0)) + 1;
-  const ticket = {
-    code: `TK-${next}`, name: name.trim(), whatsapp: whatsapp.trim(), adults, kids, parking,
-    total: hargaTiket(adults, parking), status: "Belum masuk", boughtAt: jamSekarang(), checkInAt: null, checkOutAt: null, mine: true,
-  };
-  save({ ...data, updatedAt: jamSekarang(), tickets: [...data.tickets, ticket] });
-  return ticket;
 }
 
 // Scan petugas di pintu masuk. Mengembalikan { ok, message }.

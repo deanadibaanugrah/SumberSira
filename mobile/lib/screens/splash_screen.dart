@@ -1,15 +1,18 @@
 import 'dart:async';
 import 'dart:math';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../data/app_state.dart';
 import '../theme/app_theme.dart';
 import '../utils/routes.dart';
+import '../widgets/glass.dart';
 import '../widgets/logo_mark.dart';
 
-// Layar pembuka: foto bergerak pelan, riak air dari logo, chip keunggulan, dan garis loading.
-// Setelah 3,2 detik pindah otomatis (Tentang saat pertama kali, berikutnya Beranda). Ketuk untuk lewati.
+// Layar pembuka: foto bergerak pelan di atas, lembar gelap berisi logo dengan riak air, nama, chip keunggulan,
+// dan garis loading. Setelah 3,2 detik pindah otomatis (Tentang saat pertama kali, berikutnya Beranda). Ketuk untuk lewati.
 // [P3 StatefulWidget] Punya state (animasi dan timer) yang berubah selama layar tampil.
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -51,86 +54,97 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: GestureDetector(
-        onTap: _next,
-        child: Stack(fit: StackFit.expand, children: [
-          // Foto latar yang pelan-pelan membesar.
-          ScaleTransition(
-            scale: Tween(begin: 1.05, end: 1.18).animate(_zoom),
-            child: Image.asset('assets/images/splash-sumber-sira.jpg', fit: BoxFit.cover),
-          ),
-          DecoratedBox(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [AppColors.forest.withValues(alpha: .6), AppColors.forest.withValues(alpha: .25), AppColors.ink.withValues(alpha: .9)],
-              ),
-            ),
-          ),
-          // Semua teks dan ikon di atas foto berwarna putih.
-          SafeArea(
-            child: DefaultTextStyle.merge(
-              style: const TextStyle(color: Colors.white),
-              child: IconTheme(
-                data: const IconThemeData(color: Colors.white),
-                child: LayoutBuilder(
-                  // Tinggi minimal 560 supaya di layar pendek / landscape bisa digulir, tidak overflow.
-                  builder: (context, box) => SingleChildScrollView(
-                    child: SizedBox(
-                      height: max(box.maxHeight, 560),
+    final inset = MediaQuery.paddingOf(context);
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: SystemUiOverlayStyle.dark,
+      child: Scaffold(
+        backgroundColor: AppColors.ink,
+        body: GestureDetector(
+          onTap: _next,
+          child: LayoutBuilder(builder: (context, box) {
+            // Tinggi minimal 640 supaya di layar pendek / landscape bisa digulir, tidak overflow.
+            final h = max(box.maxHeight, 640.0);
+            final photoH = h * .5;
+            return SingleChildScrollView(
+              child: SizedBox(
+                height: h,
+                child: Stack(children: [
+                  // Foto latar yang pelan-pelan membesar.
+                  Positioned(
+                    left: 0,
+                    right: 0,
+                    top: 0,
+                    height: photoH + 40,
+                    child: ClipRect(
+                      child: ScaleTransition(
+                        scale: Tween(begin: 1.05, end: 1.18).animate(_zoom),
+                        child: Image.asset('assets/images/splash-sumber-sira.jpg', fit: BoxFit.cover),
+                      ),
+                    ),
+                  ),
+                  Positioned(top: inset.top + 16, left: 0, right: 0, child: Center(child: _locationPill())),
+                  // Lembar gelap (gradien Latar Mobile) yang menumpuk sedikit di atas foto.
+                  Positioned(
+                    left: 0,
+                    right: 0,
+                    top: photoH,
+                    bottom: 0,
+                    child: Container(
+                      padding: EdgeInsets.only(bottom: inset.bottom),
+                      decoration: const BoxDecoration(gradient: AppColors.headerGradient, borderRadius: BorderRadius.vertical(top: Radius.circular(36))),
                       child: Column(children: [
-                        const SizedBox(height: 24),
-                        _locationPill(),
-                        const Spacer(flex: 2),
-                        _rippleLogo(),
-                        const SizedBox(height: 28),
-                        Text('Sumber Sira', style: AppTheme.display(34, color: Colors.white)),
-                        const SizedBox(height: 6),
-                        Text('Kunjungan Jernih Tanpa Antre', style: TextStyle(fontSize: 14, color: AppColors.white(.85))),
+                        // Ruang untuk separuh logo yang menumpuk di tepi lembar ditambah ruang kosong logo.
+                        const SizedBox(height: 86),
+                        Text('Sumber Sira', style: AppText.largeTitle()),
+                        const SizedBox(height: 4),
+                        Text('Kunjungan Jernih Tanpa Antre', style: AppText.subheadline.copyWith(color: AppColors.putih72)),
                         const SizedBox(height: 18),
                         Wrap(spacing: 8, runSpacing: 8, alignment: WrapAlignment.center, children: [
                           for (final chip in const ['Air jernih', 'Tanpa antre', 'Live Crowd']) _chip(chip),
                         ]),
-                        const Spacer(flex: 3),
+                        const Spacer(),
                         _loadingBar(),
-                        const SizedBox(height: 40),
+                        const SizedBox(height: 36),
                       ]),
                     ),
                   ),
-                ),
+                  // Logo di tepi atas lembar, dengan riak air di luar ruang kosongnya.
+                  Positioned(top: photoH - 150, left: 0, right: 0, child: Center(child: _rippleLogo())),
+                ]),
               ),
-            ),
-          ),
-        ]),
+            );
+          }),
+        ),
       ),
     );
   }
 
-  Widget _locationPill() => Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
-        decoration: BoxDecoration(color: AppColors.white(.12), borderRadius: BorderRadius.circular(20), border: Border.all(color: AppColors.white(.25))),
-        child: const Row(mainAxisSize: MainAxisSize.min, children: [
-          Icon(Icons.place_outlined, size: 15),
-          SizedBox(width: 6),
-          Text('Desa Putukrejo, Malang', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500)),
+  Widget _locationPill() => Glass(
+        radius: 18,
+        shadow: false,
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+        child: Row(mainAxisSize: MainAxisSize.min, children: [
+          const Icon(CupertinoIcons.location_solid, size: 14, color: AppColors.leaf),
+          const SizedBox(width: 6),
+          Text('Desa Putukrejo, Malang', style: AppText.footnote.copyWith(color: AppColors.ink, fontWeight: FontWeight.w600)),
         ]),
       );
 
-  // Logo dengan tiga riak air yang bergantian melebar lalu hilang.
+  // Logo dengan tiga riak air yang bergantian melebar lalu hilang. Riak dimulai di luar ruang kosong logo (25%).
   Widget _rippleLogo() => SizedBox.square(
-        dimension: 96,
+        dimension: 300,
         child: AnimatedBuilder(
           animation: _ripple,
-          builder: (_, child) => Stack(clipBehavior: Clip.none, alignment: Alignment.center, children: [
+          builder: (_, child) => Stack(alignment: Alignment.center, children: [
             for (var i = 0; i < 3; i++)
               Builder(builder: (_) {
                 final t = (_ripple.value + i / 3) % 1;
-                return Transform.scale(
-                  scale: 1 + 1.3 * t,
+                return Opacity(
+                  opacity: 1 - t,
                   child: Container(
-                    decoration: BoxDecoration(shape: BoxShape.circle, border: Border.all(color: AppColors.white(.5 * (1 - t)), width: 2)),
+                    width: 144 + 150 * t,
+                    height: 144 + 150 * t,
+                    decoration: BoxDecoration(shape: BoxShape.circle, border: Border.all(color: AppColors.kaca, width: 2)),
                   ),
                 );
               }),
@@ -142,11 +156,11 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
 
   Widget _chip(String label) => Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
-        decoration: BoxDecoration(color: AppColors.white(.12), borderRadius: BorderRadius.circular(20), border: Border.all(color: AppColors.white(.25))),
+        decoration: BoxDecoration(color: AppColors.kaca, borderRadius: BorderRadius.circular(18), border: Border.all(color: AppColors.kaca)),
         child: Row(mainAxisSize: MainAxisSize.min, children: [
           Container(width: 6, height: 6, decoration: const BoxDecoration(color: AppColors.leaf, shape: BoxShape.circle)),
           const SizedBox(width: 6),
-          Text(label, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500)),
+          Text(label, style: AppText.footnote.copyWith(color: Colors.white, fontWeight: FontWeight.w500)),
         ]),
       );
 
@@ -158,13 +172,13 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
             animation: _progress,
             builder: (_, _) => ClipRRect(
               borderRadius: BorderRadius.circular(4),
-              child: LinearProgressIndicator(value: _progress.value, minHeight: 6, backgroundColor: AppColors.white(.2), color: Colors.white),
+              child: LinearProgressIndicator(value: _progress.value, minHeight: 6, backgroundColor: AppColors.kaca, color: Colors.white),
             ),
           ),
         ),
         const SizedBox(height: 10),
-        Text('Menyiapkan kunjunganmu...', style: TextStyle(fontSize: 12.5, color: AppColors.white(.75))),
-        const SizedBox(height: 4),
-        Text('Ketuk di mana saja untuk lanjut', style: TextStyle(fontSize: 11, color: AppColors.white(.5))),
+        Text('Menyiapkan kunjunganmu...', style: AppText.footnote.copyWith(color: AppColors.putih72)),
+        const SizedBox(height: 2),
+        Text('Ketuk di mana saja untuk lanjut', style: AppText.caption.copyWith(color: AppColors.putih72)),
       ]);
 }

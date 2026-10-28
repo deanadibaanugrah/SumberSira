@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 
@@ -11,6 +12,7 @@ import '../utils/validators.dart';
 import '../widgets/app_background.dart';
 import '../widgets/common.dart';
 import '../widgets/crowd_widgets.dart';
+import '../widgets/glass.dart';
 
 // Form beli tiket masuk. StatefulWidget karena isinya berubah saat pengguna mengisi.
 // Unsur materi: Form + TextFormField + validator (P6), TextEditingController, DropdownButton,
@@ -41,11 +43,11 @@ class _TicketFormScreenState extends State<TicketFormScreen> {
   // Ikon tiap pilihan parkir dan metode pembayaran.
   static const _parkingIcons = {
     Parking.none: Icons.directions_walk_rounded,
-    Parking.motor: Icons.two_wheeler_rounded,
-    Parking.mobil: Icons.directions_car_rounded,
-    Parking.bus: Icons.directions_bus_rounded,
+    Parking.motor: Icons.two_wheeler_outlined,
+    Parking.mobil: Icons.directions_car_outlined,
+    Parking.bus: Icons.directions_bus_outlined,
   };
-  static const _paymentIcons = {PaymentMethod.qris: Icons.qr_code_2_rounded, PaymentMethod.cash: Icons.payments_outlined};
+  static const _paymentIcons = {PaymentMethod.qris: CupertinoIcons.qrcode, PaymentMethod.cash: Icons.payments_outlined};
 
   @override
   void dispose() {
@@ -54,7 +56,7 @@ class _TicketFormScreenState extends State<TicketFormScreen> {
     super.dispose();
   }
 
-  // Tombol bayar: cek validator, cek persetujuan, lalu bayar (QRIS lewat dialog, tunai langsung jadi).
+  // Tombol bayar: cek validator, cek persetujuan, lalu bayar (QRIS lewat sheet, tunai langsung jadi).
   Future<void> _pay() async {
     if (!_formKey.currentState!.validate()) return;
     if (!_agree) {
@@ -62,7 +64,7 @@ class _TicketFormScreenState extends State<TicketFormScreen> {
       return;
     }
     if (_payment == PaymentMethod.qris) {
-      final paid = await showDialog<bool>(context: context, builder: (_) => _QrisDialog(total: _total));
+      final paid = await showGlassSheet<bool>(context, builder: (_) => _QrisSheet(total: _total));
       if (paid != true || !mounted) return;
     }
     final ticket = AppState.instance.buyTicket(
@@ -82,118 +84,106 @@ class _TicketFormScreenState extends State<TicketFormScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: const PageAppBar(title: 'Tiket Masuk Online'),
+      extendBodyBehindAppBar: true,
+      extendBody: true,
+      appBar: const PageAppBar(title: 'Beli Tiket Masuk'),
       body: AppBackground(
         child: Form(
           key: _formKey,
           child: ResponsiveBody(children: [
+            // Keramaian saat ini (live) sebagai pertimbangan sebelum datang.
             ListenableBuilder(
               listenable: AppState.instance,
               builder: (_, _) => AppCard(
-                color: AppColors.mint,
-                borderColor: AppColors.pale,
-                shadow: false,
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 13),
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                 child: Row(children: [
                   const LiveDot(),
-                  const SizedBox(width: 10),
+                  const SizedBox(width: 12),
                   Expanded(
                     child: Text('Sekarang ${AppState.instance.inside} orang di dalam · ${AppState.instance.crowdLabel} (${AppState.instance.percent}%)',
-                        style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.forest)),
+                        style: AppText.subheadline.copyWith(color: AppColors.ink, fontWeight: FontWeight.w600)),
                   ),
                 ]),
               ),
             ),
-            const SectionLabel('Jumlah Pengunjung', step: 1),
-            AppCard(
-              padding: const EdgeInsets.fromLTRB(16, 12, 12, 12),
-              child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-                // [P6 intl] Tanggal hari ini dalam Bahasa Indonesia.
-                Row(children: [
-                  const Icon(Icons.event_outlined, size: 17, color: AppColors.leaf),
-                  const SizedBox(width: 6),
-                  Expanded(child: Text('Berlaku untuk hari ini, ${tanggalHariIni()}', style: const TextStyle(fontSize: 12.5, color: AppColors.muted))),
-                ]),
-                const SizedBox(height: 6),
+            // [P6 intl] Tanggal hari ini dalam Bahasa Indonesia (catatan di bawah grup).
+            GroupedList(
+              header: 'Jumlah pengunjung',
+              indent: 16,
+              footer: 'Berlaku untuk hari ini, ${tanggalHariIni()}',
+              children: [
                 _counterRow('Usia 3 tahun ke atas', '${rupiah(Ticket.pricePerPerson)} / orang', _adults, 1, 30, (v) => setState(() => _adults = v)),
-                const Divider(),
                 _counterRow('Anak di bawah 3 tahun', 'Gratis', _kids, 0, 10, (v) => setState(() => _kids = v)),
-              ]),
+              ],
             ),
-            const SectionLabel('Perkiraan Jam Datang', step: 2),
+            const SectionLabel('Perkiraan jam datang'),
             // [P4 DropdownButton] Memilih satu jam dari daftar; onChanged mengubah state lewat setState().
             DropdownButtonFormField<String>(
               initialValue: _arrival,
               dropdownColor: Colors.white,
               borderRadius: BorderRadius.circular(16),
-              decoration: const InputDecoration(prefixIcon: Icon(Icons.schedule_rounded, size: 20)),
+              icon: const Icon(CupertinoIcons.chevron_down, size: 16, color: AppColors.abu),
+              decoration: const InputDecoration(prefixIcon: Icon(CupertinoIcons.clock, size: 20)),
               items: [
-                for (final slot in DummyData.arrivalSlots) DropdownMenuItem(value: slot, child: Text(slot, style: const TextStyle(fontSize: 14))),
+                for (final slot in DummyData.arrivalSlots) DropdownMenuItem(value: slot, child: Text(slot, style: AppText.number(17, weight: FontWeight.w400))),
               ],
               onChanged: (value) => setState(() => _arrival = value!),
             ),
-            const SectionLabel('Parkir Kendaraan', step: 3),
-            // Pilih satu jenis parkir (cara kerjanya seperti RadioButton, tampilannya kartu sesuai desain).
+            const SectionLabel('Parkir kendaraan'),
+            // Pilih satu jenis parkir (cara kerjanya seperti RadioButton, tampilannya kotak pilihan).
             Row(children: [
               for (final (i, p) in Parking.values.indexed) ...[
                 if (i > 0) const SizedBox(width: 8),
                 Expanded(child: _parkingTile(p)),
               ],
             ]),
-            const SectionLabel('Data Pemesan', step: 4),
+            const SectionLabel('Data pemesan'),
             // [P6 TextFormField + validator] Validator mengembalikan pesan error, atau null kalau isian benar.
             TextFormField(  
               controller: _name,
               textInputAction: TextInputAction.next,
-              decoration: const InputDecoration(hintText: 'Nama sesuai identitas', prefixIcon: Icon(Icons.person_outline_rounded, size: 20)),
+              decoration: const InputDecoration(hintText: 'Nama sesuai identitas', prefixIcon: Icon(CupertinoIcons.person, size: 20)),
               validator: (v) => Validators.required(v, 'Nama'),
             ),
             const SizedBox(height: 10),
             TextFormField(
               controller: _whatsapp,
               keyboardType: TextInputType.phone,
-              decoration: const InputDecoration(hintText: 'No. WhatsApp, mis. 081234567890', prefixIcon: Icon(Icons.phone_outlined, size: 20)),
+              decoration: const InputDecoration(hintText: 'No. WhatsApp, mis. 081234567890', prefixIcon: Icon(CupertinoIcons.phone, size: 20)),
               validator: Validators.whatsapp,
             ),
-            const SectionLabel('Metode Pembayaran', step: 5),
             // [P4 RadioButton] Pilih tepat satu metode pembayaran dari satu kelompok pilihan.
-            AppCard(
-              padding: const EdgeInsets.symmetric(vertical: 4),
-              child: RadioGroup<PaymentMethod>(
-                groupValue: _payment,
-                onChanged: (value) => setState(() => _payment = value!),
-                child: Column(children: [
-                  for (final (i, m) in PaymentMethod.values.indexed) ...[
-                    if (i > 0) const Divider(indent: 16, endIndent: 16),
-                    RadioListTile<PaymentMethod>(
-                      value: m,
-                      controlAffinity: ListTileControlAffinity.trailing,
-                      secondary: IconBadge(_paymentIcons[m]!, size: 38),
-                      title: Text(m.label, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
-                    ),
-                  ],
-                ]),
-              ),
+            RadioGroup<PaymentMethod>(
+              groupValue: _payment,
+              onChanged: (value) => setState(() => _payment = value!),
+              child: GroupedList(header: 'Metode pembayaran', children: [
+                for (final m in PaymentMethod.values)
+                  RadioListTile<PaymentMethod>(
+                    value: m,
+                    controlAffinity: ListTileControlAffinity.trailing,
+                    contentPadding: const EdgeInsets.fromLTRB(16, 0, 8, 0),
+                    secondary: Icon(_paymentIcons[m], size: 20, color: AppColors.leaf),
+                    title: Text(m.label, style: AppText.body),
+                  ),
+              ]),
             ),
             const SizedBox(height: 12),
             // [P4 Checkbox] Persetujuan aturan kunjungan (true/false), wajib dicentang sebelum bayar.
             AppCard(
-              color: _agree ? AppColors.mint : Colors.white,
-              borderColor: _agree ? AppColors.pale : AppColors.line,
-              shadow: false,
-              padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+              color: _agree ? AppColors.leaf12 : Colors.white,
+              padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
               child: CheckboxListTile(
                 value: _agree,
                 onChanged: (value) => setState(() => _agree = value ?? false),
                 contentPadding: const EdgeInsets.symmetric(horizontal: 8),
                 controlAffinity: ListTileControlAffinity.leading,
-                title: const Text('Saya sudah membaca aturan kunjungan (tidak memakai sabun dan sampo di kolam).', style: TextStyle(fontSize: 13, height: 1.35)),
+                title: Text('Saya sudah membaca aturan kunjungan (tidak memakai sabun dan sampo di kolam).', style: AppText.subheadline.copyWith(color: AppColors.ink)),
               ),
             ),
           ]),
         ),
       ),
-      // Bar bawah: total harga dan tombol aksi. Ditaruh di bottomNavigationBar supaya tidak ikut tergulir.
+      // Bar kaca mengambang: total harga dan tombol aksi. Ditaruh di bottomNavigationBar supaya tidak ikut tergulir.
       bottomNavigationBar: TotalBar(
         label: 'Total (${_adults + _kids} orang)',
         amount: _total,
@@ -203,78 +193,73 @@ class _TicketFormScreenState extends State<TicketFormScreen> {
     );
   }
 
-  Widget _counterRow(String title, String subtitle, int value, int min, int max, ValueChanged<int> onChanged) => Padding(
-        padding: const EdgeInsets.symmetric(vertical: 8),
-        child: Row(children: [
-          Expanded(
-            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Text(title, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
-              const SizedBox(height: 3),
-              Text(subtitle, style: AppTheme.price(13)),
-            ]),
-          ),
-          StepperControl(value: value, min: min, max: max, label: title, onChanged: onChanged),
-        ]),
+  Widget _counterRow(String title, String subtitle, int value, int min, int max, ValueChanged<int> onChanged) => ListRow(
+        title: title,
+        subtitle: subtitle,
+        subtitleStyle: AppText.number(13, weight: FontWeight.w500, color: AppColors.abu),
+        trailing: StepperControl(value: value, min: min, max: max, label: title, onChanged: onChanged),
       );
 
-  // Kartu pilihan parkir: ikon kendaraan, nama, dan tarif. Yang dipilih berwarna hijau tua.
+  // Kotak pilihan parkir: ikon kendaraan, nama, dan tarif. Yang dipilih berlatar Hijau Daun 12% dan bergaris Hijau Daun.
   Widget _parkingTile(Parking p) {
     final active = p == _parking;
-    final fg = active ? Colors.white : AppColors.ink;
-    return AppCard(
-      radius: 16,
-      shadow: !active,
-      padding: const EdgeInsets.symmetric(vertical: 12),
-      color: active ? AppColors.forest : Colors.white,
-      borderColor: active ? AppColors.forest : AppColors.line,
-      onTap: () => setState(() => _parking = p),
-      child: Column(children: [
-        Icon(_parkingIcons[p], size: 24, color: active ? Colors.white : AppColors.leaf),
-        const SizedBox(height: 6),
-        Text(p.label, style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w600, color: fg)),
-        const SizedBox(height: 2),
-        Text(p.price == 0 ? '-' : rupiah(p.price), style: TextStyle(fontSize: 11, color: active ? AppColors.white(.8) : AppColors.muted)),
-      ]),
+    return Semantics(
+      selected: active,
+      child: AppCard(
+        radius: 16,
+        padding: const EdgeInsets.symmetric(vertical: 12),
+        color: active ? AppColors.leaf12 : Colors.white,
+        borderColor: active ? AppColors.leaf : null,
+        onTap: () => setState(() => _parking = p),
+        child: Column(children: [
+          Icon(_parkingIcons[p], size: 24, color: active ? AppColors.leaf : AppColors.abu),
+          const SizedBox(height: 6),
+          Text(p.label, style: AppText.footnote.copyWith(color: active ? AppColors.forest : AppColors.ink, fontWeight: FontWeight.w600)),
+          const SizedBox(height: 1),
+          Text(p.price == 0 ? '-' : rupiah(p.price), style: AppText.number(11, weight: FontWeight.w500, color: AppColors.abu)),
+        ]),
+      ),
     );
   }
 }
 
-// Dialog pembayaran QRIS (simulasi): QR berisi nominal, lalu tombol "Saya Sudah Bayar".
-class _QrisDialog extends StatelessWidget {
-  const _QrisDialog({required this.total});
+// Sheet pembayaran QRIS (simulasi): QR berisi nominal, lalu tombol "Saya Sudah Bayar".
+class _QrisSheet extends StatelessWidget {
+  const _QrisSheet({required this.total});
 
   final int total;
 
   @override
   Widget build(BuildContext context) {
-    return AlertDialog(
-      title: Text('Bayar dengan QRIS', textAlign: TextAlign.center, style: AppTheme.display(20)),
-      content: Column(mainAxisSize: MainAxisSize.min, children: [
-        Container(
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(18), border: Border.all(color: AppColors.pale, width: 1.5)),
-          // Package qr_flutter: membuat gambar QR dari teks.
-          child: QrImageView(data: 'QRIS SUMBER SIRA $total', size: 170),
+    return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+      const Text('Bayar dengan QRIS', textAlign: TextAlign.center, style: AppText.headline),
+      const SizedBox(height: 4),
+      const Text('Scan dengan aplikasi bank atau e-wallet.', textAlign: TextAlign.center, style: AppText.footnote),
+      const SizedBox(height: 18),
+      Center(
+        child: Container(
+          padding: const EdgeInsets.all(14),
+          decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(22), border: Border.all(color: AppColors.line)),
+          // Package qr_flutter: membuat gambar QR dari teks (warna Ink sesuai palet).
+          child: QrImageView(
+            data: 'QRIS SUMBER SIRA $total',
+            size: 190,
+            eyeStyle: const QrEyeStyle(eyeShape: QrEyeShape.square, color: AppColors.ink),
+            dataModuleStyle: const QrDataModuleStyle(dataModuleShape: QrDataModuleShape.square, color: AppColors.ink),
+          ),
         ),
-        const SizedBox(height: 14),
-        Text(rupiah(total), style: AppTheme.price(24)),
-        const SizedBox(height: 4),
-        const Text('Scan dengan aplikasi bank atau e-wallet.', textAlign: TextAlign.center, style: TextStyle(fontSize: 13, color: AppColors.muted)),
-      ]),
-      actionsAlignment: MainAxisAlignment.center,
-      actions: [
-        // [P5 Navigator.pop] Menutup dialog sambil mengirim hasil (false = batal, true = sudah bayar).
-        TextButton(
-          style: TextButton.styleFrom(foregroundColor: AppColors.muted),
-          onPressed: () => Navigator.pop(context, false),
-          child: const Text('Batal', style: TextStyle(fontWeight: FontWeight.w600)),
-        ),
-        FilledButton(
-          style: FilledButton.styleFrom(backgroundColor: AppColors.forest, shape: const StadiumBorder(), padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12)),
-          onPressed: () => Navigator.pop(context, true),
-          child: const Text('Saya Sudah Bayar', style: TextStyle(fontWeight: FontWeight.w600)),
-        ),
-      ],
-    );
+      ),
+      const SizedBox(height: 14),
+      Text(rupiah(total), textAlign: TextAlign.center, style: AppText.hero(34)),
+      const SizedBox(height: 20),
+      // [P5 Navigator.pop] Menutup sheet sambil mengirim hasil (false = batal, true = sudah bayar).
+      PrimaryButton(label: 'Saya Sudah Bayar', onPressed: () => Navigator.pop(context, true)),
+      const SizedBox(height: 4),
+      TextButton(
+        style: TextButton.styleFrom(foregroundColor: AppColors.abu, minimumSize: const Size.fromHeight(44)),
+        onPressed: () => Navigator.pop(context, false),
+        child: const Text('Batal', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 17)),
+      ),
+    ]);
   }
 }

@@ -1,8 +1,10 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import '../theme/app_theme.dart';
 import '../widgets/app_background.dart';
 import '../widgets/common.dart';
+import '../widgets/glass.dart';
 
 // Rancangan fitur AI (belum diimplementasikan): AI Underwater Photo Studio.
 // Tampilan "Sesudah" masih simulasi dengan filter warna; model AI dikerjakan pada tahap berikutnya.
@@ -48,9 +50,11 @@ class _AiPhotoScreenState extends State<AiPhotoScreen> {
       'Hasil tampil berdampingan dengan foto asli dan bisa dibagikan ke Galeri Komunitas.',
     ];
     return Scaffold(
+      extendBodyBehindAppBar: true,
       appBar: const PageAppBar(title: 'AI Underwater Photo Studio'),
       body: AppBackground(
         child: ResponsiveBody(children: [
+          // Hero: foto sebelum dan sesudah.
           if (_compare)
             Row(children: [
               Expanded(child: _photo('Sebelum', _dull)),
@@ -59,39 +63,35 @@ class _AiPhotoScreenState extends State<AiPhotoScreen> {
             ])
           else
             _photo('Sesudah', _enhanced(), badge: true),
-          const SizedBox(height: 14),
-          AppCard(
-            padding: const EdgeInsets.fromLTRB(16, 14, 16, 4),
-            child: Column(children: [
-              Row(children: [
-                const Icon(Icons.tune_rounded, size: 19, color: AppColors.leaf),
-                const SizedBox(width: 8),
-                const Text('Kekuatan enhance', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
-                const Spacer(),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                  decoration: BoxDecoration(color: AppColors.mint, borderRadius: BorderRadius.circular(12)),
-                  child: Text('${_strength.round()}%', style: AppTheme.price(13)),
+          GroupedList(top: 20, indent: 16, children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 14, 16, 2),
+              child: Column(children: [
+                Row(children: [
+                  const Icon(CupertinoIcons.slider_horizontal_3, size: 20, color: AppColors.leaf),
+                  const SizedBox(width: 14),
+                  const Expanded(child: Text('Kekuatan enhance', style: AppText.body)),
+                  Text('${_strength.round()}%', style: AppText.number(17, color: AppColors.forest)),
+                ]),
+                // onChanged dijalankan selama Slider digeser; setState() memperbarui foto.
+                Slider(
+                  value: _strength,
+                  max: 100,
+                  divisions: 20,
+                  label: '${_strength.round()}%',
+                  onChanged: (value) => setState(() => _strength = value),
                 ),
               ]),
-              // onChanged dijalankan selama Slider digeser; setState() memperbarui foto.
-              Slider(
-                value: _strength,
-                max: 100,
-                divisions: 20,
-                label: '${_strength.round()}%',
-                onChanged: (value) => setState(() => _strength = value),
-              ),
-              const Divider(),
-              SwitchListTile(
-                contentPadding: EdgeInsets.zero,
-                value: _compare,
-                onChanged: (value) => setState(() => _compare = value),
-                title: const Text('Bandingkan dengan foto asli', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
-              ),
-            ]),
-          ),
-          const SectionTitle('Galeri Komunitas', top: 24),
+            ),
+            SwitchListTile(
+              contentPadding: const EdgeInsets.fromLTRB(16, 2, 12, 2),
+              value: _compare,
+              onChanged: (value) => setState(() => _compare = value),
+              secondary: const Icon(CupertinoIcons.square_split_2x1, size: 20, color: AppColors.leaf),
+              title: const Text('Bandingkan dengan foto asli', style: AppText.body),
+            ),
+          ]),
+          const SectionTitle('Galeri Komunitas'),
           Row(children: [
             for (var i = 1; i <= 3; i++)
               Expanded(
@@ -113,60 +113,56 @@ class _AiPhotoScreenState extends State<AiPhotoScreen> {
                 ),
               ),
           ]),
-          const SizedBox(height: 18),
-          AppCard(
-            color: AppColors.mint,
-            borderColor: AppColors.pale,
-            shadow: false,
-            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Row(children: [
-                const IconBadge(Icons.auto_awesome, size: 38, background: Colors.white, color: AppColors.leaf),
-                const SizedBox(width: 10),
-                Text('Rencana Fitur AI', style: AppTheme.display(18)),
-              ]),
-              const SizedBox(height: 14),
-              for (var i = 0; i < steps.length; i++)
+          GroupedList(
+            header: 'Rencana fitur AI',
+            footer: 'Belum diimplementasikan. Tahap berikutnya: model image enhancement bawah air yang dipanggil lewat API.',
+            children: [
+              for (final (i, step) in steps.indexed)
                 Padding(
-                  padding: const EdgeInsets.only(bottom: 12),
+                  padding: const EdgeInsets.fromLTRB(16, 13, 16, 13),
                   child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                    CircleAvatar(radius: 12, backgroundColor: AppColors.forest, child: Text('${i + 1}', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: Colors.white))),
-                    const SizedBox(width: 12),
-                    Expanded(child: Text(steps[i], style: const TextStyle(fontSize: 13.5, height: 1.4))),
+                    SizedBox(width: 20, child: Text('${i + 1}', style: AppText.number(17, weight: FontWeight.w700, color: AppColors.forest))),
+                    const SizedBox(width: 16),
+                    Expanded(child: Text(step, style: AppText.subheadline.copyWith(color: AppColors.ink))),
                   ]),
                 ),
-              const Text('Belum diimplementasikan. Tahap berikutnya: model image enhancement bawah air yang dipanggil lewat API.',
-                  style: TextStyle(fontSize: 12.5, color: AppColors.muted, height: 1.4)),
-            ]),
+            ],
           ),
         ]),
       ),
     );
   }
 
-  // [P3 Stack + Positioned] Foto dengan label yang ditumpuk di pojok bawah dan badge di pojok atas.
+  // [P3 Stack + Positioned] Foto dengan label kaca yang ditumpuk di pojok bawah dan badge di pojok atas.
   Widget _photo(String label, ColorFilter filter, {bool badge = false}) => ClipRRect(
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(22),
         child: AspectRatio(
-          aspectRatio: 161 / 200,
+          aspectRatio: 161 / 210,
           child: Stack(fit: StackFit.expand, children: [
             ColorFiltered(colorFilter: filter, child: Image.asset('assets/images/onboarding-bawah-air.jpg', fit: BoxFit.cover)),
             Positioned(
               left: 10,
               bottom: 10,
-              child: Container(
+              child: Glass(
+                radius: 14,
+                shadow: false,
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                decoration: BoxDecoration(color: AppColors.ink.withValues(alpha: .65), borderRadius: BorderRadius.circular(12)),
-                child: Text(label, style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.w600, color: Colors.white)),
+                child: Text(label, style: AppText.caption.copyWith(color: AppColors.ink, fontWeight: FontWeight.w600)),
               ),
             ),
             if (badge)
               Positioned(
                 right: 8,
                 top: 8,
-                child: Container(
+                child: Glass(
+                  radius: 14,
+                  shadow: false,
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12)),
-                  child: const Text('AI Enhanced', style: TextStyle(fontSize: 10.5, fontWeight: FontWeight.w700, color: AppColors.forest)),
+                  child: Row(mainAxisSize: MainAxisSize.min, children: [
+                    const Icon(CupertinoIcons.sparkles, size: 12, color: AppColors.leaf),
+                    const SizedBox(width: 4),
+                    Text('AI Enhanced', style: AppText.caption.copyWith(color: AppColors.ink, fontWeight: FontWeight.w600)),
+                  ]),
                 ),
               ),
           ]),

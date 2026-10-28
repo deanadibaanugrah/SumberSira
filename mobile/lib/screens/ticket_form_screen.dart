@@ -142,7 +142,7 @@ class _TicketFormScreenState extends State<TicketFormScreen> {
             ]),
             const SectionLabel('Data Pemesan', step: 4),
             // [P6 TextFormField + validator] Validator mengembalikan pesan error, atau null kalau isian benar.
-            TextFormField(
+            TextFormField(  
               controller: _name,
               textInputAction: TextInputAction.next,
               decoration: const InputDecoration(hintText: 'Nama sesuai identitas', prefixIcon: Icon(Icons.person_outline_rounded, size: 20)),

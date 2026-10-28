@@ -1,6 +1,6 @@
 "use client";
 
-import { CalendarCheck, ChevronLeft, ChevronRight, Clock, Image as ImageIcon, LayoutGrid, LogOut, Menu, MessageCircle, Sparkles, Tag, Ticket, X } from "lucide-react";
+import { CalendarCheck, Clock, Image as ImageIcon, LayoutGrid, LogOut, Menu, MessageCircle, PanelLeftClose, PanelLeftOpen, Sparkles, Tag, Ticket, X } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
@@ -44,21 +44,26 @@ export default function Sidebar({ admin }: { admin: AdminProfile }) {
       {/* Latar gelap di belakang sidebar saat terbuka di HP, diklik untuk menutup */}
       {open && <div className="fixed inset-0 z-40 bg-ink/40 lg:hidden" onClick={() => setOpen(false)} aria-hidden="true" />}
 
-      <aside className={`fixed inset-y-4 left-4 z-50 flex w-[240px] flex-col rounded-3xl bg-white px-3 pb-4 pt-[26px] text-ink shadow-[0_8px_30px_rgba(23,35,33,0.06)] transition-[transform,width]
-                         lg:sticky lg:inset-auto lg:top-4 lg:h-[calc(100dvh-2rem)] lg:shrink-0 lg:translate-x-0 ${collapsed ? "lg:w-[82px]" : "lg:w-[240px]"} ${open ? "translate-x-0" : "-translate-x-[calc(100%+1rem)]"}`}>
-        <div className={`flex items-start justify-between px-2 ${alignWhenCollapsed}`}>
-          <Link href="/admin" title="Ke dashboard admin" className={`flex min-w-0 flex-1 items-center gap-3 ${alignWhenCollapsed}`}>
+      <aside id="admin-sidebar" className={`fixed inset-y-4 left-4 z-50 flex w-[240px] flex-col rounded-3xl bg-white px-3 pb-4 pt-[26px] text-ink shadow-[0_8px_30px_rgba(23,35,33,0.06)] transition-[transform,width]
+                         lg:sticky lg:inset-auto lg:top-4 lg:h-[calc(100dvh-2rem)] lg:shrink-0 lg:translate-x-0 ${collapsed ? "lg:w-[76px]" : "lg:w-[240px]"} ${open ? "translate-x-0" : "-translate-x-[calc(100%+1rem)]"}`}>
+        <div className={`flex h-10 items-center px-1 ${collapsed ? "justify-between lg:justify-center" : "justify-between"}`}>
+          <Link href="/admin" title="Ke dashboard admin" className={`flex min-w-0 items-center gap-2.5 ${collapsed ? "lg:hidden" : ""}`}>
             <span className="shrink-0">
-              <LogoMark size={40} label="" />
+              <LogoMark size={34} label="" />
             </span>
-            <span className={`min-w-[136px] overflow-hidden whitespace-nowrap ${hideWhenCollapsed}`}>
-              <span className="block font-display text-[21px] font-semibold leading-tight text-forest">Sumber Sira</span>
-              <span className="block text-xs text-ink/60">Admin Panel</span>
+            <span className="min-w-0 overflow-hidden whitespace-nowrap">
+              <span className="block truncate font-display text-[18px] font-semibold leading-tight text-forest">Sumber Sira</span>
+              <span className="block text-[11px] text-ink/60">Admin Panel</span>
             </span>
           </Link>
-          <button type="button" onClick={() => setCollapsed((v) => !v)} aria-label={collapsed ? "Perbesar sidebar" : "Perkecil sidebar"} title={collapsed ? "Perbesar sidebar" : "Perkecil sidebar"}
-                  className={`hidden size-8 shrink-0 place-items-center rounded-full text-ink/60 transition hover:bg-paper hover:text-forest lg:grid ${collapsed ? "absolute -right-4 top-8 bg-white shadow-md" : "mt-1 ml-2"}`}>
-            {collapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
+          <button type="button" onClick={() => setCollapsed(false)} aria-label="Buka sidebar" aria-controls="admin-sidebar" aria-expanded="false" title="Buka sidebar"
+                  className={`group/collapsed-toggle relative hidden size-10 shrink-0 place-items-center rounded-full transition hover:bg-paper ${collapsed ? "lg:grid" : "lg:hidden"}`}>
+            <LogoMark size={34} label="" className="transition-opacity group-hover/collapsed-toggle:opacity-0 group-focus-visible/collapsed-toggle:opacity-0" />
+            <PanelLeftOpen size={19} aria-hidden="true" className="absolute text-ink/70 opacity-0 transition-opacity group-hover/collapsed-toggle:opacity-100 group-focus-visible/collapsed-toggle:opacity-100" />
+          </button>
+          <button type="button" onClick={() => setCollapsed(true)} aria-label="Tutup sidebar" aria-controls="admin-sidebar" aria-expanded="true" title="Tutup sidebar"
+                  className={`hidden size-9 shrink-0 place-items-center rounded-full text-ink/70 transition hover:bg-paper hover:text-forest ${collapsed ? "lg:hidden" : "lg:grid"}`}>
+            <PanelLeftClose size={19} />
           </button>
           <button type="button" onClick={() => setOpen(false)} aria-label="Tutup menu" className="mt-2 lg:hidden"><X size={20} /></button>
         </div>
@@ -74,6 +79,7 @@ export default function Sidebar({ admin }: { admin: AdminProfile }) {
                   <Link href={href} onClick={() => setOpen(false)} aria-current={active ? "page" : undefined}
                         title={collapsed ? label : undefined}
                         className={`group/menu relative flex h-12 items-center gap-3 rounded-full pl-2 pr-0.5 text-sm tracking-[-0.015em] transition ${alignWhenCollapsed} ${
+                          collapsed ? "lg:mx-auto lg:size-11 lg:p-0" : ""} ${
                           active ? "bg-forest font-semibold text-white" : "text-ink hover:bg-paper"}`}>
                     <span className={`grid size-8 shrink-0 place-items-center rounded-full ${active ? "bg-white text-forest" : "bg-leaf/12 text-forest"}`}>
                       <Icon size={16} aria-hidden="true" />

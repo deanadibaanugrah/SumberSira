@@ -3,17 +3,15 @@ import "server-only";
 import { forbidden, redirect } from "next/navigation";
 import { cache } from "react";
 
-import { listWahana } from "@/lib/server/wahana-store";
+import { apiFetch } from "@/lib/server/api";
+import type { WahanaItem } from "@/lib/server/wahana-store";
 
+import { describeDevice } from "./device";
 import { ROLE_LABEL, can, type Permission, type Role } from "./roles";
-import { listSessionsOf, readSession } from "./session";
-import { findUserById } from "./users";
 
-// Data Access Layer (DAL): satu pintu untuk mengecek sesi dan peran sebelum data dibaca atau diubah.
-// Halaman, Server Action, dan Route Handler admin semuanya memanggil fungsi di sini.
-// proxy.ts hanya pengalihan cepat; batas keamanan yang sebenarnya ada di file ini.
+// Data Access Layer (DAL): satu pintu untuk mengecek sesi dan peran.
+// Sesi sekarang dicek ke backend (GET /auth/me), bukan lagi dari memori server Next.js.
 
-// Data admin yang boleh dikirim ke tampilan (DTO). Hash password tidak pernah ikut.
 export type AdminProfile = {
   id: string;
   name: string;
@@ -23,33 +21,39 @@ export type AdminProfile = {
   sessionId: string;
 };
 
-// Hasil bertipe untuk Server Action: tidak melempar error, cukup kembalikan alasan penolakan.
 export type AuthFailure = { ok: false; error: "UNAUTHORIZED" | "FORBIDDEN" };
 
-// Admin yang sedang login, atau null. cache() = sesi hanya dicari sekali per request.
+// Admin yang sedang login, atau null. cache() = hanya satu panggilan ke backend per request.
 export const getOptionalAdmin = cache(async (): Promise<AdminProfile | null> => {
-  const session = await readSession();
-  if (!session) return null;
-  const user = findUserById(session.userId);
-  if (!user) return null;
-  return { id: user.id, name: user.name, email: user.email, role: user.role, roleLabel: ROLE_LABEL[user.role], sessionId: session.publicId };
+  try {
+    const res = await apiFetch("/auth/me");
+    if (!res.ok) return null;
+    const u = await res.json();
+    return {
+      id: u.id,
+      name: u.name,
+      email: u.email,
+      role: u.role as Role,
+      roleLabel: ROLE_LABEL[u.role as Role],
+      sessionId: u.sessionId,
+    };
+  } catch {
+    return null; // backend tidak terjangkau: anggap belum login
+  }
 });
 
-// Autentikasi untuk halaman: belum login = dialihkan ke halaman login.
 export async function getCurrentAdmin(): Promise<AdminProfile> {
   const admin = await getOptionalAdmin();
   if (!admin) redirect("/admin/login");
   return admin;
 }
 
-// Autentikasi lalu otorisasi untuk halaman: sudah login tapi perannya tidak punya izin = halaman 403.
 export async function requirePermission(permission: Permission): Promise<AdminProfile> {
   const admin = await getCurrentAdmin();
   if (!can(admin.role, permission)) forbidden();
   return admin;
 }
 
-// Versi untuk Server Action: mengembalikan UNAUTHORIZED (belum login) atau FORBIDDEN (peran tidak cukup).
 export async function checkPermission(permission: Permission): Promise<{ ok: true; admin: AdminProfile } | AuthFailure> {
   const admin = await getOptionalAdmin();
   if (!admin) return { ok: false, error: "UNAUTHORIZED" };
@@ -57,20 +61,26 @@ export async function checkPermission(permission: Permission): Promise<{ ok: tru
   return { ok: true, admin };
 }
 
-// Daftar wahana untuk halaman Wahana & Harga. Dibaca lewat DAL supaya izin "wahana:lihat" selalu dicek.
+// Daftar wahana untuk halaman Wahana & Harga, diambil dari backend
 export async function getWahanaForAdmin() {
   const admin = await requirePermission("wahana:lihat");
-  return { items: listWahana(), canEdit: can(admin.role, "wahana:ubah") };
+  const res = await apiFetch("/admin/rides");
+  const items: WahanaItem[] = res.ok ? await res.json() : [];
+  return { items, canEdit: can(admin.role, "wahana:ubah") };
 }
 
-// Sesi aktif milik admin yang sedang login saja (bukan milik admin lain).
+type SessionRow = { id: string; userAgent: string | null; createdAt: string; expiresAt: string; current: boolean };
+
+// Sesi aktif milik admin yang sedang login saja
 export async function getMySessions() {
-  const admin = await requirePermission("akun");
-  return listSessionsOf(admin.id).map((s) => ({
-    id: s.publicId,
-    device: s.device,
-    createdAt: s.createdAt,
-    expiresAt: s.expiresAt,
-    current: s.publicId === admin.sessionId,
+  await requirePermission("akun");
+  const res = await apiFetch("/auth/sessions");
+  const rows: SessionRow[] = res.ok ? await res.json() : [];
+  return rows.map((s) => ({
+    id: s.id,
+    device: describeDevice(s.userAgent ?? ""),
+    createdAt: new Date(s.createdAt).getTime(),
+    expiresAt: new Date(s.expiresAt).getTime(),
+    current: s.current,
   }));
 }

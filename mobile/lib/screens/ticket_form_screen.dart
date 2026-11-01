@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 
 import '../data/app_state.dart';
+import '../data/api_client.dart';
 import '../data/dummy_data.dart';
 import '../models/ticket.dart';
 import '../theme/app_theme.dart';
@@ -34,8 +35,8 @@ class _TicketFormScreenState extends State<TicketFormScreen> {
   int _adults = 2;
   int _kids = 0;
   Parking _parking = Parking.motor;
-  String _arrival = DummyData.arrivalSlots.first;
-  PaymentMethod _payment = PaymentMethod.qris;
+  List<String> _slots = DummyData.arrivalSlots; // diganti dari backend begitu terhubung
+  String _arrival = DummyData.arrivalSlots.first;  PaymentMethod _payment = PaymentMethod.qris;
   bool _agree = false;
 
   int get _total => _adults * Ticket.pricePerPerson + _parking.price;
@@ -50,6 +51,24 @@ class _TicketFormScreenState extends State<TicketFormScreen> {
   static const _paymentIcons = {PaymentMethod.qris: CupertinoIcons.qrcode, PaymentMethod.cash: Icons.payments_outlined};
 
   @override
+  void initState() {
+    super.initState();
+    _loadSlots();
+  }
+
+  // Jam datang diambil dari backend (GET /time-slots). Kalau gagal, daftar bawaan tetap dipakai.
+  Future<void> _loadSlots() async {
+    try {
+      final slots = await ApiClient.fetchTimeSlots();
+      if (!mounted || slots.isEmpty) return;
+      setState(() {
+        _slots = slots;
+        if (!slots.contains(_arrival)) _arrival = slots.first;
+      });
+    } catch (_) {
+      // server tidak terjangkau: tetap pakai daftar bawaan
+    }
+  }
   void dispose() {
     _name.dispose();
     _whatsapp.dispose();
@@ -119,14 +138,14 @@ class _TicketFormScreenState extends State<TicketFormScreen> {
             const SectionLabel('Perkiraan jam datang'),
             // [P4 DropdownButton] Memilih satu jam dari daftar; onChanged mengubah state lewat setState().
             DropdownButtonFormField<String>(
+              key: ValueKey(_slots.join('|')),
               initialValue: _arrival,
               dropdownColor: Colors.white,
               borderRadius: BorderRadius.circular(16),
               icon: const Icon(CupertinoIcons.chevron_down, size: 16, color: AppColors.abu),
               decoration: const InputDecoration(prefixIcon: Icon(CupertinoIcons.clock, size: 20)),
               items: [
-                for (final slot in DummyData.arrivalSlots) DropdownMenuItem(value: slot, child: Text(slot, style: AppText.number(17, weight: FontWeight.w400))),
-              ],
+                for (final slot in _slots) DropdownMenuItem(value: slot, child: Text(slot, style: AppText.number(17, weight: FontWeight.w400))),              ],
               onChanged: (value) => setState(() => _arrival = value!),
             ),
             const SectionLabel('Parkir kendaraan'),

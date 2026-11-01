@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../data/app_state.dart';
+import '../data/api_client.dart';
 import '../data/dummy_data.dart';
 import '../models/booking.dart';
 import '../models/wahana.dart';
@@ -21,20 +22,34 @@ class BookingController extends ChangeNotifier {
     AppState.instance.addListener(_onStateChanged);
   }
 
-  late final Future<List<Wahana>> items = _load();
+  late Future<List<Wahana>> items = _load();
   List<Wahana> _loaded = const [];
+  bool offline = false; // true = server tidak terjangkau, memakai data bawaan di assets
   final Map<String, int> qty = {};
   String slot = DummyData.bookingSlots.first;
   late int _bookingCount;
 
   // Membaca assets/data/wahana.json (mock JSON) lalu mengubahnya menjadi daftar objek Wahana.
   // async/await karena membaca file butuh waktu; hasilnya ditampilkan lewat FutureBuilder.
+    // Mengambil wahana dari backend (GET /rides). Kalau server tidak terjangkau, aplikasi memakai
+  // data bawaan assets/data/wahana.json supaya tetap bisa dicoba, dan banner "Coba lagi" ditampilkan.
   Future<List<Wahana>> _load() async {
-    final raw = await rootBundle.loadString('assets/data/wahana.json');
-    final list = jsonDecode(raw) as List<dynamic>;
-    _loaded = list.map((e) => Wahana.fromJson(e as Map<String, dynamic>)).toList();
+    try {
+      _loaded = await ApiClient.fetchWahana();
+      offline = false;
+    } catch (_) {
+      final raw = await rootBundle.loadString('assets/data/wahana.json');
+      _loaded = (jsonDecode(raw) as List<dynamic>).map((e) => Wahana.fromJson(e as Map<String, dynamic>)).toList();
+      offline = true;
+    }
     notifyListeners();
     return _loaded;
+  }
+
+  // Tombol "Coba lagi" di banner: muat ulang dari server.
+  void reload() {
+    items = _load();
+    notifyListeners();
   }
 
   int get total => _loaded.fold(0, (sum, w) => sum + (qty[w.id] ?? 0) * w.price);
@@ -124,6 +139,16 @@ class BookingSection extends StatelessWidget {
                 },
               ),
             ),
+            if (controller.offline)
+              Padding(
+                padding: const EdgeInsets.only(top: 12),
+                child: Row(children: [
+                  const Icon(Icons.cloud_off_outlined, size: 18, color: AppColors.abu),
+                  const SizedBox(width: 8),
+                  const Expanded(child: Text('Server tidak terjangkau. Menampilkan data bawaan.', style: AppText.footnote)),
+                  TextButton(onPressed: controller.reload, child: const Text('Coba lagi')),
+                ]),
+              ),
             if (snapshot.connectionState != ConnectionState.done)
               const Center(child: Padding(padding: EdgeInsets.all(24), child: CircularProgressIndicator()))
             else

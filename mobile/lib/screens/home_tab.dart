@@ -32,7 +32,7 @@ class HomeTab extends StatelessWidget {
         _quickMenu(context),
         const SectionTitle('Jelajahi'),
         const FullBleed(child: _HeroCarousel()),
-        const SectionTitle('Rekomendasi Kunjungan', subtitle: 'Prediksi jumlah pengunjung per jam hari ini'),
+        const SectionTitle('Keramaian Hari Ini', subtitle: 'Jumlah orang di dalam per jam, dari tiket yang discan'),
         _recommendation(),
       ],
     );
@@ -115,7 +115,7 @@ class HomeTab extends StatelessWidget {
     ]);
   }
 
-  // Rekomendasi kunjungan: grafik batang jumlah pengunjung per jam dan waktu terbaik berkunjung.
+  // Grafik batang jumlah pengunjung per jam dan waktu terbaik berkunjung (jam yang biasanya paling sepi).
   Widget _recommendation() => AppCard(
         padding: const EdgeInsets.fromLTRB(14, 16, 16, 14),
         child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
@@ -125,18 +125,26 @@ class HomeTab extends StatelessWidget {
           const SizedBox(height: 10),
           const Padding(padding: EdgeInsets.only(left: 2), child: CrowdLegend()),
           const Padding(padding: EdgeInsets.symmetric(vertical: 14), child: Divider()),
-          Row(children: [
-            const SizedBox(width: 2),
-            const Icon(CupertinoIcons.clock, size: 20, color: AppColors.leaf),
-            const SizedBox(width: 14),
-            Expanded(
-              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                Text('Waktu terbaik berkunjung', style: AppText.subheadline.copyWith(color: AppColors.ink, fontWeight: FontWeight.w600)),
-                const SizedBox(height: 2),
-                Text('08.00-09.00 atau setelah 15.00', style: AppText.number(15, weight: FontWeight.w500, color: AppColors.abu)),
-              ]),
-            ),
-          ]),
+          ListenableBuilder(
+            listenable: AppState.instance,
+            builder: (context, _) {
+              // Dari riwayat hari-hari sebelumnya bila ada; kalau belum, saran umum.
+              final quiet = AppState.instance.hourly?.quietest;
+              final text = quiet == null ? '08.00-09.00 atau setelah 15.00' : 'Sekitar pukul ${quiet.toString().padLeft(2, '0')}.00';
+              return Row(children: [
+                const SizedBox(width: 2),
+                const Icon(CupertinoIcons.clock, size: 20, color: AppColors.leaf),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                    Text(quiet == null ? 'Waktu terbaik berkunjung' : 'Biasanya paling sepi', style: AppText.subheadline.copyWith(color: AppColors.ink, fontWeight: FontWeight.w600)),
+                    const SizedBox(height: 2),
+                    Text(text, style: AppText.number(15, weight: FontWeight.w500, color: AppColors.abu)),
+                  ]),
+                ),
+              ]);
+            },
+          ),
         ]),
       );
 }

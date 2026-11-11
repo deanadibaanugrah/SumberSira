@@ -8,7 +8,7 @@ Tugas kelompok (UTS, fokus frontend). Satu rancangan sistem dengan dua antarmuka
 | **Dashboard Web** | Admin / pengelola | **Next.js 16 (App Router) + TypeScript + Tailwind CSS 4** | `src/` |
 
 Sumber Sira adalah wisata kolam mata air di Desa Putukrejo, Malang. Aplikasi ini untuk booking sewa alat
-dan wahana, cek keramaian, foto AI bawah air, chatbot, dan ulasan. Panel admin dipakai pengelola.
+dan wahana, cek keramaian, perbagus foto dengan AI Photo Studio, tanya chatbot, dan ulasan. Panel admin dipakai pengelola.
 
 ## Menjalankan
 
@@ -47,6 +47,41 @@ Perintah lain:
 > setelah file diubah. Kelas baru jadi tidak berpengaruh sampai server di-restart. Mode webpack
 > tidak punya masalah ini. Kalau folder kamu tanpa spasi, `npm run dev:turbo` juga aman.
 
+### Menjalankan bersama backend
+
+Login admin, Wahana & Harga, **tiket, Live Crowd, Insight keramaian, dan chatbot** diambil dari backend, yaitu repo
+[SumberSira-backend](https://github.com/nibrasalghifary7/SumberSira-backend) (Express, Prisma, PostgreSQL di Neon).
+Aplikasi mobile memakai backend yang sama: wahana, jam kunjungan, beli tiket, keramaian, dan chat.
+
+```
+Flutter (pengunjung) ──┐
+                       ├──► SumberSira-backend (port 4000) ──► Neon PostgreSQL
+Next.js (web admin) ───┘
+```
+
+1. **Jalankan backend lebih dulu.** Ikuti README backend: `npm install`, salin `.env.example` menjadi `.env` lalu isi
+   `DATABASE_URL` (minta ke anggota tim, jangan di-commit), `npx prisma generate`, `npx prisma migrate deploy` (sekali, menambah
+   tabel tiket dan chat; kalau menjawab `P1001`, pakai `npm run db:apply`), `npm run seed`, lalu `npm run dev`.
+   Cek `http://localhost:4000/health`, hasilnya harus `{"ok":true}`.
+2. **Jalankan web admin** dengan `npm run dev`. Alamat backend dibaca dari variabel `API_URL`, bawaannya `http://localhost:4000`.
+   Kalau backend ada di alamat lain, buat file `.env.local` berisi `API_URL=...`. Kalau port 3000 sudah dipakai program lain,
+   pakai `npx next dev --webpack -p 3001`.
+3. **Jalankan aplikasi mobile.** Alamat backend lewat `--dart-define=API_URL=...`:
+   - emulator Android: tidak perlu apa-apa (bawaan `http://10.0.2.2:4000`),
+   - Flutter web di Chrome: `flutter run -d chrome --dart-define=API_URL=http://localhost:4000`,
+   - HP fisik dengan Wi-Fi yang sama dengan laptop: `flutter run --dart-define=API_URL=http://IP-LAPTOP:4000`.
+
+Kalau backend belum jalan, login admin menampilkan "Server tidak dapat dihubungi". Aplikasi mobile memakai data bawaan
+(wahana, keramaian contoh) dan menampilkan "Data contoh, belum terhubung ke server"; beli tiket menolak dengan pesan jelas
+(tidak membuat tiket palsu yang tidak bisa discan petugas). Yang sudah tersambung: login, logout, dan sesi admin, Wahana & Harga,
+tiket dan Live Crowd, Insight keramaian, FAQ dan chatbot. Booking sewa, galeri, dan ulasan masih data contoh.
+
+**Supaya web admin cepat pindah halaman.** Database Neon ada di Ohio, jadi tiap query terasa lambat dari Indonesia. Web admin
+menyimpan data terakhir di browser selagi pindah halaman (halaman berikutnya langsung tampil, lalu disegarkan diam-diam),
+menampilkan kerangka seketika lewat `loading.tsx`, dan backend menyimpan sesi dan keramaian di memori beberapa detik.
+Untuk demo, paling cepat pakai `npm run build` lalu `npm start` (tanpa kompilasi per halaman seperti mode dev), dan
+pindahkan database ke Neon region **Singapore**.
+
 ## Aplikasi Mobile (Flutter)
 
 Butuh Flutter SDK 3.4x atau lebih baru.
@@ -76,7 +111,7 @@ Coba riwayat dengan nomor contoh `081234567890`.
 | Tentang | `screens/about_screen.dart` | Foto besar dengan panel kaca, carousel daya tarik, info jam buka, harga tiket, parkir, pembayaran |
 | Onboarding | `screens/onboarding_screen.dart` | 3 halaman yang bisa digeser (PageView), pindah sendiri tiap 3 detik (titik aktif terisi sebagai penanda waktu, berhenti di halaman terakhir), tombol Kembali/Lanjut, Lewati |
 | Beranda | `screens/home_tab.dart` | Header gelap dengan hero keramaian (angka persen besar), menu cepat AI Photo / Ulasan / Tentang, carousel foto (5 foto, teks berbeda), grafik batang jumlah pengunjung per jam |
-| Chatbot Tanya Sira | `widgets/floating_chat.dart` | Gelembung kaca mengambang di Beranda, bisa digeser ke mana saja; diketuk membesar jadi panel chat kaca (bukan layar penuh) |
+| Chatbot Tanya Sira | `widgets/floating_chat.dart`, `data/chat_controller.dart` | Gelembung kaca mengambang di Beranda, bisa digeser; diketuk membesar jadi panel chat. Dua mode: **Jawab cepat** (FAQ pengelola, lalu AI dari data Sumber Sira) dan **Tanya pengelola** (dibalas manusia, lebih lambat, balasan muncul di chat) |
 | Tiket & Booking | `screens/tickets_tab.dart`, `widgets/booking_section.dart` | Tiga segmen: Tiket Masuk (beli tiket), Sewa & Wahana (jam selang 1 jam, daftar wahana dari mock JSON `assets/data/wahana.json`, total dan Lanjut Booking mengambang), Riwayat (tiket dan invoice per nomor WhatsApp) |
 | Beli Tiket Masuk | `screens/ticket_form_screen.dart` | Jumlah pengunjung, jam datang, parkir, nama, WhatsApp (divalidasi), bayar QRIS (sheet) atau tunai |
 | E-Tiket (hasil input) | `screens/eticket_screen.dart` | QR tiket, status, detail, kirim e-tiket ke WhatsApp, simulasi scan petugas |
@@ -85,7 +120,7 @@ Coba riwayat dengan nomor contoh `081234567890`.
 | Booking Berhasil & Invoice | `screens/invoice_screen.dart` | QR kode booking, rincian yang sudah dibayar, kirim invoice ke WhatsApp |
 | Galeri | `screens/gallery_tab.dart` | Foto utama besar lalu grid 2 kolom (GridView), ketuk untuk melihat layar penuh dan zoom |
 | Ulasan & Rating | `screens/reviews_screen.dart` | Rata-rata bintang, tulis ulasan (pilih bintang + validasi), ulasan terbaru |
-| AI Photo Studio | `screens/ai_photo_screen.dart` | Rancangan fitur AI (belum diimplementasikan) |
+| AI Photo Studio | `screens/ai_photo_screen.dart`, `utils/photo_enhance.dart`, `utils/photo_io.dart` | Pilih foto dari galeri atau kamera, dianalisis otomatis lalu warnanya diperbagus (natural, tidak berlebihan). Geser untuk membandingkan dengan foto asli, atur kekuatan dan gaya, lalu simpan atau bagikan. Diproses di HP |
 | Profil | `screens/profile_tab.dart` | Nomor WhatsApp tersimpan, pengingat jam sepi, info wisata, Google Maps |
 
 Alur booking: Tiket & Booking segmen Sewa & Wahana (pilih jam dan item), Lanjut Booking, Ringkasan Booking, Bayar Booking QRIS, Saya Sudah Bayar,
@@ -110,13 +145,23 @@ Di kode, bagian yang memakai materi kuliah diberi komentar penanda, misalnya `//
 | P5 | Navigator.push / pop, kirim data ke halaman lain, named route, navigasi tab | `main.dart` (routes + onGenerateRoute), `widgets/booking_section.dart` (kirim isi booking ke Checkout), `checkout_screen.dart` (kirim pesanan ke Bayar QRIS), `main_shell.dart` (tab bawah) |
 | P6 | Package dan plugin (google_fonts, intl, shared_preferences, url_launcher, qr_flutter), Form + TextFormField + validator | `utils/format.dart` (intl), `data/app_state.dart` (shared_preferences: riwayat per WhatsApp), `utils/launcher.dart` (url_launcher: Maps dan WhatsApp), `payment_screen.dart` (qr_flutter), `ticket_form_screen.dart`, `checkout_screen.dart`, `tickets_tab.dart` (Form) |
 
-## Rancangan Fitur AI
+## Fitur AI
 
-**AI Underwater Photo Studio.** Di lokasi belum ada fotografer, sementara foto bawah air biasanya kebiruan dan buram.
-Rencananya pengunjung mengunggah foto, lalu model *image enhancement* bawah air memperbaiki warna, mengurangi kabut air,
-dan menajamkan detail. Hasilnya tampil berdampingan dengan foto asli dan bisa dibagikan ke Galeri Komunitas (dimoderasi
-admin di halaman Galeri & Konten). Tahap UTS hanya menampilkan rancangan dan simulasi filter warna, belum memakai model atau API AI.
-Fitur AI lain yang sudah dirancang tampilannya: prediksi keramaian (AI Insight di admin) dan chatbot Tanya Sira.
+Hanya ada **dua** fitur AI. Grafik keramaian dan Insight di admin **bukan AI**: dihitung dari tiket yang discan petugas.
+
+**1. Chatbot Tanya Sira (aplikasi pengunjung).** Pengunjung memilih cara bertanya:
+
+- *Jawab cepat*: pertanyaan dicocokkan dulu dengan FAQ buatan pengelola (tanpa AI, instan). Kalau tidak ada, AI (Claude) menjawab
+  **hanya dari data Sumber Sira** (jam, harga, fasilitas, aturan, daftar wahana terbaru, keramaian saat ini). Di luar data, AI
+  mengaku tidak tahu dan pertanyaan bisa diteruskan ke pengelola. Tanpa kunci API, chatbot tetap jalan dari FAQ dan data bawaan.
+- *Tanya pengelola*: pertanyaan menunggu dibalas pengelola di halaman Chatbot & FAQ. Lebih lambat, jawabannya dari manusia, dan
+  bisa sekaligus disimpan jadi FAQ supaya pertanyaan serupa berikutnya dijawab cepat.
+
+**2. AI Photo Studio (aplikasi pengunjung).** Memperbagus foto dari galeri atau kamera seperti tombol Auto di aplikasi edit foto
+profesional, tetapi dibatasi supaya tidak berlebihan (tidak "alay"): foto dianalisis (sebaran warna, kecerahan, kontras, kepekatan warna),
+lalu rentang gelap-terang tiap warna diregangkan, warna yang berat sebelah diseimbangkan (mis. foto bawah air yang terlalu biru),
+kecerahan dan kontras disesuaikan, dan warna pucat dihidupkan. Ada tiga gaya (Alami, Cerah, Bawah air) dan slider kekuatan.
+Ini *computational photography* yang berjalan di HP (foto tidak diunggah), bukan model jaringan saraf.
 
 ## Pemenuhan Soal UTS
 
@@ -128,8 +173,8 @@ Fitur AI lain yang sudah dirancang tampilannya: prediksi keramaian (AI Insight d
 | Pengelolaan data / form input | `/admin/wahana` (tambah, edit, hapus), `/admin/faq`, `/admin/tiket` | `ticket_form_screen.dart`, `checkout_screen.dart`, `reviews_screen.dart` |
 | Halaman hasil input | Tabel ikut berubah setelah aksi | `eticket_screen.dart`, `invoice_screen.dart`, `tickets_tab.dart` |
 | Navigasi dan validasi | Sidebar, redirect login, validasi form | Named routes, tab bawah, validasi nama dan WhatsApp |
-| Data | Data contoh + `localStorage` | Data contoh + mock JSON |
-| Rancangan AI | Lihat bagian Rancangan Fitur AI | Layar AI Photo Studio |
+| Data | Dari backend (tiket, keramaian, chat, wahana) + data contoh untuk booking, galeri, ulasan | Dari backend (tiket, keramaian, chat, wahana) + data contoh bila server mati |
+| AI | Menjawab dan membalas chatbot di Chatbot & FAQ | Chatbot Tanya Sira dan AI Photo Studio (lihat bagian Fitur AI) |
 
 ## Screenshot
 
@@ -169,12 +214,12 @@ Ekspor desain Figma lengkap ada di folder `desain/`.
 |---|---|
 | `/admin/login` | Masuk admin. Semua halaman `/admin` lain wajib login, tombol keluar ada di kartu profil sidebar |
 | `/admin/akun` | Akun & Sesi: profil, hak akses, daftar sesi login aktif milik akun ini, cabut sesi perangkat lain |
-| `/admin` | Dashboard Overview (kartu ringkasan, grafik batang pill beranimasi, Insight AI, booking masuk, heatmap keramaian seminggu, tiket online hari ini, wahana terpopuler, pendapatan 7 hari) |
+| `/admin` | Dashboard Overview (kartu ringkasan, grafik batang pill beranimasi, ringkasan hari ini, booking masuk, heatmap keramaian seminggu, tiket online hari ini, wahana terpopuler, pendapatan 7 hari). Angka keramaian dan tiket dari tiket yang discan |
 | `/admin/booking` | Booking Sewa & Wahana (filter, cari lewat kotak cari di header, detail booking, konfirmasi/tolak) |
 | `/admin/tiket` | Tiket & Check-in (tambahan): scan kode tiket di pintu masuk, daftar tiket hari ini, check-in dan keluar |
-| `/admin/insight` | AI Insight (grafik area prediksi, ringkasan AI, donat sentimen, batang keluhan, ulasan terbaru) |
+| `/admin/insight` | Insight Keramaian (grafik area sepanjang hari yang naik saat tiket discan masuk dan turun saat keluar, ringkasan hari, puncak per jam, rincian tiket, pola 7 hari, pilih tanggal, unduh CSV). Tanpa AI |
 | `/admin/galeri` | Galeri & Konten (moderasi foto, urut terbaru/terlama, tampilan grid atau daftar) |
-| `/admin/faq` | Chatbot & FAQ (tambah, edit, hapus, jawab pertanyaan pengunjung) |
+| `/admin/faq` | Chatbot & FAQ (kelola FAQ jawaban cepat tanpa AI, balas pertanyaan pengunjung yang menunggu pengelola, simpan jawaban jadi FAQ, statistik jawaban otomatis) |
 | `/admin/wahana` | Wahana & Harga (filter kategori, tambah, edit, hapus) |
 
 Tampilan admin mengikuti desain admin terbaru di Figma: sidebar berupa kartu putih yang melayang, menu aktif
@@ -183,15 +228,15 @@ baris tabel membulat, dan status berbentuk pill. Warnanya tetap dua hijau yang s
 
 ### Tiket online dan Live Crowd
 
-Angka Live Crowd dihitung dari tiket masuk online: jumlah orang dari tiket yang sudah discan di pintu masuk dan
-belum keluar, dibagi kapasitas 300 orang (di bawah 40% Sepi, sampai 75% Sedang, di atasnya Ramai).
-Karena belum ada backend, web admin menyimpan tiket di `localStorage` browser (`src/lib/tiket-store.ts`) dan aplikasi
-Flutter menyimpan data contoh di memori, sedangkan tiket dan booking yang dibeli lewat aplikasi disimpan di perangkat
-dengan `shared_preferences` dan dikelompokkan per nomor WhatsApp (`mobile/lib/data/app_state.dart`).
+Angka Live Crowd dihitung dari tiket masuk online: jumlah orang dari tiket yang sudah **discan petugas** di pintu masuk dan
+belum keluar, dibagi kapasitas 300 orang (di bawah 40% Sepi, sampai 75% Sedang, di atasnya Ramai). Hanya tiket yang berlaku
+hari itu (WIB) yang dihitung. Check-in menaikkan grafik, check-out atau keluar menurunkannya.
 
-Cara demo di web admin: buka `/admin/tiket`, ketik kode tiket yang masih "Belum masuk" (mis. `1036`) lalu tekan Check-in.
-Angka di halaman Tiket dan dashboard langsung naik. Tombol "Kembalikan data contoh hari ini" mengembalikan data awal.
-Di aplikasi Flutter: beli tiket, lalu tekan "Simulasi scan petugas" di e-tiket.
+Alurnya: pengunjung membeli tiket di aplikasi (`POST /tickets`, harga dihitung server) lalu tiketnya muncul di `/admin/tiket`.
+Petugas menekan Check-in (atau mengetik kode, mis. `1036`), dan angka di web admin, widget di halaman login, dan Beranda
+aplikasi ikut naik. E-tiket di aplikasi memeriksa statusnya tiap 6 detik, jadi langsung berubah jadi "Di dalam" begitu discan.
+Data web admin ada di `src/lib/tiket-store.ts` (mengambil dari backend tiap 5 detik, dan tombol Check-in langsung mengubah tampilan
+sebelum jawaban server datang). Untuk mencoba grafik tanpa menunggu pengunjung sungguhan: `npm run seed:demo` di backend.
 
 ## Autentikasi & Otorisasi Admin (Pertemuan 9)
 
@@ -201,11 +246,11 @@ akun itu (peran admin atau petugas).
 
 | Materi | Penerapan | Letak |
 |---|---|---|
-| Hash password | Password disimpan sebagai hash scrypt + salt, dibandingkan dengan `timingSafeEqual` | `src/lib/auth/users.ts` |
-| Session berbasis server | Server menyimpan sesi, browser hanya memegang ID acak (yang disimpan server adalah hash-nya). ID baru setiap login, sesi bisa dicabut seketika | `src/lib/auth/session.ts` |
-| Cookie aman | `HttpOnly`, `Secure`, `SameSite=Lax`. "Ingat saya" = 7 hari, tanpa itu cookie hilang saat browser ditutup (maks 8 jam) | `createSession()` di `session.ts` |
-| Login lewat Server Action | Validasi isian, batas 5 kali salah lalu dikunci 1 menit, pesan error sama untuk email/password salah | `src/lib/auth/login.ts`, `actions.ts`, `src/app/admin/login/` |
-| Login lewat API (token) | `POST /api/auth/login` dengan body JSON email + password mengembalikan token `Bearer`. Token dipakai di header `Authorization: Bearer <token>` (mis. `GET /api/admin/me`), `POST /api/auth/logout` mencabutnya. Validasi dan batas percobaan sama dengan form | `src/app/api/auth/`, `src/lib/auth/login.ts`, `session.ts` |
+| Hash password | Password disimpan di database backend sebagai hash scrypt + salt, dibandingkan dengan `timingSafeEqual` | repo backend: `src/lib/password.ts` |
+| Session berbasis server | Backend menyimpan sesi di database, browser hanya memegang ID acak (yang disimpan adalah hash-nya). ID baru setiap login, sesi bisa dicabut seketika | repo backend: `src/routes/auth.ts`, `src/middleware/auth.ts` |
+| Cookie aman | `HttpOnly`, `Secure`, `SameSite=Lax`. "Ingat saya" = 7 hari, tanpa itu cookie hilang saat browser ditutup (maks 8 jam). Token dari backend disimpan ke cookie oleh Next.js | `loginAction()` di `actions.ts` |
+| Login lewat Server Action | Validasi isian, batas 5 kali salah lalu dikunci 1 menit, password dicek backend, pesan error sama untuk email/password salah | `src/lib/auth/login.ts`, `actions.ts`, `src/app/admin/login/` |
+| Login lewat API (token) | `POST /api/auth/login` dengan body JSON email + password diteruskan ke backend dan mengembalikan token `Bearer` (token sesi dari backend). Token dipakai di header `Authorization: Bearer <token>` (mis. `GET /api/admin/me`), `POST /api/auth/logout` mencabutnya di backend. Validasi dan batas percobaan sama dengan form | `src/app/api/auth/`, `src/lib/auth/login.ts` |
 | Validasi email | Wajib satu tanda @ dan ada titik setelah @, hanya huruf, angka, titik, garis bawah, dan tanda hubung. Karakter seperti `( : & " '` dan spasi ditolak. Dicek di browser (pesan di bawah kolom email, form tidak dikirim) dan dicek ulang di server (form maupun API, API membalas `400`) | `src/lib/validation/email.ts`, `LoginForm.tsx`, `login.ts` |
 | proxy.ts | Cek kasar: tanpa cookie sesi diarahkan ke `/admin/login?next=...`. Cookie ada belum tentu valid | `src/proxy.ts` |
 | DAL (Data Access Layer) | Satu pintu cek sesi dan peran: `server-only`, `cache()`, data admin dikirim tanpa hash password | `src/lib/auth/dal.ts` |
@@ -213,7 +258,7 @@ akun itu (peran admin atau petugas).
 | RBAC | Peran `admin` dan `petugas` dengan daftar izin. Menu sidebar disaring sesuai peran (hanya tampilan) | `src/lib/auth/roles.ts`, `Sidebar.tsx` |
 | 401 vs 403 | Belum login: dialihkan ke login, API membalas 401. Sudah login tapi tidak berizin: halaman 403 (`forbidden()`) | `dal.ts`, `(panel)/forbidden.tsx`, `src/app/api/admin/me/route.ts` |
 | Server Action khusus admin | Tambah/edit/hapus wahana: autentikasi, otorisasi, validasi, ubah data, revalidasi. Ditolak = `FORBIDDEN` bertipe | `src/app/admin/(panel)/wahana/actions.ts` |
-| Query terbatas (cegah IDOR) | Daftar dan pencabutan sesi hanya untuk sesi milik akun yang login; sesi akun lain dianggap tidak ada | `listSessionsOf()` dan `revokeSessionOf()` di `session.ts` |
+| Query terbatas (cegah IDOR) | Daftar dan pencabutan sesi hanya untuk sesi milik akun yang login; sesi akun lain dianggap tidak ada | repo backend: `/auth/sessions` di `src/routes/auth.ts` |
 | Open redirect | `?next=` hanya boleh halaman di dalam `/admin` | `src/lib/auth/redirect.ts` |
 
 Cara mencoba:
@@ -225,12 +270,13 @@ Cara mencoba:
 5. DevTools, tab Application, lalu Cookies: cookie `ss_admin_session` bertanda HttpOnly, Secure, SameSite Lax.
 6. Buka `/api/admin/me` tanpa login: `401`. Halaman Akun & Sesi: cabut sesi perangkat lain, perangkat itu langsung keluar.
 7. Di form login, ketik email seperti `admin@sumbersira` atau `ad(min)@sumbersira.id`: pesan muncul di bawah kolom email dan form tidak dikirim.
-8. Postman: jalankan `npm run dev`, lalu jalankan request berikut berurutan (koleksi Postman disimpan lokal di folder `postman/`, folder itu tidak ikut di-commit):
+8. Postman: jalankan backend dan web admin (lihat Menjalankan bersama backend), isi variabel `baseUrl` dengan alamat web (mis. `http://localhost:3001`),
+   lalu jalankan request berikut berurutan (koleksi Postman disimpan lokal di folder `postman/`, folder itu tidak ikut di-commit):
    login dapat token (`200`), data admin pakai token (`200`), tanpa token (`401`), akun salah (`401`), empat email salah format (`400`),
    logout (`200`), lalu token lama ditolak (`401`). Token hasil login otomatis disimpan ke variabel `{{token}}`.
 
-Catatan tahap ini: sesi dan data wahana disimpan di memori server (hilang bila server dimatikan) karena belum ada database.
-Login Google (OAuth) dan MFA belum dibuat karena butuh akun penyedia (Google Cloud) dan database.
+Catatan tahap ini: akun, sesi, dan data wahana disimpan di database backend (Neon), jadi tidak hilang saat web dimatikan.
+Backend belum membatasi percobaan login (batas 5 kali salah dipasang di Next.js), dan login Google (OAuth) serta MFA belum dibuat karena butuh akun penyedia (Google Cloud).
 
 ## Syarat dosen dan letaknya
 
@@ -238,7 +284,7 @@ Login Google (OAuth) dan MFA belum dibuat karena butuh akun penyedia (Google Clo
 |---|---|
 | Gunakan Next.js | Next.js 16 App Router + TypeScript (`src/app`) |
 | UTS fokus frontend web, minimal 3 slide (admin) | 6 halaman admin di `src/app/admin` |
-| Animasi grafik di admin | `src/components/charts/`: batang pill tumbuh dari bawah (`BarChart`), garis prediksi digambar kiri ke kanan (`AreaChart`), donat sentimen muncul (`DonutChart`), batang keluhan mengisi (`ProgressBar`) |
+| Animasi grafik di admin | `src/components/charts/`: batang pill tumbuh dari bawah (`BarChart`), garis keramaian digambar kiri ke kanan (`AreaChart`), donat rincian pembayaran muncul (`DonutChart`), batang parkir mengisi (`ProgressBar`) |
 | Introduction web | `src/app/(intro)/page.tsx` |
 | Tiap section halaman jadi file sendiri (Pertemuan 10) | Folder `components/` di dalam folder tiap halaman, `page.tsx` hanya menyusun section |
 
@@ -260,16 +306,19 @@ src/app/               Halaman (App Router). Tiap halaman punya folder component
   admin/(panel)/       Halaman admin yang wajib login: layout sidebar, forbidden.tsx (403), tiap page.tsx cek izin lewat DAL
     (dashboard)/       Dashboard, alamat /admin
       page.tsx
-      components/      StatRingkasan, LiveCrowdMonitor, InsightAi, BookingMasuk, PolaKeramaian, TiketHariIni,
-                       WahanaPopuler, PendapatanMingguan, LiveCrowdStat, Today
+      components/      StatRingkasan, LiveCrowdMonitor, RingkasanHariIni, BookingMasuk, TiketHariIni,
+                       WahanaPopuler, PendapatanMingguan, LiveCrowdStat, TiketTerjualStat, Today
     booking/components/  BookingView (data + pilihan), StatBooking, DaftarBooking, DetailBooking
     tiket/components/    TiketView, StatTiket, ScanTiket, CheckinTerbaru, DaftarTiket
-    insight/components/  CrowdForecast, RingkasanAi, SentimenUlasan, KeluhanTeratas, UlasanTerbaru
+    insight/components/  InsightView, GrafikKeramaian, RingkasanHari, PuncakPerJam, RincianTiket
     galeri/components/   GaleriView, StatGaleri, ToolbarGaleri, FotoGrid, FotoList, AiBadge, AksiFoto
-    faq/components/      FaqView, StatFaq, DaftarFaq, BelumTerjawab, FormFaq
+    faq/components/      FaqView, StatFaq, AlurJawaban, DaftarFaq, BelumTerjawab, FormFaq
     wahana/components/   WahanaView, PesanAkses, StatWahana, DaftarWahana, FormWahana (Server Action di wahana/actions.ts)
     akun/components/     Profil, SesiLogin, SesiList
   api/admin/me/        Route Handler contoh yang dilindungi (401 bila belum login atau token tidak berlaku)
+  api/admin/[...path]/ Penerus ke backend untuk tiket, insight, dan chat (sesi login ikut diteruskan)
+  api/crowd/           Live Crowd publik untuk widget halaman login
+  admin/(panel)/loading.tsx  Kerangka yang tampil seketika saat pindah halaman
   api/auth/            login (token Bearer untuk Postman) dan logout lewat API
 src/proxy.ts           Cek kasar cookie sesi sebelum masuk /admin (dulu middleware.ts)
 src/components/        Komponen yang dipakai banyak halaman
@@ -277,9 +326,13 @@ src/components/        Komponen yang dipakai banyak halaman
   admin/               AdminShell, Sidebar (menu sesuai peran), ui.tsx (AdminHeader, Card, StatCard, ...)
   Logo.tsx              Logo Sumber Sira (lingkaran hijau tua: tetes air, percikan, riak, tulisan SUMBER SIRA), juga di src/app/icon.svg
   WahanaIcon.tsx        Ikon per wahana
-src/data/              Data dummy (wahana.ts, dummy.ts). Tahap backend: ganti dengan data API
+src/data/              Data contoh yang belum ada backend-nya (booking, galeri, pendapatan; wahana.ts, dummy.ts)
 src/lib/
-  tiket-store.ts       Tiket masuk online + angka Live Crowd (disimpan di localStorage)
+  tiket-store.ts       Tiket masuk online + angka Live Crowd (dari backend, diperbarui berkala)
+  crowd-store.ts       Live Crowd publik untuk halaman login
+  insight-store.ts     Data grafik Insight dan pola 7 hari
+  chat-store.ts        FAQ dan pertanyaan chatbot
+  live/                Penyimpan data berkala (poll-store) dan pemanggil API (http)
   auth/                Autentikasi & otorisasi admin: users.ts (hash password), session.ts (sesi + cookie),
                        dal.ts (Data Access Layer), roles.ts (peran dan izin), actions.ts (login, logout, cabut sesi),
                        login.ts (alur login yang sama untuk form dan API)
@@ -332,12 +385,12 @@ src/lib/
 
 | Fitur | Sekarang (frontend) | Tahap backend |
 |---|---|---|
-| Data (wahana, booking, keramaian, FAQ, ulasan, galeri) | Konstanta di `src/data/` | Ambil dari API/database |
+| Data (booking, ulasan, galeri, pendapatan) | Konstanta di `src/data/` (wahana, tiket, keramaian, dan FAQ sudah dari backend) | Ambil dari API/database |
 | Booking & pembayaran | Kode booking dibuat di browser, pembayaran tidak diproses | Simpan booking di server. QRIS lewat payment gateway |
-| AI Photo enhance | Filter warna sebagai simulasi (aplikasi Flutter) | Kirim foto ke layanan AI, tampilkan hasilnya |
-| Tiket online & Live Crowd | Tiket disimpan di `localStorage` (web admin) dan di perangkat lewat `shared_preferences` (Flutter), pembayaran QRIS disimulasikan | Simpan tiket di database, scan QR lewat aplikasi petugas, Live Crowd dihitung server |
+| AI Photo enhance | Sudah jalan di HP (analisis dan perbaikan warna otomatis). Bukan model jaringan saraf | Opsional: Claude vision untuk menyarankan parameter, simpan hasil ke Galeri Komunitas |
+| Tiket online & Live Crowd | Sudah dari backend. Petugas memindai lewat web admin (ketik atau tempel kode); pembayaran QRIS masih disimulasikan | Scan QR dengan kamera lewat aplikasi petugas, pembayaran QRIS lewat payment gateway |
 | Riwayat per WhatsApp | Dicari dari data di perangkat, e-tiket dibuka di WhatsApp lewat tautan `wa.me` | Server mengirim e-tiket otomatis lewat WhatsApp Business API, riwayat dibuka setelah verifikasi kode OTP ke nomor itu |
-| Login admin | Akun dicek di server (hash scrypt), sesi di memori server, cookie HttpOnly + Secure + SameSite, peran admin/petugas | Akun dan sesi disimpan di database/Redis, tambah login Google (OAuth) dan MFA untuk akun admin |
+| Login admin | Sudah lewat backend: akun (hash scrypt) dan sesi di database, cookie HttpOnly + Secure + SameSite, peran admin/petugas | Batas percobaan login pindah ke backend, tambah login Google (OAuth) dan MFA untuk akun admin |
 
 **Keamanan untuk tahap backend:**
 

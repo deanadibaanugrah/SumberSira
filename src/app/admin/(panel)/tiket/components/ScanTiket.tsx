@@ -15,10 +15,11 @@ type ScanTiketProps = {
   onScan: (e: FormEvent<HTMLFormElement>) => void;
   inputRef: RefObject<HTMLInputElement>;
   hasil: { ok: boolean; message: string } | null;
+  sibuk?: boolean;
 };
 
 // Kartu scan tiket di pintu masuk: form kode tiket, pesan hasil scan, dan kapasitas terisi (angka Live Crowd).
-export default function ScanTiket({ tiket, kode, onKode, onScan, inputRef, hasil }: ScanTiketProps) {
+export default function ScanTiket({ tiket, kode, onKode, onScan, inputRef, hasil, sibuk = false }: ScanTiketProps) {
   return (
     <Card>
       <CardTitle sub="Ketik atau scan kode di e-tiket pengunjung, mis. TK-1043"
@@ -36,7 +37,7 @@ export default function ScanTiket({ tiket, kode, onKode, onScan, inputRef, hasil
           <input ref={inputRef} value={kode} onChange={(e) => onKode(e.target.value)} placeholder="TK-1043" autoComplete="off"
                  className="w-full bg-transparent font-mono text-[15px] uppercase tracking-wider outline-none placeholder:normal-case placeholder:tracking-normal placeholder:text-ink/40" />
         </label>
-        <PrimaryButton type="submit" icon={LogIn}>Check-in</PrimaryButton>
+        <PrimaryButton type="submit" icon={LogIn} disabled={sibuk} aria-busy={sibuk}>{sibuk ? "Memeriksa..." : "Check-in"}</PrimaryButton>
       </form>
       {/* Pesan hasil scan: hijau kalau berhasil, merah kalau ditolak */}
       {hasil && (

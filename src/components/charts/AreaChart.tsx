@@ -1,6 +1,8 @@
-// Grafik area dengan garis halus untuk "AI Crowd Forecast" di admin.
+// Grafik area dengan garis halus untuk grafik keramaian sepanjang hari di admin (Insight).
 // Animasi: garis digambar dari kiri ke kanan, titik muncul satu per satu, pita jam ramai memudar masuk.
 // data: [{ label: "08", value: 10 }] dalam persen  ·  band: [indeksAwal, indeksAkhir] (boleh pecahan, mis. 1.5).
+// dots: "all" (titik di setiap data) atau "peak" (hanya di titik tertinggi, untuk data yang rapat).
+// label boleh kosong ("") untuk titik yang tidak perlu tulisan di sumbu (mis. tiap 30 menit, hanya jam bulat yang diberi label).
 // Ukuran kanvas grafik dan jarak tepi (dalam satuan viewBox SVG).
 const W = 700;
 const H = 316;
@@ -23,10 +25,10 @@ function smoothPath(points) {
   }, "");
 }
 
-// Komponen grafik area prediksi keramaian di halaman AI Insight.
-export default function AreaChart({ data, band = null, max = 100, ticks = [0, 25, 50, 75, 100], tooltip }) {
-  // Mengubah urutan data dan nilai persen menjadi posisi x dan y di dalam SVG.
-  const x = (i) => LEFT + (i * (W - LEFT - RIGHT)) / (data.length - 1);
+// Komponen grafik area keramaian di halaman Insight.
+export default function AreaChart({ data, band = null, max = 100, ticks = [0, 25, 50, 75, 100], tooltip, ariaLabel = "Grafik keramaian", dots = "all" }) {
+  // Mengubah urutan data dan nilai persen menjadi posisi x dan y di dalam SVG (butuh minimal 2 titik).
+  const x = (i) => LEFT + (i * (W - LEFT - RIGHT)) / Math.max(data.length - 1, 1);
   const y = (v) => AXIS - (v / max) * (AXIS - TOP);
   const points = data.map((d, i) => [x(i), y(d.value)]);
   const line = smoothPath(points);
@@ -38,7 +40,7 @@ export default function AreaChart({ data, band = null, max = 100, ticks = [0, 25
   return (
     <div className="relative">
       <svg viewBox={`0 0 ${W} ${H}`} className="h-auto w-full overflow-visible" role="img"
-           aria-label={`Prediksi keramaian: ${data.map((d) => `${d.label}.00 ${d.value}%`).join(", ")}`}>
+           aria-label={`${ariaLabel}: ${data.map((d) => `${d.label || "-"} ${d.value}%`).join(", ")}`}>
         {/* Pita sorotan jam ramai */}
         {band && (
           <rect x={x(band[0])} y={y(max)} width={x(band[1]) - x(band[0])} height={AXIS - y(max)} rx="16"
@@ -56,13 +58,13 @@ export default function AreaChart({ data, band = null, max = 100, ticks = [0, 25
         <path d={line} fill="none" stroke="#1b4332" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"
               pathLength="1" strokeDasharray="1" strokeDashoffset="1" style={{ animation: "draw-line 1.4s ease-out 0.15s forwards" }} />
         {/* Titik di setiap jam, muncul satu per satu */}
-        {points.map(([cx, cy], i) => (
-          <circle key={data[i].label} cx={cx} cy={cy} r={i === peakIndex ? 6 : 5}
+        {points.map(([cx, cy], i) => (dots === "all" || i === peakIndex) && (
+          <circle key={i} cx={cx} cy={cy} r={i === peakIndex ? 6 : 5}
                   fill={i === peakIndex ? "#1b4332" : "#ffffff"} stroke={i === peakIndex ? "#ffffff" : "#1b4332"} strokeWidth="2.5"
-                  className="animate-pop" style={{ animationDelay: `${0.2 + i * 0.12}s`, transformOrigin: `${cx}px ${cy}px` }} />
+                  className="animate-pop" style={{ animationDelay: `${Math.min(0.2 + i * 0.12, 1.4)}s`, transformOrigin: `${cx}px ${cy}px` }} />
         ))}
-        {data.map((d, i) => (
-          <text key={d.label} x={x(i)} y={H - 4} textAnchor="middle" fill="rgba(23, 35, 33, 0.6)"
+        {data.map((d, i) => d.label && (
+          <text key={i} x={x(i)} y={H - 4} textAnchor="middle" fill="rgba(23, 35, 33, 0.6)"
                 style={{ fontFamily: "var(--font-mono)", fontSize: 12 }}>
             {d.label}
           </text>

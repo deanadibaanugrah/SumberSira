@@ -145,8 +145,7 @@ class TintedButton extends StatelessWidget {
 
   final String label;
   final IconData icon;
-  // null = tombol nonaktif (mis. saat foto sedang diproses).
-  final VoidCallback? onPressed;
+  final VoidCallback onPressed;
   final double height;
 
   @override
@@ -381,15 +380,13 @@ class StatusChip extends StatelessWidget {
 
 // Isi bar bawah form pemesanan (kaca mengambang): total di kiri, tombol aksi kaca Hijau Tua di kanan.
 class TotalBar extends StatelessWidget {
-  const TotalBar({super.key, required this.label, required this.amount, required this.button, required this.onPressed, this.buttonWidth = 190, this.loading = false});
+  const TotalBar({super.key, required this.label, required this.amount, required this.button, required this.onPressed, this.buttonWidth = 190});
 
   final String label;
   final int amount;
   final String button;
   final VoidCallback onPressed;
   final double buttonWidth;
-  // True saat menunggu server: tombol menampilkan loading dan tidak bisa ditekan dua kali.
-  final bool loading;
 
   @override
   Widget build(BuildContext context) {
@@ -403,7 +400,7 @@ class TotalBar extends StatelessWidget {
           ]),
         ),
         const SizedBox(width: 12),
-        SizedBox(width: buttonWidth, child: PrimaryButton(label: button, glass: true, loading: loading, onPressed: onPressed)),
+        SizedBox(width: buttonWidth, child: PrimaryButton(label: button, glass: true, onPressed: onPressed)),
       ]),
     );
   }

@@ -4,7 +4,7 @@ import { ScanLine } from "lucide-react";
 import { useMemo, useRef, useState } from "react";
 
 import { AdminHeader, PrimaryButton } from "@/components/admin/ui";
-import { checkIn, useTiket } from "@/lib/tiket-store";
+import { checkIn, resetDemo, useTiket } from "@/lib/tiket-store";
 
 import CheckinTerbaru from "./CheckinTerbaru";
 import DaftarTiket from "./DaftarTiket";
@@ -22,7 +22,6 @@ export default function TiketView() {
   const [query, setQuery] = useState("");
   const [kode, setKode] = useState("");
   const [hasil, setHasil] = useState(null); // { ok, message }
-  const [sibuk, setSibuk] = useState(false); // sedang menunggu jawaban server untuk scan terakhir
   const input = useRef(null);
 
   // Tiket yang tampil di tabel: cocok dengan filter dan pencarian (nama atau kode), urut dari yang terbaru dibeli.
@@ -30,18 +29,15 @@ export default function TiketView() {
     const q = query.trim().toLowerCase();
     return [...tiket.tickets]
       .filter((t) => (filter === "Semua" || t.status === filter) && (!q || t.name.toLowerCase().includes(q) || t.code.toLowerCase().includes(q)))
-      .sort((a, b) => b.boughtAtMs - a.boughtAtMs);
+      .sort((a, b) => b.boughtAt.localeCompare(a.boughtAt));
   }, [tiket.tickets, filter, query]);
 
   // Form scan: check-in kode yang diketik, tampilkan hasilnya, kosongkan kolom, lalu fokus lagi untuk scan berikutnya.
-  const scan = async (e) => {
+  const scan = (e) => {
     e.preventDefault();
-    if (!kode.trim() || sibuk) return;
-    const dipindai = kode;
+    if (!kode.trim()) return;
+    setHasil(checkIn(kode));
     setKode("");
-    setSibuk(true);
-    setHasil(await checkIn(dipindai));
-    setSibuk(false);
     input.current?.focus();
   };
   // Tombol Scan Tiket di atas: arahkan kursor ke kolom kode tiket.
@@ -59,8 +55,8 @@ export default function TiketView() {
       <StatTiket tiket={tiket} />
 
       <div className="mt-5 grid gap-5 xl:grid-cols-[736fr_380fr]">
-        <ScanTiket tiket={tiket} kode={kode} onKode={setKode} onScan={scan} inputRef={input} hasil={hasil} sibuk={sibuk} />
-        <CheckinTerbaru recent={tiket.recent} ready={tiket.ready} onRefresh={() => { void tiket.refresh(); setHasil(null); }} />
+        <ScanTiket tiket={tiket} kode={kode} onKode={setKode} onScan={scan} inputRef={input} hasil={hasil} />
+        <CheckinTerbaru recent={tiket.recent} onReset={() => { resetDemo(); setHasil(null); }} />
       </div>
 
       <DaftarTiket tiket={tiket} visible={visible} filter={filter} onFilter={setFilter}

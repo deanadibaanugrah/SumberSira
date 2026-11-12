@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:qr_flutter/qr_flutter.dart';
@@ -15,35 +13,12 @@ import '../widgets/common.dart';
 import '../widgets/crowd_widgets.dart';
 
 // Halaman hasil input: e-tiket berisi QR kode tiket (hero), status, dan detail pesanan.
-// Selama halaman terbuka, status tiket diperiksa ke server tiap 6 detik, jadi begitu petugas memindai
-// QR di pintu masuk, tampilan langsung berubah jadi "Di dalam".
-class ETicketScreen extends StatefulWidget {
+class ETicketScreen extends StatelessWidget {
   const ETicketScreen({super.key, required this.code});
 
   // [P5 Kirim data antar halaman] Kode tiket diterima lewat constructor dari halaman sebelumnya.
+
   final String code;
-
-  @override
-  State<ETicketScreen> createState() => _ETicketScreenState();
-}
-
-class _ETicketScreenState extends State<ETicketScreen> {
-  Timer? _poll;
-
-  String get code => widget.code;
-
-  @override
-  void initState() {
-    super.initState();
-    AppState.instance.refreshTicket(code);
-    _poll = Timer.periodic(const Duration(seconds: 6), (_) => AppState.instance.refreshTicket(code));
-  }
-
-  @override
-  void dispose() {
-    _poll?.cancel();
-    super.dispose();
-  }
 
   // Pesan di bawah QR sesuai status tiket.
   static const _messages = {
@@ -144,8 +119,7 @@ class _ETicketScreenState extends State<ETicketScreen> {
                 ]),
               ),
               const SizedBox(height: 20),
-              // Simulasi hanya untuk tiket contoh di perangkat. Tiket asli dipindai petugas lewat web admin.
-              if (t.status == TicketStatus.waiting && !t.synced) ...[
+              if (t.status == TicketStatus.waiting) ...[
                 TintedButton(label: 'Simulasi scan petugas (demo)', icon: CupertinoIcons.qrcode_viewfinder, onPressed: () => AppState.instance.checkIn(t.code)),
                 const SizedBox(height: 10),
               ],

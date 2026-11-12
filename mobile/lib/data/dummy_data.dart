@@ -9,8 +9,8 @@ class DummyData {
   // Pilihan jam booking sewa dan wahana, selang 1 jam (format "08-09" ditampilkan "08.00 - 09.00").
   static const bookingSlots = ['08-09', '09-10', '10-11', '11-12', '12-13', '13-14', '14-15', '15-16'];
 
-  // Data contoh jumlah pengunjung per jam (kapasitas 300 orang) untuk grafik di Beranda.
-  // Hanya dipakai bila aplikasi tidak terhubung ke server; kalau terhubung, grafiknya dari tiket yang discan.
+  // Prediksi jumlah pengunjung per jam hari ini (kapasitas 300 orang), untuk grafik di Beranda.
+  // Sama dengan prediksi per jam di web admin (CROWD_FORECAST, persen x 300).
   static const hourlyForecast = [
     ('08', 30), ('09', 60), ('10', 135), ('11', 225), ('12', 285),
     ('13', 270), ('14', 240), ('15', 120), ('16', 45),
@@ -21,7 +21,7 @@ class DummyData {
     (image: 'assets/images/hero-sawah.jpg', label: 'SUMBER SIRA', title: 'Kunjungan Jernih Tanpa Antre', text: 'Wisata mata air di tengah sawah Desa Putukrejo, Malang.'),
     (image: 'assets/images/onboarding-air-jernih.jpg', label: 'MATA AIR ALAMI', title: 'Air Jernih dari Sumber Asli', text: 'Berenang dan main air bareng ikan wader lokal.'),
     (image: 'assets/images/onboarding-kereta-sawah.jpg', label: 'WAHANA', title: 'Kereta Sawah & Wahana Seru', text: 'Sewa ban, ATV, dan flying fox lewat menu Tiket & Booking.'),
-    (image: 'assets/images/onboarding-bawah-air.jpg', label: 'AI PHOTO STUDIO', title: 'Foto Lebih Jernih dan Berwarna', text: 'Perbagus warna foto dari galeri HP secara otomatis.'),
+    (image: 'assets/images/onboarding-bawah-air.jpg', label: 'AI PHOTO STUDIO', title: 'Foto Bawah Air Lebih Jernih', text: 'Rencana fitur AI untuk memperbaiki warna foto bawah air.'),
     (image: 'assets/images/komunitas-2.jpg', label: 'TIKET ONLINE', title: 'Beli Tiket, Tanpa Antre', text: 'Rp5.000 per orang, tunjukkan QR di pintu masuk.'),
   ];
 

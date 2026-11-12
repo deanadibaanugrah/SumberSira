@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
 
@@ -6,16 +5,13 @@ import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../models/booking.dart';
-import '../models/live.dart';
 import '../models/review.dart';
 import '../models/ticket.dart';
 import '../utils/format.dart';
-import 'api_client.dart';
 import 'dummy_data.dart';
 
-// Penyimpanan data aplikasi. Tiket dan Live Crowd diambil dari backend; data contoh di bawah hanya tampil bila server
-// tidak terjangkau. Layar yang mendengarkan AppState otomatis diperbarui (ChangeNotifier) saat ada tiket baru,
-// booking baru, atau tiket discan petugas.
+// Penyimpanan data sederhana tanpa backend. Layar yang mendengarkan AppState
+// otomatis diperbarui (ChangeNotifier) saat ada tiket baru, booking baru, atau tiket discan.
 // Aplikasi pengunjung tidak memakai login: riwayat tiket dan booking dikelompokkan per nomor WhatsApp.
 class AppState extends ChangeNotifier {
   AppState._();
@@ -100,48 +96,10 @@ class AppState extends ChangeNotifier {
     return bookings.where((b) => nomorWa(b.whatsapp) == wa).toList().reversed.toList();
   }
 
-  // Live Crowd dari backend (tiket yang discan petugas). null = belum pernah berhasil diambil (server tidak terjangkau).
-  CrowdInfo? _crowd;
-  // Grafik per jam hari ini dari backend.
-  HourlyCrowd? hourly;
-  Timer? _liveTimer;
-  int _liveUsers = 0;
-
-  // True bila angka keramaian berasal dari server. False = data contoh di perangkat.
-  bool get isLive => _crowd != null;
-
   // Live Crowd = jumlah orang dari tiket yang sudah discan masuk, dibagi kapasitas.
-  // Dari server bila terhubung, kalau tidak dihitung dari data contoh.
-  int get inside => _crowd?.inside ?? tickets.where((t) => t.status == TicketStatus.inside).fold(0, (sum, t) => sum + t.people);
-  int get percent => _crowd?.percent ?? min(100, (inside / capacity * 100).round());
-  String get crowdLabel => _crowd?.label ?? labelFor(percent);
-
-  // Mengambil Live Crowd dan grafik per jam. Gagal diam-diam: data terakhir tetap dipakai.
-  Future<void> refreshCrowd() async {
-    try {
-      final result = await Future.wait([ApiClient.fetchCrowd(), ApiClient.fetchHourly()]);
-      _crowd = result[0] as CrowdInfo;
-      hourly = result[1] as HourlyCrowd;
-      notifyListeners();
-    } on ApiException {
-      // server tidak terjangkau: biarkan data terakhir
-    }
-  }
-
-  // Layar yang butuh data keramaian terbaru memanggil startLive saat tampil dan stopLive saat ditutup.
-  // Selama ada yang memakai, data diperbarui tiap 10 detik.
-  void startLive() {
-    if (++_liveUsers != 1) return;
-    refreshCrowd();
-    _liveTimer = Timer.periodic(const Duration(seconds: 10), (_) => refreshCrowd());
-  }
-
-  void stopLive() {
-    if (_liveUsers > 0 && --_liveUsers == 0) {
-      _liveTimer?.cancel();
-      _liveTimer = null;
-    }
-  }
+  int get inside => tickets.where((t) => t.status == TicketStatus.inside).fold(0, (sum, t) => sum + t.people);
+  int get percent => (inside / capacity * 100).round();
+  String get crowdLabel => labelFor(percent);
 
   // Label keramaian dari persen kapasitas: di bawah 40% Sepi, sampai 75% Sedang, di atasnya Ramai.
   static String labelFor(int percent) => percent < 40 ? 'Sepi' : (percent <= 75 ? 'Sedang' : 'Ramai');
@@ -166,50 +124,6 @@ class AppState extends ChangeNotifier {
     notifyListeners();
     _saveHistory();
     return ticket;
-  }
-
-  // Beli tiket lewat server. Harga dan kode ditentukan server, jadi tiket yang tampil sama dengan yang dilihat petugas.
-  // Melempar ApiException bila gagal (server tidak terjangkau atau isian ditolak).
-  Future<Ticket> buyTicketOnline({required String name, required String whatsapp, required int adults, required int kids, required Parking parking, PaymentMethod payment = PaymentMethod.qris, String arrival = ''}) async {
-    final ticket = await ApiClient.buyTicket(name: name, whatsapp: nomorWa(whatsapp), adults: adults, kids: kids, parking: parking, payment: payment, arrival: arrival);
-    _upsert(ticket);
-    notifyListeners();
-    _saveHistory();
-    refreshCrowd();
-    return ticket;
-  }
-
-  // Menambah tiket, atau mengganti yang kodenya sama.
-  void _upsert(Ticket ticket) {
-    final i = tickets.indexWhere((t) => t.code == ticket.code);
-    i >= 0 ? tickets[i] = ticket : tickets.add(ticket);
-  }
-
-  // Riwayat tiket satu nomor WhatsApp dari server (tanpa login). Hasilnya digabung ke daftar tiket di perangkat.
-  Future<void> syncHistory(String whatsapp) async {
-    final wa = nomorWa(whatsapp);
-    if (wa.isEmpty) return;
-    for (final t in await ApiClient.fetchTickets(wa)) {
-      _upsert(t);
-    }
-    notifyListeners();
-    _saveHistory();
-  }
-
-  // Memperbarui status satu tiket (mis. sudah discan petugas) dari server. Hanya untuk tiket yang tercatat di server.
-  Future<void> refreshTicket(String code) async {
-    final t = find(code);
-    if (t == null || !t.synced) return;
-    try {
-      final latest = await ApiClient.fetchTicketStatus(code);
-      if (latest.status == t.status && latest.checkInAt == t.checkInAt) return;
-      t.status = latest.status;
-      t.checkInAt = latest.checkInAt;
-      notifyListeners();
-      _saveHistory();
-    } on ApiException {
-      // server tidak terjangkau: tampilkan status terakhir
-    }
   }
 
   // Menyimpan booking setelah pembayaran QRIS selesai. Kode: SS-tanggal-nomor urut, mis. SS-20261014-043.

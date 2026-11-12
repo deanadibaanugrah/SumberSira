@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:intl/date_symbol_data_local.dart';
 
 import 'data/app_state.dart';
-import 'data/chat_controller.dart';
 import 'models/booking.dart';
 import 'screens/about_screen.dart';
 import 'screens/ai_photo_screen.dart';
@@ -25,7 +24,6 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await initializeDateFormatting('id_ID');
   await AppState.instance.loadSettings();
-  await ChatController.instance.init();
   runApp(const SumberSiraApp());
 }
 

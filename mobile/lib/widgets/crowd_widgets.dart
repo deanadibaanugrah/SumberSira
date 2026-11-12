@@ -88,10 +88,6 @@ class CrowdHero extends StatelessWidget {
               borderRadius: BorderRadius.circular(4),
               child: LinearProgressIndicator(value: (s.percent / 100).clamp(0, 1).toDouble(), minHeight: 8, backgroundColor: AppColors.kaca, color: color),
             ),
-            const SizedBox(height: 10),
-            // Dari tiket yang discan petugas. Tanpa koneksi, angka yang tampil adalah data contoh.
-            Text(s.isLive ? 'Dari tiket yang discan petugas di pintu masuk' : 'Data contoh, belum terhubung ke server',
-                style: AppText.caption.copyWith(color: AppColors.putih72)),
           ]),
         );
       },
@@ -99,58 +95,40 @@ class CrowdHero extends StatelessWidget {
   }
 }
 
-// Grafik batang jumlah pengunjung per jam hari ini (Beranda), dihitung dari tiket yang discan petugas.
-// Sumbu bawah = jam (08 sampai 16), sumbu kiri = jumlah orang di dalam (0 sampai kapasitas 300).
-// Warna batang mengikuti tingkat keramaian; batang jam sekarang disorot Hijau Tua. Garis tipis di tiap jam
-// = kebiasaan hari-hari sebelumnya (rata-rata), bila sudah ada riwayat. Tanpa koneksi memakai data contoh.
+// Grafik batang prediksi jumlah pengunjung per jam (Beranda).
+// Sumbu bawah = jam (08 sampai 16), sumbu kiri = jumlah pengunjung (0 sampai kapasitas 300).
+// Warna batang mengikuti tingkat keramaian; batang jam sekarang disorot Hijau Tua.
 class HourlyCrowdChart extends StatelessWidget {
   const HourlyCrowdChart({super.key, this.height = 200});
 
   final double height;
 
-  // Data yang digambar: jam, jumlah hari ini, dan kebiasaan (bisa kosong).
-  static ({List<(String, int)> bars, List<int?>? usual, bool live}) data(AppState s) {
-    final h = s.hourly;
-    if (h == null) return (bars: DummyData.hourlyForecast, usual: null, live: false);
-    return (bars: [for (final (i, hour) in h.hours.indexed) (hour.toString().padLeft(2, '0'), h.today[i])], usual: h.usual, live: true);
-  }
-
   @override
   Widget build(BuildContext context) {
-    return ListenableBuilder(
-      listenable: AppState.instance,
-      builder: (context, _) {
-        final d = data(AppState.instance);
-        final peak = d.bars.reduce((a, b) => a.$2 >= b.$2 ? a : b);
-        return Semantics(
-          label: d.live
-              ? (peak.$2 == 0 ? 'Grafik pengunjung per jam hari ini, belum ada pengunjung masuk' : 'Grafik pengunjung per jam hari ini, paling ramai pukul ${peak.$1}.00 sebanyak ${peak.$2} orang')
-              : 'Grafik contoh pengunjung per jam, paling ramai pukul ${peak.$1}.00 sekitar ${peak.$2} orang',
-          // [P3 CustomPaint] Menggambar grafik sendiri dengan Canvas lewat CustomPainter.
-          child: TweenAnimationBuilder<double>(
-            tween: Tween(begin: 0, end: 1),
-            duration: MediaQuery.disableAnimationsOf(context) ? Duration.zero : const Duration(milliseconds: 800),
-            curve: Curves.easeOutCubic,
-            builder: (_, t, _) => SizedBox(
-              height: height,
-              width: double.infinity,
-              child: CustomPaint(painter: _HourlyChartPainter(progress: t, nowHour: DateTime.now().hour, bars: d.bars, usual: d.usual)),
-            ),
-          ),
-        );
-      },
+    final peak = DummyData.hourlyForecast.reduce((a, b) => a.$2 >= b.$2 ? a : b);
+    return Semantics(
+      label: 'Grafik prediksi pengunjung per jam, paling ramai pukul ${peak.$1}.00 sekitar ${peak.$2} orang',
+      // [P3 CustomPaint] Menggambar grafik sendiri dengan Canvas lewat CustomPainter.
+      child: TweenAnimationBuilder<double>(
+        tween: Tween(begin: 0, end: 1),
+        duration: MediaQuery.disableAnimationsOf(context) ? Duration.zero : const Duration(milliseconds: 800),
+        curve: Curves.easeOutCubic,
+        builder: (_, t, _) => SizedBox(
+          height: height,
+          width: double.infinity,
+          child: CustomPaint(painter: _HourlyChartPainter(progress: t, nowHour: DateTime.now().hour)),
+        ),
+      ),
     );
   }
 }
 
 class _HourlyChartPainter extends CustomPainter {
-  _HourlyChartPainter({required this.progress, required this.nowHour, required this.bars, this.usual});
+  _HourlyChartPainter({required this.progress, required this.nowHour});
 
   // 0 sampai 1: batang tumbuh pelan saat grafik pertama tampil.
   final double progress;
   final int nowHour;
-  final List<(String, int)> bars;
-  final List<int?>? usual;
 
   static const _left = 30.0, _bottom = 22.0, _top = 22.0;
   static const _yTicks = [0, 100, 200, 300];
@@ -167,7 +145,7 @@ class _HourlyChartPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final data = bars;
+    final data = DummyData.hourlyForecast;
     final chartW = size.width - _left;
     final chartH = size.height - _bottom - _top;
     final step = chartW / data.length;
@@ -194,26 +172,13 @@ class _HourlyChartPainter extends CustomPainter {
         RRect.fromRectAndCorners(rect, topLeft: Radius.circular(barW / 2), topRight: Radius.circular(barW / 2), bottomLeft: const Radius.circular(3), bottomRight: const Radius.circular(3)),
         Paint()..color = isNow ? AppColors.forest : crowdBarColor(label),
       );
-      // Kebiasaan hari-hari sebelumnya: garis tipis di tiap jam.
-      final u = (usual != null && i < usual!.length) ? usual![i] : null;
-      if (u != null && u > 0) {
-        final uy = _top + chartH - chartH * u.clamp(0, AppState.capacity) / AppState.capacity;
-        canvas.drawLine(
-          Offset(cx(i) - barW / 2 - 2, uy),
-          Offset(cx(i) + barW / 2 + 2, uy),
-          Paint()
-            ..color = AppColors.ink.withValues(alpha: .55)
-            ..strokeWidth = 2
-            ..strokeCap = StrokeCap.round,
-        );
-      }
       if (isNow) _text(canvas, 'Sekarang', Offset(cx(i), _top + chartH - h - 11), color: AppColors.forest, weight: FontWeight.w700);
       _text(canvas, data[i].$1, Offset(cx(i), size.height - _bottom / 2), color: isNow ? AppColors.forest : AppColors.abu, weight: isNow ? FontWeight.w700 : FontWeight.w500);
     }
   }
 
   @override
-  bool shouldRepaint(_HourlyChartPainter old) => old.progress != progress || old.nowHour != nowHour || old.bars != bars || old.usual != usual;
+  bool shouldRepaint(_HourlyChartPainter old) => old.progress != progress || old.nowHour != nowHour;
 }
 
 // Keterangan warna grafik: Sepi, Sedang, Ramai.
@@ -222,24 +187,14 @@ class CrowdLegend extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListenableBuilder(
-      listenable: AppState.instance,
-      builder: (context, _) => Wrap(spacing: 16, runSpacing: 6, children: [
-        for (final label in ['Sepi', 'Sedang', 'Ramai'])
-          Row(mainAxisSize: MainAxisSize.min, children: [
-            StatusDot(crowdBarColor(label), size: 10),
-            const SizedBox(width: 6),
-            Text(label, style: AppText.footnote),
-          ]),
-        // Garis kebiasaan hanya ada bila server sudah punya riwayat hari-hari sebelumnya.
-        if (AppState.instance.hourly?.usual != null)
-          Row(mainAxisSize: MainAxisSize.min, children: [
-            Container(width: 14, height: 3, decoration: BoxDecoration(color: AppColors.ink.withValues(alpha: .55), borderRadius: BorderRadius.circular(2))),
-            const SizedBox(width: 6),
-            const Text('Biasanya', style: AppText.footnote),
-          ]),
-      ]),
-    );
+    return Wrap(spacing: 16, runSpacing: 6, children: [
+      for (final label in ['Sepi', 'Sedang', 'Ramai'])
+        Row(mainAxisSize: MainAxisSize.min, children: [
+          StatusDot(crowdBarColor(label), size: 10),
+          const SizedBox(width: 6),
+          Text(label, style: AppText.footnote),
+        ]),
+    ]);
   }
 }
 

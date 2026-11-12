@@ -1,13 +1,12 @@
 "use client";
 
-import { CalendarCheck, Clock, Image as ImageIcon, LayoutGrid, LogOut, Menu, MessageCircle, PanelLeftClose, PanelLeftOpen, ChartLine, Tag, Ticket, X } from "lucide-react";
+import { CalendarCheck, Clock, Image as ImageIcon, LayoutGrid, LogOut, Menu, MessageCircle, PanelLeftClose, PanelLeftOpen, Sparkles, Tag, Ticket, X } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 
 import LogoMark from "@/components/Logo";
 import { logoutAction } from "@/lib/auth/actions";
-import { jamBukaHariIni } from "@/lib/jam-buka";
 import type { AdminProfile } from "@/lib/auth/dal";
 import { can, type Permission } from "@/lib/auth/roles";
 
@@ -16,7 +15,7 @@ export const ADMIN_MENU: { href: string; label: string; icon: typeof LayoutGrid;
   { href: "/admin", label: "Dashboard", icon: LayoutGrid, permission: "dashboard" },
   { href: "/admin/booking", label: "Booking Sewa & Wahana", icon: CalendarCheck, permission: "booking" },
   { href: "/admin/tiket", label: "Tiket & Check-in", icon: Ticket, permission: "tiket" },
-  { href: "/admin/insight", label: "Insight Keramaian", icon: ChartLine, permission: "insight" },
+  { href: "/admin/insight", label: "AI Insight", icon: Sparkles, permission: "insight" },
   { href: "/admin/galeri", label: "Galeri & Konten", icon: ImageIcon, permission: "galeri" },
   { href: "/admin/faq", label: "Chatbot & FAQ", icon: MessageCircle, permission: "faq" },
   { href: "/admin/wahana", label: "Wahana & Harga", icon: Tag, permission: "wahana:lihat" },
@@ -103,7 +102,7 @@ export default function Sidebar({ admin }: { admin: AdminProfile }) {
             <span className="grid size-10 shrink-0 place-items-center rounded-full bg-white text-leaf"><Clock size={18} aria-hidden="true" /></span>
             <span className={`min-w-[116px] overflow-hidden whitespace-nowrap ${hideWhenCollapsed}`}>
               <span className="block text-xs text-abu">Buka hari ini</span>
-              <span className="block text-[15px] font-semibold tabular-nums text-ink">{jamBukaHariIni().label}</span>
+              <span className="block text-[15px] font-semibold tabular-nums text-ink">08.00 - 17.00</span>
             </span>
           </div>
           <div className={`flex min-h-[68px] items-center gap-2.5 rounded-[20px] bg-leaf/12 py-2 pl-3 pr-1.5 ${alignWhenCollapsed}`}>

@@ -2,12 +2,48 @@
 // Tahap backend: ganti setiap konstanta di sini dengan data dari API.
 import { FOTO } from "@/lib/foto";
 
+// Jumlah pengunjung per jam untuk grafik "Live Crowd Monitor" di dashboard admin (dibaca dari desain).
+export const VISITORS_TODAY = [
+  { label: "08.00", value: 40 },
+  { label: "10.00", value: 60 },
+  { label: "12.00", value: 94 },
+  { label: "14.00", value: 120 },
+  { label: "16.00", value: 101 },
+  { label: "18.00", value: 52 },
+];
+// Jam yang dihitung ramai (batang Hijau Tua).
+export const BUSY_HOURS = ["12.00", "14.00", "16.00"];
+
+// Keramaian saat ini dihitung dari tiket online yang discan: lihat src/lib/tiket-store.js.
+
+// Prediksi admin (AI Insight): per jam 08-16 untuk besok, jam ramai 10.00 - 14.00 disorot.
+export const CROWD_FORECAST = [
+  { hour: "08", value: 10 },
+  { hour: "09", value: 20 },
+  { hour: "10", value: 45 },
+  { hour: "11", value: 75 },
+  { hour: "12", value: 95 },
+  { hour: "13", value: 90 },
+  { hour: "14", value: 80 },
+  { hour: "15", value: 40 },
+  { hour: "16", value: 15 },
+];
+
+// Ringkasan prediksi besok yang tampil di kartu Ringkasan AI.
+export const FORECAST_SUMMARY = {
+  day: "Minggu 11 Okt",
+  busyRange: "10.00 - 14.00",
+  peakHour: "12.00",
+  peakPercent: 95,
+  tip: "Buka loket sewa tambahan mulai 09.45",
+};
+
 // Kartu ringkasan dashboard (ikonnya dipilih di halaman).
 export const STATS = [
   { label: "Booking Sewa Hari Ini", value: "24", note: "+12% dari kemarin", trend: "+12%" },
   { label: "Wahana Terlaris", value: "ATV", note: "25 booking minggu ini" },
   { label: "Tingkat Keramaian", value: "Sedang", note: "62% kapasitas" },
-  { label: "Tiket Terjual Hari Ini", value: "0", note: "" }, // kartu ini memakai angka live: TiketTerjualStat
+  { label: "Rating Ulasan AI", value: "4.8/5", note: "dari 132 ulasan" },
 ];
 
 // Detail tiap booking. lines merujuk id di src/data/wahana.js; harga dihitung dari katalog.
@@ -35,6 +71,29 @@ export const BOOKINGS = [
 // Angka total di desain Booking (24 hari ini) mencakup booking di luar 6 contoh ini.
 export const BOOKING_TOTALS = { hariIni: 24, menunggu: 7, diproses: 5, selesai: 12 };
 
+// Kartu "Insight AI" di dashboard. icon: trend | chat | box.
+export const AI_NOTIFICATIONS = [
+  { title: "Prediksi lonjakan pengunjung", sub: "Jam 11.00-13.00, siapkan petugas", icon: "trend" },
+  { title: "5 ulasan baru perlu ditinjau", sub: "Ringkasan sentimen ada di AI Insight", icon: "chat" },
+  { title: "Stok ban besar tersisa 3 unit", sub: "Tambah stok sebelum akhir pekan", icon: "box" },
+];
+
+// Persentase sentimen ulasan (positif, netral, negatif) untuk grafik donat di AI Insight.
+export const SENTIMENT = [
+  { label: "Positif", value: 75, color: "#1b4332" },
+  { label: "Netral", value: 18, color: "rgba(64, 145, 108, 0.4)" },
+  { label: "Negatif", value: 7, color: "#e07a5f" },
+];
+export const REVIEW_COUNT = { total: 132, period: "7 hari terakhir" };
+
+// Topik keluhan terbanyak hasil rangkuman AI dari ulasan pengunjung.
+export const COMPLAINT_TAGS = [
+  { label: "Jalan terjal", count: 128 },
+  { label: "Kurang toilet", count: 94 },
+  { label: "Kurang tempat duduk", count: 76 },
+];
+export const COMPLAINT_TIP = "Saran AI: perbaiki jalur masuk dan tambah toilet sebelum musim liburan";
+
 // Foto galeri memakai foto asli Sumber Sira dengan potongan berbeda (pos = object-position).
 export const GALLERY = [
   { id: 1, owner: "Bu Rani S.", src: FOTO.heroSawah, pos: "50% 50%", status: "Baru", date: "2026-10-10" },
@@ -49,6 +108,51 @@ export const GALLERY = [
 
 // Angka total galeri di desain (312 masuk, 18 menunggu, 248 tampil) mencakup foto lama di luar 8 contoh ini.
 export const GALLERY_TOTALS = { masuk: 312, menunggu: 18, tampil: 248 };
+
+// Daftar FAQ yang dipakai chatbot Tanya Sira untuk menjawab pengunjung.
+export const FAQ = [
+  { id: 1, q: "Jam buka Sumber Sira weekday & weekend?", a: "Weekday 08.00-16.00, weekend 08.00-17.00." },
+  { id: 2, q: "Berapa harga tiket masuk?", a: "Rp5.000 per orang, untuk usia 3 tahun ke atas." },
+  { id: 3, q: "Apakah bisa bayar pakai QRIS?", a: "Bisa. Pembayaran tersedia tunai dan QRIS." },
+  { id: 4, q: "Fasilitas apa saja yang termasuk HTM?", a: "Kolam mata air, kolam anak, gazebo, dan musholla." },
+  { id: 5, q: "Bagaimana cara sewa ATV?", a: "Buka menu Sewa & Booking, pilih jam, tambah ATV, lalu konfirmasi." },
+  { id: 6, q: "Apakah ada tempat parkir bus?", a: "Ada. Parkir motor 3rb, mobil 10rb, bus 20rb." },
+];
+
+// asked = berapa kali ditanyakan minggu ini.
+export const UNANSWERED = [
+  { id: 101, q: "Apakah boleh bawa makanan dari luar?", asked: 4 },
+  { id: 102, q: "Ada spot foto yang teduh gak?", asked: 3 },
+  { id: 103, q: "Kalau hujan tetap buka?", asked: 3 },
+  { id: 104, q: "Ada penyewaan payung atau tikar?", asked: 2 },
+  { id: 105, q: "Anak di bawah 3 tahun bayar gak?", asked: 2 },
+];
+
+// Persentase pertanyaan pengunjung yang dijawab otomatis oleh Tanya Sira.
+export const FAQ_AUTO_RATE = 92;
+
+// Ulasan terbaru yang tampil di halaman AI Insight.
+export const REVIEWS = [
+  { id: 1, name: "Bu Rani S.", stars: 5, text: "Airnya jernih banget, anak-anak senang main di kolam!" },
+  { id: 2, name: "Dimas P.", stars: 4, text: "Spot foto oke, tapi pas siang rame banget." },
+  { id: 3, name: "Kel. Ahmad", stars: 5, text: "Sewa ATV gampang lewat app, ga perlu antre." },
+];
+
+// Pola keramaian 7 hari terakhir (persen kapasitas per jam), direkap dari tiket yang discan masuk.
+// Dipakai heatmap di dashboard admin.
+export const WEEKLY_CROWD = {
+  hours: ["08", "09", "10", "11", "12", "13", "14", "15", "16"],
+  days: [
+    { day: "Sen", values: [8, 14, 25, 38, 46, 44, 40, 26, 12] },
+    { day: "Sel", values: [6, 12, 22, 34, 42, 40, 36, 22, 10] },
+    { day: "Rab", values: [7, 15, 28, 40, 50, 47, 41, 27, 13] },
+    { day: "Kam", values: [9, 16, 30, 44, 52, 49, 43, 29, 14] },
+    { day: "Jum", values: [10, 18, 34, 48, 58, 55, 47, 32, 16] },
+    { day: "Sab", values: [18, 32, 55, 78, 92, 95, 86, 60, 30] },
+    { day: "Min", values: [22, 38, 62, 85, 97, 94, 88, 64, 34] },
+  ],
+  insight: "Sabtu dan Minggu pukul 11.00-14.00 hampir penuh. Tambah petugas loket dan parkir di jam itu.",
+};
 
 // Wahana paling banyak dipesan minggu ini (id merujuk src/data/wahana.js).
 export const WAHANA_POPULER = [

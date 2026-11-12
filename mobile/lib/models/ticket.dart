@@ -1,5 +1,3 @@
-import 'package:intl/intl.dart';
-
 // Status tiket masuk, beserta label yang tampil di layar.
 enum TicketStatus {
   waiting('Belum masuk'),
@@ -48,32 +46,7 @@ class Ticket {
     this.date = '',
     this.checkInAt,
     this.mine = false,
-    this.synced = false,
   });
-
-  // Membaca tiket dari backend (POST /tickets, GET /tickets). Jam dari server (UTC) diubah ke WIB, tanggal ke Bahasa Indonesia.
-  factory Ticket.fromApi(Map<String, dynamic> j) => Ticket(
-        code: j['code'] as String,
-        name: j['name'] as String,
-        whatsapp: (j['whatsapp'] as String?) ?? '',
-        adults: j['adults'] as int,
-        kids: (j['kids'] as int?) ?? 0,
-        parking: Parking.values.byName(j['parking'] as String),
-        payment: PaymentMethod.values.byName(j['payment'] as String),
-        arrival: (j['arrival'] as String?) ?? '',
-        status: TicketStatus.values.byName(j['status'] as String),
-        boughtAt: jamWib(j['boughtAt'] as String),
-        date: tanggalPanjang(j['visitDate'] as String),
-        checkInAt: j['checkInAt'] == null ? null : jamWib(j['checkInAt'] as String),
-        mine: true,
-        synced: true,
-      );
-
-  // "2026-11-11T03:42:00.000Z" -> "10.42" (WIB = UTC+7, tidak bergantung zona waktu HP).
-  static String jamWib(String iso) => DateFormat('HH.mm').format(DateTime.parse(iso).toUtc().add(const Duration(hours: 7)));
-
-  // "2026-11-12" -> "Kamis, 12 November 2026". Butuh initializeDateFormatting('id_ID') yang sudah dipanggil di main().
-  static String tanggalPanjang(String ymd) => DateFormat('EEEE, d MMMM yyyy', 'id_ID').format(DateTime.parse(ymd));
 
   // Membaca tiket yang tersimpan di perangkat (kebalikan dari toJson).
   factory Ticket.fromJson(Map<String, dynamic> json) => Ticket(
@@ -90,7 +63,6 @@ class Ticket {
         date: (json['date'] as String?) ?? '',
         checkInAt: json['checkInAt'] as String?,
         mine: true,
-        synced: (json['synced'] as bool?) ?? false,
       );
 
   static const int pricePerPerson = 5000;
@@ -107,8 +79,6 @@ class Ticket {
   // Tanggal berlaku tiket. Kosong untuk data contoh, artinya hari ini.
   final String date;
   final bool mine;
-  // True bila tiket ini tercatat di server (bisa discan petugas). False hanya untuk data contoh tanpa koneksi.
-  final bool synced;
   TicketStatus status;
   // [P2 Null Safety] Tanda ? artinya boleh kosong (null) selama tiket belum discan.
   String? checkInAt;
@@ -130,6 +100,5 @@ class Ticket {
         'boughtAt': boughtAt,
         'date': date,
         'checkInAt': checkInAt,
-        'synced': synced,
       };
 }

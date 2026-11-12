@@ -38,8 +38,6 @@ class _TicketFormScreenState extends State<TicketFormScreen> {
   List<String> _slots = DummyData.arrivalSlots; // diganti dari backend begitu terhubung
   String _arrival = DummyData.arrivalSlots.first;  PaymentMethod _payment = PaymentMethod.qris;
   bool _agree = false;
-  // True selama tiket dikirim ke server (tombol bayar menampilkan loading).
-  bool _paying = false;
 
   int get _total => _adults * Ticket.pricePerPerson + _parking.price;
 
@@ -71,7 +69,6 @@ class _TicketFormScreenState extends State<TicketFormScreen> {
       // server tidak terjangkau: tetap pakai daftar bawaan
     }
   }
-  @override
   void dispose() {
     _name.dispose();
     _whatsapp.dispose();
@@ -79,9 +76,7 @@ class _TicketFormScreenState extends State<TicketFormScreen> {
   }
 
   // Tombol bayar: cek validator, cek persetujuan, lalu bayar (QRIS lewat sheet, tunai langsung jadi).
-  // Tiket dibuat di server supaya petugas bisa memindainya dan Live Crowd ikut naik. Harga dihitung server.
   Future<void> _pay() async {
-    if (_paying) return;
     if (!_formKey.currentState!.validate()) return;
     if (!_agree) {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Centang persetujuan aturan kunjungan dulu.')));
@@ -91,29 +86,18 @@ class _TicketFormScreenState extends State<TicketFormScreen> {
       final paid = await showGlassSheet<bool>(context, builder: (_) => _QrisSheet(total: _total));
       if (paid != true || !mounted) return;
     }
-    setState(() => _paying = true);
-    try {
-      final ticket = await AppState.instance.buyTicketOnline(
-        name: _name.text,
-        whatsapp: _whatsapp.text,
-        adults: _adults,
-        kids: _kids,
-        parking: _parking,
-        payment: _payment,
-        arrival: _arrival,
-      );
-      AppState.instance.saveWhatsapp(_whatsapp.text);
-      if (!mounted) return;
-      // [P5 Named Route] Pindah ke e-tiket sambil mengirim kode tiket sebagai argumen.
-      Navigator.pushReplacementNamed(context, AppRoutes.eticket, arguments: ticket.code);
-    } on ApiException catch (e) {
-      if (!mounted) return;
-      setState(() => _paying = false);
-      // Tidak membuat tiket palsu di perangkat: tiket yang tidak tercatat di server tidak bisa discan petugas.
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text(e.offline ? 'Tiket belum dibuat: tidak bisa terhubung ke server. Periksa koneksi lalu coba lagi.' : e.message),
-      ));
-    }
+    final ticket = AppState.instance.buyTicket(
+      name: _name.text,
+      whatsapp: _whatsapp.text,
+      adults: _adults,
+      kids: _kids,
+      parking: _parking,
+      payment: _payment,
+      arrival: _arrival,
+    );
+    AppState.instance.saveWhatsapp(_whatsapp.text);
+    // [P5 Named Route] Pindah ke e-tiket sambil mengirim kode tiket sebagai argumen.
+    Navigator.pushReplacementNamed(context, AppRoutes.eticket, arguments: ticket.code);
   }
 
   @override
@@ -224,7 +208,6 @@ class _TicketFormScreenState extends State<TicketFormScreen> {
         amount: _total,
         button: _payment == PaymentMethod.qris ? 'Bayar dengan QRIS' : 'Pesan, Bayar di Loket',
         onPressed: _pay,
-        loading: _paying,
       ),
     );
   }

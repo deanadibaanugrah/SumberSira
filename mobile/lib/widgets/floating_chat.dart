@@ -4,16 +4,27 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
-import '../data/chat_controller.dart';
 import '../data/dummy_data.dart';
 import '../theme/app_theme.dart';
 import 'common.dart';
 import 'glass.dart';
 
+// Satu pesan chat: fromBot true = balasan Tanya Sira, false = pertanyaan pengunjung.
+typedef ChatMessage = ({bool fromBot, String text});
+
+// Jawaban Tanya Sira (versi frontend): cari FAQ yang kata kuncinya muncul di pertanyaan.
+// [Rencana AI] Nanti fungsi ini diganti panggilan ke model AI di backend, tampilan tetap sama.
+String jawabanTanyaSira(String question) {
+  final q = question.toLowerCase();
+  for (final f in DummyData.faq) {
+    if (f.keys.any(q.contains)) return f.answer;
+  }
+  return 'Maaf, aku belum tahu jawabannya. Pertanyaanmu dicatat untuk admin ya 🙏';
+}
+
 // Chatbot Tanya Sira yang mengambang di Beranda.
 // Tertutup: gelembung kaca Hijau Tua berisi ikon chat yang bisa digeser ke mana saja.
 // Diketuk: membesar menjadi panel chat kaca (bukan layar penuh, bukan halaman baru).
-// Dua cara bertanya: "Jawab cepat" (FAQ pengelola lalu AI dari data Sumber Sira) atau "Tanya pengelola" (dibalas manusia, lebih lama).
 class FloatingChat extends StatefulWidget {
   const FloatingChat({super.key});
 
@@ -29,13 +40,15 @@ class _FloatingChatState extends State<FloatingChat> {
   Offset? _pos;
   bool _open = false;
   bool _dragging = false;
-  // Riwayat chat ada di ChatController supaya tidak hilang saat kotak chat ditutup.
-  final _chat = ChatController.instance;
+  // Riwayat chat disimpan di sini supaya tidak hilang saat kotak chat ditutup.
+  final _messages = <ChatMessage>[
+    (fromBot: true, text: 'Halo! Aku Tanya Sira 👋 Ada yang bisa dibantu soal Sumber Sira?'),
+  ];
 
-  void _setOpen(bool open) {
-    setState(() => _open = open);
-    _chat.setPanelOpen(open);
-  }
+  void _send(String question) => setState(() {
+        _messages.add((fromBot: false, text: question));
+        _messages.add((fromBot: true, text: jawabanTanyaSira(question)));
+      });
 
   @override
   Widget build(BuildContext context) {
@@ -48,7 +61,7 @@ class _FloatingChatState extends State<FloatingChat> {
 
       // Ukuran kotak chat, dan posisinya tumbuh dari sisi tempat gelembung berada.
       final panelW = min(340.0, box.maxWidth - _margin * 2);
-      final panelH = min(500.0, box.maxHeight - _margin * 2);
+      final panelH = min(460.0, box.maxHeight - _margin * 2);
       final onRight = pos.dx + _size / 2 > box.maxWidth / 2;
       final onBottom = pos.dy + _size / 2 > box.maxHeight / 2;
       final panelX = (onRight ? pos.dx + _size - panelW : pos.dx).clamp(_margin, max(_margin, box.maxWidth - panelW - _margin));
@@ -73,7 +86,7 @@ class _FloatingChatState extends State<FloatingChat> {
                     maxWidth: panelW,
                     minHeight: panelH,
                     maxHeight: panelH,
-                    child: _ChatPanel(chat: _chat, onClose: () => _setOpen(false)),
+                    child: _ChatPanel(messages: _messages, onSend: _send, onClose: () => setState(() => _open = false)),
                   ),
                 )
               : Glass(tone: GlassTone.tint, radius: _size / 2, child: _bubble(pos)),
@@ -82,42 +95,28 @@ class _FloatingChatState extends State<FloatingChat> {
     });
   }
 
-  // Gelembung chat: diketuk = buka chat, digeser = pindah posisi. Titik coral = ada balasan pengelola yang belum dibaca.
+  // Gelembung kepala robot: diketuk = buka chat, digeser = pindah posisi.
   Widget _bubble(Offset pos) => Semantics(
         button: true,
         label: 'Buka chatbot Tanya Sira',
         child: GestureDetector(
           // down = gerakan dihitung sejak jari menyentuh, jadi gelembung ikut jari tanpa tertinggal.
           dragStartBehavior: DragStartBehavior.down,
-          onTap: () => _setOpen(true),
+          onTap: () => setState(() => _open = true),
           onPanStart: (_) => setState(() => _dragging = true),
           onPanUpdate: (d) => setState(() => _pos = (_pos ?? pos) + d.delta),
           onPanEnd: (_) => setState(() => _dragging = false),
-          child: ListenableBuilder(
-            listenable: _chat,
-            builder: (_, _) => Stack(alignment: Alignment.center, children: [
-              const Icon(CupertinoIcons.chat_bubble_2_fill, color: Colors.white, size: 26),
-              if (_chat.unread > 0)
-                Positioned(
-                  right: 12,
-                  top: 11,
-                  child: Container(
-                    width: 12,
-                    height: 12,
-                    decoration: BoxDecoration(color: AppColors.coral, shape: BoxShape.circle, border: Border.all(color: Colors.white, width: 1.5)),
-                  ),
-                ),
-            ]),
-          ),
+          child: const Center(child: Icon(CupertinoIcons.chat_bubble_2_fill, color: Colors.white, size: 26)),
         ),
       );
 }
 
-// Isi kotak chat: header, pilihan cara bertanya, daftar pesan, pertanyaan cepat, dan kolom tulis pertanyaan.
+// Isi kotak chat: header, daftar pesan, pertanyaan cepat, dan kolom tulis pertanyaan.
 class _ChatPanel extends StatefulWidget {
-  const _ChatPanel({required this.chat, required this.onClose});
+  const _ChatPanel({required this.messages, required this.onSend, required this.onClose});
 
-  final ChatController chat;
+  final List<ChatMessage> messages;
+  final ValueChanged<String> onSend;
   final VoidCallback onClose;
 
   @override
@@ -127,32 +126,18 @@ class _ChatPanel extends StatefulWidget {
 class _ChatPanelState extends State<_ChatPanel> {
   final _input = TextEditingController();
   final _scroll = ScrollController();
-  int _shown = 0;
-
-  ChatController get chat => widget.chat;
 
   @override
   void initState() {
     super.initState();
-    _shown = chat.messages.length;
-    chat.addListener(_onChat);
     _scrollToBottom(jump: true);
   }
 
   @override
   void dispose() {
-    chat.removeListener(_onChat);
     _input.dispose();
     _scroll.dispose();
     super.dispose();
-  }
-
-  // Pesan baru masuk (jawaban bot atau balasan pengelola): gulir ke bawah.
-  void _onChat() {
-    if (chat.messages.length != _shown || chat.busy) {
-      _shown = chat.messages.length;
-      _scrollToBottom();
-    }
   }
 
   // Gulir ke pesan paling bawah setelah tampilan selesai digambar.
@@ -167,178 +152,98 @@ class _ChatPanelState extends State<_ChatPanel> {
   // Kirim pertanyaan dari kolom tulis atau dari tombol pertanyaan cepat.
   void _send([String? text]) {
     final question = (text ?? _input.text).trim();
-    if (question.isEmpty || chat.busy) return;
-    chat.send(question);
+    if (question.isEmpty) return;
+    widget.onSend(question);
     _input.clear();
+    _scrollToBottom();
   }
 
   @override
   Widget build(BuildContext context) {
     return Material(
       color: Colors.transparent,
-      child: ListenableBuilder(
-        listenable: chat,
-        builder: (context, _) => Column(children: [
-          // Header panel chat dengan tombol tutup.
-          Container(
-            padding: const EdgeInsets.fromLTRB(16, 10, 6, 10),
-            decoration: const BoxDecoration(border: Border(bottom: BorderSide(color: AppColors.line))),
-            child: Row(children: [
-              const Icon(CupertinoIcons.chat_bubble_2_fill, color: AppColors.leaf, size: 22),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                  const Text('Tanya Sira', style: AppText.headline),
-                  Row(children: [
-                    const StatusDot(AppColors.leaf, size: 7),
-                    const SizedBox(width: 5),
-                    Text('AI Assistant · Online', style: AppText.caption),
-                  ]),
+      child: Column(children: [
+        // Header panel chat dengan tombol tutup.
+        Container(
+          padding: const EdgeInsets.fromLTRB(16, 10, 6, 10),
+          decoration: const BoxDecoration(border: Border(bottom: BorderSide(color: AppColors.line))),
+          child: Row(children: [
+            const Icon(CupertinoIcons.chat_bubble_2_fill, color: AppColors.leaf, size: 22),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                const Text('Tanya Sira', style: AppText.headline),
+                Row(children: [
+                  const StatusDot(AppColors.leaf, size: 7),
+                  const SizedBox(width: 5),
+                  Text('AI Assistant · Online', style: AppText.caption),
                 ]),
-              ),
-              IconButton(tooltip: 'Tutup chat', onPressed: widget.onClose, icon: const Icon(CupertinoIcons.xmark, color: AppColors.ink, size: 19)),
-            ]),
-          ),
-          _modeBar(),
-          Expanded(
-            child: ListView(
-              controller: _scroll,
-              padding: const EdgeInsets.fromLTRB(12, 12, 12, 8),
-              children: [
-                for (final (i, m) in chat.messages.indexed) ...[
-                  _bubble(m),
-                  if (m.offerManagerFor != null)
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: 12),
-                      child: Align(
-                        alignment: Alignment.centerLeft,
-                        child: ActionChip(
-                          avatar: const Icon(CupertinoIcons.person_crop_circle, size: 16, color: AppColors.forest),
-                          label: Text('Tanya pengelola', style: AppText.footnote.copyWith(fontWeight: FontWeight.w600, color: AppColors.forest)),
-                          onPressed: chat.busy ? null : () => chat.askManager(m.offerManagerFor!, echo: false),
+              ]),
+            ),
+            IconButton(tooltip: 'Tutup chat', onPressed: widget.onClose, icon: const Icon(CupertinoIcons.xmark, color: AppColors.ink, size: 19)),
+          ]),
+        ),
+        Expanded(
+          child: ListView(
+            controller: _scroll,
+            padding: const EdgeInsets.fromLTRB(12, 12, 12, 8),
+            children: [
+              for (final (i, m) in widget.messages.indexed) ...[
+                _bubble(m),
+                // Pertanyaan cepat tampil di bawah sapaan pertama.
+                if (i == 0)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 12),
+                    child: Wrap(spacing: 6, runSpacing: 6, children: [
+                      for (final q in DummyData.quickQuestions)
+                        ActionChip(
+                          label: Text(q, style: AppText.footnote.copyWith(fontWeight: FontWeight.w600, color: AppColors.forest)),
+                          onPressed: () => _send(q),
                           visualDensity: VisualDensity.compact,
                           backgroundColor: AppColors.leaf12,
                           side: BorderSide.none,
                           shape: const StadiumBorder(),
                         ),
-                      ),
-                    ),
-                  // Pertanyaan cepat tampil di bawah sapaan pertama (mode jawab cepat).
-                  if (i == 0 && chat.mode == ChatMode.fast)
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: 12),
-                      child: Wrap(spacing: 6, runSpacing: 6, children: [
-                        for (final q in DummyData.quickQuestions)
-                          ActionChip(
-                            label: Text(q, style: AppText.footnote.copyWith(fontWeight: FontWeight.w600, color: AppColors.forest)),
-                            onPressed: chat.busy ? null : () => _send(q),
-                            visualDensity: VisualDensity.compact,
-                            backgroundColor: AppColors.leaf12,
-                            side: BorderSide.none,
-                            shape: const StadiumBorder(),
-                          ),
-                      ]),
-                    ),
-                ],
-                if (chat.busy) _typing(),
-              ],
-            ),
-          ),
-          Container(
-            padding: const EdgeInsets.fromLTRB(12, 10, 10, 12),
-            decoration: const BoxDecoration(border: Border(top: BorderSide(color: AppColors.line))),
-            child: Row(children: [
-              Expanded(
-                child: TextField(
-                  controller: _input,
-                  textInputAction: TextInputAction.send,
-                  onSubmitted: (_) => _send(),
-                  style: AppText.subheadline.copyWith(color: AppColors.ink),
-                  decoration: InputDecoration(
-                    hintText: chat.mode == ChatMode.fast ? 'Tulis pertanyaan...' : 'Tulis pertanyaan untuk pengelola...',
-                    hintStyle: AppText.subheadline,
-                    isDense: true,
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(22), borderSide: BorderSide.none),
-                    enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(22), borderSide: BorderSide.none),
-                    focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(22), borderSide: const BorderSide(color: AppColors.leaf, width: 1.5)),
+                    ]),
                   ),
+              ],
+            ],
+          ),
+        ),
+        Container(
+          padding: const EdgeInsets.fromLTRB(12, 10, 10, 12),
+          decoration: const BoxDecoration(border: Border(top: BorderSide(color: AppColors.line))),
+          child: Row(children: [
+            Expanded(
+              child: TextField(
+                controller: _input,
+                textInputAction: TextInputAction.send,
+                onSubmitted: (_) => _send(),
+                style: AppText.subheadline.copyWith(color: AppColors.ink),
+                decoration: InputDecoration(
+                  hintText: 'Tulis pertanyaan...',
+                  hintStyle: AppText.subheadline,
+                  isDense: true,
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(22), borderSide: BorderSide.none),
+                  enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(22), borderSide: BorderSide.none),
+                  focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(22), borderSide: const BorderSide(color: AppColors.leaf, width: 1.5)),
                 ),
               ),
-              const SizedBox(width: 8),
-              IconButton.filled(
-                tooltip: 'Kirim',
-                style: IconButton.styleFrom(backgroundColor: AppColors.forest, fixedSize: const Size(44, 44)),
-                onPressed: chat.busy ? null : _send,
-                icon: const Icon(CupertinoIcons.paperplane_fill, color: Colors.white, size: 18),
-              ),
-            ]),
-          ),
-        ]),
-      ),
-    );
-  }
-
-  // Pilihan cara bertanya: jawab cepat (FAQ + AI) atau tanya pengelola (menunggu dibalas manusia).
-  Widget _modeBar() => Padding(
-        padding: const EdgeInsets.fromLTRB(12, 10, 12, 0),
-        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Row(children: [
-            Expanded(child: _modeChip(ChatMode.fast, CupertinoIcons.bolt_fill, 'Jawab cepat')),
-            const SizedBox(width: 8),
-            Expanded(child: _modeChip(ChatMode.manager, CupertinoIcons.person_crop_circle, 'Tanya pengelola')),
-          ]),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(4, 6, 4, 0),
-            child: Text(
-              chat.mode == ChatMode.fast ? 'Dijawab langsung oleh FAQ dan AI dari data Sumber Sira.' : 'Dijawab pengelola. Lebih lama, balasan muncul di sini.',
-              style: AppText.caption,
             ),
-          ),
-        ]),
-      );
-
-  Widget _modeChip(ChatMode value, IconData icon, String label) {
-    final active = chat.mode == value;
-    return Semantics(
-      button: true,
-      selected: active,
-      label: label,
-      child: GestureDetector(
-        onTap: () => chat.setMode(value),
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 180),
-          padding: const EdgeInsets.symmetric(vertical: 8),
-          decoration: BoxDecoration(
-            color: active ? AppColors.forest : Colors.white,
-            borderRadius: BorderRadius.circular(18),
-            border: Border.all(color: active ? AppColors.forest : AppColors.line),
-          ),
-          child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-            Icon(icon, size: 14, color: active ? Colors.white : AppColors.forest),
-            const SizedBox(width: 6),
-            Flexible(child: Text(label, maxLines: 1, overflow: TextOverflow.ellipsis, style: AppText.footnote.copyWith(fontWeight: FontWeight.w600, color: active ? Colors.white : AppColors.ink))),
+            const SizedBox(width: 8),
+            IconButton.filled(
+              tooltip: 'Kirim',
+              style: IconButton.styleFrom(backgroundColor: AppColors.forest, fixedSize: const Size(44, 44)),
+              onPressed: _send,
+              icon: const Icon(CupertinoIcons.paperplane_fill, color: Colors.white, size: 18),
+            ),
           ]),
         ),
-      ),
+      ]),
     );
   }
 
-  // Gelembung "sedang mengetik" selama menunggu server.
-  Widget _typing() => Padding(
-        padding: const EdgeInsets.only(bottom: 10),
-        child: Row(children: [
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-            decoration: const BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.only(topLeft: Radius.circular(6), topRight: Radius.circular(20), bottomLeft: Radius.circular(20), bottomRight: Radius.circular(20)),
-            ),
-            child: Text(chat.mode == ChatMode.fast ? 'Tanya Sira sedang mencari jawaban...' : 'Mengirim ke pengelola...', style: AppText.footnote),
-          ),
-        ]),
-      );
-
-  // Gelembung pesan: bot di kiri (putih), pengunjung di kanan (Hijau Tua). Pesan bot memuat asal jawabannya.
+  // Gelembung pesan: bot di kiri (putih), pengunjung di kanan (Hijau Tua).
   Widget _bubble(ChatMessage m) => Padding(
         padding: const EdgeInsets.only(bottom: 10),
         child: Row(
@@ -356,13 +261,7 @@ class _ChatPanelState extends State<_ChatPanel> {
                     bottomRight: const Radius.circular(20),
                   ),
                 ),
-                child: Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisSize: MainAxisSize.min, children: [
-                  Text(m.text, style: AppText.subheadline.copyWith(color: m.fromBot ? AppColors.ink : Colors.white, height: 1.4)),
-                  if (m.fromBot && m.source.isNotEmpty) ...[
-                    const SizedBox(height: 4),
-                    Text(m.source, style: AppText.caption.copyWith(color: AppColors.forest, fontWeight: FontWeight.w600)),
-                  ],
-                ]),
+                child: Text(m.text, style: AppText.subheadline.copyWith(color: m.fromBot ? AppColors.ink : Colors.white, height: 1.4)),
               ),
             ),
           ],

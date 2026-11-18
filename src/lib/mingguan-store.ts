@@ -2,7 +2,7 @@
 
 import { api } from "@/lib/live/http";
 import { createPollStore } from "@/lib/live/poll-store";
-import { KAPASITAS, tanggalHariIni } from "@/lib/tiket-store";
+import { tanggalHariIni } from "@/lib/tiket-store";
 
 // Agregasi mingguan yang dihitung di sisi klien dari data kontrak backend:
 // daftar tiket per tanggal (7 hari terakhir) + daftar booking. Backend belum punya endpoint mingguan,
@@ -13,7 +13,7 @@ export type MingguanData = {
   days: HariData[];
   total: number;
   pola: { hours: string[]; days: { date: string; day: string; values: number[] }[]; note: string };
-  wahana: { id: string; count: number }[];
+  wahana: { id: string; name: string; count: number }[];
 };
 
 // Jam operasional yang ditampilkan di heatmap (08.00-17.00).
@@ -39,7 +39,7 @@ function tujuhHari(): string[] {
 
 type ApiTicket = { people: number; adults: number; kids: number; amount: number; paymentStatus: string; checkInAt: string | null; checkOutAt: string | null };
 type ApiTicketList = { items: ApiTicket[] };
-type ApiBooking = { visitDate: string; amount: number; paymentStatus: string; createdAt: string; lines: { rideId: string; qty: number }[] };
+type ApiBooking = { visitDate: string; amount: number; paymentStatus: string; createdAt: string; lines: { rideId: string; name: string; qty: number }[] };
 type ApiBookingList = { items: ApiBooking[] };
 type ApiCrowd = { capacity: number };
 
@@ -51,7 +51,7 @@ async function ambil(): Promise<MingguanData> {
     // Kapasitas resmi dari server (bisa diubah pengelola di halaman Wahana & Harga).
     api<ApiCrowd>("GET", "/api/crowd"),
   ]);
-  const kapasitas = crowd.capacity || KAPASITAS;
+  const kapasitas = crowd.capacity;
 
   // Pendapatan per hari (hanya yang lunas): tiket masuk + parkir, dan sewa alat/wahana.
   const days: HariData[] = dates.map((date, i) => ({
@@ -90,12 +90,15 @@ async function ambil(): Promise<MingguanData> {
 
   // Wahana terlaris: jumlah item sewa/wahana dari booking 7 hari terakhir (dibuat dalam seminggu ke belakang).
   const batas = Date.now() - 7 * 24 * 3600 * 1000;
-  const hitung = new Map<string, number>();
+  const hitung = new Map<string, { name: string; count: number }>();
   for (const b of bookingList.items) {
     if (Date.parse(b.createdAt) < batas) continue;
-    for (const l of b.lines ?? []) hitung.set(l.rideId, (hitung.get(l.rideId) ?? 0) + l.qty);
+    for (const l of b.lines ?? []) {
+      const prev = hitung.get(l.rideId);
+      hitung.set(l.rideId, { name: l.name || l.rideId, count: (prev?.count ?? 0) + (l.qty ?? 0) });
+    }
   }
-  const wahana = [...hitung.entries()].map(([id, count]) => ({ id, count })).sort((a, b) => b.count - a.count).slice(0, 5);
+  const wahana = [...hitung.entries()].map(([id, v]) => ({ id, name: v.name, count: v.count })).sort((a, b) => b.count - a.count).slice(0, 5);
 
   return { days, total: days.reduce((s, d) => s + d.tiket + d.sewa, 0), pola, wahana };
 }

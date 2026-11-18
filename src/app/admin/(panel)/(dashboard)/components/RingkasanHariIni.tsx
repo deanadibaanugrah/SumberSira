@@ -8,16 +8,13 @@ import { useDashboard } from "@/lib/dashboard-store";
 import { useTiket } from "@/lib/tiket-store";
 
 // Kartu hijau ringkasan hari ini: angka dari dashboard backend, tiket live, dan Live Crowd.
-// Baris "pertanyaan chatbot menunggu" belum ditampilkan karena backend belum punya endpoint rekapnya
-// (baru tersedia lewat /admin/faq/unanswered di fase Chatbot & FAQ).
 export default function RingkasanHariIni({ canInsight }: { canInsight: boolean }) {
   const d = useDashboard();
   const t = useTiket();
   const c = useCrowd();
-  // Puncak keramaian dari prakiraan server: jam dengan perkiraan orang terbanyak.
-  const puncak = (c.data?.forecast ?? []).reduce<{ hour: string; count: number } | null>(
-    (a, f) => (!a || f.count > a.count ? f : a), null);
-  const kapasitas = c.capacity || 300;
+  const puncak = (c.data?.forecast ?? []).reduce<{ hour: string; count: number } | null>((a, f) => (!a || f.count > a.count ? f : a), null);
+  const kapasitas = c.data?.capacity ?? 0;
+  const persenPuncak = puncak && kapasitas ? Math.round((puncak.count / kapasitas) * 100) : null;
   return (
     <section className="flex flex-col rounded-3xl bg-gradient-to-b from-forest to-ink p-6 text-white">
       <div className="flex items-center gap-3">
@@ -30,10 +27,10 @@ export default function RingkasanHariIni({ canInsight }: { canInsight: boolean }
       <ul className="mt-5 space-y-2">
         <Baris icon={TrendingUp}
                title={puncak ? `Prakiraan puncak ${puncak.hour}.00, ${puncak.count} orang` : "Belum ada pengunjung masuk"}
-               sub={puncak ? `${Math.round((puncak.count / kapasitas) * 100)}% dari kapasitas` : "Grafik naik saat tiket discan masuk"} />
+               sub={puncak ? (persenPuncak == null ? "Belum ada kapasitas dari server" : `${persenPuncak}% dari kapasitas`) : "Grafik naik saat tiket discan masuk"} />
         <Baris icon={Ticket} title={`${d.data?.ticketsToday ?? t.sold} tiket terjual`}
                sub={`${d.data?.pendingCash ?? 0} pembayaran tunai menunggu konfirmasi`} />
-        <Baris icon={Users} title={`${c.inside} orang di dalam`} sub={`Keramaian ${c.label}`} />
+        <Baris icon={Users} title={`${t.inside} orang di dalam`} sub={`Keramaian ${t.label ?? "–"}`} />
       </ul>
       {canInsight && (
         <Link href="/admin/insight"

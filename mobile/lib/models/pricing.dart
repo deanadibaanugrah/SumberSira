@@ -24,9 +24,11 @@ class PricingData {
     required this.parking,
   });
 
+  // Semua angka wajib ada di respons server. Tidak ada nilai cadangan supaya tarif di layar
+  // tidak pernah berbeda dari yang dipakai backend saat membuat tiket.
   factory PricingData.fromJson(Map<String, dynamic> j) => PricingData(
-        ticketPricePerPerson: (j['ticketPricePerPerson'] as num?)?.toInt() ?? Ticket.pricePerPerson,
-        capacity: (j['capacity'] as num?)?.toInt() ?? 300,
+        ticketPricePerPerson: (j['ticketPricePerPerson'] as num).toInt(),
+        capacity: (j['capacity'] as num).toInt(),
         parking: [
           for (final e in (j['parking'] as List? ?? const [])) ParkingTarif.fromJson(e as Map<String, dynamic>),
         ],
@@ -36,11 +38,11 @@ class PricingData {
   final int capacity;
   final List<ParkingTarif> parking;
 
-  // Tarif parkir untuk satu pilihan di form. Bila server tidak mengirim kuncinya, pakai tarif bawaan enum.
-  int tarif(Parking p) {
+  // Tarif parkir untuk satu pilihan di form. Null bila server tidak mengirim kuncinya.
+  int? tarif(Parking p) {
     for (final t in parking) {
       if (t.key == p.name) return t.price;
     }
-    return p.price;
+    return null;
   }
 }

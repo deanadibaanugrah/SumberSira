@@ -7,8 +7,8 @@ import 'package:intl/date_symbol_data_local.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sumber_sira/data/api_client.dart';
 import 'package:sumber_sira/data/app_state.dart';
-import 'package:sumber_sira/data/chat_controller.dart';
-import 'package:sumber_sira/data/crowd_state.dart';
+import 'package:sumber_sira/features/chat/viewmodel/chat_controller.dart';
+import 'package:sumber_sira/features/crowd/viewmodel/crowd_state.dart';
 import 'package:sumber_sira/models/ticket.dart';
 
 // Uji ke backend sungguhan (bukan tiruan): beli tiket, scan petugas, Live Crowd, dan chat Tanya Sira.
@@ -17,7 +17,7 @@ import 'package:sumber_sira/models/ticket.dart';
 // Tanpa E2E=1 tes ini dilewati, jadi `flutter test` biasa tetap tidak butuh server.
 const _e2e = String.fromEnvironment('E2E') == '1';
 
-// Akun demo dari seed backend (hanya untuk lingkungan lokal).
+// Akun awal dari seed backend (hanya untuk lingkungan lokal).
 Future<Map<String, String>> _login(String email, String password) async {
   final res = await http.post(
     Uri.parse('${ApiClient.baseUrl}/auth/login'),
@@ -61,6 +61,9 @@ void main() {
         expect(c.forecast.map((f) => f.hour), ['08', '09', '10', '11', '12', '13', '14', '15', '16']);
         final insideBefore = c.inside;
 
+        // Tarif dibaca dari server, bukan angka di aplikasi.
+        final pricing = await ApiClient.fetchPricing();
+
         // Beli tiket: kode dan harga ditentukan server.
         final t = await s.buyTicketOnline(
           name: 'Uji Flutter',
@@ -73,7 +76,7 @@ void main() {
         );
         expect(t.code, matches(RegExp(r'^TK-\d{4,}$')));
         expect(t.synced, isTrue);
-        expect(t.total, 2 * 5000 + 3000);
+        expect(t.total, 2 * pricing.ticketPricePerPerson + (pricing.tarif(Parking.motor) ?? 0));
         expect(t.people, 3);
         expect(t.status, TicketStatus.waiting);
         expect(t.whatsapp, wa);
@@ -112,7 +115,7 @@ void main() {
         expect(s.find(t.code)!.status, TicketStatus.inside);
         expect(s.find(t.code)!.checkInAt, matches(RegExp(r'^\d\d\.\d\d$')));
         await c.refresh();
-        expect(c.inside, insideBefore + 3);
+        expect(c.inside, insideBefore! + 3);
 
         // Keluar: Live Crowd turun lagi.
         final co = await http.post(

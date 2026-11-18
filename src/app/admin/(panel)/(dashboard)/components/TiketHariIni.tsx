@@ -7,9 +7,8 @@ import ProgressBar from "@/components/charts/ProgressBar";
 import { Avatar } from "@/components/admin/ui";
 import { jumlahOrang, useTiket } from "@/lib/tiket-store";
 
-// Bagian dashboard yang ikut berubah saat tiket discan (data dari src/lib/tiket-store.js).
 // Warna batang keramaian sesuai status.
-const BAR = { Sepi: "bg-leaf", Sedang: "bg-leaf/30", Ramai: "bg-coral" };
+const BAR: Record<string, string> = { Sepi: "bg-leaf", Sedang: "bg-leaf/30", Ramai: "bg-coral" };
 
 // Label kecil Live dengan titik berdenyut.
 function LiveDot() {
@@ -29,6 +28,10 @@ export default function TiketHariIni() {
   const t = useTiket();
   // Tiga pengunjung terakhir yang masih di dalam.
   const masuk = t.recent.filter((x) => x.status === "Di dalam").slice(0, 3);
+  const kapasitas = t.capacity; // dari server via /crowd; null sampai data tersedia
+  const persen = t.percent; // dari server via /crowd; null bila kapasitas belum ada
+  const label = t.label; // tingkat keramaian; null bila tidak ada data
+
   return (
     <section className="flex flex-col rounded-3xl bg-white p-6">
       <div className="flex items-start justify-between gap-3">
@@ -39,13 +42,21 @@ export default function TiketHariIni() {
         <LiveDot />
       </div>
 
-      <p className="mt-5 flex items-end gap-2">
-        <span className="font-display text-[40px] font-semibold leading-none tabular-nums text-forest">{t.inside}</span>
-        <span className="pb-1 text-sm text-abu">/ {t.capacity} orang di dalam</span>
-      </p>
-      <div className="mt-3">
-        <ProgressBar value={t.percent} fillClass={BAR[t.label]} trackClass="bg-ink/10" height="h-3" />
-      </div>
+      {t.ready && kapasitas != null && persen != null ? (
+        <>
+          <p className="mt-5 flex items-end gap-2">
+            <span className="font-display text-[40px] font-semibold leading-none tabular-nums text-forest">{t.inside}</span>
+            <span className="pb-1 text-sm text-abu">/ {kapasitas} orang di dalam</span>
+          </p>
+          <div className="mt-3">
+            <ProgressBar value={persen} fillClass={BAR[label ?? "Sepi"]} trackClass="bg-ink/10" height="h-3" />
+          </div>
+        </>
+      ) : (
+        <p className="mt-5 grid h-40 place-items-center rounded-2xl bg-paper text-sm text-abu">
+          {t.error ? "Tidak bisa terhubung ke server." : "Memuat data..."}
+        </p>
+      )}
 
       <dl className="mt-4 grid grid-cols-3 gap-2 text-center">
         {[["Terjual", `${t.sold} tiket`], ["Belum datang", `${t.waiting} orang`], ["Sudah keluar", `${t.out} orang`]].map(([k, v]) => (

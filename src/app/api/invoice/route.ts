@@ -1,4 +1,4 @@
-import { SLOTS, WAHANA, bookingLabel } from "@/data/wahana";
+import { apiFetch } from "@/lib/server/api";
 import { buildInvoicePdf } from "@/lib/invoice-pdf";
 import { rupiah } from "@/lib/format";
 import { PAYMENT_METHODS } from "@/lib/payment";
@@ -34,25 +34,35 @@ export async function POST(request) {
     return json(400, { ok: false, error: "invalid_payload" });
   }
 
-  // --- Validasi & derivasi data di server --------------------------------
+  // --- Validasi & derivasi data dari backend --------------------------------
   const { code, name, whatsapp, slot, payment } = input ?? {};
   if (typeof code !== "string" || !CODE_PATTERN.test(code)) return json(400, { ok: false, error: "invalid_payload" });
   if (typeof name !== "string" || !name.trim() || name.length > 80) return json(400, { ok: false, error: "invalid_payload" });
   const wa = normalizeWhatsapp(typeof whatsapp === "string" ? whatsapp : "");
   if (!WA_PATTERN.test(wa)) return json(400, { ok: false, error: "invalid_whatsapp" });
-  const slotInfo = SLOTS.find((s) => s.id === slot);
-  if (!slotInfo) return json(400, { ok: false, error: "invalid_payload" });
   if (!PAYMENT_METHODS.includes(payment)) return json(400, { ok: false, error: "invalid_payload" });
 
   const rawItems = Array.isArray(input?.items) ? input.items : [];
   if (!rawItems.length || rawItems.length > 50) return json(400, { ok: false, error: "invalid_payload" });
+
+  // Daftar wahana dan jam booking diambil dari backend supaya nama, harga, dan total invoice
+  // selalu sesuai data server, bukan dari daftar klien atau katalog lokal.
+  const ridesRes = await apiFetch("/rides");
+  const rides = (await ridesRes.json().catch(() => null)) as Array<{ id: string; name: string; unit: string; price: number }> | null;
+  const slotsRes = await apiFetch("/booking-slots");
+  const slots = (await slotsRes.json().catch(() => null)) as Array<{ id: string; label: string; range: string }> | null;
+  if (!ridesRes.ok || !Array.isArray(rides)) return json(400, { ok: false, error: "invalid_rides" });
+  if (!slotsRes.ok || !Array.isArray(slots)) return json(400, { ok: false, error: "invalid_slots" });
+  const slotInfo = slots.find((s) => s.id === slot);
+  if (!slotInfo) return json(400, { ok: false, error: "invalid_payload" });
+
   const items = [];
   for (const raw of rawItems) {
-    const wahana = WAHANA.find((w) => w.id === raw?.id);
+    const wahana = rides.find((w) => w.id === raw?.id);
     const qty = Number(raw?.qty);
-    // Harga & nama dari katalog server, jadi klien tidak bisa memanipulasi nominal.
     if (!wahana || !Number.isInteger(qty) || qty < 1 || qty > 99) return json(400, { ok: false, error: "invalid_payload" });
-    items.push({ name: bookingLabel(wahana), qty, price: wahana.price });
+    const nama = !wahana.unit || !wahana.unit.trim() ? wahana.name : wahana.unit.toLowerCase().includes("menit") ? `${wahana.name} (${wahana.unit})` : `${wahana.name} (per ${wahana.unit})`;
+    items.push({ name: nama, qty, price: wahana.price });
   }
   const total = items.reduce((sum, item) => sum + item.qty * item.price, 0);
 

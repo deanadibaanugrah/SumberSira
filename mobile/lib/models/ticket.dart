@@ -22,20 +22,20 @@ enum PaymentMethod {
 // Status pembayaran tiket di server. Selain paid, pembayaran masih harus dituntaskan.
 enum PaymentStatus { pending, paid, failed, expired, cancelled }
 
-// Pilihan parkir beserta tarifnya.
+// Pilihan parkir. Tarifnya tidak disimpan di aplikasi: selalu dibaca dari backend (GET /pricing)
+// supaya angka di layar sama dengan yang ditagih server.
 enum Parking {
-  none('Tidak', 0),
-  motor('Motor', 3000),
-  mobil('Mobil', 10000),
-  bus('Bus', 20000);
+  none('Tidak'),
+  motor('Motor'),
+  mobil('Mobil'),
+  bus('Bus');
 
-  const Parking(this.label, this.price);
+  const Parking(this.label);
   final String label;
-  final int price;
 }
 
 // [P2 Class dan Object] Class Ticket adalah cetakan; setiap tiket yang dibuat adalah object-nya.
-// Satu tiket masuk online. Harga tiket Rp5.000 per orang usia 3 tahun ke atas, balita gratis.
+// Satu tiket masuk online. Harga tiket ditentukan backend, balita gratis.
 class Ticket {
   Ticket({
     required this.code,
@@ -96,7 +96,6 @@ class Ticket {
   // "2026-11-12" -> "Kamis, 12 November 2026". Butuh initializeDateFormatting('id_ID') yang sudah dipanggil di main().
   static String tanggalPanjang(String ymd) => DateFormat('EEEE, d MMMM yyyy', 'id_ID').format(DateTime.parse(ymd));
 
-  static const int pricePerPerson = 5000;
   final String code;
   final String name;
   final String whatsapp;
@@ -115,7 +114,7 @@ class Ticket {
   // [P2 Null Safety] Tanda ? artinya boleh kosong (null) selama tiket belum discan.
   String? checkInAt;
 
-  // Total sebenarnya dihitung server (sumber kebenaran). Null hanya untuk data lama: dihitung dari harga bawaan.
+  // Total sebenarnya dihitung server (sumber kebenaran). Null hanya bila respons server tidak memuatnya.
   final int? amount;
   // Status pembayaran di server; berubah saat polling (mis. tunai dikonfirmasi petugas di loket).
   PaymentStatus paymentStatus;
@@ -127,7 +126,8 @@ class Ticket {
   final String? expiresAt;
 
   int get people => adults + kids;
-  int get total => amount ?? adults * pricePerPerson + parking.price;
+  // Null berarti server tidak mengirim total; layar menampilkan "—", bukan harga karangan.
+  int? get total => amount;
 
   // Teks baris Pembayaran di e-tiket, sesuai metode dan status pembayaran.
   String get labelPembayaran => switch (payment) {

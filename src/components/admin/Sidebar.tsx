@@ -114,8 +114,6 @@ export default function Sidebar({ admin }: { admin: AdminProfile }) {
             <span className="relative grid size-11 shrink-0 place-items-center rounded-full bg-forest text-base font-semibold text-white">
               {/* Inisial nama admin, misalnya Pak Yono jadi PY */}
               {admin.name.split(" ").map((w) => w[0]).join("").slice(0, 2).toUpperCase()}
-              <span className="absolute -right-1 -top-1 grid size-[18px] place-items-center rounded-full bg-leaf text-[10px] font-semibold ring-2 ring-white"
-                    aria-label="3 notifikasi">3</span>
             </span>
             <span className={`min-w-[108px] flex-1 overflow-hidden whitespace-nowrap ${hideWhenCollapsed}`}>
               <span className="block truncate text-[15px] font-semibold text-ink">{admin.name}</span>

@@ -9,5 +9,9 @@ import { useCrowd } from "@/lib/crowd-store";
 // angka yang sama dengan yang dilihat pengunjung di aplikasi.
 export default function LiveCrowdStat() {
   const t = useCrowd();
-  return <StatCard variant="tall" icon={Users} value={t.label} label="Tingkat Keramaian" note={`${t.percent}% kapasitas · ${t.inside} orang`} />;
+  const data = t.data;
+  const angka = t.ready && data ? data.inside : 0;
+  const persen = t.ready && data ? data.percent : null;
+  const label = t.ready && data ? data.label : null;
+  return <StatCard variant="tall" icon={Users} value={t.ready ? label : "…"} label="Tingkat Keramaian" note={t.ready ? `${persen}% kapasitas · ${angka} orang` : undefined} />;
 }

@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
-// Satu alat sewa atau wahana, dibaca dari mock JSON (assets/data/wahana.json).
+// Satu alat sewa atau wahana dari backend (GET /rides).
 class Wahana {
   const Wahana({required this.id, required this.name, required this.category, required this.price, this.unit = ''});
 

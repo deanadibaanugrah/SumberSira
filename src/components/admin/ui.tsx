@@ -2,7 +2,7 @@
 // Gaya diseragamkan dengan aplikasi mobile (Liquid Glass): lapisan navigasi (sidebar dan header) dari kaca terang,
 // isi halaman berupa kartu putih solid membulat, angka besar memakai Fraunces, dan warna hanya dari palet
 // (Hijau Tua, Hijau Daun, Ink, Abu, Abu Muda, Coral untuk ramai/tolak/keluhan).
-import { Bell, Search } from "lucide-react";
+import { Search } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import type { ButtonHTMLAttributes, ElementType, ReactNode } from "react";
 
@@ -28,10 +28,7 @@ export function AdminHeader({ title, subtitle, action, search }: { title: ReactN
           <input {...searchProps} placeholder={search?.placeholder ?? "Cari booking, wahana, ulasan..."}
                  className="w-full bg-transparent text-sm text-ink outline-none placeholder:text-ink/55" />
         </label>
-        <button type="button" aria-label="Notifikasi (ada yang baru)" className="relative grid size-12 place-items-center rounded-full border border-ink/10 bg-white text-ink">
-          <Bell size={20} />
-          <span className="absolute right-3 top-2.5 size-2.5 rounded-full bg-leaf ring-2 ring-white" />
-        </button>
+
       </div>
     </header>
   );

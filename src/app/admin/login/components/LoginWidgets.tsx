@@ -24,32 +24,36 @@ function Ping() {
 // Widget Live Crowd: cincin progres persen keramaian dan jumlah orang di dalam.
 export function CrowdWidget({ className = "" }) {
   const t = useCrowd();
+  const data = t.data;
+  const persen = t.ready && data ? data.percent : null;
+  const label = t.ready && data ? data.label : null;
+  const color = label === "Ramai" ? "#e07a5f" : "#ffffff";
   return (
     <div className={`${glass} ${className}`} style={{ animation: "float-y 6s ease-in-out infinite" }}>
       <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.14em] text-white/75"><Ping /> Live Crowd</p>
       <div className="mt-4 flex items-center gap-4">
         {/* Cincin progres: panjang garis mengikuti persen keramaian, jadi merah kalau Ramai */}
-        <svg viewBox="0 0 80 80" className="size-20 shrink-0 -rotate-90" role="img" aria-label={`Keramaian ${t.percent}%`}>
+        <svg viewBox="0 0 80 80" className="size-20 shrink-0 -rotate-90" role="img" aria-label={`Keramaian ${persen ?? 0}%`}>
           <circle cx="40" cy="40" r={R} fill="none" stroke="rgba(255,255,255,0.15)" strokeWidth="8" />
-          <circle cx="40" cy="40" r={R} fill="none" stroke={t.label === "Ramai" ? "#e07a5f" : "#ffffff"} strokeWidth="8" strokeLinecap="round"
-                  strokeDasharray={C} strokeDashoffset={C * (1 - t.percent / 100)} style={{ transition: "stroke-dashoffset 0.8s ease" }} />
+          <circle cx="40" cy="40" r={R} fill="none" stroke={color} strokeWidth="8" strokeLinecap="round"
+                  strokeDasharray={C} strokeDashoffset={C * (1 - (persen ?? 0) / 100)} style={{ transition: "stroke-dashoffset 0.8s ease" }} />
         </svg>
         <div>
-          <p className="font-display text-[34px] font-semibold leading-none">{t.ready ? `${t.percent}%` : "..."}</p>
-          <p className="mt-1.5 inline-flex rounded-full bg-white px-2.5 py-0.5 text-xs font-semibold text-forest">{t.label}</p>
+          <p className="font-display text-[34px] font-semibold leading-none">{persen == null ? "–" : `${persen}%`}</p>
+          <p className="mt-1.5 inline-flex rounded-full bg-white px-2.5 py-0.5 text-xs font-semibold text-forest">{label ?? "Menunggu data"}</p>
         </div>
       </div>
-      <p className="mt-4 flex items-center gap-2 text-sm text-white/85"><Users size={15} /> {t.ready ? t.inside : "-"} dari {t.capacity} orang di dalam</p>
+      <p className="mt-4 flex items-center gap-2 text-sm text-white/85"><Users size={15} /> {t.ready && data ? `${data.inside} dari ${data.capacity} orang di dalam` : "Menunggu data dari server"}</p>
     </div>
   );
 }
 
 // Widget prakiraan pengunjung hari ini dari server (/crowd → forecast) dengan grafik batang kecil.
-// Saat server belum terjangkau, batangnya memakai bentuk dekoratif seperti desain awal.
 export function TiketWidget({ className = "" }) {
   const t = useCrowd();
-  const forecast = t.forecast;
-  const bars = forecast.length ? forecast.map((f) => f.count) : [30, 45, 38, 60, 52, 80, 100];
+  const data = t.data;
+  const forecast = data?.forecast ?? [];
+  const bars = forecast.length ? forecast.map((f) => f.count) : [];
   const top = Math.max(...bars, 1);
   const total = forecast.reduce((s, f) => s + f.count, 0);
   return (
@@ -62,6 +66,7 @@ export function TiketWidget({ className = "" }) {
                 style={{ height: `${Math.round((h / top) * 100)}%`, animationDelay: `${300 + i * 80}ms` }} />
         ))}
       </div>
+      {!t.ready && <p className="mt-3 text-xs text-white/75">Prakiraan belum tersedia. Tunggu backend menyala.</p>}
     </div>
   );
 }
@@ -81,9 +86,10 @@ export function JamBukaWidget({ className = "" }) {
 // Versi ringkas untuk layar kecil (di atas form).
 export function CrowdChip() {
   const t = useCrowd();
+  const data = t.data;
   return (
     <span className="inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/10 px-3 py-1.5 text-xs text-white backdrop-blur-md">
-      <Ping /> Live Crowd {t.ready ? `${t.percent}% · ${t.label}` : "..."}
+      <Ping /> Live Crowd {t.ready && data ? `${data.percent}% · ${data.label}` : "Menunggu data"}
     </span>
   );
 }

@@ -2,8 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sumber_sira/data/app_state.dart';
-import 'package:sumber_sira/data/crowd_state.dart';
-import 'package:sumber_sira/data/dummy_data.dart';
+import 'package:sumber_sira/features/crowd/viewmodel/crowd_state.dart';
 import 'package:sumber_sira/models/booking.dart';
 import 'package:sumber_sira/models/ticket.dart';
 import 'package:sumber_sira/utils/format.dart';
@@ -47,10 +46,13 @@ void main() {
     expect(nomorWaInternasional('0812 3456 7890'), '6281234567890');
   });
 
-  test('total tiket dihitung dari jumlah orang dan parkir', () {
-    final t = Ticket(code: 'TK-2001', name: 'Rani', whatsapp: '081211112222', adults: 2, parking: Parking.motor, boughtAt: '10.00');
+  test('total tiket memakai angka dari server, bukan harga bawaan', () {
+    final t = Ticket(code: 'TK-2001', name: 'Rani', whatsapp: '081211112222', adults: 2, parking: Parking.motor, boughtAt: '10.00', amount: 13000);
     expect(t.total, 13000);
     expect(t.people, 2);
+    // Respons tanpa total tidak ditebak memakai harga lokal.
+    final tanpaTotal = Ticket(code: 'TK-2002', name: 'Rani', adults: 1, boughtAt: '10.00');
+    expect(tanpaTotal.total, isNull);
   });
 
   test('riwayat tiket dan booking dicari lewat nomor WhatsApp', () {
@@ -77,9 +79,8 @@ void main() {
     expect(s.bookingsFor('081299998888').single.code, b.code);
   });
 
-  test('jam booking selang 1 jam dan label keramaian', () {
-    expect(DummyData.bookingSlots.length, 8);
-    expect(labelJam(DummyData.bookingSlots.first), '08.00 - 09.00');
+  test('label jam booking dan label keramaian', () {
+    expect(labelJam('08-09'), '08.00 - 09.00');
     expect(CrowdState.labelFor(10), 'Sepi');
     expect(CrowdState.labelFor(62), 'Sedang');
     expect(CrowdState.labelFor(95), 'Ramai');

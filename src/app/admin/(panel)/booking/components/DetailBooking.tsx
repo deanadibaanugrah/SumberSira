@@ -1,23 +1,21 @@
-"use client";
+﻿"use client";
 
 import { Check, X } from "lucide-react";
 import { useState } from "react";
 
 import WahanaIcon from "@/components/WahanaIcon";
 import { Avatar, Card, CardTitle, Modal, PrimaryButton, StatusPill } from "@/components/admin/ui";
-import { WAHANA } from "@/data/wahana";
 import { batalkanPembayaran, tandaiLunas, type Booking } from "@/lib/booking-store";
 import { rupiah } from "@/lib/format";
 
-// Katalog wahana berdasarkan id, untuk ikon item (nama dan harga item datang dari backend).
-const CATALOG = Object.fromEntries(WAHANA.map((w) => [w.id, w]));
+// Ikon item sewa dari id wahana yang dikirim backend (mis. "ban-besar").
 
 // "2026-11-15" -> "15 Nov 2026" (WIB).
 const tanggalSingkat = (d: string) =>
   new Intl.DateTimeFormat("id-ID", { day: "numeric", month: "short", year: "numeric", timeZone: "Asia/Jakarta" }).format(new Date(`${d}T00:00:00+07:00`));
 
-// Chip metode + status pembayaran, mis. "QRIS · Lunas".
-const chipPembayaran = (b: Booking) => `${b.payment?.method === "cash" ? "Tunai" : "QRIS"} · ${b.status}`;
+// Chip metode + status pembayaran, mis. "QRIS Â· Lunas".
+const chipPembayaran = (b: Booking) => `${b.payment?.method === "cash" ? "Tunai" : "QRIS"} Â· ${b.status}`;
 
 type DetailBookingProps = {
   selected: Booking | null;
@@ -64,7 +62,7 @@ export default function DetailBooking({ selected, canKelola }: DetailBookingProp
         <Avatar name={selected.name} size={52} solid />
         <div className="min-w-0 flex-1">
           <p className="text-base font-semibold text-ink">{selected.name}</p>
-          <p className="text-[13px] text-abu">Pesan lewat aplikasi · {selected.time}</p>
+          <p className="text-[13px] text-abu">Pesan lewat aplikasi Â· {selected.time}</p>
         </div>
         <StatusPill status={selected.status} />
       </div>
@@ -78,7 +76,7 @@ export default function DetailBooking({ selected, canKelola }: DetailBookingProp
       <ul className="mt-2 space-y-2.5">
         {selected.lines.map((l) => (
           <li key={l.rideId} className="flex h-[52px] items-center gap-3 rounded-2xl bg-paper px-3">
-            <span className="grid size-8 shrink-0 place-items-center rounded-full bg-white text-forest"><WahanaIcon name={CATALOG[l.rideId]?.icon ?? l.rideId} variant="admin" size={15} /></span>
+            <span className="grid size-8 shrink-0 place-items-center rounded-full bg-white text-forest"><WahanaIcon name={l.rideId} variant="admin" size={15} /></span>
             <span className="flex-1 text-sm font-semibold text-ink">{l.qty}x {l.name}</span>
             <span className="font-mono text-sm text-ink">{rupiah(l.subtotal)}</span>
           </li>

@@ -6,7 +6,7 @@ import { Card, CardTitle, PrimaryButton } from "@/components/admin/ui";
 import type { useTiket } from "@/lib/tiket-store";
 
 // Warna batang kapasitas sesuai status keramaian.
-const BAR = { Sepi: "bg-leaf", Sedang: "bg-leaf/30", Ramai: "bg-coral" };
+const BAR: Record<string, string> = { Sepi: "bg-leaf", Sedang: "bg-leaf/30", Ramai: "bg-coral" };
 
 type ScanTiketProps = {
   tiket: ReturnType<typeof useTiket>;
@@ -20,13 +20,20 @@ type ScanTiketProps = {
 
 // Kartu scan tiket di pintu masuk: form kode tiket, pesan hasil scan, dan kapasitas terisi (angka Live Crowd).
 export default function ScanTiket({ tiket, kode, onKode, onScan, inputRef, hasil, sibuk = false }: ScanTiketProps) {
+  const kapasitas = tiket.capacity; // dari server via /crowd; null sampai tiket/kapasitas tersedia
+  const persen = tiket.percent; // persen kapasitas dari server; null bila kapasitas belum ada
+  const label = tiket.label; // tingkat keramaian; null bila tidak ada data
+  const siap = tiket.ready;
+  const warna = BAR[label ?? "Sepi"];
+  const siapKapasitas = siap && kapasitas != null;
+
   return (
     <Card>
       <CardTitle sub="Ketik atau scan kode di e-tiket pengunjung, mis. TK-1043"
                  right={<span className="flex h-8 items-center gap-2 rounded-full bg-leaf/12 px-3 text-[13px] font-semibold text-forest">
-                   <span className="relative flex size-2"><span className="absolute inline-flex size-full animate-ping rounded-full bg-leaf opacity-60" /><span className="relative size-2 rounded-full bg-leaf" /></span>
-                   Live
-                 </span>}>
+                    <span className="relative flex size-2"><span className="absolute inline-flex size-full animate-ping rounded-full bg-leaf opacity-60" /><span className="relative size-2 rounded-full bg-leaf" /></span>
+                    Live
+                  </span>}>
         Scan Tiket di Pintu Masuk
       </CardTitle>
       {/* Form scan kode tiket */}
@@ -48,21 +55,29 @@ export default function ScanTiket({ tiket, kode, onKode, onScan, inputRef, hasil
 
       {/* Jumlah pengunjung di dalam dan batang kapasitas (inilah angka Live Crowd) */}
       <div className="mt-6 rounded-2xl bg-paper p-5">
-        <div className="flex flex-wrap items-end justify-between gap-3">
-          <div>
-            <p className="text-[13px] text-abu">Pengunjung di dalam sekarang</p>
-            <p className="mt-1 font-display text-[32px] font-semibold leading-none tabular-nums text-forest">{tiket.inside}<span className="ml-1.5 font-sans text-base font-normal text-abu">/ {tiket.capacity} orang</span></p>
-          </div>
-          <span className="inline-flex items-center gap-1.5 rounded-full border border-ink/10 bg-white px-3 py-1.5 text-xs font-semibold text-ink">
-            <span className={`size-1.5 rounded-full ${BAR[tiket.label]}`} aria-hidden="true" />{tiket.label} · {tiket.percent}%
-          </span>
-        </div>
-        <div className="mt-4">
-          <ProgressBar value={tiket.percent} fillClass={BAR[tiket.label]} trackClass="bg-ink/10" height="h-3" />
-        </div>
-        <p className="mt-3 text-xs text-abu">
-          Angka ini tampil di Live Crowd aplikasi pengunjung{tiket.updatedAt ? `, terakhir berubah pukul ${tiket.updatedAt}` : ""}.
-        </p>
+        {siapKapasitas && persen != null ? (
+          <>
+            <div className="flex flex-wrap items-end justify-between gap-3">
+              <div>
+                <p className="text-[13px] text-abu">Pengunjung di dalam sekarang</p>
+                <p className="mt-1 font-display text-[32px] font-semibold leading-none tabular-nums text-forest">{tiket.inside}<span className="ml-1.5 font-sans text-base font-normal text-abu">/ {kapasitas} orang</span></p>
+              </div>
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-ink/10 bg-white px-3 py-1.5 text-xs font-semibold text-ink">
+                <span className="size-1.5 rounded-full" style={{ backgroundColor: warna }} aria-hidden="true" />{label} · {persen}%
+              </span>
+            </div>
+            <div className="mt-4">
+              <ProgressBar value={persen} fillClass={warna} trackClass="bg-ink/10" height="h-3" />
+            </div>
+            <p className="mt-3 text-xs text-abu">
+              Angka ini tampil di Live Crowd aplikasi pengunjung{tiket.updatedAt ? `, terakhir berubah pukul ${tiket.updatedAt}` : ""}.
+            </p>
+          </>
+        ) : (
+          <p className="grid h-24 place-items-center rounded-2xl bg-white px-4 text-center text-sm text-abu">
+            {tiket.error ? "Tidak bisa terhubung ke server." : "Memuat data tiket..."}
+          </p>
+        )}
       </div>
     </Card>
   );

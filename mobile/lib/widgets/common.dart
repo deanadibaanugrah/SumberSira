@@ -385,7 +385,8 @@ class TotalBar extends StatelessWidget {
   const TotalBar({super.key, required this.label, required this.amount, required this.button, required this.onPressed, this.buttonWidth = 190, this.loading = false});
 
   final String label;
-  final int amount;
+  // Null = tarif belum termuat dari server; tampilkan "—" alih-alih Rp0.
+  final int? amount;
   final String button;
   final VoidCallback onPressed;
   final double buttonWidth;
@@ -400,7 +401,7 @@ class TotalBar extends StatelessWidget {
           child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
             Text(label, maxLines: 1, overflow: TextOverflow.ellipsis, style: AppText.footnote),
             const SizedBox(height: 2),
-            FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.centerLeft, child: Text(rupiah(amount), style: AppText.hero(24))),
+            FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.centerLeft, child: Text(amount == null ? '—' : rupiah(amount!), style: AppText.hero(24))),
           ]),
         ),
         const SizedBox(width: 12),

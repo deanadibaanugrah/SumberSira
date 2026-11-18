@@ -11,13 +11,14 @@ import { createPollStore } from "@/lib/live/poll-store";
 // ikut naik atau turun untuk hari itu saja. Data diambil berkala dan dibagi ke semua komponen (dashboard, tiket, login).
 // Live Crowd = jumlah orang dari tiket yang sudah discan masuk dan belum keluar, dibagi kapasitas.
 
-export const KAPASITAS = 300;
-export const PARKIR = [
-  { id: "none", label: "Tidak", price: 0 },
-  { id: "motor", label: "Motor", price: 3000 },
-  { id: "mobil", label: "Mobil", price: 10000 },
-  { id: "bus", label: "Bus", price: 20000 },
-];
+// Label tampilan parkir dari server (GET /pricing). Tidak ada daftar harga di sini supaya
+// angka di layar selalu sesuai harga yang dipakai backend saat membuat tagihan.
+export const PARKIR_LABEL: Record<string, string> = {
+  none: "-",
+  motor: "Motor",
+  mobil: "Mobil",
+  bus: "Bus",
+};
 
 // Bentuk satu tiket seperti yang dikirim backend (tanpa id: kode tiket adalah identitasnya).
 type ApiTicket = {
@@ -72,16 +73,17 @@ function fromApi(t: ApiTicket): Ticket {
 
 // Ringkasan untuk Live Crowd, dashboard admin, dan halaman tiket.
 // Menghitung orang di dalam, persen kapasitas, yang belum datang, yang sudah keluar, dan daftar check-in terbaru.
-export function ringkasan(tickets: Ticket[], capacity = KAPASITAS) {
+// Kapasitas boleh null (belum ada data dari server) -> persen dan label juga null, bukan angka default.
+export function ringkasan(tickets: Ticket[], capacity: number | null) {
   const sum = (status: Ticket["status"]) => tickets.filter((t) => t.status === status).reduce((n, t) => n + jumlahOrang(t), 0);
   const inside = sum("Di dalam");
-  const percent = Math.min(100, Math.round((inside / capacity) * 100));
+  const percent = capacity ? Math.min(100, Math.round((inside / capacity) * 100)) : null;
   const recent = tickets
     .filter((t) => t.checkInMs)
     .sort((a, b) => Math.max(b.checkInMs ?? 0, b.checkOutMs ?? 0) - Math.max(a.checkInMs ?? 0, a.checkOutMs ?? 0));
   // Perubahan terakhir (masuk atau keluar) untuk keterangan "terakhir berubah pukul ...".
   const lastMs = recent.length ? Math.max(recent[0].checkInMs ?? 0, recent[0].checkOutMs ?? 0) : 0;
-  return { inside, percent, capacity, label: statusKeramaian(percent), waiting: sum("Belum masuk"), out: sum("Keluar"), sold: tickets.length, recent, updatedAt: lastMs ? jam(lastMs) : null };
+  return { inside, percent, capacity, label: percent == null ? null : statusKeramaian(percent), waiting: sum("Belum masuk"), out: sum("Keluar"), sold: tickets.length, recent, updatedAt: lastMs ? jam(lastMs) : null };
 }
 
 const store = createPollStore<Ticket[]>(async () => {
@@ -92,8 +94,9 @@ const store = createPollStore<Ticket[]>(async () => {
 // Hook utama: dipakai halaman admin mana pun untuk membaca data tiket dan ringkasan Live Crowd yang selalu terbaru.
 export function useTiket() {
   const { data, ready, error } = store.use();
-  // Kapasitas resmi ikut diatur server (GET /pricing, dikirim lewat /crowd), jadi persen keramaian dihitung dari angka itu.
-  const { capacity } = useCrowd();
+  const { data: crowd } = useCrowd();
+  // Kapasitas resmi dari server (lewat /crowd); null sampai data tiket/kapasitas tersedia.
+  const capacity = crowd?.capacity ?? null;
   const tickets = useMemo(() => data ?? [], [data]);
   const summary = useMemo(() => ringkasan(tickets, capacity), [tickets, capacity]);
   return { tickets, ...summary, ready, error, refresh: store.refresh };

@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowLeft, ArrowRight, Eye, EyeOff, Loader2, Lock, Mail, ShieldCheck, Sparkles } from "lucide-react";
+import { ArrowLeft, ArrowRight, Eye, EyeOff, Loader2, Lock, Mail, ShieldCheck } from "lucide-react";
 import Link from "next/link";
 import { useActionState, useState } from "react";
 
@@ -14,12 +14,6 @@ import { validateEmail } from "@/lib/validation/email";
 const field = "flex h-12 items-center gap-3 rounded-2xl border border-transparent bg-paper pl-1.5 pr-3 transition focus-within:border-leaf focus-within:bg-white focus-within:ring-4 focus-within:ring-leaf/15";
 const iconBox = "grid size-9 shrink-0 place-items-center rounded-xl bg-white text-forest shadow-sm";
 
-// Petunjuk akun demo untuk presentasi (hanya ditampilkan di layar). Pengecekan tetap di server memakai hash.
-const DEMO_ACCOUNTS = [
-  { label: "Admin", email: "admin@sumbersira.id", password: "sumbersira" },
-  { label: "Petugas", email: "petugas@sumbersira.id", password: "petugas123" },
-];
-
 // next = halaman tujuan setelah login (sudah diamankan di server).
 export default function LoginForm({ next }: { next: string }) {
   // [state dari server] error dan email terakhir dikembalikan loginAction; pending = sedang dicek server.
@@ -32,13 +26,6 @@ export default function LoginForm({ next }: { next: string }) {
   // Pesan salah format email dari pengecekan di browser, tampil di bawah kolom email.
   const [emailError, setEmailError] = useState<string | null>(null);
   const error = state?.error;
-
-  // Tombol Isi: mengisi email dan password salah satu akun demo.
-  const isiAkunDemo = (akun: (typeof DEMO_ACCOUNTS)[number]) => {
-    setEmail(akun.email);
-    setPassword(akun.password);
-    setEmailError(null);
-  };
 
   // Sebelum dikirim: email yang salah format tidak dikirim ke server, pesannya muncul di bawah kolom email.
   const cekSebelumKirim = (e: React.FormEvent<HTMLFormElement>) => {
@@ -106,21 +93,6 @@ export default function LoginForm({ next }: { next: string }) {
           {pending ? "Memeriksa..." : "Masuk ke Dasbor"}
           {!pending && <ArrowRight size={18} className="transition group-hover:translate-x-1" />}
         </button>
-
-        {/* Kotak akun demo untuk presentasi: Admin (semua menu) dan Petugas (menu terbatas) */}
-        <div className="mt-6 rounded-2xl border border-dashed border-leaf/40 bg-leaf/12 p-3.5">
-          <p className="flex items-center gap-2 text-[13px] font-semibold text-forest"><Sparkles size={15} /> Akun demo</p>
-          {DEMO_ACCOUNTS.map((akun) => (
-            <div key={akun.email} className="mt-2.5 flex items-center gap-3">
-              <span className="w-16 shrink-0 text-[12px] font-semibold text-ink">{akun.label}</span>
-              <p className="min-w-0 flex-1 break-all font-mono text-[11px] leading-snug text-abu">{akun.email}<br />{akun.password}</p>
-              <button type="button" onClick={() => isiAkunDemo(akun)}
-                      className="h-8 shrink-0 rounded-full bg-white px-3.5 text-[12px] font-semibold text-forest shadow-sm transition hover:bg-forest hover:text-white">
-                Isi
-              </button>
-            </div>
-          ))}
-        </div>
 
         <Link href="/" className="mt-6 flex w-fit items-center gap-2 text-sm text-abu hover:text-forest">
           <ArrowLeft size={16} /> Kembali ke halaman utama

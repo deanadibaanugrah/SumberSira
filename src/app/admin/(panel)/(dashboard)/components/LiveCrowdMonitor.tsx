@@ -9,7 +9,7 @@ import { useCrowd } from "@/lib/crowd-store";
 // Tiap batang = perkiraan jumlah orang di dalam pada jam itu. Jam dengan keramaian Sedang ke atas diberi warna hijau tua.
 export default function LiveCrowdMonitor() {
   const { data, ready, error } = useCrowd();
-  const capacity = data?.capacity ?? 300;
+  const capacity = data?.capacity ?? 0;
   const chart = (data?.forecast ?? []).map((f) => ({ label: `${f.hour}.00`, value: f.count }));
   const kosong = chart.every((d) => d.value === 0);
   return (
@@ -25,8 +25,7 @@ export default function LiveCrowdMonitor() {
       </CardTitle>
       <div className="mt-8">
         {chart.length > 0 ? (
-          <BarChart data={chart} ticks={niceTicks(Math.max(...chart.map((d) => d.value)))}
-                    highlight={(d) => d.value >= capacity * 0.4} tooltip={(d) => `${d.value} orang`} />
+          <BarChart data={chart} ticks={niceTicks(Math.max(...chart.map((d) => d.value)))} highlight={(d) => d.value >= capacity * 0.4} tooltip={(d) => `${d.value} orang`} />
         ) : (
           <p className="grid h-[174px] place-items-center rounded-2xl bg-paper px-6 text-center text-sm text-abu">
             {!ready ? (error ? "Tidak bisa terhubung ke server." : "Memuat grafik...") : "Prakiraan keramaian belum tersedia hari ini."}

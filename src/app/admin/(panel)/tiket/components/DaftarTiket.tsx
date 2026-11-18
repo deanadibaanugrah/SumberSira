@@ -2,12 +2,11 @@ import { Banknote, LogIn, LogOut } from "lucide-react";
 
 import { Card, CardTitle, FilterPills, StatusPill } from "@/components/admin/ui";
 import { rupiah } from "@/lib/format";
-import { PARKIR, checkIn, checkOut, jumlahOrang, konfirmasiTunai, type Ticket, type useTiket } from "@/lib/tiket-store";
+import { PARKIR_LABEL, checkIn, checkOut, jumlahOrang, konfirmasiTunai, type Ticket, type useTiket } from "@/lib/tiket-store";
 
 // Pilihan filter status tiket.
 const FILTERS = ["Semua", "Belum masuk", "Di dalam", "Keluar"];
-// Nama parkir untuk tabel (Tidak ditulis sebagai tanda -).
-const PARKIR_LABEL = Object.fromEntries(PARKIR.map((p) => [p.id, p.id === "none" ? "-" : p.label]));
+
 
 type DaftarTiketProps = {
   tiket: ReturnType<typeof useTiket>;

@@ -15,8 +15,6 @@ class AppState extends ChangeNotifier {
   AppState._();
   static final AppState instance = AppState._();
 
-  static const int capacity = 300;
-
   final List<Ticket> tickets = [];
   final List<Booking> bookings = [];
   // Ulasan dari server (GET /reviews). Rata-rata dan jumlahnya juga dari server.
@@ -66,24 +64,41 @@ class AppState extends ChangeNotifier {
     notifyListeners();
   }
 
-  // Tarif tiket dan parkir dari server (GET /pricing). Bila server tidak terjangkau,
-  // dipakai harga bawaan di model (Ticket.pricePerPerson dan tarif di enum Parking).
-  int hargaTiket = Ticket.pricePerPerson;
-  final Map<Parking, int> parkirTarif = {for (final p in Parking.values) p: p.price};
+  // Tarif tiket dan parkir dari server (GET /pricing). Null/kosong sampai server menjawab;
+  // tidak ada harga cadangan di aplikasi supaya angka di layar selalu sama dengan tagihan server.
+  int? hargaTiket;
+  final Map<Parking, int> parkirTarif = {};
+  String? pricingError;
 
-  // Mengambil tarif terbaru dari server. Gagal diam-diam: tarif bawaan tetap dipakai.
+  // Teks info tarif untuk layar Tentang dan Profil. Jujur bila server belum menjawab.
+  String get hargaTiketText =>
+      hargaTiket == null ? 'Tarif belum tersedia' : '${rupiah(hargaTiket!)} per orang (usia 3 tahun ke atas)';
+
+  String get parkirText {
+    if (parkirTarif.isEmpty) return 'Tarif belum tersedia';
+    return [
+      for (final p in const [Parking.motor, Parking.mobil, Parking.bus])
+        if (parkirTarif[p] != null) '${p.label} ${rupiah(parkirTarif[p]!)}',
+    ].join(' · ');
+  }
+
+  // Mengambil tarif terbaru dari server. Bila gagal, tarif terakhir yang benar tetap dipakai
+  // dan pesan galat disimpan untuk layar yang ingin menampilkannya.
   Future<void> refreshPricing() async {
     try {
       final p = await ApiClient.fetchPricing();
       hargaTiket = p.ticketPricePerPerson;
+      parkirTarif.clear();
       for (final t in p.parking) {
-        final cocok = Parking.values.where((v) => v.name == t.key).toList();
-        if (cocok.isNotEmpty) parkirTarif[cocok.first] = t.price;
+        for (final v in Parking.values) {
+          if (v.name == t.key) parkirTarif[v] = t.price;
+        }
       }
-      notifyListeners();
-    } on ApiException {
-      // server tidak terjangkau: tarif bawaan
+      pricingError = null;
+    } on ApiException catch (e) {
+      pricingError = e.message;
     }
+    notifyListeners();
   }
 
   // Menyimpan pilihan pengingat jam sepi (Switch di Profil).

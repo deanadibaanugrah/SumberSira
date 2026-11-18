@@ -16,7 +16,7 @@ class CrowdInfo {
         inside: j['inside'] as int,
         percent: j['percent'] as int,
         label: j['label'] as String,
-        capacity: (j['capacity'] as int?) ?? 300,
+        capacity: j['capacity'] as int,
         updatedAt: j['updatedAt'] as String?,
         forecast: [
           for (final f in (j['forecast'] as List? ?? const []))

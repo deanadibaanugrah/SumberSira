@@ -16,6 +16,7 @@ const store = createPollStore<Crowd>(() => api<Crowd>("GET", "/api/crowd"), 10_0
 
 export function useCrowd() {
   const { data, ready, error } = store.use();
-  const c = data ?? { inside: 0, percent: 0, label: "Sepi", capacity: 300, updatedAt: null, forecast: [] };
-  return { data, ...c, ready, error, refresh: store.refresh };
+  // Tidak ada angka cadangan: data harus datang dari backend (lewat BFF /api/crowd) supaya
+  // tampilan tidak pernah menampilkan angka yang bukan milik server.
+  return { data, ready, error, refresh: store.refresh };
 }

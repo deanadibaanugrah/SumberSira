@@ -4,19 +4,19 @@ import 'package:flutter/material.dart';
 import 'package:intl/date_symbol_data_local.dart';
 
 import 'data/app_state.dart';
-import 'data/chat_controller.dart';
+import 'features/chat/viewmodel/chat_controller.dart';
 import 'models/booking.dart';
-import 'screens/about_screen.dart';
-import 'screens/ai_photo_screen.dart';
-import 'screens/checkout_screen.dart';
-import 'screens/eticket_screen.dart';
-import 'screens/invoice_screen.dart';
-import 'screens/main_shell.dart';
-import 'screens/onboarding_screen.dart';
-import 'screens/payment_screen.dart';
-import 'screens/reviews_screen.dart';
-import 'screens/splash_screen.dart';
-import 'screens/ticket_form_screen.dart';
+import 'features/about/view/about_screen.dart';
+import 'features/ai_photo/view/ai_photo_screen.dart';
+import 'features/booking/view/checkout_screen.dart';
+import 'features/tickets/view/eticket_screen.dart';
+import 'features/booking/view/invoice_screen.dart';
+import 'features/shell/view/main_shell.dart';
+import 'features/onboarding/view/onboarding_screen.dart';
+import 'features/booking/view/payment_screen.dart';
+import 'features/reviews/view/reviews_screen.dart';
+import 'features/splash/view/splash_screen.dart';
+import 'features/tickets/view/ticket_form_screen.dart';
 import 'theme/app_theme.dart';
 import 'utils/routes.dart';
 
@@ -47,7 +47,9 @@ Future<void> main() async {
     debugPrint('loadSettings gagal: $e');
   }
   runApp(const SumberSiraApp());
-  // Pertanyaan cepat dimuat setelah UI tampil. Bila server belum terjangkau, daftar bawaan tetap dipakai.
+  // Data awal dimuat setelah UI tampil. Bila server belum terjangkau, daftar tetap kosong
+  // dan layar menampilkan status belum terhubung (tidak ada data bawaan).
+  unawaited(AppState.instance.refreshPricing());
   unawaited(ChatController.instance.init());
 }
 

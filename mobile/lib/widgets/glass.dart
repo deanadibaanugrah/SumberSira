@@ -57,9 +57,12 @@ class Glass extends StatelessWidget {
       child: Padding(padding: padding, child: child),
     );
     if (!solid) {
-      box = BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 14, sigmaY: 14),
-        child: box,
+      // RepaintBoundary: blur tidak ikut digambar ulang saat bagian lain layar berubah, jadi gulir tetap lancar.
+      box = RepaintBoundary(
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 14, sigmaY: 14),
+          child: box,
+        ),
       );
     }
     box = ClipRRect(borderRadius: shape, child: box);

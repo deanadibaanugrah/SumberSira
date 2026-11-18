@@ -38,6 +38,20 @@ class _MainShellState extends State<MainShell> {
     super.dispose();
   }
 
+  // Membuka tab: tampilan berganti dengan animasi, dan data tab itu dimuat ulang dari server (seperti hard refresh).
+  void _openTab(int i) {
+    final same = i == _index;
+    setState(() => _index = i);
+    if (same) return;
+    CrowdState.instance.refresh();
+    AppState.instance.refreshPricing();
+    if (i == 1) {
+      final wa = AppState.instance.savedWhatsapp;
+      if (wa.isNotEmpty) AppState.instance.syncHistory(wa).catchError((_) {});
+    }
+    if (i == 3) AppState.instance.refreshReviews();
+  }
+
   // Ikon garis untuk tab biasa, ikon penuh (fill) untuk tab aktif.
   static const _tabs = [
     (CupertinoIcons.house, CupertinoIcons.house_fill, 'Beranda'),
@@ -61,16 +75,21 @@ class _MainShellState extends State<MainShell> {
       extendBody: true,
       body: AppBackground(
         // IndexedStack menjaga isi tiap tab tetap tersimpan saat berpindah tab.
-        child: IndexedStack(
+        child: _TabFader(
           index: _index,
-          children: const [HomeTab(), TicketsTab(), GalleryTab(), ProfileTab()],
+          child: IndexedStack(
+            index: _index,
+            children: const [
+              HomeTab(),
+              TicketsTab(),
+              GalleryTab(),
+              ProfileTab(),
+            ],
+          ),
         ),
       ),
       // [P5 Navigasi Tab] Tab bar bawah untuk berpindah antar tab.
-      bottomNavigationBar: _GlassTabBar(
-        index: _index,
-        onChanged: (i) => setState(() => _index = i),
-      ),
+      bottomNavigationBar: _GlassTabBar(index: _index, onChanged: _openTab),
     );
   }
 }
@@ -161,4 +180,55 @@ class _GlassTabBar extends StatelessWidget {
       ),
     );
   }
+}
+
+// Memudarkan dan menggeser tipis isi tab setiap kali tab berganti. Isi semua tab tetap tersimpan (IndexedStack),
+// jadi pilihan dan pencarian di tab lain tidak hilang.
+class _TabFader extends StatefulWidget {
+  const _TabFader({required this.index, required this.child});
+
+  final int index;
+  final Widget child;
+
+  @override
+  State<_TabFader> createState() => _TabFaderState();
+}
+
+class _TabFaderState extends State<_TabFader>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _c = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 320),
+    value: 1,
+  );
+  late final Animation<double> _curve = CurvedAnimation(
+    parent: _c,
+    curve: Curves.easeOutCubic,
+  );
+
+  @override
+  void didUpdateWidget(_TabFader old) {
+    super.didUpdateWidget(old);
+    if (old.index != widget.index && !MediaQuery.disableAnimationsOf(context)) {
+      _c.forward(from: 0);
+    }
+  }
+
+  @override
+  void dispose() {
+    _c.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => FadeTransition(
+    opacity: _curve,
+    child: SlideTransition(
+      position: Tween<Offset>(
+        begin: const Offset(0, .025),
+        end: Offset.zero,
+      ).animate(_curve),
+      child: widget.child,
+    ),
+  );
 }

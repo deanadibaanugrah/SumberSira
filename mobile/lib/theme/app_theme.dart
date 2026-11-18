@@ -140,12 +140,60 @@ class AppText {
   );
 }
 
+// Transisi pindah halaman: halaman baru muncul dengan geser naik tipis dan memudar masuk, halaman lama sedikit meredup.
+// Dipakai di semua platform supaya animasinya sama di HP, tablet, dan web.
+class SlideFadePageTransitionsBuilder extends PageTransitionsBuilder {
+  const SlideFadePageTransitionsBuilder();
+
+  @override
+  Widget buildTransitions<T>(
+    PageRoute<T> route,
+    BuildContext context,
+    Animation<double> animation,
+    Animation<double> secondaryAnimation,
+    Widget child,
+  ) {
+    final enter = CurvedAnimation(
+      parent: animation,
+      curve: Curves.easeOutCubic,
+      reverseCurve: Curves.easeInCubic,
+    );
+    final leave = CurvedAnimation(
+      parent: secondaryAnimation,
+      curve: Curves.easeInOut,
+    );
+    return FadeTransition(
+      opacity: Tween<double>(begin: 1, end: .88).animate(leave),
+      child: FadeTransition(
+        opacity: enter,
+        child: SlideTransition(
+          position: Tween<Offset>(
+            begin: const Offset(0, .035),
+            end: Offset.zero,
+          ).animate(enter),
+          child: child,
+        ),
+      ),
+    );
+  }
+}
+
 // Tema aplikasi: hanya mode terang, warna dari palet terkunci.
 class AppTheme {
   static ThemeData light() {
     final base = ThemeData(
       useMaterial3: true,
       brightness: Brightness.light,
+      pageTransitionsTheme: const PageTransitionsTheme(
+        builders: {
+          TargetPlatform.android: SlideFadePageTransitionsBuilder(),
+          TargetPlatform.iOS: SlideFadePageTransitionsBuilder(),
+          TargetPlatform.macOS: SlideFadePageTransitionsBuilder(),
+          TargetPlatform.windows: SlideFadePageTransitionsBuilder(),
+          TargetPlatform.linux: SlideFadePageTransitionsBuilder(),
+          TargetPlatform.fuchsia: SlideFadePageTransitionsBuilder(),
+        },
+      ),
       colorScheme: const ColorScheme.light(
         primary: AppColors.forest,
         onPrimary: Colors.white,

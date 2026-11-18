@@ -16,7 +16,7 @@ class AppBackground extends StatelessWidget {
       ColoredBox(color: AppColors.abuMuda, child: child);
 }
 
-// Isi halaman turunan yang bisa digulir: lebar maksimal 480 di tengah (tablet/web), margin 20.
+// Isi halaman turunan yang bisa digulir: lebar maksimal 480 (HP), 600 (tablet), 720 (desktop) di tengah, margin 20.
 // Isi boleh lewat di belakang nav bar dan bar bawah kaca, jadi jaraknya diambil dari MediaQuery.padding.
 class ResponsiveBody extends StatelessWidget {
   const ResponsiveBody({
@@ -31,10 +31,13 @@ class ResponsiveBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final inset = MediaQuery.paddingOf(context);
+    final width = MediaQuery.sizeOf(context).width;
     return Align(
       alignment: Alignment.topCenter,
       child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 480),
+        constraints: BoxConstraints(
+          maxWidth: width >= 1000 ? 720 : (width >= 700 ? 600 : 480),
+        ),
         child: ListView(
           padding:
               padding + EdgeInsets.only(top: inset.top, bottom: inset.bottom),

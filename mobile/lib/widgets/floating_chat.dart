@@ -173,9 +173,9 @@ class _ChatPanelState extends State<_ChatPanel> {
                 child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                   const Text('Tanya Sira', style: AppText.headline),
                   Row(children: [
-                    const StatusDot(AppColors.leaf, size: 7),
+                    StatusDot(chat.online ? AppColors.leaf : AppColors.coral, size: 7),
                     const SizedBox(width: 5),
-                    Text('AI Assistant · Online', style: AppText.caption),
+                    Text(chat.online ? 'AI Assistant · Online' : 'AI Assistant · Offline', style: AppText.caption),
                   ]),
                 ]),
               ),

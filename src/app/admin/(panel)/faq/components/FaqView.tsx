@@ -146,7 +146,7 @@ export default function FaqView({ faqs, pending, error }: { faqs: AdminFaq[]; pe
       <StatFaq faqAktif={faqAktif} pendingCount={pending.length} />
       <AlurJawaban />
 
-      <div className="mt-5 grid gap-5 xl:grid-cols-[736fr_380fr]">
+      <div className="mt-5 grid grid-cols-1 gap-5 xl:grid-cols-[736fr_380fr]">
         <DaftarFaq faqs={faqs} ready={!error} onEdit={edit} onRemove={hapusSatuFaq} />
         <BelumTerjawab pending={pending} ready={!error} onAnswer={jawab} onRemove={hapusSatuPertanyaan} />
       </div>

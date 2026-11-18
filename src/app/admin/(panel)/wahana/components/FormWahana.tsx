@@ -17,7 +17,7 @@ export default function FormWahana({ form, onChange, error, pending, onSave, onC
         <label className={labelClass}>Nama wahana
           <input value={form.name} onChange={(e) => onChange({ ...form, name: e.target.value })} className={`${inputClass} mt-1`} required autoFocus />
         </label>
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           <label className={labelClass}>Kategori
             <select value={form.category} onChange={(e) => onChange({ ...form, category: e.target.value })} className={`${inputClass} mt-1`}>
               <option>Wahana</option><option>Sewa Alat</option>

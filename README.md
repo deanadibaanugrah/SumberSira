@@ -75,6 +75,14 @@ Next.js (web admin) ───┘
 
 Daftar uji manual ujung ke ujung ada di [`docs/uji-manual.md`](docs/uji-manual.md).
 
+### Deploy otomatis untuk tim
+
+Panduan lengkap ada di [`docs/deploy.md`](docs/deploy.md). Ringkasnya: backend ke **Render** (membaca
+`render.yaml`), web admin ke **Vercel** (isi `API_URL`), aplikasi pengunjung ke **GitHub Pages** (workflow
+`flutter-web.yml`). Setelah terhubung, setiap push ke `main` langsung terbit dan bisa dipakai tim.
+Web admin sudah responsif: di HP tabel berubah menjadi daftar kartu, jadi semua menu tetap bisa dikelola
+dari layar kecil.
+
 Semua fitur butuh backend: login dan sesi admin, tiket, booking dan pembayaran, Live Crowd, ulasan, galeri,
 Insight, harga, akun petugas, chat, dan AI Photo. Kalau backend belum jalan, halaman admin menampilkan pesan
 "tidak bisa memuat" dan aplikasi mobile menampilkan galat dengan tombol coba lagi. Wahana, jam booking, dan harga
@@ -249,7 +257,7 @@ akun itu (peran admin atau petugas).
 |---|---|---|
 | Hash password | Password disimpan di database backend sebagai hash scrypt + salt, dibandingkan dengan `timingSafeEqual` | repo backend: `src/lib/password.ts` |
 | Session berbasis server | Backend menyimpan sesi di database, browser hanya memegang ID acak (yang disimpan adalah hash-nya). ID baru setiap login, sesi bisa dicabut seketika | repo backend: `src/routes/auth.ts`, `src/middleware/auth.ts` |
-| Cookie aman | `HttpOnly`, `Secure`, `SameSite=Lax`. "Ingat saya" = 7 hari, tanpa itu cookie hilang saat browser ditutup (maks 8 jam). Token dari backend disimpan ke cookie oleh Next.js | `loginAction()` di `actions.ts` |
+| Cookie aman | `HttpOnly`, `Secure` (produksi), `SameSite=Lax`. "Ingat saya" = 7 hari, tanpa itu cookie hilang saat browser ditutup (maks 8 jam). Token dari backend disimpan ke cookie oleh Next.js | `loginAction()` di `actions.ts` |
 | Login lewat Server Action | Validasi isian, batas 5 kali salah lalu dikunci 1 menit, password dicek backend, pesan error sama untuk email/password salah | `src/lib/auth/login.ts`, `actions.ts`, `src/app/admin/login/` |
 | Login lewat API (token) | `POST /api/auth/login` dengan body JSON email + password diteruskan ke backend dan mengembalikan token `Bearer` (token sesi dari backend). Token dipakai di header `Authorization: Bearer <token>` (mis. `GET /api/admin/me`), `POST /api/auth/logout` mencabutnya di backend. Validasi dan batas percobaan sama dengan form | `src/app/api/auth/`, `src/lib/auth/login.ts` |
 | Validasi email | Wajib satu tanda @ dan ada titik setelah @, hanya huruf, angka, titik, garis bawah, dan tanda hubung. Karakter seperti `( : & " '` dan spasi ditolak. Dicek di browser (pesan di bawah kolom email, form tidak dikirim) dan dicek ulang di server (form maupun API, API membalas `400`) | `src/lib/validation/email.ts`, `LoginForm.tsx`, `login.ts` |

@@ -22,7 +22,7 @@ export default function InsightView({ data, error }: { data: AdminInsight | null
       {data && (
         <>
           <StatInsight data={data} />
-          <div className="mt-5 grid gap-5 xl:grid-cols-[736fr_380fr]">
+          <div className="mt-5 grid grid-cols-1 gap-5 xl:grid-cols-[736fr_380fr]">
             <SebaranRating data={data} />
             <SaranInsight data={data} />
           </div>

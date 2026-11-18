@@ -12,7 +12,7 @@ export default function PanelLoading() {
       <div className="mt-6 grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
         {[0, 1, 2, 3].map((i) => <div key={i} className="h-28 rounded-3xl bg-white" />)}
       </div>
-      <div className="mt-5 grid gap-5 xl:grid-cols-[736fr_380fr]">
+      <div className="mt-5 grid grid-cols-1 gap-5 xl:grid-cols-[736fr_380fr]">
         <div className="h-80 rounded-3xl bg-white" />
         <div className="h-80 rounded-3xl bg-white" />
       </div>

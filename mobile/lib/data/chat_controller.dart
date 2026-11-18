@@ -23,6 +23,8 @@ class ChatController extends ChangeNotifier {
     const ChatMessage(fromBot: true, text: 'Halo! Aku Tanya Sira 👋 Ada yang bisa dibantu soal Sumber Sira?'),
   ];
   bool busy = false;
+  // Status koneksi terakhir ke backend. Header chat memakai ini supaya tidak menulis "Online" saat server mati.
+  bool online = true;
   // Pertanyaan cepat dari backend (GET /chat/quick-questions). Selama belum termuat atau server mati,
   // dipakai daftar bawaan agar tombol cepat tetap ada.
   List<String> quickQuestions = DummyData.quickQuestions;
@@ -31,14 +33,19 @@ class ChatController extends ChangeNotifier {
   Future<void> init() async {
     try {
       final list = await ApiClient.fetchQuickQuestions();
+      online = true;
       if (list.isNotEmpty) {
         quickQuestions = list;
-        notifyListeners();
       }
-    } on ApiException {
-      // server tidak terjangkau: tombol cepat bawaan
+      notifyListeners();
+    } on ApiException catch (e) {
+      // Server tidak terjangkau: tombol cepat bawaan tetap dipakai dan status chat menjadi Offline.
+      online = !e.offline;
+      notifyListeners();
     } catch (e) {
       // Balasan server yang bentuknya tidak terduga juga tidak boleh menghentikan aplikasi.
+      online = false;
+      notifyListeners();
       debugPrint('ChatController.init gagal: $e');
     }
   }
@@ -57,6 +64,7 @@ class ChatController extends ChangeNotifier {
     notifyListeners();
     try {
       final jawaban = await ApiClient.askChat(question);
+      online = true;
       _add(ChatMessage(
         fromBot: true,
         text: jawaban.answer,
@@ -64,9 +72,12 @@ class ChatController extends ChangeNotifier {
         source: jawaban.matched ? 'FAQ pengelola' : 'Pertanyaan dicatat untuk admin',
       ));
     } on ApiException catch (e) {
+      online = !e.offline;
       _add(ChatMessage(
         fromBot: true,
-        text: e.offline ? 'Server belum terjangkau, jadi aku belum bisa menjawab. Coba lagi sebentar lagi ya.' : e.message,
+        text: e.offline
+            ? 'Server belum terjangkau di ${ApiClient.baseUrl}. Pastikan backend menyala, atau ubah alamat server di Profil → Server Backend.'
+            : e.message,
       ));
     } finally {
       busy = false;

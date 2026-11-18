@@ -15,7 +15,7 @@ export default async function AkunPage() {
   return (
     <>
       <AdminHeader title="Akun & Sesi" subtitle="Profil, hak akses, dan perangkat yang sedang login" />
-      <div className="mt-6 grid gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)]">
+      <div className="mt-6 grid grid-cols-1 gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)]">
         <Profil admin={admin} />
         <SesiLogin sessions={sessions} />
       </div>

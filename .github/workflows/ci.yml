@@ -1,0 +1,58 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  web:
+    runs-on: ubuntu-latest
+    env:
+      NEXT_TELEMETRY_DISABLED: "1"
+      # Alamat backend hanya dibaca saat request; build tidak butuh server hidup.
+      API_URL: http://localhost:4000
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run build
+
+  mobile:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: mobile
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - run: flutter pub get
+      - run: flutter analyze
+      - run: flutter test
+
+  # Deploy otomatis ke Vercel setelah CI lulus (opsional).
+  # Cara termudah: hubungkan repo ini ke Vercel, auto-deploy sudah aktif tanpa workflow ini.
+  # Kalau memakai Deploy Hook: isi secret VERCEL_DEPLOY_HOOK_URL.
+  deploy:
+    needs: [web, mobile]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger deploy hook
+        env:
+          HOOK: ${{ secrets.VERCEL_DEPLOY_HOOK_URL }}
+        run: |
+          if [ -n "$HOOK" ]; then
+            curl -fsS -X POST "$HOOK"
+            echo "Deploy web admin diminta."
+          else
+            echo "Lewati: secret VERCEL_DEPLOY_HOOK_URL belum diisi (integrasi Git Vercel tetap berjalan)."
+          fi

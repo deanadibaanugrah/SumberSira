@@ -23,7 +23,7 @@ export default async function DashboardPage() {
   const admin = await requirePermission("dashboard");
   return (
     <>
-      <AdminHeader title="Halo, Pak Yono!"
+      <AdminHeader title={`Halo, ${admin.name}!`}
                    subtitle={<><Today /> · ringkasan operasional Sumber Sira hari ini</>}
                    action={<PrimaryButton icon={Download}>Unduh Laporan</PrimaryButton>} />
 
@@ -32,7 +32,7 @@ export default async function DashboardPage() {
         <StatRingkasan />
 
         {/* Baris 2: grafik pengunjung per jam dan kartu ringkasan hari ini */}
-        <div className="grid gap-5 xl:grid-cols-[736fr_380fr]">
+        <div className="grid grid-cols-1 gap-5 xl:grid-cols-[736fr_380fr]">
           <LiveCrowdMonitor />
           <RingkasanHariIni canInsight={can(admin.role, "insight")} />
         </div>
@@ -41,13 +41,13 @@ export default async function DashboardPage() {
         <BookingMasuk />
 
         {/* Baris 4: heatmap keramaian seminggu dan kartu tiket online hari ini */}
-        <div className="grid gap-5 xl:grid-cols-[736fr_380fr]">
+        <div className="grid grid-cols-1 gap-5 xl:grid-cols-[736fr_380fr]">
           <PolaKeramaian />
           <TiketHariIni />
         </div>
 
         {/* Baris 5: wahana terpopuler dan pendapatan 7 hari */}
-        <div className="grid gap-5 xl:grid-cols-2">
+        <div className="grid grid-cols-1 gap-5 xl:grid-cols-2">
           <WahanaPopuler />
           <PendapatanMingguan />
         </div>

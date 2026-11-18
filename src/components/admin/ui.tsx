@@ -19,7 +19,8 @@ export function AdminHeader({ title, subtitle, action, search }: { title: ReactN
         <h1 className="font-display text-[26px] font-semibold leading-[1.15] text-ink sm:text-[28px]">{title}</h1>
         {subtitle && <p className="mt-1 text-[13px] text-abu">{subtitle}</p>}
       </div>
-      <div className="flex items-center gap-3">
+      {/* max-w-full + flex-wrap: di HP 320px tombol aksi yang lebar turun ke baris sendiri, bukan mendorong halaman melebar. */}
+      <div className="flex max-w-full flex-wrap items-center justify-end gap-3">
         {action}
         <label className="hidden h-12 w-[280px] items-center gap-3 rounded-full border border-ink/10 bg-white px-4 md:flex">
           <Search size={18} className="shrink-0 text-abu" aria-hidden="true" />
@@ -38,7 +39,8 @@ export function AdminHeader({ title, subtitle, action, search }: { title: ReactN
 
 // Kartu putih membulat, wadah dasar hampir semua bagian admin.
 export function Card({ as: Tag = "section", className = "", children }: { as?: ElementType; className?: string; children: ReactNode }) {
-  return <Tag className={`rounded-3xl bg-white p-6 ${className}`}>{children}</Tag>;
+  // min-w-0 penting di dalam grid: tanpa ini tabel yang bisa digeser memaksa kartu (dan seluruh halaman) melebar.
+  return <Tag className={`min-w-0 rounded-3xl bg-white p-6 ${className}`}>{children}</Tag>;
 }
 
 // Judul kartu (Inter tebal 18 px) dengan subjudul opsional dan isi tambahan di kanan.
@@ -209,7 +211,7 @@ export function Modal({ title, onClose, children }: { title: string; onClose: ()
   return (
     <div className="fixed inset-0 z-50 grid place-items-center bg-ink/40 p-4" role="dialog" aria-modal="true" aria-label={title}
          onClick={onClose}>
-      <div className="w-full max-w-md rounded-3xl bg-white p-6 shadow-xl animate-fade-up" onClick={(e) => e.stopPropagation()}>
+      <div className="max-h-[calc(100dvh-2rem)] w-full max-w-md overflow-y-auto rounded-3xl bg-white p-6 shadow-xl animate-fade-up" onClick={(e) => e.stopPropagation()}>
         <h2 className="text-lg font-semibold text-ink">{title}</h2>
         <div className="mt-4">{children}</div>
       </div>

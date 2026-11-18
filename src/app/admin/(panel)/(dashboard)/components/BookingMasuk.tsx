@@ -18,7 +18,22 @@ export default function BookingMasuk() {
                  right={<Link href="/admin/booking" className="text-sm font-semibold text-leaf hover:text-forest">Lihat semua</Link>}>
         Booking Sewa Masuk
       </CardTitle>
-      <div className="mt-2 overflow-x-auto">
+      {/* Di HP tabel diganti daftar kartu supaya tidak perlu digeser ke samping. */}
+      <ul className="mt-3 space-y-2 md:hidden">
+        {data.map((b) => (
+          <li key={b.code} className="flex items-center gap-3 rounded-2xl bg-paper p-3">
+            <Avatar name={b.name} size={32} />
+            <div className="min-w-0 flex-1">
+              <p className="truncate text-sm font-semibold text-ink">{b.name}</p>
+              <p className="truncate text-xs text-abu">{items(b)} · {b.slotLabel}</p>
+            </div>
+            <StatusPill status={b.status} />
+          </li>
+        ))}
+        {!ready && <li className="rounded-2xl bg-paper px-5 py-8 text-center text-sm text-abu">Memuat booking...</li>}
+        {ready && data.length === 0 && <li className="rounded-2xl bg-paper px-5 py-8 text-center text-sm text-abu">Belum ada booking.</li>}
+      </ul>
+      <div className="mt-2 hidden overflow-x-auto md:block">
         <table className="w-full min-w-[640px] border-separate border-spacing-y-2 text-left text-sm">
           <thead className="text-[13px] text-abu">
             <tr>

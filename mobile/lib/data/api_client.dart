@@ -33,19 +33,40 @@ class ApiClient {
   // Penentuan baseUrl otomatis berdasarkan platform dan lingkungan:
   // - Bila customBaseUrl diisi di aplikasi, prioritaskan nilai tersebut.
   // - Bila diberikan via argument --dart-define=API_URL=..., gunakan nilai itu.
-  // - Bila di Web (Chrome) atau Desktop (Windows): otomatis memakai http://localhost:4000.
-  // - Bila di Android: memakai http://10.0.2.2:4000 (standar emulator Android).
+  // - Bila di Web: ikuti host halaman bila dibuka lewat IP LAN (mis. dari HP), selain itu localhost.
+  // - Bila di Desktop (Windows/macOS/Linux): http://localhost:4000.
+  // - Bila di Android: http://10.0.2.2:4000 (standar emulator Android).
   static String get baseUrl {
     if (customBaseUrl.isNotEmpty) return customBaseUrl;
     const envUrl = String.fromEnvironment('API_URL');
     if (envUrl.isNotEmpty) return envUrl;
-    if (kIsWeb ||
-        defaultTargetPlatform == TargetPlatform.windows ||
+    if (kIsWeb) {
+      // Flutter web yang dibuka dari HP lewat Wi-Fi dilayani dari IP laptop (mis. 192.168.1.5:8080).
+      // Backend ada di laptop yang sama, jadi host-nya dipakai lagi dengan port 4000.
+      final host = Uri.base.host;
+      if (Uri.base.scheme == 'http' && host.isNotEmpty && host != 'localhost' && host != '127.0.0.1') {
+        return 'http://$host:4000';
+      }
+      return 'http://localhost:4000';
+    }
+    if (defaultTargetPlatform == TargetPlatform.windows ||
         defaultTargetPlatform == TargetPlatform.macOS ||
         defaultTargetPlatform == TargetPlatform.linux) {
       return 'http://localhost:4000';
     }
     return 'http://10.0.2.2:4000';
+  }
+
+  // Cek cepat apakah backend di alamat ini hidup (GET /health). Dipakai tombol "Tes Koneksi" di Profil.
+  static Future<bool> checkHealth(String url) async {
+    final target = url.trim().replaceAll(RegExp(r'/+$'), '');
+    if (target.isEmpty) return false;
+    try {
+      final res = await http.get(Uri.parse('$target/health')).timeout(const Duration(seconds: 5));
+      return res.statusCode == 200;
+    } catch (_) {
+      return false;
+    }
   }
   static const _timeout = Duration(seconds: 8);
   // Unggah foto dan proses AI Photo butuh waktu lebih lama daripada permintaan JSON biasa.

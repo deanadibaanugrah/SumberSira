@@ -1,4 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Wajib untuk build release: tanpa ini APK tidak boleh mengakses jaringan (semua request gagal). -->
+    <uses-permission android:name="android.permission.INTERNET"/>
     <application
         android:label="Sumber Sira"
         android:name="${applicationName}"

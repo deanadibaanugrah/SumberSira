@@ -26,7 +26,31 @@ export default function DaftarWahana({ visible, filter, onFilter, onEdit, onRemo
         <CardTitle>Daftar Wahana</CardTitle>
         <div className="mt-4"><FilterPills options={FILTERS} value={filter} onChange={onFilter} label="Filter kategori" /></div>
       </div>
-      <div className="mt-4 overflow-x-auto">
+      {/* Di HP tabel diganti kartu agar harga dan tombol edit/hapus tidak terpotong. */}
+      <ul className="mt-4 space-y-2 md:hidden">
+        {visible.map((w) => (
+          <li key={w.id} className="rounded-2xl bg-paper p-3">
+            <div className="flex items-start gap-3">
+              <span className="grid size-9 shrink-0 place-items-center rounded-full bg-white text-ink"><WahanaIcon name={w.icon} variant="admin" size={17} /></span>
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-[15px] font-semibold text-ink">{w.name}</p>
+                <p className="mt-0.5 font-mono text-sm text-ink">{rupiah(w.price)}{w.unit && <span className="text-xs text-abu"> / {w.unit}</span>}</p>
+              </div>
+              <StatusPill status={w.status} />
+            </div>
+            <div className="mt-2.5 flex items-center justify-between gap-2">
+              <span className={`inline-flex h-7 items-center rounded-full px-3 text-[13px] ${CATEGORY_TAG[w.category] ?? CATEGORY_TAG.Wahana}`}>{w.category}</span>
+              <div className="flex gap-2">
+                <IconButton label={`Edit ${w.name}`} onClick={() => onEdit(w)}><Pencil size={16} /></IconButton>
+                <IconButton label={`Hapus ${w.name}`} tone="coral" onClick={() => onRemove(w.id)}><Trash2 size={16} /></IconButton>
+              </div>
+            </div>
+          </li>
+        ))}
+        {visible.length === 0 && <li className="rounded-2xl bg-paper px-5 py-10 text-center text-sm text-abu">Belum ada item di kategori ini.</li>}
+      </ul>
+
+      <div className="mt-4 hidden overflow-x-auto md:block">
         {/* Tabel daftar wahana */}
         <table className="w-full min-w-[760px] border-separate border-spacing-y-2.5 text-left text-sm">
           <thead className="text-[13px] text-abu">

@@ -37,7 +37,37 @@ export default function DaftarBooking({ visible, selectedCode, onSelect, filter,
                className="mt-3 h-10 w-full rounded-full bg-paper px-4 text-sm outline-none focus:ring-2 focus:ring-leaf/30 md:hidden" />
       </div>
 
-      <div className="mt-4 overflow-x-auto">
+      {/* Di HP tabel diganti kartu agar nama, item, jam, dan status terbaca tanpa menggeser layar. */}
+      <ul className="mt-4 space-y-2 md:hidden">
+        {visible.map((r) => {
+          const active = r.code === selectedCode;
+          return (
+            <li key={r.code}>
+              <button type="button" onClick={() => onSelect(r.code)} aria-pressed={active}
+                      className={`w-full rounded-2xl p-3 text-left transition ${active ? "bg-leaf/12 ring-1 ring-leaf" : "bg-paper"}`}>
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex min-w-0 items-center gap-2.5">
+                    <Avatar name={r.name} size={32} />
+                    <div className="min-w-0">
+                      <p className="truncate text-sm font-semibold text-ink">{r.name}</p>
+                      <p className="truncate text-xs text-abu">{r.lines.map((l) => `${l.qty}x ${l.name}`).join(", ") || "-"}</p>
+                    </div>
+                  </div>
+                  <StatusPill status={r.status} />
+                </div>
+                <p className="mt-2 font-mono text-xs text-abu">{r.slotLabel} · {r.lines.reduce((s, l) => s + l.qty, 0)} item</p>
+              </button>
+            </li>
+          );
+        })}
+        {visible.length === 0 && (
+          <li className="rounded-2xl bg-paper px-5 py-10 text-center text-sm text-abu">
+            {!ready ? (error ? "Tidak bisa terhubung ke server." : "Memuat booking...") : "Tidak ada booking yang cocok."}
+          </li>
+        )}
+      </ul>
+
+      <div className="mt-4 hidden overflow-x-auto md:block">
         {/* Tabel booking, klik satu baris untuk melihat detailnya */}
         <table className="w-full min-w-[600px] border-separate border-spacing-y-2.5 text-left text-sm">
           <thead className="text-[13px] text-abu">

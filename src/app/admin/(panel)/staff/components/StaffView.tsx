@@ -73,6 +73,18 @@ export default function StaffView({ staff, error, currentId }: { staff: AdminSta
 
   const adminAktif = items.filter((s) => s.role === "admin" && s.active).length;
 
+  // Tombol aksi yang sama dipakai di tabel (layar lebar) dan kartu (HP).
+  const aksi = (s: AdminStaff) => (
+    <div className="flex gap-2">
+      <IconButton label={`Ubah akun ${s.name}`} onClick={() => { setForm({ id: s.id, name: s.name, email: s.email, role: s.role, active: s.active, password: "" }); setNotice(null); }}>
+        <Pencil size={16} />
+      </IconButton>
+      <IconButton label={`Atur ulang password ${s.name}`} tone="gray" onClick={() => { setReset(s); setPassword(""); setNotice(null); }}>
+        <KeyRound size={16} />
+      </IconButton>
+    </div>
+  );
+
   return (
     <>
       <AdminHeader
@@ -92,7 +104,31 @@ export default function StaffView({ staff, error, currentId }: { staff: AdminSta
         <div className="px-2">
           <CardTitle sub={`${items.length} akun · ${adminAktif} admin aktif`}>Daftar Akun</CardTitle>
         </div>
-        <div className="mt-4 overflow-x-auto">
+
+        {/* Di HP tabel diganti kartu agar peran, status, dan tombol aksi tetap terlihat. */}
+        <ul className="mt-4 space-y-2 md:hidden">
+          {items.map((s) => (
+            <li key={s.id} className="rounded-2xl bg-paper p-3 animate-fade-up">
+              <div className="flex items-start gap-3">
+                <Avatar name={s.name} solid={s.role === "admin"} />
+                <div className="min-w-0 flex-1">
+                  <p className="truncate font-semibold text-ink">
+                    {s.name} {s.id === currentId && <span className="ml-1 rounded-full bg-leaf/12 px-2 py-0.5 text-[11px] font-semibold text-forest">Akun ini</span>}
+                  </p>
+                  <p className="truncate text-[13px] text-abu">{s.email}</p>
+                </div>
+                <StatusPill status={s.active ? "Aktif" : "Nonaktif"} />
+              </div>
+              <div className="mt-2 flex flex-wrap items-center justify-between gap-2">
+                <p className="text-xs text-abu">{ROLE_LABEL[s.role]} · dibuat {tanggal(s.createdAt)}</p>
+                {aksi(s)}
+              </div>
+            </li>
+          ))}
+          {items.length === 0 && <li className="rounded-2xl bg-paper px-5 py-8 text-center text-sm text-abu">{error ? "Daftar akun belum bisa dimuat." : "Belum ada akun."}</li>}
+        </ul>
+
+        <div className="mt-4 hidden overflow-x-auto md:block">
           <table className="w-full min-w-[720px] border-separate border-spacing-y-2.5 text-left text-sm">
             <thead className="text-[13px] text-abu">
               <tr>
@@ -120,22 +156,13 @@ export default function StaffView({ staff, error, currentId }: { staff: AdminSta
                   <td className="py-3 text-ink">{ROLE_LABEL[s.role]}</td>
                   <td className="py-3"><StatusPill status={s.active ? "Aktif" : "Nonaktif"} /></td>
                   <td className="py-3 text-[13px] text-abu">{tanggal(s.createdAt)}</td>
-                  <td className="rounded-r-2xl py-3 pr-4">
-                    <div className="flex gap-2">
-                      <IconButton label={`Ubah akun ${s.name}`} onClick={() => { setForm({ id: s.id, name: s.name, email: s.email, role: s.role, active: s.active, password: "" }); setNotice(null); }}>
-                        <Pencil size={16} />
-                      </IconButton>
-                      <IconButton label={`Atur ulang password ${s.name}`} tone="gray" onClick={() => { setReset(s); setPassword(""); setNotice(null); }}>
-                        <KeyRound size={16} />
-                      </IconButton>
-                    </div>
-                  </td>
+                  <td className="rounded-r-2xl py-3 pr-4">{aksi(s)}</td>
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
-        {items.length === 0 && <p className="mt-4 px-2 text-sm text-abu">{error ? "Daftar akun belum bisa dimuat." : "Belum ada akun."}</p>}
+        {items.length === 0 && <p className="mt-4 hidden px-2 text-sm text-abu md:block">{error ? "Daftar akun belum bisa dimuat." : "Belum ada akun."}</p>}
       </Card>
 
       {form && <FormStaffBaru form={form} saving={saving} notice={notice} onChange={setForm} onSave={simpan} onClose={() => { setForm(null); setNotice(null); }} />}

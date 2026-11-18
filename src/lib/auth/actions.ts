@@ -27,7 +27,9 @@ export async function loginAction(_prev: LoginState, formData: FormData): Promis
 
   (await cookies()).set(SESSION_COOKIE, result.token, {
     httpOnly: true,
-    secure: true,
+    // Secure hanya di produksi. Di dev, tim membuka web admin lewat IP LAN (http://192.168...),
+    // dan browser menolak cookie Secure di alamat http selain localhost.
+    secure: process.env.NODE_ENV === "production",
     sameSite: "lax",
     path: "/",
     ...(remember ? { expires: new Date(result.expiresAt) } : {}),

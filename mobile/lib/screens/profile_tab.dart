@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../data/api_client.dart';
@@ -16,46 +17,84 @@ class ProfileTab extends StatelessWidget {
   static const _maps = 'https://www.google.com/maps/search/?api=1&query=Sumber+Sira+Putukrejo+Malang';
   static const _route = 'https://www.google.com/maps/dir/?api=1&destination=Sumber+Sira+Putukrejo+Malang';
 
+  // Petunjuk alamat server sesuai platform yang sedang dipakai.
+  String _petunjukServer() {
+    if (kIsWeb) return 'Browser di laptop: http://localhost:4000. Dibuka dari HP: http://IP-LAPTOP:4000.';
+    if (defaultTargetPlatform == TargetPlatform.android) {
+      return 'Emulator Android: http://10.0.2.2:4000. HP fisik: http://IP-LAPTOP:4000 (Wi-Fi sama).';
+    }
+    return 'Desktop: http://localhost:4000.';
+  }
+
   void _ubahServerDialog(BuildContext context) {
     final controller = TextEditingController(text: ApiClient.baseUrl);
+    String? hasil;
+    var menguji = false;
     showDialog(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Alamat Server Backend'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'Alamat backend saat ini untuk menghubungkan aplikasi ke server:',
-              style: AppText.footnote,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setState) => AlertDialog(
+          title: const Text('Alamat Server Backend'),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text('Alamat backend yang dipakai aplikasi ini:', style: AppText.footnote),
+                const SizedBox(height: 12),
+                TextField(
+                  controller: controller,
+                  keyboardType: TextInputType.url,
+                  decoration: const InputDecoration(
+                    hintText: 'http://localhost:4000',
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(_petunjukServer(), style: AppText.caption),
+                if (hasil != null) ...[
+                  const SizedBox(height: 10),
+                  Text(hasil!, style: AppText.footnote.copyWith(
+                    color: hasil!.startsWith('Terhubung') ? AppColors.leaf : AppColors.coral,
+                    fontWeight: FontWeight.w600,
+                  )),
+                ],
+              ],
             ),
-            const SizedBox(height: 12),
-            TextField(
-              controller: controller,
-              decoration: const InputDecoration(
-                hintText: 'http://localhost:4000',
-                border: OutlineInputBorder(),
-              ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                AppState.instance.setApiUrl('');
+                Navigator.pop(ctx);
+              },
+              child: const Text('Reset Bawaan'),
+            ),
+            TextButton(
+              onPressed: menguji
+                  ? null
+                  : () async {
+                      setState(() { menguji = true; hasil = null; });
+                      final ok = await ApiClient.checkHealth(controller.text);
+                      if (!ctx.mounted) return;
+                      setState(() {
+                        menguji = false;
+                        hasil = ok
+                            ? 'Terhubung ke server.'
+                            : 'Tidak bisa terhubung. Pastikan backend menyala dan alamatnya benar.';
+                      });
+                    },
+              child: Text(menguji ? 'Menguji...' : 'Tes Koneksi'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                AppState.instance.setApiUrl(controller.text.trim());
+                Navigator.pop(ctx);
+              },
+              child: const Text('Simpan'),
             ),
           ],
         ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              AppState.instance.setApiUrl('');
-              Navigator.pop(ctx);
-            },
-            child: const Text('Reset Bawaan'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              AppState.instance.setApiUrl(controller.text.trim());
-              Navigator.pop(ctx);
-            },
-            child: const Text('Simpan'),
-          ),
-        ],
       ),
     );
   }

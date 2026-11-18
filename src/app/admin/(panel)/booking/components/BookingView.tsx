@@ -38,7 +38,7 @@ export default function BookingView({ canKelola }: { canKelola: boolean }) {
       <StatBooking />
 
       {/* Kiri: daftar booking. Kanan: detail booking yang dipilih */}
-      <div className="mt-5 grid gap-5 xl:grid-cols-[736fr_380fr]">
+      <div className="mt-5 grid grid-cols-1 gap-5 xl:grid-cols-[736fr_380fr]">
         <DaftarBooking visible={visible} selectedCode={selected?.code ?? null} onSelect={setSelectedCode}
                        filter={filter} onFilter={setFilter} query={query} onQuery={setQuery}
                        total={total} page={page} onPage={setPage} ready={ready} error={error} />

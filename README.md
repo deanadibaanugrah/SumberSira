@@ -1,6 +1,7 @@
 # Sumber Sira · Aplikasi Mobile & Web Admin
 
-Tugas kelompok (UTS, fokus frontend). Satu rancangan sistem dengan dua antarmuka, dari desain Figma **HI-FI** Sumber Sira:
+Tugas kelompok. Satu rancangan sistem dengan dua antarmuka, dari desain Figma **HI-FI** Sumber Sira. Frontend
+(mobile dan web admin) sudah tersambung ke backend SumberSira untuk seluruh alur data.
 
 | Bagian | Pengguna | Teknologi | Folder |
 |---|---|---|---|
@@ -26,12 +27,12 @@ Buka <http://localhost:3000>:
 | `/` | Halaman perkenalan web (introduction web) |
 | `/admin` | Panel admin (wajib login, lihat akun demo di bawah). Desainnya untuk layar 1440 × 900 |
 
-**Akun demo panel admin** (dicek di server, password disimpan sebagai hash):
+**Akun demo panel admin** (dibuat oleh `npm run seed` di backend; password disimpan sebagai hash):
 
 | Peran | Email | Password | Hak akses |
 |---|---|---|---|
-| Pengelola (admin) | `admin@sumbersira.id` | `sumbersira` | Semua menu, termasuk mengubah wahana dan harga |
-| Petugas Loket | `petugas@sumbersira.id` | `petugas123` | Dashboard, Booking, Tiket & Check-in, melihat Wahana & Harga |
+| Pengelola (admin) | `admin@sumbersira.id` | `sumbersira` | Semua menu, termasuk mengubah harga dan mengelola akun petugas |
+| Petugas Loket | `petugas@sumbersira.id` | `petugas123` | Dashboard, Booking, Tiket & Check-in, melihat Wahana & Harga, dan Akun |
 
 Di halaman login ada tombol "Isi" untuk masing-masing akun. Penjelasan login dan hak akses ada di bagian
 **Autentikasi & Otorisasi Admin** di bawah.
@@ -49,9 +50,10 @@ Perintah lain:
 
 ### Menjalankan bersama backend
 
-Login admin, Wahana & Harga, **tiket, Live Crowd, Insight keramaian, dan chatbot** diambil dari backend, yaitu repo
+Login admin, Wahana & Harga, tiket, Live Crowd, booking, pembayaran, ulasan, galeri, Insight, akun petugas, chat,
+dan AI Photo diambil dari backend, yaitu repo
 [SumberSira-backend](https://github.com/nibrasalghifary7/SumberSira-backend) (Express, Prisma, PostgreSQL di Neon).
-Aplikasi mobile memakai backend yang sama: wahana, jam kunjungan, beli tiket, keramaian, dan chat.
+Aplikasi mobile memakai backend yang sama.
 
 ```
 Flutter (pengunjung) ──┐
@@ -71,16 +73,17 @@ Next.js (web admin) ───┘
    - Flutter web di Chrome: `flutter run -d chrome --dart-define=API_URL=http://localhost:4000`,
    - HP fisik dengan Wi-Fi yang sama dengan laptop: `flutter run --dart-define=API_URL=http://IP-LAPTOP:4000`.
 
-Kalau backend belum jalan, login admin menampilkan "Server tidak dapat dihubungi". Aplikasi mobile memakai data bawaan
-(wahana, keramaian contoh) dan menampilkan "Data contoh, belum terhubung ke server"; beli tiket menolak dengan pesan jelas
-(tidak membuat tiket palsu yang tidak bisa discan petugas). Yang sudah tersambung: login, logout, dan sesi admin, Wahana & Harga,
-tiket dan Live Crowd, Insight keramaian, FAQ dan chatbot. Booking sewa, galeri, dan ulasan masih data contoh.
+Daftar uji manual ujung ke ujung ada di [`docs/uji-manual.md`](docs/uji-manual.md).
 
-**Supaya web admin cepat pindah halaman.** Database Neon ada di Ohio, jadi tiap query terasa lambat dari Indonesia. Web admin
-menyimpan data terakhir di browser selagi pindah halaman (halaman berikutnya langsung tampil, lalu disegarkan diam-diam),
-menampilkan kerangka seketika lewat `loading.tsx`, dan backend menyimpan sesi dan keramaian di memori beberapa detik.
-Untuk demo, paling cepat pakai `npm run build` lalu `npm start` (tanpa kompilasi per halaman seperti mode dev), dan
-pindahkan database ke Neon region **Singapore**.
+Semua fitur butuh backend: login dan sesi admin, tiket, booking dan pembayaran, Live Crowd, ulasan, galeri,
+Insight, harga, akun petugas, chat, dan AI Photo. Kalau backend belum jalan, halaman admin menampilkan pesan
+"tidak bisa memuat" dan aplikasi mobile menampilkan galat dengan tombol coba lagi. Wahana, jam booking, dan harga
+di mobile masih punya cadangan lokal supaya halaman itu tetap bisa dibuka.
+
+**Supaya web admin cepat pindah halaman.** Database Neon ada di Ohio, jadi tiap query terasa lambat dari Indonesia.
+Web admin menampilkan kerangka seketika lewat `loading.tsx`, dan data live di dashboard, tiket, serta booking
+disegarkan berkala di browser. Untuk demo, paling cepat pakai `npm run build` lalu `npm start` (tanpa kompilasi
+per halaman seperti mode dev), dan pindahkan database ke Neon region **Singapore**.
 
 ## Aplikasi Mobile (Flutter)
 
@@ -90,20 +93,20 @@ Butuh Flutter SDK 3.4x atau lebih baru.
 cd mobile
 flutter pub get
 flutter run            # pilih perangkat: Android atau Chrome
-flutter test           # uji format Rupiah, validasi form, Live Crowd, jam booking, dan riwayat per WhatsApp
+flutter test           # uji format Rupiah, validasi form, label keramaian, jam booking, dan riwayat per WhatsApp
 flutter build web      # hasil build ada di mobile/build/web
 flutter build apk      # APK Android ada di mobile/build/app/outputs/flutter-apk/app-release.apk
 ```
 
 Aplikasi pengunjung **tanpa login**. Login hanya ada di web admin. Sebagai gantinya, **riwayat tiket dan booking
-disimpan per nomor WhatsApp**: nomor yang dipakai saat membeli menjadi kunci riwayat. Di Tiket & Booking pengunjung cukup
+diambil dari server per nomor WhatsApp**: nomor yang dipakai saat membeli menjadi kunci riwayat. Di Tiket & Booking pengunjung cukup
 mengetik nomor WhatsApp lalu menekan Cari (nomor terakhir terisi otomatis), dan e-tiket atau invoice bisa dikirim ke WhatsApp.
 Pertama kali dibuka alurnya Splash, Tentang, Onboarding, lalu Beranda. Berikutnya Splash langsung ke Beranda.
 
 Tab bar kaca yang mengambang berisi 4 tab: **Beranda, Tiket & Booking, Galeri, Profil**. Tidak ada menu samping (garis tiga);
 isinya dipindah menjadi tombol di Beranda, dan chatbot Tanya Sira mengambang di Beranda.
 
-Coba riwayat dengan nomor contoh `081234567890`.
+Riwayat akan muncul setelah kamu membeli tiket atau booking dengan nomor WhatsApp itu (database baru mulai kosong).
 
 | Layar | File | Isi |
 |---|---|---|
@@ -111,25 +114,26 @@ Coba riwayat dengan nomor contoh `081234567890`.
 | Tentang | `screens/about_screen.dart` | Foto besar dengan panel kaca, carousel daya tarik, info jam buka, harga tiket, parkir, pembayaran |
 | Onboarding | `screens/onboarding_screen.dart` | 3 halaman yang bisa digeser (PageView), pindah sendiri tiap 3 detik (titik aktif terisi sebagai penanda waktu, berhenti di halaman terakhir), tombol Kembali/Lanjut, Lewati |
 | Beranda | `screens/home_tab.dart` | Header gelap dengan hero keramaian (angka persen besar), menu cepat AI Photo / Ulasan / Tentang, carousel foto (5 foto, teks berbeda), grafik batang jumlah pengunjung per jam |
-| Chatbot Tanya Sira | `widgets/floating_chat.dart`, `data/chat_controller.dart` | Gelembung kaca mengambang di Beranda, bisa digeser; diketuk membesar jadi panel chat. Dua mode: **Jawab cepat** (FAQ pengelola, lalu AI dari data Sumber Sira) dan **Tanya pengelola** (dibalas manusia, lebih lambat, balasan muncul di chat) |
-| Tiket & Booking | `screens/tickets_tab.dart`, `widgets/booking_section.dart` | Tiga segmen: Tiket Masuk (beli tiket), Sewa & Wahana (jam selang 1 jam, daftar wahana dari mock JSON `assets/data/wahana.json`, total dan Lanjut Booking mengambang), Riwayat (tiket dan invoice per nomor WhatsApp) |
+| Chatbot Tanya Sira | `widgets/floating_chat.dart`, `data/chat_controller.dart` | Gelembung kaca mengambang di Beranda, bisa digeser; diketuk membesar jadi panel chat. Pertanyaan cepat dari `GET /chat/quick-questions`; pesan dikirim ke `POST /chat` dan dijawab FAQ pengelola. Pertanyaan yang tidak cocok dicatat backend agar dijawab admin |
+| Tiket & Booking | `screens/tickets_tab.dart`, `widgets/booking_section.dart` | Tiga segmen: Tiket Masuk (beli tiket), Sewa & Wahana (jam dari `GET /booking-slots` dan daftar wahana dari `GET /rides`, dengan cadangan `assets/data/wahana.json` bila server mati, total dan Lanjut Booking mengambang), Riwayat (tiket dan invoice per nomor WhatsApp) |
 | Beli Tiket Masuk | `screens/ticket_form_screen.dart` | Jumlah pengunjung, jam datang, parkir, nama, WhatsApp (divalidasi), bayar QRIS (sheet) atau tunai |
-| E-Tiket (hasil input) | `screens/eticket_screen.dart` | QR tiket, status, detail, kirim e-tiket ke WhatsApp, simulasi scan petugas |
+| E-Tiket (hasil input) | `screens/eticket_screen.dart` | QR tiket, status yang diperbarui dari server tiap beberapa detik, detail, kirim e-tiket ke WhatsApp |
 | Ringkasan Booking | `screens/checkout_screen.dart` | Ringkasan booking, nama, WhatsApp, pembayaran QRIS |
-| Bayar Booking QRIS | `screens/payment_screen.dart` | QR pembayaran, total, batas waktu 15 menit, cara bayar, tombol Saya Sudah Bayar (simulasi) |
+| Bayar Booking QRIS | `screens/payment_screen.dart` | QR pembayaran dari backend, total, batas waktu 15 menit, cara bayar, tombol Saya Sudah Bayar (mode simulasi backend) |
 | Booking Berhasil & Invoice | `screens/invoice_screen.dart` | QR kode booking, rincian yang sudah dibayar, kirim invoice ke WhatsApp |
-| Galeri | `screens/gallery_tab.dart` | Foto utama besar lalu grid 2 kolom (GridView), ketuk untuk melihat layar penuh dan zoom |
-| Ulasan & Rating | `screens/reviews_screen.dart` | Rata-rata bintang, tulis ulasan (pilih bintang + validasi), ulasan terbaru |
-| AI Photo Studio | `screens/ai_photo_screen.dart`, `utils/photo_enhance.dart`, `utils/photo_io.dart` | Pilih foto dari galeri atau kamera, dianalisis otomatis lalu warnanya diperbagus (natural, tidak berlebihan). Geser untuk membandingkan dengan foto asli, atur kekuatan dan gaya, lalu simpan atau bagikan. Diproses di HP |
+| Galeri | `screens/gallery_tab.dart` | Foto dari `GET /gallery` (kiriman pengunjung yang disetujui admin): foto utama besar lalu grid 2 kolom, ketuk untuk melihat layar penuh dan zoom |
+| Ulasan & Rating | `screens/reviews_screen.dart` | Rata-rata bintang dari server, tulis ulasan (pilih bintang + validasi), ulasan terbaru |
+| AI Photo Studio | `screens/ai_photo_screen.dart`, `utils/photo_upload.dart` | Pilih foto dari galeri atau kamera, unggah ke `POST /ai-photo`, lalu tampilkan foto asli dan hasil perbaikan dari server berdampingan. Hasil bisa disimpan, dibagikan, atau dikirim ke Galeri Komunitas (menunggu persetujuan admin) |
 | Profil | `screens/profile_tab.dart` | Nomor WhatsApp tersimpan, pengingat jam sepi, info wisata, Google Maps |
 
 Alur booking: Tiket & Booking segmen Sewa & Wahana (pilih jam dan item), Lanjut Booking, Ringkasan Booking, Bayar Booking QRIS, Saya Sudah Bayar,
 lalu Booking Berhasil & Invoice. Booking baru tersimpan setelah pembayaran.
 
 Struktur `mobile/lib`: `screens/` (layar), `widgets/` (komponen yang dipakai ulang: kaca Liquid Glass, tab bar dan bar mengambang, kartu konten,
-list inset grouped, header tab, logo bergerak, grafik per jam, chatbot mengambang, bagian booking, stepper), `models/` (Ticket, Booking, Review, Wahana), `data/` (data contoh dan `AppState` berbasis ChangeNotifier), `theme/` (warna dan font),
-`utils/` (rute, format Rupiah dan nomor WhatsApp, validasi, pembuka tautan). Package: `google_fonts` (Fraunces, Inter), `cupertino_icons` (ikon gaya SF Symbols), `intl` (format Rupiah dan tanggal Indonesia), `qr_flutter` (kode QR),
-`shared_preferences` (menyimpan nomor WhatsApp terakhir, riwayat tiket dan booking, tanda onboarding, dan pengaturan pengingat), dan `url_launcher` (membuka Google Maps dan WhatsApp).
+list inset grouped, header tab, logo bergerak, grafik per jam, chatbot mengambang, bagian booking, stepper), `models/` (Ticket, Booking, Review, Wahana, Galeri),
+`data/` (`AppState`, `CrowdState`, `ChatController`, dan `ApiClient` berbasis ChangeNotifier/Future), `theme/` (warna dan font),
+`utils/` (rute, format Rupiah dan nomor WhatsApp, validasi, unggah foto, pembuka tautan). Package: `google_fonts` (Fraunces, Inter), `cupertino_icons` (ikon gaya SF Symbols), `intl` (format Rupiah dan tanggal Indonesia), `qr_flutter` (kode QR),
+`shared_preferences` (menyimpan nomor WhatsApp terakhir, tanda onboarding, dan pengaturan pengingat), `image_picker` + `http` (AI Photo), `share_plus` (bagikan hasil foto), dan `url_launcher` (membuka Google Maps dan WhatsApp).
 Responsif: isi halaman bisa digulir, lebar maksimal 480 px di tengah untuk tablet/web, ukuran mengikuti layar lewat
 `Expanded`, `Wrap`, `LayoutBuilder`, dan `SafeArea`, jadi tidak ada overflow saat layar kecil atau landscape.
 
@@ -141,27 +145,23 @@ Di kode, bagian yang memakai materi kuliah diberi komentar penanda, misalnya `//
 |---|---|---|
 | P2 | `var`, `final`, `const`, class dan object, null safety (`?`, `??`) | `models/ticket.dart`, `data/dummy_data.dart`, `data/app_state.dart` |
 | P3 | StatelessWidget, StatefulWidget, setState, Row, Column, Container, Padding, SizedBox, Stack, Positioned, Expanded, GridView | Semua layar, misalnya `home_tab.dart` (Stack untuk chatbot mengambang), `gallery_tab.dart` (GridView), `widgets/common.dart` |
-| P4 | ElevatedButton, TextField + InputDecoration, TextEditingController, DropdownButton, Slider, Switch, Checkbox, RadioButton, Image.asset, Image.network | `ticket_form_screen.dart` (Dropdown, Radio, Checkbox), `home_tab.dart` dan `gallery_tab.dart` (Image.asset), `ai_photo_screen.dart` (Slider, Switch, Image.network), `profile_tab.dart` (Switch) |
+| P4 | ElevatedButton, TextField + InputDecoration, TextEditingController, DropdownButton, Slider, Switch, Checkbox, RadioButton, Image.asset, Image.network | `ticket_form_screen.dart` (Dropdown, Radio, Checkbox), `home_tab.dart` dan `gallery_tab.dart` (Image.asset), `ai_photo_screen.dart` (Image.network), `profile_tab.dart` (Switch) |
 | P5 | Navigator.push / pop, kirim data ke halaman lain, named route, navigasi tab | `main.dart` (routes + onGenerateRoute), `widgets/booking_section.dart` (kirim isi booking ke Checkout), `checkout_screen.dart` (kirim pesanan ke Bayar QRIS), `main_shell.dart` (tab bawah) |
-| P6 | Package dan plugin (google_fonts, intl, shared_preferences, url_launcher, qr_flutter), Form + TextFormField + validator | `utils/format.dart` (intl), `data/app_state.dart` (shared_preferences: riwayat per WhatsApp), `utils/launcher.dart` (url_launcher: Maps dan WhatsApp), `payment_screen.dart` (qr_flutter), `ticket_form_screen.dart`, `checkout_screen.dart`, `tickets_tab.dart` (Form) |
+| P6 | Package dan plugin (google_fonts, intl, shared_preferences, url_launcher, qr_flutter), Form + TextFormField + validator | `utils/format.dart` (intl), `data/app_state.dart` (shared_preferences: nomor WhatsApp terakhir, onboarding, pengingat jam sepi), `utils/launcher.dart` (url_launcher: Maps dan WhatsApp), `payment_screen.dart` (qr_flutter), `ticket_form_screen.dart`, `checkout_screen.dart`, `tickets_tab.dart` (Form) |
 
 ## Fitur AI
 
 Hanya ada **dua** fitur AI. Grafik keramaian dan Insight di admin **bukan AI**: dihitung dari tiket yang discan petugas.
 
-**1. Chatbot Tanya Sira (aplikasi pengunjung).** Pengunjung memilih cara bertanya:
+**1. Chatbot Tanya Sira (aplikasi pengunjung).** Pertanyaan cepat diambil dari `GET /chat/quick-questions`. Setiap
+pesan dikirim ke `POST /chat`; backend mencocokkannya dengan FAQ buatan pengelola (tanpa LLM). Pertanyaan yang tidak
+cocok disimpan backend dan muncul di halaman Chatbot & FAQ untuk dijawab admin. Menjawab pertanyaan berarti membuat
+FAQ baru lalu menghapus pertanyaan itu, supaya pertanyaan serupa berikutnya dijawab otomatis.
 
-- *Jawab cepat*: pertanyaan dicocokkan dulu dengan FAQ buatan pengelola (tanpa AI, instan). Kalau tidak ada, AI (Claude) menjawab
-  **hanya dari data Sumber Sira** (jam, harga, fasilitas, aturan, daftar wahana terbaru, keramaian saat ini). Di luar data, AI
-  mengaku tidak tahu dan pertanyaan bisa diteruskan ke pengelola. Tanpa kunci API, chatbot tetap jalan dari FAQ dan data bawaan.
-- *Tanya pengelola*: pertanyaan menunggu dibalas pengelola di halaman Chatbot & FAQ. Lebih lambat, jawabannya dari manusia, dan
-  bisa sekaligus disimpan jadi FAQ supaya pertanyaan serupa berikutnya dijawab cepat.
-
-**2. AI Photo Studio (aplikasi pengunjung).** Memperbagus foto dari galeri atau kamera seperti tombol Auto di aplikasi edit foto
-profesional, tetapi dibatasi supaya tidak berlebihan (tidak "alay"): foto dianalisis (sebaran warna, kecerahan, kontras, kepekatan warna),
-lalu rentang gelap-terang tiap warna diregangkan, warna yang berat sebelah diseimbangkan (mis. foto bawah air yang terlalu biru),
-kecerahan dan kontras disesuaikan, dan warna pucat dihidupkan. Ada tiga gaya (Alami, Cerah, Bawah air) dan slider kekuatan.
-Ini *computational photography* yang berjalan di HP (foto tidak diunggah), bukan model jaringan saraf.
+**2. AI Photo Studio (aplikasi pengunjung).** Foto dari galeri atau kamera diunggah ke `POST /ai-photo`. Backend
+memperbaiki warna dan ketajamannya (analisis sebaran warna, kecerahan, kontras, kepekatan warna), lalu mengembalikan
+foto hasil. Aplikasi menampilkan foto asli dan hasil berdampingan; hasil bisa disimpan, dibagikan, atau dikirim ke
+Galeri Komunitas untuk disetujui admin.
 
 ## Pemenuhan Soal UTS
 
@@ -169,12 +169,12 @@ Ini *computational photography* yang berjalan di HP (foto tidak diunggah), bukan
 |---|---|---|
 | Halaman login (simulasi) | `/admin/login` | Tidak memakai login. Riwayat tiket dan booking dicari lewat nomor WhatsApp |
 | Dashboard / halaman utama | `/admin` | `home_tab.dart` |
-| Data berbentuk tabel atau kartu | Tabel booking, tiket, wahana; kartu ringkasan | Kartu tiket, invoice, daftar wahana, galeri, ulasan |
-| Pengelolaan data / form input | `/admin/wahana` (tambah, edit, hapus), `/admin/faq`, `/admin/tiket` | `ticket_form_screen.dart`, `checkout_screen.dart`, `reviews_screen.dart` |
+| Data berbentuk tabel atau kartu | Tabel booking, tiket, wahana, akun; kartu ringkasan | Kartu tiket, invoice, daftar wahana, galeri, ulasan |
+| Pengelolaan data / form input | `/admin/wahana` (tambah, edit, hapus), `/admin/faq`, `/admin/staff`, `/admin/tiket` | `ticket_form_screen.dart`, `checkout_screen.dart`, `reviews_screen.dart` |
 | Halaman hasil input | Tabel ikut berubah setelah aksi | `eticket_screen.dart`, `invoice_screen.dart`, `tickets_tab.dart` |
 | Navigasi dan validasi | Sidebar, redirect login, validasi form | Named routes, tab bawah, validasi nama dan WhatsApp |
-| Data | Dari backend (tiket, keramaian, chat, wahana) + data contoh untuk booking, galeri, ulasan | Dari backend (tiket, keramaian, chat, wahana) + data contoh bila server mati |
-| AI | Menjawab dan membalas chatbot di Chatbot & FAQ | Chatbot Tanya Sira dan AI Photo Studio (lihat bagian Fitur AI) |
+| Data | Dari backend (tiket, booking, pembayaran, keramaian, chat, ulasan, galeri, wahana, harga, akun) | Dari backend (semua fitur; cadangan lokal hanya untuk wahana, jam, dan harga) |
+| AI | Chatbot (FAQ) dan AI Insight berbasis aturan | Chatbot Tanya Sira dan AI Photo Studio (lihat bagian Fitur AI) |
 
 ## Screenshot
 
@@ -213,14 +213,15 @@ Ekspor desain Figma lengkap ada di folder `desain/`.
 | Rute | Halaman |
 |---|---|
 | `/admin/login` | Masuk admin. Semua halaman `/admin` lain wajib login, tombol keluar ada di kartu profil sidebar |
-| `/admin/akun` | Akun & Sesi: profil, hak akses, daftar sesi login aktif milik akun ini, cabut sesi perangkat lain |
+| `/admin/akun` | Akun & Sesi: profil, hak akses, daftar sesi login aktif milik akun ini, cabut sesi perangkat lain, ganti password sendiri |
 | `/admin` | Dashboard Overview (kartu ringkasan, grafik batang pill beranimasi, ringkasan hari ini, booking masuk, heatmap keramaian seminggu, tiket online hari ini, wahana terpopuler, pendapatan 7 hari). Angka keramaian dan tiket dari tiket yang discan |
 | `/admin/booking` | Booking Sewa & Wahana (filter, cari lewat kotak cari di header, detail booking, konfirmasi/tolak) |
-| `/admin/tiket` | Tiket & Check-in (tambahan): scan kode tiket di pintu masuk, daftar tiket hari ini, check-in dan keluar |
-| `/admin/insight` | Insight Keramaian (grafik area sepanjang hari yang naik saat tiket discan masuk dan turun saat keluar, ringkasan hari, puncak per jam, rincian tiket, pola 7 hari, pilih tanggal, unduh CSV). Tanpa AI |
-| `/admin/galeri` | Galeri & Konten (moderasi foto, urut terbaru/terlama, tampilan grid atau daftar) |
-| `/admin/faq` | Chatbot & FAQ (kelola FAQ jawaban cepat tanpa AI, balas pertanyaan pengunjung yang menunggu pengelola, simpan jawaban jadi FAQ, statistik jawaban otomatis) |
-| `/admin/wahana` | Wahana & Harga (filter kategori, tambah, edit, hapus) |
+| `/admin/tiket` | Tiket & Check-in: scan kode tiket di pintu masuk, daftar tiket hari ini, check-in dan keluar |
+| `/admin/insight` | AI Insight: rating dan sebaran ulasan, keramaian saat ini, jam terpadat, dan saran dari `GET /admin/insight`. Bagian lama yang datanya tidak disediakan backend (grafik per 30 menit, rincian tiket, pola 7 hari, pilih tanggal, unduh CSV) disembunyikan. Analisisnya aturan, bukan LLM |
+| `/admin/galeri` | Galeri & Konten (moderasi foto kiriman pengunjung dari backend, urut terbaru/terlama, tampilan grid atau daftar) |
+| `/admin/faq` | Chatbot & FAQ: kelola FAQ jawaban cepat, lihat pertanyaan pengunjung yang belum terjawab. Menjawab = membuat FAQ baru lalu menghapus pertanyaan itu |
+| `/admin/wahana` | Wahana & Harga (filter kategori, tambah, edit, hapus) dan harga tiket masuk, kapasitas, serta tarif parkir. Petugas hanya melihat; admin bisa mengubah |
+| `/admin/staff` | Akun Petugas (khusus admin): tambah akun, ubah nama/peran/status, atur ulang password. Menonaktifkan akun atau mengatur ulang password mencabut semua sesinya |
 
 Tampilan admin mengikuti desain admin terbaru di Figma: sidebar berupa kartu putih yang melayang, menu aktif
 berbentuk pill Hijau Tua, kartu statistik membulat dengan ikon di dalam lingkaran, grafik batang berbentuk pill,
@@ -257,14 +258,14 @@ akun itu (peran admin atau petugas).
 | Layout / page | Layout `(panel)` hanya mengambil data untuk sidebar; setiap `page.tsx` cek izin sendiri lewat DAL | `src/app/admin/(panel)/` |
 | RBAC | Peran `admin` dan `petugas` dengan daftar izin. Menu sidebar disaring sesuai peran (hanya tampilan) | `src/lib/auth/roles.ts`, `Sidebar.tsx` |
 | 401 vs 403 | Belum login: dialihkan ke login, API membalas 401. Sudah login tapi tidak berizin: halaman 403 (`forbidden()`) | `dal.ts`, `(panel)/forbidden.tsx`, `src/app/api/admin/me/route.ts` |
-| Server Action khusus admin | Tambah/edit/hapus wahana: autentikasi, otorisasi, validasi, ubah data, revalidasi. Ditolak = `FORBIDDEN` bertipe | `src/app/admin/(panel)/wahana/actions.ts` |
+| Server Action khusus admin | Tambah/edit/hapus wahana, simpan harga, kelola akun petugas, dan ganti password: autentikasi, otorisasi, validasi, ubah data, revalidasi. Ditolak = `FORBIDDEN` bertipe | `wahana/actions.ts`, `staff/actions.ts`, `lib/auth/actions.ts` |
 | Query terbatas (cegah IDOR) | Daftar dan pencabutan sesi hanya untuk sesi milik akun yang login; sesi akun lain dianggap tidak ada | repo backend: `/auth/sessions` di `src/routes/auth.ts` |
 | Open redirect | `?next=` hanya boleh halaman di dalam `/admin` | `src/lib/auth/redirect.ts` |
 
 Cara mencoba:
 
 1. Buka `/admin/wahana` tanpa login: diarahkan ke login, setelah masuk kembali ke Wahana.
-2. Masuk sebagai Petugas: sidebar hanya 4 menu. Buka `/admin/insight` lewat alamat langsung: halaman 403.
+2. Masuk sebagai Petugas: sidebar hanya 5 menu. Buka `/admin/insight` atau `/admin/staff` lewat alamat langsung: halaman 403.
 3. Masih sebagai Petugas, tekan hapus atau edit di Wahana & Harga: server menolak dengan `403 FORBIDDEN`.
 4. Masuk sebagai Admin: semua menu terbuka dan harga bisa diubah.
 5. DevTools, tab Application, lalu Cookies: cookie `ss_admin_session` bertanda HttpOnly, Secure, SameSite Lax.
@@ -276,7 +277,8 @@ Cara mencoba:
    logout (`200`), lalu token lama ditolak (`401`). Token hasil login otomatis disimpan ke variabel `{{token}}`.
 
 Catatan tahap ini: akun, sesi, dan data wahana disimpan di database backend (Neon), jadi tidak hilang saat web dimatikan.
-Backend belum membatasi percobaan login (batas 5 kali salah dipasang di Next.js), dan login Google (OAuth) serta MFA belum dibuat karena butuh akun penyedia (Google Cloud).
+Backend membatasi 5 kegagalan login per menit per email, dan form Next.js menambah batas 5 kali salah dalam 10 menit.
+Login Google (OAuth) dan MFA belum dibuat karena butuh akun penyedia (Google Cloud).
 
 ## Syarat dosen dan letaknya
 
@@ -310,13 +312,15 @@ src/app/               Halaman (App Router). Tiap halaman punya folder component
                        WahanaPopuler, PendapatanMingguan, LiveCrowdStat, TiketTerjualStat, Today
     booking/components/  BookingView (data + pilihan), StatBooking, DaftarBooking, DetailBooking
     tiket/components/    TiketView, StatTiket, ScanTiket, CheckinTerbaru, DaftarTiket
-    insight/components/  InsightView, GrafikKeramaian, RingkasanHari, PuncakPerJam, RincianTiket
+    insight/components/  InsightView, StatInsight, SebaranRating, SaranInsight
     galeri/components/   GaleriView, StatGaleri, ToolbarGaleri, FotoGrid, FotoList, AiBadge, AksiFoto
     faq/components/      FaqView, StatFaq, AlurJawaban, DaftarFaq, BelumTerjawab, FormFaq
-    wahana/components/   WahanaView, PesanAkses, StatWahana, DaftarWahana, FormWahana (Server Action di wahana/actions.ts)
-    akun/components/     Profil, SesiLogin, SesiList
+    wahana/components/   WahanaView, PesanAkses, StatWahana, DaftarWahana, FormWahana, PricingCard
+                         (Server Action di wahana/actions.ts)
+    staff/components/    StaffView, FormStaff (Server Action di staff/actions.ts, khusus admin)
+    akun/components/     Profil, SesiLogin, SesiList, GantiPassword
   api/admin/me/        Route Handler contoh yang dilindungi (401 bila belum login atau token tidak berlaku)
-  api/admin/[...path]/ Penerus ke backend untuk tiket, insight, dan chat (sesi login ikut diteruskan)
+  api/admin/[...path]/ Penerus ke backend untuk dashboard, tiket, booking, dan pembayaran (sesi login ikut diteruskan)
   api/crowd/           Live Crowd publik untuk widget halaman login
   admin/(panel)/loading.tsx  Kerangka yang tampil seketika saat pindah halaman
   api/auth/            login (token Bearer untuk Postman) dan logout lewat API
@@ -326,18 +330,21 @@ src/components/        Komponen yang dipakai banyak halaman
   admin/               AdminShell, Sidebar (menu sesuai peran), ui.tsx (AdminHeader, Card, StatCard, ...)
   Logo.tsx              Logo Sumber Sira (lingkaran hijau tua: tetes air, percikan, riak, tulisan SUMBER SIRA), juga di src/app/icon.svg
   WahanaIcon.tsx        Ikon per wahana
-src/data/              Data contoh yang belum ada backend-nya (booking, galeri, pendapatan; wahana.ts, dummy.ts)
+src/data/              Katalog wahana bawaan (wahana.ts)
 src/lib/
   tiket-store.ts       Tiket masuk online + angka Live Crowd (dari backend, diperbarui berkala)
+  booking-store.ts     Daftar booking admin (halaman per halaman) dan aksi pembayaran
+  dashboard-store.ts   Ringkasan dashboard (dari backend, diperbarui berkala)
   crowd-store.ts       Live Crowd publik untuk halaman login
-  insight-store.ts     Data grafik Insight dan pola 7 hari
-  chat-store.ts        FAQ dan pertanyaan chatbot
+  mingguan-store.ts    Agregasi 7 hari (heatmap, wahana populer, pendapatan) dari data backend
   live/                Penyimpan data berkala (poll-store) dan pemanggil API (http)
-  auth/                Autentikasi & otorisasi admin: users.ts (hash password), session.ts (sesi + cookie),
-                       dal.ts (Data Access Layer), roles.ts (peran dan izin), actions.ts (login, logout, cabut sesi),
-                       login.ts (alur login yang sama untuk form dan API)
+  auth/                Autentikasi & otorisasi admin: dal.ts (Data Access Layer), roles.ts (peran dan izin),
+                       actions.ts (login, logout, cabut sesi, ganti password), login.ts (alur login yang sama
+                       untuk form dan API), constants.ts, redirect.ts, device.ts
   validation/email.ts  Aturan email yang dipakai form di browser dan pengecekan di server
+  server/api.ts        Pemanggil backend dari server Next.js (meneruskan sesi dan User-Agent)
   server/wahana-store.ts  Data wahana di server untuk Server Action khusus admin
+  nice-ticks.ts        Skala sumbu grafik batang keramaian
   whatsapp.ts          Pesan invoice WhatsApp
   format.ts            Format Rupiah dan kode booking
   foto.ts              Import semua foto aplikasi dari desain/foto
@@ -370,8 +377,8 @@ src/lib/
   Pakai lewat kelas Tailwind, misalnya `bg-forest` dan `text-leaf`.
 - Font dipasang dari npm (Fontsource): Fraunces (judul), Inter (teks), JetBrains Mono (angka/harga).
 - Foto aplikasi ada di `desain/foto/` (folder `public/` tidak dipakai lagi) dan di-import lewat `src/lib/foto.ts`,
-  jadi Next.js memprosesnya sebagai gambar statis. Foto baru: taruh di `desain/foto/`, lalu tambahkan di `foto.ts`. Semua foto adalah foto asli Sumber Sira; foto galeri admin
-  memakai foto yang sama dengan potongan berbeda (`pos` di `src/data/dummy.ts`).
+  jadi Next.js memprosesnya sebagai gambar statis. Foto baru: taruh di `desain/foto/`, lalu tambahkan di `foto.ts`.
+  Foto galeri pengunjung diambil dari URL backend (`GET /gallery`), bukan dari file statis.
 - Logo Sumber Sira ada di `src/components/Logo.tsx` (sidebar dan login admin, intro web), versi Flutter di `mobile/lib/widgets/logo_mark.dart`
   (Splash, Beranda, Tentang), dan sebagai ikon tab browser di `src/app/icon.svg`. Animasinya: tetes air jatuh dan memantul, percikan,
   riak melebar, lalu tulisan SUMBER SIRA muncul (siklus 9 detik, keyframe `logo-*` di `src/app/globals.css`).
@@ -381,16 +388,19 @@ src/lib/
   Warna tema web dan latar layar pembuka saat di-install dari browser: Hijau Tua `#1B4332`, sama dengan `AppColors.forest`.
 - Yang tidak ada di Figma dan sengaja ditambahkan: halaman intro web, pesan validasi form, dan modal Tambah/Edit di admin.
 
-## Masih simulasi dan perlu dikerjakan di tahap backend
+## Yang masih simulasi
 
-| Fitur | Sekarang (frontend) | Tahap backend |
+Seluruh data aplikasi (tiket, booking, pembayaran, keramaian, ulasan, galeri, FAQ, wahana, harga, dan akun) sudah
+diambil dari backend. Yang belum dipakai di produksi hanya hal-hal berikut.
+
+| Fitur | Sekarang | Kalau dilanjutkan |
 |---|---|---|
-| Data (booking, ulasan, galeri, pendapatan) | Konstanta di `src/data/` (wahana, tiket, keramaian, dan FAQ sudah dari backend) | Ambil dari API/database |
-| Booking & pembayaran | Kode booking dibuat di browser, pembayaran tidak diproses | Simpan booking di server. QRIS lewat payment gateway |
-| AI Photo enhance | Sudah jalan di HP (analisis dan perbaikan warna otomatis). Bukan model jaringan saraf | Opsional: Claude vision untuk menyarankan parameter, simpan hasil ke Galeri Komunitas |
-| Tiket online & Live Crowd | Sudah dari backend. Petugas memindai lewat web admin (ketik atau tempel kode); pembayaran QRIS masih disimulasikan | Scan QR dengan kamera lewat aplikasi petugas, pembayaran QRIS lewat payment gateway |
-| Riwayat per WhatsApp | Dicari dari data di perangkat, e-tiket dibuka di WhatsApp lewat tautan `wa.me` | Server mengirim e-tiket otomatis lewat WhatsApp Business API, riwayat dibuka setelah verifikasi kode OTP ke nomor itu |
-| Login admin | Sudah lewat backend: akun (hash scrypt) dan sesi di database, cookie HttpOnly + Secure + SameSite, peran admin/petugas | Batas percobaan login pindah ke backend, tambah login Google (OAuth) dan MFA untuk akun admin |
+| Pembayaran QRIS | Backend punya dua mode: `simulation` (tombol "Saya Sudah Bayar") dan Midtrans. Demo memakai mode simulasi | Aktifkan Midtrans production beserta webhook pembayaran |
+| E-tiket & invoice WhatsApp | Dibuka lewat tautan `wa.me` dari aplikasi, jadi pengunjung sendiri yang menekan kirim | Kirim otomatis lewat WhatsApp Business API dari nomor resmi |
+| Check-in | Petugas mengetik atau menempel kode tiket di `/admin/tiket` | Pindai QR dengan kamera (aplikasi petugas atau browser) |
+| Riwayat per WhatsApp | Server mengembalikan tiket dan booking untuk nomor yang diketik, tanpa verifikasi | Kirim OTP ke nomor itu sebelum riwayat dibuka |
+| AI Photo Studio | Perbaikan warna dan ketajaman di server memakai analisis sebaran warna, bukan model jaringan saraf | Model AI untuk hasil yang lebih halus |
+| Login admin | Email + password, sesi di database, peran admin/petugas | Login Google (OAuth) dan MFA |
 
 **Keamanan untuk tahap backend:**
 

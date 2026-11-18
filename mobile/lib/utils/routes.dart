@@ -11,4 +11,7 @@ class AppRoutes {
   static const invoice = '/booking/invoice';
   static const aiPhoto = '/ai-photo';
   static const reviews = '/ulasan';
+  // Rute praktikum Pertemuan 10 (Modul Arsitektur Aplikasi Flutter)
+  static const praktikumClean = '/praktikum/clean';
+  static const praktikumMvvm = '/praktikum/mvvm';
 }

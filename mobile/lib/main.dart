@@ -20,6 +20,15 @@ import 'screens/ticket_form_screen.dart';
 import 'theme/app_theme.dart';
 import 'utils/routes.dart';
 
+// Import praktikum Clean Architecture & MVVM (Modul Pertemuan 10)
+import 'mahasiswa/data/repositories/mahasiswa_repository_memory.dart';
+import 'mahasiswa/domain/usecases/ambil_mahasiswa.dart';
+import 'mahasiswa/domain/usecases/hapus_mahasiswa.dart';
+import 'mahasiswa/domain/usecases/tambah_mahasiswa.dart';
+import 'mahasiswa/presentation/viewmodels/mahasiswa_viewmodel.dart';
+import 'mahasiswa/presentation/views/mahasiswa_page.dart';
+import 'mahasiswa_mvvm/views/mahasiswa_page.dart' as mvvm;
+
 // Titik awal aplikasi pengunjung Sumber Sira.
 // [P6] main() dibuat async: menyiapkan format tanggal Indonesia (intl) dan membaca pengaturan
 // serta riwayat yang tersimpan di perangkat (shared_preferences) sebelum aplikasi tampil.
@@ -73,6 +82,22 @@ class SumberSiraApp extends StatelessWidget {
           AppRoutes.checkout when args is BookingDraft => MaterialPageRoute(settings: settings, builder: (_) => CheckoutScreen(draft: args)),
           AppRoutes.payment when args is Booking => MaterialPageRoute(settings: settings, builder: (_) => PaymentScreen(booking: args)),
           AppRoutes.invoice when args is String => MaterialPageRoute(settings: settings, builder: (_) => InvoiceScreen(code: args)),
+          AppRoutes.praktikumClean => MaterialPageRoute(
+              settings: settings,
+              builder: (_) {
+                final repo = MahasiswaRepositoryMemory();
+                final vm = MahasiswaViewModel(
+                  ambilMahasiswa: AmbilMahasiswa(repo),
+                  tambahMahasiswa: TambahMahasiswa(repo),
+                  hapusMahasiswa: HapusMahasiswa(repo),
+                );
+                return MahasiswaPage(vm: vm);
+              },
+            ),
+          AppRoutes.praktikumMvvm => MaterialPageRoute(
+              settings: settings,
+              builder: (_) => const mvvm.MahasiswaPage(),
+            ),
           _ => null,
         };
       },

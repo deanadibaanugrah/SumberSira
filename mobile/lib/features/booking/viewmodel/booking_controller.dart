@@ -63,7 +63,8 @@ class BookingController extends ChangeNotifier {
     notifyListeners();
   }
 
-  int get total => _loaded.fold(0, (sum, w) => sum + (qty[w.id] ?? 0) * w.price);
+  int get total =>
+      _loaded.fold(0, (sum, w) => sum + (qty[w.id] ?? 0) * w.price);
 
   void setSlot(String value) {
     slot = value;
@@ -80,20 +81,34 @@ class BookingController extends ChangeNotifier {
   void next(BuildContext context) {
     if (slot == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Jam booking belum tersedia dari server.'), margin: EdgeInsets.fromLTRB(16, 0, 16, 84)),
+        const SnackBar(
+          content: Text('Jam booking belum tersedia dari server.'),
+          margin: EdgeInsets.fromLTRB(16, 0, 16, 84),
+        ),
       );
       return;
     }
     final chosen = _loaded.where((w) => (qty[w.id] ?? 0) > 0).toList();
     if (chosen.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Pilih minimal satu wahana dulu.'), margin: EdgeInsets.fromLTRB(16, 0, 16, 84)),
+        const SnackBar(
+          content: Text('Pilih minimal satu wahana dulu.'),
+          margin: EdgeInsets.fromLTRB(16, 0, 16, 84),
+        ),
       );
       return;
     }
     final draft = BookingDraft(
       slot: slot!,
-      lines: [for (final w in chosen) BookingLine(name: w.label, qty: qty[w.id]!, price: w.price, rideId: w.id)],
+      lines: [
+        for (final w in chosen)
+          BookingLine(
+            name: w.label,
+            qty: qty[w.id]!,
+            price: w.price,
+            rideId: w.id,
+          ),
+      ],
     );
     // [P5 Kirim data antar halaman] Isi booking dikirim sebagai arguments ke rute Checkout.
     Navigator.pushNamed(context, AppRoutes.checkout, arguments: draft);

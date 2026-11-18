@@ -12,14 +12,14 @@ class PaymentInfo {
   });
 
   factory PaymentInfo.fromJson(Map<String, dynamic> j) => PaymentInfo(
-        id: j['id'] as String,
-        status: (j['status'] as String?) ?? 'pending',
-        amount: (j['amount'] as num?)?.toInt() ?? 0,
-        provider: j['provider'] as String?,
-        qrString: j['qrString'] as String?,
-        qrUrl: j['qrUrl'] as String?,
-        expiresAt: j['expiresAt'] as String?,
-      );
+    id: j['id'] as String,
+    status: (j['status'] as String?) ?? 'pending',
+    amount: (j['amount'] as num?)?.toInt() ?? 0,
+    provider: j['provider'] as String?,
+    qrString: j['qrString'] as String?,
+    qrUrl: j['qrUrl'] as String?,
+    expiresAt: j['expiresAt'] as String?,
+  );
 
   final String id;
   final String status;
@@ -36,8 +36,10 @@ class PaymentInfo {
   // Backend dijalankan dengan PAYMENT_MODE=simulation: tombol "Saya Sudah Bayar" boleh tampil.
   // Respons pembuatan tiket tidak selalu memuat provider, jadi mode uji coba juga dikenali
   // dari QR simulasi yang selalu berawalan "QRIS-SIM:".
-  bool get simulasi => provider == 'simulation' || (qrString?.startsWith('QRIS-SIM:') ?? false);
+  bool get simulasi =>
+      provider == 'simulation' || (qrString?.startsWith('QRIS-SIM:') ?? false);
 
   // Tidak bisa dibayar lagi (bukan pending dan belum lunas).
-  bool get tutup => status == 'failed' || status == 'expired' || status == 'cancelled';
+  bool get tutup =>
+      status == 'failed' || status == 'expired' || status == 'cancelled';
 }

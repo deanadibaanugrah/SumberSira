@@ -55,7 +55,9 @@ class AppState extends ChangeNotifier {
       await prefs.remove(_apiUrlKey);
       ApiClient.customBaseUrl = '';
     } else {
-      final clean = trimmed.endsWith('/') ? trimmed.substring(0, trimmed.length - 1) : trimmed;
+      final clean = trimmed.endsWith('/')
+          ? trimmed.substring(0, trimmed.length - 1)
+          : trimmed;
       await prefs.setString(_apiUrlKey, clean);
       ApiClient.customBaseUrl = clean;
     }
@@ -71,8 +73,9 @@ class AppState extends ChangeNotifier {
   String? pricingError;
 
   // Teks info tarif untuk layar Tentang dan Profil. Jujur bila server belum menjawab.
-  String get hargaTiketText =>
-      hargaTiket == null ? 'Tarif belum tersedia' : '${rupiah(hargaTiket!)} per orang (usia 3 tahun ke atas)';
+  String get hargaTiketText => hargaTiket == null
+      ? 'Tarif belum tersedia'
+      : '${rupiah(hargaTiket!)} per orang (usia 3 tahun ke atas)';
 
   String get parkirText {
     if (parkirTarif.isEmpty) return 'Tarif belum tersedia';
@@ -126,26 +129,51 @@ class AppState extends ChangeNotifier {
   }
 
   // Tiket yang dibeli lewat aplikasi ini, yang terbaru di atas.
-  List<Ticket> get myTickets => tickets.where((t) => t.mine).toList().reversed.toList();
+  List<Ticket> get myTickets =>
+      tickets.where((t) => t.mine).toList().reversed.toList();
 
   // Riwayat tiket untuk satu nomor WhatsApp, yang terbaru di atas.
   List<Ticket> ticketsFor(String whatsapp) {
     final wa = nomorWa(whatsapp);
     if (wa.isEmpty) return [];
-    return tickets.where((t) => t.whatsapp.isNotEmpty && nomorWa(t.whatsapp) == wa).toList().reversed.toList();
+    return tickets
+        .where((t) => t.whatsapp.isNotEmpty && nomorWa(t.whatsapp) == wa)
+        .toList()
+        .reversed
+        .toList();
   }
 
   // Riwayat booking sewa dan wahana untuk satu nomor WhatsApp, yang terbaru di atas.
   List<Booking> bookingsFor(String whatsapp) {
     final wa = nomorWa(whatsapp);
     if (wa.isEmpty) return [];
-    return bookings.where((b) => nomorWa(b.whatsapp) == wa).toList().reversed.toList();
+    return bookings
+        .where((b) => nomorWa(b.whatsapp) == wa)
+        .toList()
+        .reversed
+        .toList();
   }
 
   // Beli tiket lewat server. Harga dan kode ditentukan server, jadi tiket yang tampil sama dengan yang dilihat petugas.
   // Melempar ApiException bila gagal (server tidak terjangkau atau isian ditolak).
-  Future<Ticket> buyTicketOnline({required String name, required String whatsapp, required int adults, required int kids, required Parking parking, PaymentMethod payment = PaymentMethod.qris, String arrival = ''}) async {
-    final ticket = await ApiClient.buyTicket(name: name, whatsapp: nomorWa(whatsapp), adults: adults, kids: kids, parking: parking, payment: payment, arrival: arrival);
+  Future<Ticket> buyTicketOnline({
+    required String name,
+    required String whatsapp,
+    required int adults,
+    required int kids,
+    required Parking parking,
+    PaymentMethod payment = PaymentMethod.qris,
+    String arrival = '',
+  }) async {
+    final ticket = await ApiClient.buyTicket(
+      name: name,
+      whatsapp: nomorWa(whatsapp),
+      adults: adults,
+      kids: kids,
+      parking: parking,
+      payment: payment,
+      arrival: arrival,
+    );
     _upsert(ticket);
     notifyListeners();
     return ticket;
@@ -181,11 +209,14 @@ class AppState extends ChangeNotifier {
     final t = find(code);
     // Tiket lama tanpa data server tidak perlu diperbarui.
     if (t != null && !t.synced) return;
-    final wa = (t != null && t.whatsapp.isNotEmpty) ? t.whatsapp : savedWhatsapp;
+    final wa = (t != null && t.whatsapp.isNotEmpty)
+        ? t.whatsapp
+        : savedWhatsapp;
     if (wa.isEmpty) return;
     try {
       final latest = await ApiClient.fetchTicket(code, wa);
-      final berubah = t == null ||
+      final berubah =
+          t == null ||
           t.status != latest.status ||
           t.checkInAt != latest.checkInAt ||
           t.paymentStatus != latest.paymentStatus;
@@ -199,9 +230,21 @@ class AppState extends ChangeNotifier {
   // Membuat booking di server (dipanggil dari Checkout, saat pengguna menekan tombol bayar).
   // Kode, total, dan harga per item ditentukan server; jika ada wahana dinonaktifkan admin,
   // melempar ApiException dengan kode RIDE_UNAVAILABLE.
-  Future<Booking> createBookingOnline({required BookingDraft draft, required String name, required String whatsapp}) async {
-    final item = [for (final l in draft.lines) if (l.rideId != null) (rideId: l.rideId!, qty: l.qty)];
-    final booking = await ApiClient.createBooking(name: name, whatsapp: nomorWa(whatsapp), slot: draft.slot, items: item);
+  Future<Booking> createBookingOnline({
+    required BookingDraft draft,
+    required String name,
+    required String whatsapp,
+  }) async {
+    final item = [
+      for (final l in draft.lines)
+        if (l.rideId != null) (rideId: l.rideId!, qty: l.qty),
+    ];
+    final booking = await ApiClient.createBooking(
+      name: name,
+      whatsapp: nomorWa(whatsapp),
+      slot: draft.slot,
+      items: item,
+    );
     _upsertBooking(booking);
     notifyListeners();
     return booking;
@@ -218,7 +261,9 @@ class AppState extends ChangeNotifier {
   Future<void> refreshBooking(String code) async {
     final b = findBooking(code);
     if (b != null && !b.synced) return;
-    final wa = (b != null && b.whatsapp.isNotEmpty) ? b.whatsapp : savedWhatsapp;
+    final wa = (b != null && b.whatsapp.isNotEmpty)
+        ? b.whatsapp
+        : savedWhatsapp;
     if (wa.isEmpty) return;
     try {
       final latest = await ApiClient.fetchBooking(code, wa);

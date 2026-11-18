@@ -30,10 +30,12 @@ Future<Map<String, String>> _login(String email, String password) async {
 }
 
 // Petugas loket: cukup untuk tiket, booking, dan pembayaran.
-Future<Map<String, String>> _adminHeaders() => _login('petugas@sumbersira.id', 'petugas123');
+Future<Map<String, String>> _adminHeaders() =>
+    _login('petugas@sumbersira.id', 'petugas123');
 
 // Pengelola (admin): untuk FAQ, ulasan, galeri, dan insight.
-Future<Map<String, String>> _pengelolaHeaders() => _login('admin@sumbersira.id', 'sumbersira');
+Future<Map<String, String>> _pengelolaHeaders() =>
+    _login('admin@sumbersira.id', 'sumbersira');
 
 void main() {
   group(
@@ -58,7 +60,17 @@ void main() {
         // Prakiraan per jam dari server: jam 08 sampai 16.
         await c.refresh();
         expect(c.isLive, isTrue);
-        expect(c.forecast.map((f) => f.hour), ['08', '09', '10', '11', '12', '13', '14', '15', '16']);
+        expect(c.forecast.map((f) => f.hour), [
+          '08',
+          '09',
+          '10',
+          '11',
+          '12',
+          '13',
+          '14',
+          '15',
+          '16',
+        ]);
         final insideBefore = c.inside;
 
         // Tarif dibaca dari server, bukan angka di aplikasi.
@@ -76,7 +88,11 @@ void main() {
         );
         expect(t.code, matches(RegExp(r'^TK-\d{4,}$')));
         expect(t.synced, isTrue);
-        expect(t.total, 2 * pricing.ticketPricePerPerson + (pricing.tarif(Parking.motor) ?? 0));
+        expect(
+          t.total,
+          2 * pricing.ticketPricePerPerson +
+              (pricing.tarif(Parking.motor) ?? 0),
+        );
         expect(t.people, 3);
         expect(t.status, TicketStatus.waiting);
         expect(t.whatsapp, wa);
@@ -89,7 +105,9 @@ void main() {
 
         // Petugas mengonfirmasi pembayaran tunai di loket, baru tiket boleh discan masuk.
         final bayar = await http.post(
-          Uri.parse('${ApiClient.baseUrl}/admin/tickets/${t.code}/confirm-cash'),
+          Uri.parse(
+            '${ApiClient.baseUrl}/admin/tickets/${t.code}/confirm-cash',
+          ),
           headers: headers,
         );
         expect(bayar.statusCode, 200);
@@ -101,9 +119,12 @@ void main() {
             headers: headers,
           )).body,
         ) as Map<String, dynamic>;
-        final ketemu =
-            (list['items'] as List).any((e) => e['code'] == t.code);
-        expect(ketemu, isTrue, reason: 'tiket baru harus muncul di daftar admin');
+        final ketemu = (list['items'] as List).any((e) => e['code'] == t.code);
+        expect(
+          ketemu,
+          isTrue,
+          reason: 'tiket baru harus muncul di daftar admin',
+        );
         final ci = await http.post(
           Uri.parse('${ApiClient.baseUrl}/admin/tickets/${t.code}/check-in'),
           headers: headers,
@@ -150,71 +171,77 @@ void main() {
             arrival: '',
           ),
           throwsA(
-            isA<ApiException>().having(
-              (e) => e.code,
-              'code',
-              'VALIDATION',
-            ),
+            isA<ApiException>().having((e) => e.code, 'code', 'VALIDATION'),
           ),
         );
       });
 
-      test('booking sewa dibuat di server lalu QRIS dibayar (mode simulasi)', () async {
-        final rides = await ApiClient.fetchWahana();
-        final slots = await ApiClient.fetchBookingSlots();
-        expect(rides, isNotEmpty);
-        expect(slots, isNotEmpty);
+      test(
+        'booking sewa dibuat di server lalu QRIS dibayar (mode simulasi)',
+        () async {
+          final rides = await ApiClient.fetchWahana();
+          final slots = await ApiClient.fetchBookingSlots();
+          expect(rides, isNotEmpty);
+          expect(slots, isNotEmpty);
 
-        final ride = rides.first;
-        final booking = await ApiClient.createBooking(
-          name: 'Uji Booking',
-          whatsapp: wa,
-          slot: slots.first.id,
-          items: [(rideId: ride.id, qty: 2)],
-        );
-        expect(booking.code, matches(RegExp(r'^SS-\d{8}-\d{3}$')));
-        expect(booking.amount, ride.price * 2);
-        expect(booking.lines.single.qty, 2);
-        expect(booking.paymentStatus, PaymentStatus.pending);
-        expect(booking.paymentId, isNotNull);
+          final ride = rides.first;
+          final booking = await ApiClient.createBooking(
+            name: 'Uji Booking',
+            whatsapp: wa,
+            slot: slots.first.id,
+            items: [(rideId: ride.id, qty: 2)],
+          );
+          expect(booking.code, matches(RegExp(r'^SS-\d{8}-\d{3}$')));
+          expect(booking.amount, ride.price * 2);
+          expect(booking.lines.single.qty, 2);
+          expect(booking.paymentStatus, PaymentStatus.pending);
+          expect(booking.paymentId, isNotNull);
 
-        // QRIS baru dibuat: masih menunggu dan punya teks QR untuk dipindai.
-        final awal = await ApiClient.fetchPayment(booking.paymentId!);
-        expect(awal.status, 'pending');
-        expect(awal.qrString, isNotNull, reason: 'mode simulasi selalu memberi teks QR');
-        expect(awal.simulasi, isTrue);
+          // QRIS baru dibuat: masih menunggu dan punya teks QR untuk dipindai.
+          final awal = await ApiClient.fetchPayment(booking.paymentId!);
+          expect(awal.status, 'pending');
+          expect(
+            awal.qrString,
+            isNotNull,
+            reason: 'mode simulasi selalu memberi teks QR',
+          );
+          expect(awal.simulasi, isTrue);
 
-        // Mode simulasi: server menandai lunas, lalu booking ikut berubah.
-        final lunas = await ApiClient.simulatePayment(awal.id);
-        expect(lunas.status, 'paid');
+          // Mode simulasi: server menandai lunas, lalu booking ikut berubah.
+          final lunas = await ApiClient.simulatePayment(awal.id);
+          expect(lunas.status, 'paid');
 
-        final terbaru = await ApiClient.fetchBooking(booking.code, wa);
-        expect(terbaru.paymentStatus, PaymentStatus.paid);
-        final daftar = await ApiClient.fetchBookings(wa);
-        expect(daftar.map((b) => b.code), contains(booking.code));
-      });
+          final terbaru = await ApiClient.fetchBooking(booking.code, wa);
+          expect(terbaru.paymentStatus, PaymentStatus.paid);
+          final daftar = await ApiClient.fetchBookings(wa);
+          expect(daftar.map((b) => b.code), contains(booking.code));
+        },
+      );
 
-      test('tiket QRIS: QR dari server, lunas setelah simulasi bayar', () async {
-        final t = await ApiClient.buyTicket(
-          name: 'Uji QRIS',
-          whatsapp: wa,
-          adults: 1,
-          kids: 0,
-          parking: Parking.none,
-          payment: PaymentMethod.qris,
-          arrival: '10.00 - 12.00',
-        );
-        expect(t.paymentStatus, PaymentStatus.pending);
-        expect(t.paymentId, isNotNull);
+      test(
+        'tiket QRIS: QR dari server, lunas setelah simulasi bayar',
+        () async {
+          final t = await ApiClient.buyTicket(
+            name: 'Uji QRIS',
+            whatsapp: wa,
+            adults: 1,
+            kids: 0,
+            parking: Parking.none,
+            payment: PaymentMethod.qris,
+            arrival: '10.00 - 12.00',
+          );
+          expect(t.paymentStatus, PaymentStatus.pending);
+          expect(t.paymentId, isNotNull);
 
-        final p = await ApiClient.fetchPayment(t.paymentId!);
-        expect(p.qrString, isNotNull);
-        expect(p.simulasi, isTrue);
+          final p = await ApiClient.fetchPayment(t.paymentId!);
+          expect(p.qrString, isNotNull);
+          expect(p.simulasi, isTrue);
 
-        await ApiClient.simulatePayment(p.id);
-        final terbaru = await ApiClient.fetchTicket(t.code, wa);
-        expect(terbaru.paymentStatus, PaymentStatus.paid);
-      });
+          await ApiClient.simulatePayment(p.id);
+          final terbaru = await ApiClient.fetchTicket(t.code, wa);
+          expect(terbaru.paymentStatus, PaymentStatus.paid);
+        },
+      );
 
       test('chat: pertanyaan cocok dijawab FAQ, yang tidak cocok dicatat untuk admin', () async {
         final chat = ChatController.instance;
@@ -225,9 +252,7 @@ void main() {
         expect(faq.matched, isTrue);
         expect(faq.answer, contains('08.00'));
 
-        final unknown = await ApiClient.askChat(
-          'boleh bawa drone ke kolam?',
-        );
+        final unknown = await ApiClient.askChat('boleh bawa drone ke kolam?');
         expect(unknown.matched, isFalse);
         expect(unknown.answer, isNotEmpty);
       });
@@ -285,15 +310,18 @@ void main() {
         );
       });
 
-      test('server tidak terjangkau: permintaan langsung melempar galat', () async {
-        // Port yang tidak dipakai: simulasi server mati dengan memanggil alamat lain lewat http langsung.
-        await expectLater(
-          http
-              .get(Uri.parse('http://localhost:1/crowd'))
-              .timeout(const Duration(seconds: 3)),
-          throwsA(anything),
-        );
-      });
+      test(
+        'server tidak terjangkau: permintaan langsung melempar galat',
+        () async {
+          // Port yang tidak dipakai: simulasi server mati dengan memanggil alamat lain lewat http langsung.
+          await expectLater(
+            http
+                .get(Uri.parse('http://localhost:1/crowd'))
+                .timeout(const Duration(seconds: 3)),
+            throwsA(anything),
+          );
+        },
+      );
     },
     skip: _e2e ? null : 'Butuh backend menyala. Jalankan dengan --dart-define=E2E=1 (lihat catatan di atas file).',
   );

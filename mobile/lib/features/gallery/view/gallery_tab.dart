@@ -63,7 +63,12 @@ class _GalleryTabState extends State<GalleryTab> {
     if (_uploading) return;
     final XFile? file;
     try {
-      file = await _picker.pickImage(source: ImageSource.gallery, maxWidth: 2048, maxHeight: 2048, imageQuality: 90);
+      file = await _picker.pickImage(
+        source: ImageSource.gallery,
+        maxWidth: 2048,
+        maxHeight: 2048,
+        imageQuality: 90,
+      );
     } catch (_) {
       _snack('Galeri foto tidak bisa dibuka di perangkat ini.');
       return;
@@ -83,7 +88,9 @@ class _GalleryTabState extends State<GalleryTab> {
       builder: (_) => PhotoForm(
         heading: 'Kirim Foto',
         hint: 'Foto akan tampil setelah disetujui admin.',
-        ownerAwal: AppState.instance.myTickets.isNotEmpty ? AppState.instance.myTickets.first.name : '',
+        ownerAwal: AppState.instance.myTickets.isNotEmpty
+            ? AppState.instance.myTickets.first.name
+            : '',
       ),
     );
     if (isi == null || !mounted) return;
@@ -91,9 +98,16 @@ class _GalleryTabState extends State<GalleryTab> {
     setState(() => _uploading = true);
     try {
       final bytes = await file.readAsBytes();
-      await ApiClient.uploadGalleryPhoto(fileName: file.name, fileBytes: bytes, title: isi.title, owner: isi.owner);
+      await ApiClient.uploadGalleryPhoto(
+        fileName: file.name,
+        fileBytes: bytes,
+        title: isi.title,
+        owner: isi.owner,
+      );
       if (!mounted) return;
-      _snack('Foto terkirim. Menunggu persetujuan admin sebelum tampil di galeri.');
+      _snack(
+        'Foto terkirim. Menunggu persetujuan admin sebelum tampil di galeri.',
+      );
     } on ApiException catch (e) {
       // Termasuk FILE_TOO_LARGE dan UNSUPPORTED_MEDIA dari backend, sudah dalam pesan Indonesia.
       _snack(e.message);
@@ -104,7 +118,8 @@ class _GalleryTabState extends State<GalleryTab> {
 
   void _snack(String message) {
     if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text(message)));
   }
 
   // Penampil foto layar penuh berlatar Ink: InteractiveViewer = bisa dicubit untuk zoom dan digeser.
@@ -114,46 +129,71 @@ class _GalleryTabState extends State<GalleryTab> {
       barrierColor: AppColors.ink,
       builder: (_) => Dialog.fullscreen(
         backgroundColor: AppColors.ink,
-        child: Stack(children: [
-          Positioned.fill(
-            child: InteractiveViewer(
-              maxScale: 4,
-              child: SizedBox.expand(
-                child: Image.network(
-                  photo.url,
-                  fit: BoxFit.contain,
-                  errorBuilder: (_, _, _) => const Center(child: Icon(CupertinoIcons.photo, size: 48, color: AppColors.putih72)),
+        child: Stack(
+          children: [
+            Positioned.fill(
+              child: InteractiveViewer(
+                maxScale: 4,
+                child: SizedBox.expand(
+                  child: Image.network(
+                    photo.url,
+                    fit: BoxFit.contain,
+                    errorBuilder: (_, _, _) => const Center(
+                      child: Icon(
+                        CupertinoIcons.photo,
+                        size: 48,
+                        color: AppColors.putih72,
+                      ),
+                    ),
+                  ),
                 ),
               ),
             ),
-          ),
-          SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.all(12),
-              child: GlassIconButton(icon: CupertinoIcons.xmark, tooltip: 'Tutup', tone: GlassTone.dark, onPressed: () => Navigator.pop(context)),
-            ),
-          ),
-          Positioned(
-            left: 16,
-            right: 16,
-            bottom: 0,
-            child: SafeArea(
-              top: false,
-              minimum: const EdgeInsets.only(bottom: 16),
-              child: Glass(
-                tone: GlassTone.dark,
-                radius: 20,
-                shadow: false,
-                padding: const EdgeInsets.fromLTRB(16, 12, 16, 14),
-                child: Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisSize: MainAxisSize.min, children: [
-                  Text(photo.title, style: AppText.headline.copyWith(color: Colors.white)),
-                  const SizedBox(height: 2),
-                  Text('Foto dari ${photo.owner}${photo.ai ? ' · AI Enhanced' : ''}', style: AppText.footnote.copyWith(color: AppColors.putih72)),
-                ]),
+            SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.all(12),
+                child: GlassIconButton(
+                  icon: CupertinoIcons.xmark,
+                  tooltip: 'Tutup',
+                  tone: GlassTone.dark,
+                  onPressed: () => Navigator.pop(context),
+                ),
               ),
             ),
-          ),
-        ]),
+            Positioned(
+              left: 16,
+              right: 16,
+              bottom: 0,
+              child: SafeArea(
+                top: false,
+                minimum: const EdgeInsets.only(bottom: 16),
+                child: Glass(
+                  tone: GlassTone.dark,
+                  radius: 20,
+                  shadow: false,
+                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 14),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        photo.title,
+                        style: AppText.headline.copyWith(color: Colors.white),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        'Foto dari ${photo.owner}${photo.ai ? ' · AI Enhanced' : ''}',
+                        style: AppText.footnote.copyWith(
+                          color: AppColors.putih72,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -161,7 +201,9 @@ class _GalleryTabState extends State<GalleryTab> {
   @override
   Widget build(BuildContext context) {
     final first = _photos.isEmpty ? null : _photos.first;
-    final rest = _photos.length > 1 ? _photos.sublist(1) : const <GalleryPhoto>[];
+    final rest = _photos.length > 1
+        ? _photos.sublist(1)
+        : const <GalleryPhoto>[];
     return TabPage(
       title: 'Galeri',
       header: TabHeader(
@@ -169,8 +211,18 @@ class _GalleryTabState extends State<GalleryTab> {
         subtitle: 'Foto pengunjung dan suasana Sumber Sira',
         trailing: Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
-          decoration: BoxDecoration(color: AppColors.kaca, borderRadius: BorderRadius.circular(16), border: Border.all(color: AppColors.kaca)),
-          child: Text(_loading ? 'Memuat...' : '${_photos.length} foto', style: AppText.footnote.copyWith(color: Colors.white, fontWeight: FontWeight.w600)),
+          decoration: BoxDecoration(
+            color: AppColors.kaca,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: AppColors.kaca),
+          ),
+          child: Text(
+            _loading ? 'Memuat...' : '${_photos.length} foto',
+            style: AppText.footnote.copyWith(
+              color: Colors.white,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
         ),
       ),
       children: [
@@ -180,38 +232,56 @@ class _GalleryTabState extends State<GalleryTab> {
           icon: CupertinoIcons.camera_fill,
           onPressed: _uploading ? null : _upload,
         ),
-        if (_uploading) const Padding(padding: EdgeInsets.only(top: 10), child: LinearProgressIndicator(minHeight: 3)),
+        if (_uploading)
+          const Padding(
+            padding: EdgeInsets.only(top: 10),
+            child: LinearProgressIndicator(minHeight: 3),
+          ),
         const SizedBox(height: 6),
-        Text('Foto baru tampil di galeri setelah disetujui admin.', textAlign: TextAlign.center, style: AppText.footnote),
+        Text(
+          'Foto baru tampil di galeri setelah disetujui admin.',
+          textAlign: TextAlign.center,
+          style: AppText.footnote,
+        ),
         const SizedBox(height: 20),
         // Status kosong, memuat, dan galat memakai kartu yang sama dengan isi galeri.
         if (_loading && _photos.isEmpty)
           const _InfoCard(text: 'Memuat galeri...')
         else if (_error != null && _photos.isEmpty)
-          _InfoCard(text: 'Tidak dapat memuat galeri.', detail: _error, onRetry: _load)
+          _InfoCard(
+            text: 'Tidak dapat memuat galeri.',
+            detail: _error,
+            onRetry: _load,
+          )
         else if (_photos.isEmpty)
           const _InfoCard(text: 'Belum ada foto yang disetujui.')
         else ...[
           _hero(context, first!),
           const SizedBox(height: 24),
           // [P3 GridView] Dua kolom foto; shrinkWrap karena berada di dalam ListView.
-          LayoutBuilder(builder: (context, box) {
-            final w = (box.maxWidth - 12) / 2;
-            return GridView.count(
-              crossAxisCount: 2,
-              mainAxisSpacing: 18,
-              crossAxisSpacing: 12,
-              childAspectRatio: w / (w + 48),
-              shrinkWrap: true,
-              padding: EdgeInsets.zero,
-              physics: const NeverScrollableScrollPhysics(),
-              children: [for (final p in rest) _tile(context, p)],
-            );
-          }),
+          LayoutBuilder(
+            builder: (context, box) {
+              final w = (box.maxWidth - 12) / 2;
+              return GridView.count(
+                crossAxisCount: 2,
+                mainAxisSpacing: 18,
+                crossAxisSpacing: 12,
+                childAspectRatio: w / (w + 48),
+                shrinkWrap: true,
+                padding: EdgeInsets.zero,
+                physics: const NeverScrollableScrollPhysics(),
+                children: [for (final p in rest) _tile(context, p)],
+              );
+            },
+          ),
           // Galat saat memuat ulang: foto terakhir tetap tampil, dengan tombol coba lagi.
           if (_error != null) ...[
             const SizedBox(height: 16),
-            _InfoCard(text: 'Gagal memperbarui galeri. Menampilkan data terakhir.', detail: _error, onRetry: _load),
+            _InfoCard(
+              text: 'Gagal memperbarui galeri. Menampilkan data terakhir.',
+              detail: _error,
+              onRetry: _load,
+            ),
           ],
         ],
       ],
@@ -220,44 +290,55 @@ class _GalleryTabState extends State<GalleryTab> {
 
   // Foto utama: besar, dengan judul di panel kaca.
   Widget _hero(BuildContext context, GalleryPhoto p) => Pressable(
-        onTap: () => _open(context, p),
-        semanticLabel: 'Buka foto ${p.title}',
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(24),
-          child: SizedBox(
-            height: 280,
-            child: Stack(fit: StackFit.expand, children: [
-              _photoImage(p, fit: BoxFit.cover),
-              Positioned(
-                left: 12,
-                right: 12,
-                bottom: 12,
-                child: Glass(
-                  radius: 18,
-                  shadow: false,
-                  padding: const EdgeInsets.fromLTRB(14, 11, 14, 12),
-                  child: Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisSize: MainAxisSize.min, children: [
+    onTap: () => _open(context, p),
+    semanticLabel: 'Buka foto ${p.title}',
+    child: ClipRRect(
+      borderRadius: BorderRadius.circular(24),
+      child: SizedBox(
+        height: 280,
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            _photoImage(p, fit: BoxFit.cover),
+            Positioned(
+              left: 12,
+              right: 12,
+              bottom: 12,
+              child: Glass(
+                radius: 18,
+                shadow: false,
+                padding: const EdgeInsets.fromLTRB(14, 11, 14, 12),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
                     Text(p.title, style: AppText.headline),
                     const SizedBox(height: 2),
                     Text(p.owner, style: AppText.footnote),
-                  ]),
+                  ],
                 ),
               ),
-            ]),
-          ),
+            ),
+          ],
         ),
-      );
+      ),
+    ),
+  );
 
   // Satu foto di grid: foto persegi, label AI Enhanced (bila ada), lalu judul dan pengirim di bawahnya.
   Widget _tile(BuildContext context, GalleryPhoto p) => Pressable(
-        onTap: () => _open(context, p),
-        semanticLabel: 'Buka foto ${p.title}',
-        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          AspectRatio(
-            aspectRatio: 1,
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(18),
-              child: Stack(fit: StackFit.expand, children: [
+    onTap: () => _open(context, p),
+    semanticLabel: 'Buka foto ${p.title}',
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        AspectRatio(
+          aspectRatio: 1,
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(18),
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
                 _photoImage(p, fit: BoxFit.cover),
                 if (p.ai)
                   Positioned(
@@ -266,32 +347,65 @@ class _GalleryTabState extends State<GalleryTab> {
                     child: Glass(
                       radius: 12,
                       shadow: false,
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                      child: Row(mainAxisSize: MainAxisSize.min, children: [
-                        const Icon(CupertinoIcons.sparkles, size: 12, color: AppColors.leaf),
-                        const SizedBox(width: 4),
-                        Text('AI Enhanced', style: AppText.caption.copyWith(color: AppColors.ink, fontWeight: FontWeight.w600)),
-                      ]),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(
+                            CupertinoIcons.sparkles,
+                            size: 12,
+                            color: AppColors.leaf,
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            'AI Enhanced',
+                            style: AppText.caption.copyWith(
+                              color: AppColors.ink,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
-              ]),
+              ],
             ),
           ),
-          const SizedBox(height: 8),
-          Text(p.title, maxLines: 1, overflow: TextOverflow.ellipsis, style: AppText.subheadline.copyWith(color: AppColors.ink, fontWeight: FontWeight.w600)),
-          Text(p.owner, maxLines: 1, overflow: TextOverflow.ellipsis, style: AppText.footnote),
-        ]),
-      );
+        ),
+        const SizedBox(height: 8),
+        Text(
+          p.title,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: AppText.subheadline.copyWith(
+            color: AppColors.ink,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        Text(
+          p.owner,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: AppText.footnote,
+        ),
+      ],
+    ),
+  );
 
   // Foto dari server; bila gagal dimuat (mis. server mati), tampil latar Abu Muda dengan ikon.
   Widget _photoImage(GalleryPhoto p, {required BoxFit fit}) => Image.network(
-        p.url,
-        fit: fit,
-        errorBuilder: (_, _, _) => ColoredBox(
-          color: AppColors.abuMuda,
-          child: const Center(child: Icon(CupertinoIcons.photo, size: 28, color: AppColors.abu)),
-        ),
-      );
+    p.url,
+    fit: fit,
+    errorBuilder: (_, _, _) => ColoredBox(
+      color: AppColors.abuMuda,
+      child: const Center(
+        child: Icon(CupertinoIcons.photo, size: 28, color: AppColors.abu),
+      ),
+    ),
+  );
 }
 
 // Kartu status: memuat, kosong, atau galat dengan tombol coba lagi.
@@ -305,18 +419,27 @@ class _InfoCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AppCard(
-      child: Column(children: [
-        Text(text, textAlign: TextAlign.center, style: AppText.subheadline.copyWith(color: AppColors.ink)),
-        if (detail != null) ...[
-          const SizedBox(height: 4),
-          Text(detail!, textAlign: TextAlign.center, style: AppText.footnote),
+      child: Column(
+        children: [
+          Text(
+            text,
+            textAlign: TextAlign.center,
+            style: AppText.subheadline.copyWith(color: AppColors.ink),
+          ),
+          if (detail != null) ...[
+            const SizedBox(height: 4),
+            Text(detail!, textAlign: TextAlign.center, style: AppText.footnote),
+          ],
+          if (onRetry != null) ...[
+            const SizedBox(height: 8),
+            TextButton.icon(
+              onPressed: onRetry,
+              icon: const Icon(CupertinoIcons.refresh, size: 18),
+              label: const Text('Coba lagi'),
+            ),
+          ],
         ],
-        if (onRetry != null) ...[
-          const SizedBox(height: 8),
-          TextButton.icon(onPressed: onRetry, icon: const Icon(CupertinoIcons.refresh, size: 18), label: const Text('Coba lagi')),
-        ],
-      ]),
+      ),
     );
   }
 }
-

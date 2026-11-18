@@ -14,8 +14,7 @@ class Mahasiswa {
   // Constructor const: memungkinkan pembuatan instance konstan di memori untuk efisiensi
   // required memastikan nilai nim dan nama wajib diisi saat objek Mahasiswa diinstansiasi
   const Mahasiswa({
-    required this.nim,  // Wajib menyertakan parameter nim bertipe String
+    required this.nim, // Wajib menyertakan parameter nim bertipe String
     required this.nama, // Wajib menyertakan parameter nama bertipe String
   });
 }
-

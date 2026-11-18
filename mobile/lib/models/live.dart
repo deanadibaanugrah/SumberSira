@@ -13,16 +13,19 @@ class CrowdInfo {
   });
 
   factory CrowdInfo.fromJson(Map<String, dynamic> j) => CrowdInfo(
-        inside: j['inside'] as int,
-        percent: j['percent'] as int,
-        label: j['label'] as String,
-        capacity: j['capacity'] as int,
-        updatedAt: j['updatedAt'] as String?,
-        forecast: [
-          for (final f in (j['forecast'] as List? ?? const []))
-            (hour: (f as Map<String, dynamic>)['hour'] as String, count: (f['count'] as num?)?.toInt() ?? 0),
-        ],
-      );
+    inside: j['inside'] as int,
+    percent: j['percent'] as int,
+    label: j['label'] as String,
+    capacity: j['capacity'] as int,
+    updatedAt: j['updatedAt'] as String?,
+    forecast: [
+      for (final f in (j['forecast'] as List? ?? const []))
+        (
+          hour: (f as Map<String, dynamic>)['hour'] as String,
+          count: (f['count'] as num?)?.toInt() ?? 0,
+        ),
+    ],
+  );
 
   final int inside;
   final int percent;
@@ -39,11 +42,10 @@ class ChatAnswer {
   const ChatAnswer({required this.answer, required this.matched});
 
   factory ChatAnswer.fromJson(Map<String, dynamic> j) => ChatAnswer(
-        answer: j['answer'] as String? ?? '',
-        matched: j['matched'] as bool? ?? false,
-      );
+    answer: j['answer'] as String? ?? '',
+    matched: j['matched'] as bool? ?? false,
+  );
 
   final String answer;
   final bool matched;
 }
-

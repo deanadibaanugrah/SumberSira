@@ -4,15 +4,23 @@ import 'ticket.dart';
 // Satu baris pesanan di booking, mis. 2x Ban Besar @Rp10.000.
 // rideId ada bila barisnya berasal dari server (katalog wahana); dipakai saat mengirim booking.
 class BookingLine {
-  const BookingLine({required this.name, required this.qty, required this.price, this.rideId});
+  const BookingLine({
+    required this.name,
+    required this.qty,
+    required this.price,
+    this.rideId,
+  });
 
   factory BookingLine.fromJson(Map<String, dynamic> json) => BookingLine(
-        rideId: json['rideId'] as String?,
-        name: json['name'] as String,
-        qty: json['qty'] as int,
-        // Server mengirim unitPrice; data contoh lama memakai price.
-        price: (json['unitPrice'] as num?)?.toInt() ?? (json['price'] as num?)?.toInt() ?? 0,
-      );
+    rideId: json['rideId'] as String?,
+    name: json['name'] as String,
+    qty: json['qty'] as int,
+    // Server mengirim unitPrice; data contoh lama memakai price.
+    price:
+        (json['unitPrice'] as num?)?.toInt() ??
+        (json['price'] as num?)?.toInt() ??
+        0,
+  );
 
   final String? rideId;
   final String name;
@@ -65,11 +73,17 @@ class Booking {
       whatsapp: (j['whatsapp'] as String?) ?? '',
       slot: (j['slot'] as String?) ?? '',
       slotLabel: (j['slotLabel'] as String?) ?? '',
-      lines: [for (final l in (j['lines'] as List? ?? const [])) BookingLine.fromJson(l as Map<String, dynamic>)],
+      lines: [
+        for (final l in (j['lines'] as List? ?? const []))
+          BookingLine.fromJson(l as Map<String, dynamic>),
+      ],
       orderedAt: jamWib(j['createdAt'] as String?),
       date: tanggalPanjang(j['visitDate'] as String),
       amount: (j['amount'] as num?)?.toInt(),
-      paymentStatus: PaymentStatus.values.firstWhere((v) => v.name == (j['paymentStatus'] as String?), orElse: () => PaymentStatus.pending),
+      paymentStatus: PaymentStatus.values.firstWhere(
+        (v) => v.name == (j['paymentStatus'] as String?),
+        orElse: () => PaymentStatus.pending,
+      ),
       paymentId: pay?['id'] as String?,
       paymentProvider: pay?['provider'] as String?,
       qrString: pay?['qrString'] as String?,
@@ -109,9 +123,9 @@ class Booking {
 
   // Teks baris Pembayaran di faktur (booking hanya memakai QRIS).
   String get labelPembayaran => switch (paymentStatus) {
-        PaymentStatus.paid => 'QRIS, lunas',
-        PaymentStatus.expired => 'QRIS · Kedaluwarsa',
-        PaymentStatus.failed || PaymentStatus.cancelled => 'QRIS · Gagal',
-        _ => 'QRIS · Menunggu pembayaran',
-      };
+    PaymentStatus.paid => 'QRIS, lunas',
+    PaymentStatus.expired => 'QRIS · Kedaluwarsa',
+    PaymentStatus.failed || PaymentStatus.cancelled => 'QRIS · Gagal',
+    _ => 'QRIS · Menunggu pembayaran',
+  };
 }

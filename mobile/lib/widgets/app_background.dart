@@ -12,13 +12,18 @@ class AppBackground extends StatelessWidget {
   final Widget child;
 
   @override
-  Widget build(BuildContext context) => ColoredBox(color: AppColors.abuMuda, child: child);
+  Widget build(BuildContext context) =>
+      ColoredBox(color: AppColors.abuMuda, child: child);
 }
 
 // Isi halaman turunan yang bisa digulir: lebar maksimal 480 di tengah (tablet/web), margin 20.
 // Isi boleh lewat di belakang nav bar dan bar bawah kaca, jadi jaraknya diambil dari MediaQuery.padding.
 class ResponsiveBody extends StatelessWidget {
-  const ResponsiveBody({super.key, required this.children, this.padding = const EdgeInsets.fromLTRB(20, 16, 20, 28)});
+  const ResponsiveBody({
+    super.key,
+    required this.children,
+    this.padding = const EdgeInsets.fromLTRB(20, 16, 20, 28),
+  });
 
   final List<Widget> children;
   final EdgeInsets padding;
@@ -30,7 +35,11 @@ class ResponsiveBody extends StatelessWidget {
       alignment: Alignment.topCenter,
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 480),
-        child: ListView(padding: padding + EdgeInsets.only(top: inset.top, bottom: inset.bottom), children: children),
+        child: ListView(
+          padding:
+              padding + EdgeInsets.only(top: inset.top, bottom: inset.bottom),
+          children: children,
+        ),
       ),
     );
   }
@@ -40,7 +49,14 @@ class ResponsiveBody extends StatelessWidget {
 // muncul bar kaca dengan judul kecil (seperti large title iOS yang mengecil).
 // overlay = elemen mengambang di atas isi (mis. chatbot atau CTA), bottomExtra = ruang tambahan di bawah isi.
 class TabPage extends StatefulWidget {
-  const TabPage({super.key, required this.title, required this.header, required this.children, this.overlay, this.bottomExtra = 0});
+  const TabPage({
+    super.key,
+    required this.title,
+    required this.header,
+    required this.children,
+    this.overlay,
+    this.bottomExtra = 0,
+  });
 
   final String title;
   final Widget header;
@@ -80,39 +96,52 @@ class _TabPageState extends State<TabPage> {
     final inset = MediaQuery.paddingOf(context);
     // Ikon status bar putih di atas header gelap, gelap saat bar kaca terang muncul.
     return AnnotatedRegion<SystemUiOverlayStyle>(
-      value: _collapsed ? SystemUiOverlayStyle.dark : SystemUiOverlayStyle.light,
-      child: Stack(children: [
-        Align(
-          alignment: Alignment.topCenter,
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 480),
-            child: ListView(
-              controller: _scroll,
-              padding: EdgeInsets.only(bottom: inset.bottom + 28 + widget.bottomExtra),
-              children: [
-                KeyedSubtree(key: _headerKey, child: widget.header),
-                // Tiap isi diberi margin 20, kecuali yang dibungkus FullBleed (mis. carousel selebar layar).
-                for (final child in widget.children)
-                  child is FullBleed ? child.child : Padding(padding: const EdgeInsets.symmetric(horizontal: AppSpace.margin), child: child),
-              ],
+      value: _collapsed
+          ? SystemUiOverlayStyle.dark
+          : SystemUiOverlayStyle.light,
+      child: Stack(
+        children: [
+          Align(
+            alignment: Alignment.topCenter,
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 480),
+              child: ListView(
+                controller: _scroll,
+                padding: EdgeInsets.only(
+                  bottom: inset.bottom + 28 + widget.bottomExtra,
+                ),
+                children: [
+                  KeyedSubtree(key: _headerKey, child: widget.header),
+                  // Tiap isi diberi margin 20, kecuali yang dibungkus FullBleed (mis. carousel selebar layar).
+                  for (final child in widget.children)
+                    child is FullBleed
+                        ? child.child
+                        : Padding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: AppSpace.margin,
+                            ),
+                            child: child,
+                          ),
+                ],
+              ),
             ),
           ),
-        ),
-        Positioned(
-          top: 0,
-          left: 0,
-          right: 0,
-          child: IgnorePointer(
-            ignoring: !_collapsed,
-            child: AnimatedOpacity(
-              opacity: _collapsed ? 1 : 0,
-              duration: const Duration(milliseconds: 180),
-              child: _CollapsedBar(title: widget.title),
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            child: IgnorePointer(
+              ignoring: !_collapsed,
+              child: AnimatedOpacity(
+                opacity: _collapsed ? 1 : 0,
+                duration: const Duration(milliseconds: 180),
+                child: _CollapsedBar(title: widget.title),
+              ),
             ),
           ),
-        ),
-        ?widget.overlay,
-      ]),
+          ?widget.overlay,
+        ],
+      ),
     );
   }
 }
@@ -137,17 +166,39 @@ class _CollapsedBar extends StatelessWidget {
   Widget build(BuildContext context) {
     final solid = MediaQuery.highContrastOf(context);
     final bar = DecoratedBox(
-      decoration: BoxDecoration(color: solid ? Colors.white : AppColors.glass, border: const Border(bottom: BorderSide(color: AppColors.line))),
-      child: SafeArea(bottom: false, child: SizedBox(height: 44, child: Center(child: Text(title, style: AppText.headline)))),
+      decoration: BoxDecoration(
+        color: solid ? Colors.white : AppColors.glass,
+        border: const Border(bottom: BorderSide(color: AppColors.line)),
+      ),
+      child: SafeArea(
+        bottom: false,
+        child: SizedBox(
+          height: 44,
+          child: Center(child: Text(title, style: AppText.headline)),
+        ),
+      ),
     );
-    return ClipRect(child: solid ? bar : BackdropFilter(filter: ImageFilter.blur(sigmaX: 14, sigmaY: 14), child: bar));
+    return ClipRect(
+      child: solid
+          ? bar
+          : BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 14, sigmaY: 14),
+              child: bar,
+            ),
+    );
   }
 }
 
 // Header tab utama: gradien Latar Mobile (Hijau Tua ke Ink), judul besar serif,
 // keterangan satu baris, dan isi tambahan (opsional). Tingginya menyesuaikan isi tiap tab.
 class TabHeader extends StatelessWidget {
-  const TabHeader({super.key, required this.title, this.subtitle, this.trailing, this.child});
+  const TabHeader({
+    super.key,
+    required this.title,
+    this.subtitle,
+    this.trailing,
+    this.child,
+  });
 
   final String title;
   final String? subtitle;
@@ -158,26 +209,50 @@ class TabHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
-      padding: EdgeInsets.fromLTRB(AppSpace.margin, MediaQuery.paddingOf(context).top + 16, AppSpace.margin, 22),
-      decoration: const BoxDecoration(gradient: AppColors.headerGradient, borderRadius: BorderRadius.vertical(bottom: Radius.circular(32))),
-      child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-        Row(crossAxisAlignment: CrossAxisAlignment.center, children: [
-          Expanded(child: Text(title, style: AppText.largeTitle())),
-          ?trailing,
-        ]),
-        if (subtitle != null) ...[
-          const SizedBox(height: 4),
-          Text(subtitle!, maxLines: 1, overflow: TextOverflow.ellipsis, style: AppText.footnote.copyWith(color: AppColors.putih72)),
+      padding: EdgeInsets.fromLTRB(
+        AppSpace.margin,
+        MediaQuery.paddingOf(context).top + 16,
+        AppSpace.margin,
+        22,
+      ),
+      decoration: const BoxDecoration(
+        gradient: AppColors.headerGradient,
+        borderRadius: BorderRadius.vertical(bottom: Radius.circular(32)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Expanded(child: Text(title, style: AppText.largeTitle())),
+              ?trailing,
+            ],
+          ),
+          if (subtitle != null) ...[
+            const SizedBox(height: 4),
+            Text(
+              subtitle!,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: AppText.footnote.copyWith(color: AppColors.putih72),
+            ),
+          ],
+          if (child != null) ...[const SizedBox(height: 18), child!],
         ],
-        if (child != null) ...[const SizedBox(height: 18), child!],
-      ]),
+      ),
     );
   }
 }
 
 // Kontrol bersegmen gaya iOS di atas header gelap: track kaca, pilihan aktif putih dengan teks Hijau Tua.
 class HeaderSegments extends StatelessWidget {
-  const HeaderSegments({super.key, required this.labels, required this.index, required this.onChanged});
+  const HeaderSegments({
+    super.key,
+    required this.labels,
+    required this.index,
+    required this.onChanged,
+  });
 
   final List<String> labels;
   final int index;
@@ -189,40 +264,64 @@ class HeaderSegments extends StatelessWidget {
     return Container(
       height: 40,
       padding: const EdgeInsets.all(3),
-      decoration: BoxDecoration(color: AppColors.kaca, borderRadius: BorderRadius.circular(20), border: Border.all(color: AppColors.kaca)),
-      child: LayoutBuilder(builder: (context, box) {
-        final w = box.maxWidth / labels.length;
-        return Stack(children: [
-          AnimatedPositioned(
-            duration: still ? Duration.zero : const Duration(milliseconds: 240),
-            curve: Curves.easeOutCubic,
-            left: w * index,
-            top: 0,
-            bottom: 0,
-            width: w,
-            child: DecoratedBox(decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(17))),
-          ),
-          Row(children: [
-            for (final (i, label) in labels.indexed)
-              Expanded(
-                child: Semantics(
-                  button: true,
-                  selected: i == index,
-                  child: GestureDetector(
-                    behavior: HitTestBehavior.opaque,
-                    onTap: () => onChanged(i),
-                    child: Center(
-                      child: Text(label,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: AppText.footnote.copyWith(fontWeight: FontWeight.w600, color: i == index ? AppColors.forest : AppColors.putih72)),
-                    ),
+      decoration: BoxDecoration(
+        color: AppColors.kaca,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: AppColors.kaca),
+      ),
+      child: LayoutBuilder(
+        builder: (context, box) {
+          final w = box.maxWidth / labels.length;
+          return Stack(
+            children: [
+              AnimatedPositioned(
+                duration: still
+                    ? Duration.zero
+                    : const Duration(milliseconds: 240),
+                curve: Curves.easeOutCubic,
+                left: w * index,
+                top: 0,
+                bottom: 0,
+                width: w,
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(17),
                   ),
                 ),
               ),
-          ]),
-        ]);
-      }),
+              Row(
+                children: [
+                  for (final (i, label) in labels.indexed)
+                    Expanded(
+                      child: Semantics(
+                        button: true,
+                        selected: i == index,
+                        child: GestureDetector(
+                          behavior: HitTestBehavior.opaque,
+                          onTap: () => onChanged(i),
+                          child: Center(
+                            child: Text(
+                              label,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: AppText.footnote.copyWith(
+                                fontWeight: FontWeight.w600,
+                                color: i == index
+                                    ? AppColors.forest
+                                    : AppColors.putih72,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+            ],
+          );
+        },
+      ),
     );
   }
 }

@@ -1,0 +1,270 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Presentasi MVVM — Sumber Sira Mobile (5 menit)</title>
+<style>
+  :root {
+    --hutan: #1B4332; --daun: #40916C; --tinta: #172321; --abu: #4B5A57;
+    --muda: #F5F6F5; --coral: #E07A5F; --kertas: #ffffff;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; }
+  body {
+    font-family: "Segoe UI", Arial, sans-serif;
+    background: #0d1f18; color: var(--tinta);
+    display: flex; align-items: center; justify-content: center;
+  }
+  #deck { width: min(100%, 1040px); height: 100%; position: relative; }
+  .slide {
+    display: none; position: absolute; inset: 0;
+    background: var(--kertas); border-radius: 18px;
+    padding: 48px 60px 70px; overflow: auto;
+    box-shadow: 0 18px 60px rgba(0,0,0,.35);
+  }
+  .slide.active { display: block; }
+  h1 { font-size: 42px; color: var(--hutan); margin: 0 0 14px; line-height: 1.15; }
+  h2 { font-size: 30px; color: var(--hutan); margin: 0 0 16px; }
+  h3 { font-size: 20px; color: var(--daun); margin: 18px 0 8px; }
+  p, li { font-size: 20px; line-height: 1.45; }
+  ul { margin: 8px 0 0 24px; padding: 0; }
+  li { margin: 7px 0; }
+  code, pre { font-family: Consolas, "Courier New", monospace; }
+  pre {
+    background: #f0f4f2; border-left: 5px solid var(--daun);
+    padding: 12px 16px; border-radius: 8px; font-size: 16px; line-height: 1.35;
+    overflow-x: auto; white-space: pre;
+  }
+  .kecil { font-size: 15px; color: var(--abu); }
+  .path { color: var(--daun); font-size: 15px; }
+  .jawab {
+    background: var(--hutan); color: white; padding: 16px 22px;
+    border-radius: 12px; font-size: 24px; font-weight: 600; margin: 16px 0;
+  }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+  .kotak {
+    border: 2px solid var(--daun); border-radius: 12px; padding: 14px 18px;
+    background: #f7faf8;
+  }
+  .kotak.utama { border-color: var(--coral); background: #fff6f2; }
+  .kotak b { color: var(--hutan); display: block; margin-bottom: 6px; }
+  .flow { display: flex; align-items: stretch; gap: 8px; flex-wrap: wrap; margin: 14px 0; }
+  .flow .kotak { flex: 1 1 150px; font-size: 17px; }
+  .panah { align-self: center; color: var(--daun); font-size: 26px; font-weight: bold; }
+  table { width: 100%; border-collapse: collapse; font-size: 17px; }
+  th, td { border: 1px solid #cfd8d3; padding: 8px 10px; text-align: left; vertical-align: top; }
+  th { background: var(--muda); color: var(--hutan); }
+  .note {
+    background: #fff8e6; border-left: 5px solid #d9a441; padding: 9px 14px;
+    font-size: 15px; border-radius: 6px; margin-top: 14px;
+  }
+  .note b { color: #8a5a00; }
+  body.sembunyi-note .note { display: none; }
+  #nav {
+    position: fixed; right: 22px; bottom: 16px; display: flex; gap: 8px; z-index: 10;
+  }
+  #nav button {
+    background: var(--daun); color: white; border: 0; border-radius: 999px;
+    padding: 9px 16px; font-size: 15px; cursor: pointer;
+  }
+  #nav button:hover { background: var(--hutan); }
+  #counter {
+    position: fixed; left: 22px; bottom: 18px; color: #cfe3d8; font-size: 14px; z-index: 10;
+  }
+  #bar { position: fixed; top: 0; left: 0; height: 5px; background: var(--coral); z-index: 10; transition: width .2s; }
+  @media print {
+    body { background: white; display: block; height: auto; }
+    #deck { width: 100%; height: auto; }
+    .slide { display: block !important; position: static; page-break-after: always;
+             box-shadow: none; border-radius: 0; min-height: 95vh; }
+    #nav, #counter, #bar { display: none; }
+  }
+</style>
+</head>
+<body>
+<div id="bar"></div>
+<div id="deck">
+
+  <!-- 1 -->
+  <section class="slide active">
+    <h1>Apakah mobile Sumber Sira memakai MVVM?</h1>
+    <div class="jawab">Jawab singkat: ADA — tapi di folder praktikum, bukan di aplikasi utama.</div>
+    <ul>
+      <li><b>Aplikasi utama</b> (Sumber Sira): View + <code>AppState</code> + <code>ApiClient</code>, memakai <code>ChangeNotifier</code>.</li>
+      <li><b>Contoh MVVM</b>: <span class="path">lib/mahasiswa_mvvm/</span>.</li>
+      <li><b>Contoh Clean Architecture</b>: <span class="path">lib/mahasiswa/</span>.</li>
+    </ul>
+    <div class="note"><b>Catatan pembicara:</b> Mulai dengan kalimat ini supaya dosen tahu kita jujur: paket <code>provider</code> dan <code>go_router</code> tidak ada di proyek.</div>
+  </section>
+
+  <!-- 2 -->
+  <section class="slide">
+    <h1>Dua contoh arsitektur + satu aplikasi nyata</h1>
+    <div class="grid">
+      <div class="kotak">
+        <b>1. MVVM tradisional — <span class="path">mahasiswa_mvvm/</span></b>
+        Model → Repository → ViewModel → View.<br>
+        Cocok untuk penjelasan dasar MVVM.
+      </div>
+      <div class="kotak">
+        <b>2. Clean Architecture — <span class="path">mahasiswa/</span></b>
+        Domain (entity + use case) → Data → Presentation.<br>
+        Aturan bisnis dipisah dari UI.
+      </div>
+    </div>
+    <div class="kotak utama" style="margin-top:18px">
+      <b>3. Aplikasi utama Sumber Sira</b>
+      Tidak memakai kelas bernama <code>Repository</code>; perannya dijalankan <code>ApiClient</code> statis. Tidak ada <code>provider</code>/<code>go_router</code> (<span class="path">pubspec.yaml:9-25</span>).<br>
+      Struktur terbaru: <code>lib/features/&lt;fitur&gt;/view</code> + <code>viewmodel</code> — lihat <span class="path">docs/STRUKTUR_FEATURES.md</span>.
+    </div>
+    <div class="note"><b>Catatan:</b> Tunjukkan folder di VS Code kalau bisa. Fokus slide ini: membedakan "contoh praktikum" dan "aplikasi sebenarnya".</div>
+  </section>
+
+  <!-- 3 -->
+  <section class="slide">
+    <h1>Lapisan MVVM tradisional</h1>
+    <div class="flow">
+      <div class="kotak"><b>View</b>Widget + <code>ListenableBuilder</code><br><span class="path">views/mahasiswa_page.dart</span></div>
+      <div class="panah">→</div>
+      <div class="kotak"><b>ViewModel</b><code>ChangeNotifier</code> + validasi + <code>notifyListeners()</code><br><span class="path">viewmodels/mahasiswa_viewmodel.dart:14</span></div>
+      <div class="panah">→</div>
+      <div class="kotak"><b>Repository</b>Data di memori<br><span class="path">repositories/mahasiswa_repository.dart:10</span></div>
+      <div class="panah">→</div>
+      <div class="kotak"><b>Model</b><code>Mahasiswa</code><br><span class="path">models/mahasiswa.dart</span></div>
+    </div>
+    <p><b>Entrypoint terpisah:</b> <span class="path">lib/mahasiswa_mvvm/main_mvvm.dart:13-17</span> — dijalankan dengan <code>flutter run -t lib/mahasiswa_mvvm/main_mvvm.dart</code>.</p>
+    <div class="note"><b>Catatan:</b> Jelaskan singkat: Model = data, View = tampilan, ViewModel = jembatan yang menyimpan state.</div>
+  </section>
+
+  <!-- 4 -->
+  <section class="slide">
+    <h1>Model &amp; Repository: sumber data sederhana</h1>
+    <p>Repository menyimpan data di <b>memori</b> (list), bukan HTTP. Itu sebabnya contoh ini mudah dipahami pemula.</p>
+<pre>// lib/mahasiswa_mvvm/repositories/mahasiswa_repository.dart:10-18
+class MahasiswaRepository {
+  final List&lt;Mahasiswa&gt; _data = [
+    const Mahasiswa(nim: '001', nama: 'Andi'),
+    const Mahasiswa(nim: '002', nama: 'Budi'),
+  ];
+  List&lt;Mahasiswa&gt; ambilSemua() =&gt; List.unmodifiable(_data);
+}</pre>
+    <p class="kecil">Method lain: <code>tambah()</code> baris 21-23, <code>hapus()</code> baris 26-28, <code>nimSudahAda()</code> baris 31.</p>
+    <div class="note"><b>Catatan:</b> <code>List.unmodifiable</code> mencegah View mengubah data secara langsung — semua perubahan lewat ViewModel.</div>
+  </section>
+
+  <!-- 5 -->
+  <section class="slide">
+    <h1>ViewModel: tempat aturan &amp; state</h1>
+<pre>// lib/mahasiswa_mvvm/viewmodels/mahasiswa_viewmodel.dart:28-47
+void tambah(String nim, String nama) {
+  nim = nim.trim();
+  nama = nama.trim();
+  if (nim.isEmpty || nama.isEmpty) {
+    pesanError = 'NIM dan nama wajib diisi';
+  } else if (repository.nimSudahAda(nim)) {
+    pesanError = 'NIM sudah digunakan';
+  } else {
+    repository.tambah(Mahasiswa(nim: nim, nama: nama));
+    pesanError = null;
+  }
+  notifyListeners();
+}</pre>
+    <ul>
+      <li><code>ChangeNotifier</code> = kelas Flutter yang bisa memberi tahu widget kalau data berubah.</li>
+      <li><code>notifyListeners()</code> = sinyal "gambar ulang UI" (baris 46).</li>
+    </ul>
+    <div class="note"><b>Catatan:</b> Tunjukkan juga <code>pesanError</code> di baris 25, dan <code>daftar</code> getter di baris 22.</div>
+  </section>
+
+  <!-- 6 -->
+  <section class="slide">
+    <h1>View: mendengarkan ViewModel</h1>
+<pre>// Pola yang dipakai di project (contoh baris 83 pada pembacaan awal)
+ListenableBuilder(
+  listenable: viewModel,
+  builder: (context, _) =&gt; ListView.builder(...),
+)</pre>
+    <p><b>Alur lengkap:</b></p>
+    <div class="flow">
+      <div class="kotak">Tombol ditekan</div><div class="panah">→</div>
+      <div class="kotak">VM validasi + simpan</div><div class="panah">→</div>
+      <div class="kotak"><code>notifyListeners()</code></div><div class="panah">→</div>
+      <div class="kotak">View bangun ulang</div>
+    </div>
+    <p class="kecil"><b>Update:</b> file <span class="path">mahasiswa_mvvm/views/mahasiswa_page.dart</span> sudah dikembalikan dari Git, jadi contoh MVVM ini bisa dijalankan. <code>flutter analyze</code> → <b>No issues found</b>.</p>
+    <div class="note"><b>Catatan:</b> Tuliskan struktur baru di papan: <code>features/&lt;fitur&gt;/view</code> dan <code>viewmodel</code>. Contoh paling jelas: <code>features/booking/</code>.</div>
+  </section>
+
+  <!-- 7 -->
+  <section class="slide">
+    <h1>Di aplikasi utama, "ViewModel"-nya bernama AppState</h1>
+<pre>// lib/data/app_state.dart:14-16
+class AppState extends ChangeNotifier {
+  AppState._();
+  static final AppState instance = AppState._();
+}</pre>
+    <ul>
+      <li><b>Singleton</b>: hanya satu objek untuk seluruh aplikasi (<code>AppState.instance</code>).</li>
+      <li>Isinya: tiket, booking, tarif, ulasan, pengaturan (<span class="path">app_state.dart:18-37</span>).</li>
+      <li>View mendengar memakai <code>ListenableBuilder</code>, mis. <span class="path">eticket_screen.dart:72</span>.</li>
+      <li>Data diambil lewat <code>ApiClient</code> (<span class="path">api_client.dart:98</span>), bukan Repository abstrak.</li>
+    </ul>
+    <div class="note"><b>Catatan:</b> Ini poin paling penting: konsep mirip MVVM, tapi tidak memakai paket <code>provider</code> dan tidak ada <code>ChangeNotifierProvider</code>.</div>
+  </section>
+
+  <!-- 8 -->
+  <section class="slide">
+    <h1>Perbandingan cepat (bisa dihafal)</h1>
+    <table>
+      <tr><th>Aspek</th><th>Praktikum MVVM</th><th>Aplikasi utama</th></tr>
+      <tr><td>State</td><td>ViewModel per halaman</td><td><code>AppState</code> singleton + <code>BookingController</code></td></tr>
+      <tr><td>Data</td><td>Repository in-memory</td><td><code>ApiClient</code> → backend via <code>http</code></td></tr>
+      <tr><td>Notifikasi UI</td><td><code>notifyListeners()</code></td><td><code>notifyListeners()</code> juga</td></tr>
+      <tr><td>Navigasi</td><td><code>runApp</code> terpisah</td><td><code>Navigator.pushNamed</code> (<span class="path">main.dart:68</span>)</td></tr>
+      <tr><td>Paket</td><td colspan="2">Tidak ada <code>provider</code>, tidak ada <code>go_router</code></td></tr>
+    </table>
+    <div class="note"><b>Catatan:</b> Kalau ada waktu, sebutkan folder <code>mahasiswa/</code> sebagai versi Clean Architecture dengan use case di <code>domain/usecases/</code>.</div>
+  </section>
+
+  <!-- 9 -->
+  <section class="slide">
+    <h1>Ringkasan 3 kalimat + siap tanya jawab</h1>
+    <ol>
+      <li><b>Ada MVVM?</b> Ya, di <span class="path">lib/mahasiswa_mvvm/</span> (klasik) dan <span class="path">lib/mahasiswa/</span> (Clean Architecture).</li>
+      <li><b>Aplikasi utama?</b> View + <code>AppState</code>/controller + <code>ApiClient</code>; state memakai <code>ChangeNotifier</code>.</li>
+      <li><b>provider/go_router?</b> Tidak dipakai; yang ada <code>http</code> (<span class="path">pubspec.yaml:18</span>).</li>
+    </ol>
+    <p style="margin-top:20px"><b>Dokumen:</b> <span class="path">docs/STRUKTUR_FEATURES.md</span> (struktur terbaru) · <span class="path">docs/MVVM_DEEP_DIVE.md</span> (penjelasan arsitektur)</p>
+    <div class="note"><b>Catatan:</b> Tekan <b>N</b> untuk menyembunyikan catatan ini saat presentasi, <b>F</b> untuk fullscreen, panah kanan/kiri untuk berpindah slide.</div>
+  </section>
+
+</div>
+
+<div id="counter"></div>
+<div id="nav">
+  <button onclick="geser(-1)">← Sebelumnya</button>
+  <button onclick="geser(1)">Berikutnya →</button>
+</div>
+
+<script>
+  const slides = [...document.querySelectorAll('.slide')];
+  let i = 0;
+  function tampil() {
+    slides.forEach((s, n) => s.classList.toggle('active', n === i));
+    document.getElementById('counter').textContent = `Slide ${i + 1} / ${slides.length}`;
+    document.getElementById('bar').style.width = ((i + 1) / slides.length * 100) + '%';
+  }
+  function geser(d) { i = Math.max(0, Math.min(slides.length - 1, i + d)); tampil(); }
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') { e.preventDefault(); geser(1); }
+    if (e.key === 'ArrowLeft' || e.key === 'PageUp') { e.preventDefault(); geser(-1); }
+    if (e.key.toLowerCase() === 'n') document.body.classList.toggle('sembunyi-note');
+    if (e.key.toLowerCase() === 'f') {
+      document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen();
+    }
+  });
+  tampil();
+</script>
+</body>
+</html>

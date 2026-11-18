@@ -34,7 +34,9 @@ class _TicketFormScreenState extends State<TicketFormScreen> {
   final _formKey = GlobalKey<FormState>();
   // [P4 TextEditingController] Membaca isi kolom nama dan WhatsApp (nomor terakhir diisi dari shared_preferences).
   final _name = TextEditingController();
-  late final _whatsapp = TextEditingController(text: AppState.instance.savedWhatsapp);
+  late final _whatsapp = TextEditingController(
+    text: AppState.instance.savedWhatsapp,
+  );
   // State form. Setiap perubahan lewat setState() supaya tampilan dan total ikut berubah.
   int _adults = 2;
   int _kids = 0;
@@ -65,7 +67,10 @@ class _TicketFormScreenState extends State<TicketFormScreen> {
     Parking.mobil: Icons.directions_car_outlined,
     Parking.bus: Icons.directions_bus_outlined,
   };
-  static const _paymentIcons = {PaymentMethod.qris: CupertinoIcons.qrcode, PaymentMethod.cash: Icons.payments_outlined};
+  static const _paymentIcons = {
+    PaymentMethod.qris: CupertinoIcons.qrcode,
+    PaymentMethod.cash: Icons.payments_outlined,
+  };
 
   @override
   void initState() {
@@ -110,6 +115,7 @@ class _TicketFormScreenState extends State<TicketFormScreen> {
       });
     }
   }
+
   @override
   void dispose() {
     _state.removeListener(_tarifBerubah);
@@ -126,15 +132,31 @@ class _TicketFormScreenState extends State<TicketFormScreen> {
     if (_paying) return;
     if (!_formKey.currentState!.validate()) return;
     if (!_agree) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Centang persetujuan aturan kunjungan dulu.')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Centang persetujuan aturan kunjungan dulu.'),
+        ),
+      );
       return;
     }
     if (_arrival.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Jam datang belum tersedia dari server. Muat ulang dulu.')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Jam datang belum tersedia dari server. Muat ulang dulu.',
+          ),
+        ),
+      );
       return;
     }
     if (_state.hargaTiket == null) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Tarif belum termuat dari server. Periksa koneksi lalu coba lagi.')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Tarif belum termuat dari server. Periksa koneksi lalu coba lagi.',
+          ),
+        ),
+      );
       return;
     }
     setState(() => _paying = true);
@@ -152,18 +174,31 @@ class _TicketFormScreenState extends State<TicketFormScreen> {
       if (!mounted) return;
       // QRIS: tiket sudah ada di server dengan pembayaran pending; QR asli ditunggu lunas lewat sheet.
       if (_payment == PaymentMethod.qris) {
-        await showGlassSheet<bool>(context, builder: (_) => _QrisSheet(ticket: ticket));
+        await showGlassSheet<bool>(
+          context,
+          builder: (_) => _QrisSheet(ticket: ticket),
+        );
         if (!mounted) return;
       }
       // [P5 Named Route] Pindah ke e-tiket sambil mengirim kode tiket sebagai argumen.
-      Navigator.pushReplacementNamed(context, AppRoutes.eticket, arguments: ticket.code);
+      Navigator.pushReplacementNamed(
+        context,
+        AppRoutes.eticket,
+        arguments: ticket.code,
+      );
     } on ApiException catch (e) {
       if (!mounted) return;
       setState(() => _paying = false);
       // Tidak membuat tiket palsu di perangkat: tiket yang tidak tercatat di server tidak bisa discan petugas.
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text(e.offline ? 'Tiket belum dibuat: tidak bisa terhubung ke server. Periksa koneksi lalu coba lagi.' : e.message),
-      ));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            e.offline
+                ? 'Tiket belum dibuat: tidak bisa terhubung ke server. Periksa koneksi lalu coba lagi.'
+                : e.message,
+          ),
+        ),
+      );
     }
   }
 
@@ -176,144 +211,245 @@ class _TicketFormScreenState extends State<TicketFormScreen> {
       body: AppBackground(
         child: Form(
           key: _formKey,
-          child: ResponsiveBody(children: [
-            // Keramaian saat ini (live) sebagai pertimbangan sebelum datang.
-            ListenableBuilder(
-              listenable: CrowdState.instance,
-              builder: (_, _) {
-                final c = CrowdState.instance;
-                return AppCard(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                  child: Row(children: [
-                    LiveDot(color: c.ready ? AppColors.leaf : AppColors.abu),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Text(
-                        c.ready
-                            ? 'Sekarang ${c.inside} orang di dalam · ${c.crowdLabel} (${c.percent}%)'
-                            : 'Data keramaian belum tersedia dari server.',
-                        style: AppText.subheadline.copyWith(color: AppColors.ink, fontWeight: FontWeight.w600),
-                      ),
+          child: ResponsiveBody(
+            children: [
+              // Keramaian saat ini (live) sebagai pertimbangan sebelum datang.
+              ListenableBuilder(
+                listenable: CrowdState.instance,
+                builder: (_, _) {
+                  final c = CrowdState.instance;
+                  return AppCard(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 14,
                     ),
-                  ]),
-                );
-              },
-            ),
-            // [P6 intl] Tanggal hari ini dalam Bahasa Indonesia (catatan di bawah grup).
-            GroupedList(
-              header: 'Jumlah pengunjung',
-              indent: 16,
-              footer: 'Berlaku untuk hari ini, ${tanggalHariIni()}',
-              children: [
-                _counterRow('Usia 3 tahun ke atas', _state.hargaTiket == null ? 'Tarif belum tersedia' : '${rupiah(_state.hargaTiket!)} / orang', _adults, 1, 30, (v) => setState(() => _adults = v)),
-                _counterRow('Anak di bawah 3 tahun', 'Gratis', _kids, 0, 10, (v) => setState(() => _kids = v)),
-              ],
-            ),
-            const SectionLabel('Perkiraan jam datang'),
-            if (_loadingSlots)
-              const AppCard(
-                padding: EdgeInsets.symmetric(horizontal: 16, vertical: 18),
-                child: Row(children: [
-                  SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2)),
-                  SizedBox(width: 12),
-                  Text('Memuat jam datang dari server...', style: AppText.footnote),
-                ]),
-              )
-            else if (_slotsError != null)
-              AppCard(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                child: Row(children: [
-                  const Icon(Icons.cloud_off_outlined, size: 18, color: AppColors.coral),
-                  const SizedBox(width: 8),
-                  Expanded(child: Text(_slotsError!, style: AppText.footnote)),
-                  TextButton(onPressed: _loadSlots, child: const Text('Coba lagi')),
-                ]),
-              )
-            else
-              // [P4 DropdownButton] Memilih satu jam dari daftar server; onChanged mengubah state lewat setState().
-              DropdownButtonFormField<String>(
-                key: ValueKey(_slots.join('|')),
-                initialValue: _arrival,
-                dropdownColor: Colors.white,
-                borderRadius: BorderRadius.circular(16),
-                icon: const Icon(CupertinoIcons.chevron_down, size: 16, color: AppColors.abu),
-                decoration: const InputDecoration(prefixIcon: Icon(CupertinoIcons.clock, size: 20)),
-                items: [
-                  for (final slot in _slots) DropdownMenuItem(value: slot, child: Text(slot, style: AppText.number(17, weight: FontWeight.w400))),
-                ],
-                onChanged: (value) => setState(() => _arrival = value!),
+                    child: Row(
+                      children: [
+                        LiveDot(
+                          color: c.ready ? AppColors.leaf : AppColors.abu,
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Text(
+                            c.ready
+                                ? 'Sekarang ${c.inside} orang di dalam · ${c.crowdLabel} (${c.percent}%)'
+                                : 'Data keramaian belum tersedia dari server.',
+                            style: AppText.subheadline.copyWith(
+                              color: AppColors.ink,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                },
               ),
-            const SectionLabel('Parkir kendaraan'),
-            // Pilih satu jenis parkir (cara kerjanya seperti RadioButton, tampilannya kotak pilihan).
-            Row(children: [
-              for (final (i, p) in Parking.values.indexed) ...[
-                if (i > 0) const SizedBox(width: 8),
-                Expanded(child: _parkingTile(p)),
-              ],
-            ]),
-            const SectionLabel('Data pemesan'),
-            // [P6 TextFormField + validator] Validator mengembalikan pesan error, atau null kalau isian benar.
-            TextFormField(  
-              controller: _name,
-              textInputAction: TextInputAction.next,
-              decoration: const InputDecoration(hintText: 'Nama sesuai identitas', prefixIcon: Icon(CupertinoIcons.person, size: 20)),
-              validator: (v) => Validators.required(v, 'Nama'),
-            ),
-            const SizedBox(height: 10),
-            TextFormField(
-              controller: _whatsapp,
-              keyboardType: TextInputType.phone,
-              decoration: const InputDecoration(hintText: 'No. WhatsApp, mis. 081234567890', prefixIcon: Icon(CupertinoIcons.phone, size: 20)),
-              validator: Validators.whatsapp,
-            ),
-            // [P4 RadioButton] Pilih tepat satu metode pembayaran dari satu kelompok pilihan.
-            RadioGroup<PaymentMethod>(
-              groupValue: _payment,
-              onChanged: (value) => setState(() => _payment = value!),
-              child: GroupedList(header: 'Metode pembayaran', children: [
-                for (final m in PaymentMethod.values)
-                  RadioListTile<PaymentMethod>(
-                    value: m,
-                    controlAffinity: ListTileControlAffinity.trailing,
-                    contentPadding: const EdgeInsets.fromLTRB(16, 0, 8, 0),
-                    secondary: Icon(_paymentIcons[m], size: 20, color: AppColors.leaf),
-                    title: Text(m.label, style: AppText.body),
+              // [P6 intl] Tanggal hari ini dalam Bahasa Indonesia (catatan di bawah grup).
+              GroupedList(
+                header: 'Jumlah pengunjung',
+                indent: 16,
+                footer: 'Berlaku untuk hari ini, ${tanggalHariIni()}',
+                children: [
+                  _counterRow(
+                    'Usia 3 tahun ke atas',
+                    _state.hargaTiket == null
+                        ? 'Tarif belum tersedia'
+                        : '${rupiah(_state.hargaTiket!)} / orang',
+                    _adults,
+                    1,
+                    30,
+                    (v) => setState(() => _adults = v),
                   ),
-              ]),
-            ),
-            const SizedBox(height: 12),
-            // [P4 Checkbox] Persetujuan aturan kunjungan (true/false), wajib dicentang sebelum bayar.
-            AppCard(
-              color: _agree ? AppColors.leaf12 : Colors.white,
-              padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
-              child: CheckboxListTile(
-                value: _agree,
-                onChanged: (value) => setState(() => _agree = value ?? false),
-                contentPadding: const EdgeInsets.symmetric(horizontal: 8),
-                controlAffinity: ListTileControlAffinity.leading,
-                title: Text('Saya sudah membaca aturan kunjungan (tidak memakai sabun dan sampo di kolam).', style: AppText.subheadline.copyWith(color: AppColors.ink)),
+                  _counterRow(
+                    'Anak di bawah 3 tahun',
+                    'Gratis',
+                    _kids,
+                    0,
+                    10,
+                    (v) => setState(() => _kids = v),
+                  ),
+                ],
               ),
-            ),
-          ]),
+              const SectionLabel('Perkiraan jam datang'),
+              if (_loadingSlots)
+                const AppCard(
+                  padding: EdgeInsets.symmetric(horizontal: 16, vertical: 18),
+                  child: Row(
+                    children: [
+                      SizedBox(
+                        width: 18,
+                        height: 18,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      ),
+                      SizedBox(width: 12),
+                      Text(
+                        'Memuat jam datang dari server...',
+                        style: AppText.footnote,
+                      ),
+                    ],
+                  ),
+                )
+              else if (_slotsError != null)
+                AppCard(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 14,
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(
+                        Icons.cloud_off_outlined,
+                        size: 18,
+                        color: AppColors.coral,
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(_slotsError!, style: AppText.footnote),
+                      ),
+                      TextButton(
+                        onPressed: _loadSlots,
+                        child: const Text('Coba lagi'),
+                      ),
+                    ],
+                  ),
+                )
+              else
+                // [P4 DropdownButton] Memilih satu jam dari daftar server; onChanged mengubah state lewat setState().
+                DropdownButtonFormField<String>(
+                  key: ValueKey(_slots.join('|')),
+                  initialValue: _arrival,
+                  dropdownColor: Colors.white,
+                  borderRadius: BorderRadius.circular(16),
+                  icon: const Icon(
+                    CupertinoIcons.chevron_down,
+                    size: 16,
+                    color: AppColors.abu,
+                  ),
+                  decoration: const InputDecoration(
+                    prefixIcon: Icon(CupertinoIcons.clock, size: 20),
+                  ),
+                  items: [
+                    for (final slot in _slots)
+                      DropdownMenuItem(
+                        value: slot,
+                        child: Text(
+                          slot,
+                          style: AppText.number(17, weight: FontWeight.w400),
+                        ),
+                      ),
+                  ],
+                  onChanged: (value) => setState(() => _arrival = value!),
+                ),
+              const SectionLabel('Parkir kendaraan'),
+              // Pilih satu jenis parkir (cara kerjanya seperti RadioButton, tampilannya kotak pilihan).
+              Row(
+                children: [
+                  for (final (i, p) in Parking.values.indexed) ...[
+                    if (i > 0) const SizedBox(width: 8),
+                    Expanded(child: _parkingTile(p)),
+                  ],
+                ],
+              ),
+              const SectionLabel('Data pemesan'),
+              // [P6 TextFormField + validator] Validator mengembalikan pesan error, atau null kalau isian benar.
+              TextFormField(
+                controller: _name,
+                textInputAction: TextInputAction.next,
+                decoration: const InputDecoration(
+                  hintText: 'Nama sesuai identitas',
+                  prefixIcon: Icon(CupertinoIcons.person, size: 20),
+                ),
+                validator: (v) => Validators.required(v, 'Nama'),
+              ),
+              const SizedBox(height: 10),
+              TextFormField(
+                controller: _whatsapp,
+                keyboardType: TextInputType.phone,
+                decoration: const InputDecoration(
+                  hintText: 'No. WhatsApp, mis. 081234567890',
+                  prefixIcon: Icon(CupertinoIcons.phone, size: 20),
+                ),
+                validator: Validators.whatsapp,
+              ),
+              // [P4 RadioButton] Pilih tepat satu metode pembayaran dari satu kelompok pilihan.
+              RadioGroup<PaymentMethod>(
+                groupValue: _payment,
+                onChanged: (value) => setState(() => _payment = value!),
+                child: GroupedList(
+                  header: 'Metode pembayaran',
+                  children: [
+                    for (final m in PaymentMethod.values)
+                      RadioListTile<PaymentMethod>(
+                        value: m,
+                        controlAffinity: ListTileControlAffinity.trailing,
+                        contentPadding: const EdgeInsets.fromLTRB(16, 0, 8, 0),
+                        secondary: Icon(
+                          _paymentIcons[m],
+                          size: 20,
+                          color: AppColors.leaf,
+                        ),
+                        title: Text(m.label, style: AppText.body),
+                      ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 12),
+              // [P4 Checkbox] Persetujuan aturan kunjungan (true/false), wajib dicentang sebelum bayar.
+              AppCard(
+                color: _agree ? AppColors.leaf12 : Colors.white,
+                padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+                child: CheckboxListTile(
+                  value: _agree,
+                  onChanged: (value) => setState(() => _agree = value ?? false),
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 8),
+                  controlAffinity: ListTileControlAffinity.leading,
+                  title: Text(
+                    'Saya sudah membaca aturan kunjungan (tidak memakai sabun dan sampo di kolam).',
+                    style: AppText.subheadline.copyWith(color: AppColors.ink),
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
       // Bar kaca mengambang: total harga dan tombol aksi. Ditaruh di bottomNavigationBar supaya tidak ikut tergulir.
       bottomNavigationBar: TotalBar(
         label: 'Total (${_adults + _kids} orang)',
         amount: _total,
-        button: _payment == PaymentMethod.qris ? 'Bayar dengan QRIS' : 'Pesan, Bayar di Loket',
+        button: _payment == PaymentMethod.qris
+            ? 'Bayar dengan QRIS'
+            : 'Pesan, Bayar di Loket',
         onPressed: _pay,
         loading: _paying,
-        ),
+      ),
     );
   }
 
-  Widget _counterRow(String title, String subtitle, int value, int min, int max, ValueChanged<int> onChanged) => ListRow(
-        title: title,
-        subtitle: subtitle,
-        subtitleStyle: AppText.number(13, weight: FontWeight.w500, color: AppColors.abu),
-        trailing: StepperControl(value: value, min: min, max: max, label: title, onChanged: onChanged),
-      );
+  Widget _counterRow(
+    String title,
+    String subtitle,
+    int value,
+    int min,
+    int max,
+    ValueChanged<int> onChanged,
+  ) => ListRow(
+    title: title,
+    subtitle: subtitle,
+    subtitleStyle: AppText.number(
+      13,
+      weight: FontWeight.w500,
+      color: AppColors.abu,
+    ),
+    trailing: StepperControl(
+      value: value,
+      min: min,
+      max: max,
+      label: title,
+      onChanged: onChanged,
+    ),
+  );
 
   // Kotak pilihan parkir: ikon kendaraan, nama, dan tarif dari server. Yang dipilih berlatar Hijau Daun 12% dan bergaris Hijau Daun.
   Widget _parkingTile(Parking p) {
@@ -327,13 +463,36 @@ class _TicketFormScreenState extends State<TicketFormScreen> {
         color: active ? AppColors.leaf12 : Colors.white,
         borderColor: active ? AppColors.leaf : null,
         onTap: () => setState(() => _parking = p),
-        child: Column(children: [
-          Icon(_parkingIcons[p], size: 24, color: active ? AppColors.leaf : AppColors.abu),
-          const SizedBox(height: 6),
-          Text(p.label, style: AppText.footnote.copyWith(color: active ? AppColors.forest : AppColors.ink, fontWeight: FontWeight.w600)),
-          const SizedBox(height: 1),
-          Text(tarif == null ? '—' : tarif == 0 ? '-' : rupiah(tarif), style: AppText.number(11, weight: FontWeight.w500, color: AppColors.abu)),
-        ]),
+        child: Column(
+          children: [
+            Icon(
+              _parkingIcons[p],
+              size: 24,
+              color: active ? AppColors.leaf : AppColors.abu,
+            ),
+            const SizedBox(height: 6),
+            Text(
+              p.label,
+              style: AppText.footnote.copyWith(
+                color: active ? AppColors.forest : AppColors.ink,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: 1),
+            Text(
+              tarif == null
+                  ? '—'
+                  : tarif == 0
+                  ? '-'
+                  : rupiah(tarif),
+              style: AppText.number(
+                11,
+                weight: FontWeight.w500,
+                color: AppColors.abu,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -413,7 +572,8 @@ class _QrisSheetState extends State<_QrisSheet> {
     } on ApiException catch (e) {
       if (!mounted) return;
       setState(() => _confirming = false);
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.message)));
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(e.message)));
     }
   }
 
@@ -424,74 +584,143 @@ class _QrisSheetState extends State<_QrisSheet> {
       return QrImageView(
         data: q,
         size: 190,
-        eyeStyle: const QrEyeStyle(eyeShape: QrEyeShape.square, color: AppColors.ink),
-        dataModuleStyle: const QrDataModuleStyle(dataModuleShape: QrDataModuleShape.square, color: AppColors.ink),
+        eyeStyle: const QrEyeStyle(
+          eyeShape: QrEyeShape.square,
+          color: AppColors.ink,
+        ),
+        dataModuleStyle: const QrDataModuleStyle(
+          dataModuleShape: QrDataModuleShape.square,
+          color: AppColors.ink,
+        ),
       );
     }
     final url = _pay.qrUrl;
     if (url != null && url.isNotEmpty) {
-      return ClipRRect(borderRadius: BorderRadius.circular(12), child: Image.network(url, width: 190, height: 190, fit: BoxFit.cover));
+      return ClipRRect(
+        borderRadius: BorderRadius.circular(12),
+        child: Image.network(url, width: 190, height: 190, fit: BoxFit.cover),
+      );
     }
     // Cadangan: QR kode tiket, sama dengan yang discan petugas.
     return QrImageView(
       data: widget.ticket.code,
       size: 190,
-      eyeStyle: const QrEyeStyle(eyeShape: QrEyeShape.square, color: AppColors.ink),
-      dataModuleStyle: const QrDataModuleStyle(dataModuleShape: QrDataModuleShape.square, color: AppColors.ink),
+      eyeStyle: const QrEyeStyle(
+        eyeShape: QrEyeShape.square,
+        color: AppColors.ink,
+      ),
+      dataModuleStyle: const QrDataModuleStyle(
+        dataModuleShape: QrDataModuleShape.square,
+        color: AppColors.ink,
+      ),
     );
   }
 
   // Pesan ketika pembayaran tidak bisa dilanjutkan (expired, failed, cancelled).
   String get _pesanAkhir => switch (_pay.status) {
-        'expired' => 'Batas waktu pembayaran habis.',
-        'failed' => 'Pembayaran gagal diproses.',
-        _ => 'Pembayaran dibatalkan.',
-      };
+    'expired' => 'Batas waktu pembayaran habis.',
+    'failed' => 'Pembayaran gagal diproses.',
+    _ => 'Pembayaran dibatalkan.',
+  };
 
   @override
   Widget build(BuildContext context) {
     final tutup = _pay.tutup;
-    return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-      const Text('Bayar dengan QRIS', textAlign: TextAlign.center, style: AppText.headline),
-      const SizedBox(height: 4),
-      const Text('Scan dengan aplikasi bank atau e-wallet.', textAlign: TextAlign.center, style: AppText.footnote),
-      const SizedBox(height: 18),
-      Center(
-        child: Container(
-          padding: const EdgeInsets.all(14),
-          decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(22), border: Border.all(color: AppColors.line)),
-          // Package qr_flutter: membuat gambar QR dari teks QRIS asli dari server (warna Ink sesuai palet).
-          child: Opacity(opacity: tutup ? .45 : 1, child: _qr()),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        const Text(
+          'Bayar dengan QRIS',
+          textAlign: TextAlign.center,
+          style: AppText.headline,
         ),
-      ),
-      const SizedBox(height: 14),
-      Text(rupiah(_pay.amount), textAlign: TextAlign.center, style: AppText.hero(34)),
-      const SizedBox(height: 14),
-      if (tutup) ...[
-        Text(_pesanAkhir, textAlign: TextAlign.center, style: AppText.subheadline.copyWith(color: AppColors.coral, fontWeight: FontWeight.w600)),
         const SizedBox(height: 4),
-        Text('Tiket sudah tercatat. Cek statusnya lagi lewat Riwayat.', textAlign: TextAlign.center, style: AppText.footnote),
-      ] else ...[
-        // Indikator menunggu: mode sungguhan tetap di sini sampai pembayaran terkonfirmasi server.
-        Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-          const SizedBox(width: 14, height: 14, child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.leaf)),
-          const SizedBox(width: 10),
-          Text('Menunggu pembayaran...', style: AppText.subheadline),
-        ]),
-      ],
-      const SizedBox(height: 20),
-      if (tutup) ...[
-        PrimaryButton(label: 'Tutup', onPressed: () => Navigator.pop(context, false)),
-      ] else ...[
-        // [P5 Navigator.pop] Tombol simulasi (mode uji backend) menandai lunas lalu menutup sheet.
-        if (_pay.simulasi) PrimaryButton(label: 'Saya Sudah Bayar', onPressed: _sudahBayar, loading: _confirming),
-        const SizedBox(height: 4),
-        TextButton(
-          style: TextButton.styleFrom(foregroundColor: AppColors.abu, minimumSize: const Size.fromHeight(44)),
-          onPressed: () => Navigator.pop(context, false),
-          child: const Text('Batal', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 17)),
+        const Text(
+          'Scan dengan aplikasi bank atau e-wallet.',
+          textAlign: TextAlign.center,
+          style: AppText.footnote,
         ),
+        const SizedBox(height: 18),
+        Center(
+          child: Container(
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(22),
+              border: Border.all(color: AppColors.line),
+            ),
+            // Package qr_flutter: membuat gambar QR dari teks QRIS asli dari server (warna Ink sesuai palet).
+            child: Opacity(opacity: tutup ? .45 : 1, child: _qr()),
+          ),
+        ),
+        const SizedBox(height: 14),
+        Text(
+          rupiah(_pay.amount),
+          textAlign: TextAlign.center,
+          style: AppText.hero(34),
+        ),
+        const SizedBox(height: 14),
+        if (tutup) ...[
+          Text(
+            _pesanAkhir,
+            textAlign: TextAlign.center,
+            style: AppText.subheadline.copyWith(
+              color: AppColors.coral,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            'Tiket sudah tercatat. Cek statusnya lagi lewat Riwayat.',
+            textAlign: TextAlign.center,
+            style: AppText.footnote,
+          ),
+        ] else ...[
+          // Indikator menunggu: mode sungguhan tetap di sini sampai pembayaran terkonfirmasi server.
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const SizedBox(
+                width: 14,
+                height: 14,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  color: AppColors.leaf,
+                ),
+              ),
+              const SizedBox(width: 10),
+              Text('Menunggu pembayaran...', style: AppText.subheadline),
+            ],
+          ),
+        ],
+        const SizedBox(height: 20),
+        if (tutup) ...[
+          PrimaryButton(
+            label: 'Tutup',
+            onPressed: () => Navigator.pop(context, false),
+          ),
+        ] else ...[
+          // [P5 Navigator.pop] Tombol simulasi (mode uji backend) menandai lunas lalu menutup sheet.
+          if (_pay.simulasi)
+            PrimaryButton(
+              label: 'Saya Sudah Bayar',
+              onPressed: _sudahBayar,
+              loading: _confirming,
+            ),
+          const SizedBox(height: 4),
+          TextButton(
+            style: TextButton.styleFrom(
+              foregroundColor: AppColors.abu,
+              minimumSize: const Size.fromHeight(44),
+            ),
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text(
+              'Batal',
+              style: TextStyle(fontWeight: FontWeight.w600, fontSize: 17),
+            ),
+          ),
+        ],
       ],
-    ]);
+    );
   }
 }

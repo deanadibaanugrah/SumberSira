@@ -5,6 +5,7 @@
 
 // Mengimpor ChangeNotifier dari foundation Flutter untuk notifikasi perubahan state ke View
 import 'package:flutter/foundation.dart';
+
 // Mengimpor entitas Mahasiswa dari domain
 import '../../domain/entities/mahasiswa.dart';
 // Mengimpor Use Case AmbilMahasiswa
@@ -64,4 +65,3 @@ class MahasiswaViewModel extends ChangeNotifier {
     notifyListeners();
   }
 }
-

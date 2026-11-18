@@ -21,4 +21,3 @@ abstract class MahasiswaRepository {
   // Kontrak method untuk menghapus data mahasiswa berdasarkan string nim yang diberikan
   void hapus(String nim);
 }
-

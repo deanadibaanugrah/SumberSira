@@ -9,7 +9,7 @@ import { normalizeWhatsapp } from "@/lib/whatsapp";
   RESMI Sumber Sira ke nomor penyewa (WhatsApp Cloud API Meta).
 
   Anti-rekayasa (tahap tanpa database):
-  • nama item, harga & total diambil/dihitung ulang dari katalog src/data/wahana.js,
+  • nama item, harga & total diambil/dihitung ulang dari backend (GET /rides, GET /booking-slots),
     bukan dari data klien, jadi PDF tidak bisa "dipalsukan" dari sisi pengguna;
   • PDF digenerate di server, jadi tidak bisa diedit pengguna;
   • pengiriman dari nomor bisnis resmi (WHATSAPP_PHONE_NUMBER_ID), bukan wa.me.

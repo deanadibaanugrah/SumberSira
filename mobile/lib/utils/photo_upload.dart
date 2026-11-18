@@ -10,8 +10,11 @@ const List<String> _mimeFoto = ['image/jpeg', 'image/png', 'image/webp'];
 Future<String?> validatePhotoFile(XFile file) async {
   final nama = file.name.toLowerCase();
   final mime = (file.mimeType ?? '').toLowerCase();
-  final tipeCocok = _ekstensiFoto.any(nama.endsWith) || _mimeFoto.contains(mime);
+  final tipeCocok =
+      _ekstensiFoto.any(nama.endsWith) || _mimeFoto.contains(mime);
   if (!tipeCocok) return 'Format foto harus JPEG, PNG, atau WebP.';
-  if (await file.length() > maxPhotoBytes) return 'Foto terlalu besar. Maksimal 4 MB.';
+  if (await file.length() > maxPhotoBytes) {
+    return 'Foto terlalu besar. Maksimal 4 MB.';
+  }
   return null;
 }

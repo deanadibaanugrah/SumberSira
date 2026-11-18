@@ -11,11 +11,14 @@ import 'package:sumber_sira/mahasiswa/data/repositories/mahasiswa_repository_mem
 import 'package:sumber_sira/mahasiswa/domain/usecases/ambil_mahasiswa.dart';
 import 'package:sumber_sira/mahasiswa/domain/usecases/hapus_mahasiswa.dart';
 import 'package:sumber_sira/mahasiswa/domain/usecases/tambah_mahasiswa.dart';
-import 'package:sumber_sira/mahasiswa/presentation/viewmodels/mahasiswa_viewmodel.dart' as clean_vm;
+import 'package:sumber_sira/mahasiswa/presentation/viewmodels/mahasiswa_viewmodel.dart'
+    as clean_vm;
 
 // Import MVVM Tradisional
-import 'package:sumber_sira/mahasiswa_mvvm/repositories/mahasiswa_repository.dart' as mvvm_repo;
-import 'package:sumber_sira/mahasiswa_mvvm/viewmodels/mahasiswa_viewmodel.dart' as mvvm_vm;
+import 'package:sumber_sira/mahasiswa_mvvm/repositories/mahasiswa_repository.dart'
+    as mvvm_repo;
+import 'package:sumber_sira/mahasiswa_mvvm/viewmodels/mahasiswa_viewmodel.dart'
+    as mvvm_vm;
 
 void main() {
   group('1. Pengujian Modul Clean Architecture (Percobaan 5 - 10)', () {
@@ -31,13 +34,16 @@ void main() {
       );
     });
 
-    test('Uji 1: Buka aplikasi -> Data inisial Andi (001) dan Budi (002) tampil', () {
-      expect(vm.daftar.length, 2);
-      expect(vm.daftar[0].nim, '001');
-      expect(vm.daftar[0].nama, 'Andi');
-      expect(vm.daftar[1].nim, '002');
-      expect(vm.daftar[1].nama, 'Budi');
-    });
+    test(
+      'Uji 1: Buka aplikasi -> Data inisial Andi (001) dan Budi (002) tampil',
+      () {
+        expect(vm.daftar.length, 2);
+        expect(vm.daftar[0].nim, '001');
+        expect(vm.daftar[0].nama, 'Andi');
+        expect(vm.daftar[1].nim, '002');
+        expect(vm.daftar[1].nama, 'Budi');
+      },
+    );
 
     test('Uji 2: Tambah 003 dan Citra -> Citra berhasil masuk ke daftar', () {
       vm.tambah('003', 'Citra');
@@ -102,4 +108,3 @@ void main() {
     });
   });
 }
-

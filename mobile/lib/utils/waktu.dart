@@ -24,4 +24,5 @@ String tanggalPanjangWib(String? iso) {
 }
 
 // Tanggal berlaku tiket dari server ("2026-11-12") -> "Kamis, 12 November 2026".
-String tanggalPanjang(String ymd) => DateFormat('EEEE, d MMMM yyyy', 'id_ID').format(DateTime.parse(ymd));
+String tanggalPanjang(String ymd) =>
+    DateFormat('EEEE, d MMMM yyyy', 'id_ID').format(DateTime.parse(ymd));

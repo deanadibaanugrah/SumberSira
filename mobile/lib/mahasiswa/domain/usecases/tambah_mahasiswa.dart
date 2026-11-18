@@ -39,4 +39,3 @@ class TambahMahasiswa {
     repository.tambah(Mahasiswa(nim: nim, nama: nama));
   }
 }
-

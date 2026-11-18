@@ -5,6 +5,7 @@
 
 // Mengimpor ChangeNotifier dari framework Flutter
 import 'package:flutter/foundation.dart';
+
 // Mengimpor model Mahasiswa
 import '../models/mahasiswa.dart';
 // Mengimpor repository konkret MahasiswaRepository
@@ -34,10 +35,10 @@ class MahasiswaViewModel extends ChangeNotifier {
     // Validasi 1: memeriksa apakah input kosong
     if (nim.isEmpty || nama.isEmpty) {
       pesanError = 'NIM dan nama wajib diisi';
-    // Validasi 2: memeriksa apakah NIM sudah terdaftar
+      // Validasi 2: memeriksa apakah NIM sudah terdaftar
     } else if (repository.nimSudahAda(nim)) {
       pesanError = 'NIM sudah digunakan';
-    // Jika valid, masukkan ke repository dan kosongkan pesan error
+      // Jika valid, masukkan ke repository dan kosongkan pesan error
     } else {
       repository.tambah(Mahasiswa(nim: nim, nama: nama));
       pesanError = null;
@@ -56,4 +57,3 @@ class MahasiswaViewModel extends ChangeNotifier {
     notifyListeners();
   }
 }
-

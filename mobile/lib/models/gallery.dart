@@ -22,19 +22,25 @@ class GalleryPhoto {
   final DateTime? createdAt;
 
   factory GalleryPhoto.fromApi(Map<String, dynamic> json) => GalleryPhoto(
-        id: json['id'] as String? ?? '',
-        url: json['url'] as String? ?? '',
-        title: json['title'] as String? ?? '',
-        owner: json['owner'] as String? ?? '',
-        ai: json['ai'] as bool? ?? false,
-        status: json['status'] as String? ?? 'approved',
-        createdAt: DateTime.tryParse(json['createdAt'] as String? ?? ''),
-      );
+    id: json['id'] as String? ?? '',
+    url: json['url'] as String? ?? '',
+    title: json['title'] as String? ?? '',
+    owner: json['owner'] as String? ?? '',
+    ai: json['ai'] as bool? ?? false,
+    status: json['status'] as String? ?? 'approved',
+    createdAt: DateTime.tryParse(json['createdAt'] as String? ?? ''),
+  );
 }
 
 // Hasil POST /ai-photo: foto asli dan hasil perbaikan yang disimpan di server.
 class AiPhotoResult {
-  const AiPhotoResult({required this.id, required this.status, required this.originalUrl, required this.resultUrl, this.error});
+  const AiPhotoResult({
+    required this.id,
+    required this.status,
+    required this.originalUrl,
+    required this.resultUrl,
+    this.error,
+  });
 
   final String id;
   final String status;
@@ -46,10 +52,10 @@ class AiPhotoResult {
   bool get done => status == 'done';
 
   factory AiPhotoResult.fromApi(Map<String, dynamic> json) => AiPhotoResult(
-        id: json['id'] as String? ?? '',
-        status: json['status'] as String? ?? '',
-        originalUrl: json['originalUrl'] as String? ?? '',
-        resultUrl: json['resultUrl'] as String? ?? '',
-        error: json['error'] as String?,
-      );
+    id: json['id'] as String? ?? '',
+    status: json['status'] as String? ?? '',
+    originalUrl: json['originalUrl'] as String? ?? '',
+    resultUrl: json['resultUrl'] as String? ?? '',
+    error: json['error'] as String?,
+  );
 }

@@ -30,12 +30,32 @@ void main() {
   test('email wajib @ dan titik, karakter seperti ( : & " \' ditolak', () {
     expect(Validators.email('admin@sumbersira.id'), isNull);
     expect(Validators.email('kel.hidayat_01@mail.co.id'), isNull);
-    expect(Validators.email('adminsumbersira.id'), 'Email harus memakai tanda @.');
-    expect(Validators.email('admin@sumbersira'), 'Bagian setelah @ harus memakai titik, contoh: nama@sumbersira.id.');
-    for (final salah in ['ad(min)@sumbersira.id', 'admin:1@sumbersira.id', 'a&b@sumbersira.id', '"admin"@sumbersira.id', "admin'@sumbersira.id", 'ad min@sumbersira.id']) {
-      expect(Validators.email(salah), contains('hanya boleh berisi huruf, angka'), reason: salah);
+    expect(
+      Validators.email('adminsumbersira.id'),
+      'Email harus memakai tanda @.',
+    );
+    expect(
+      Validators.email('admin@sumbersira'),
+      'Bagian setelah @ harus memakai titik, contoh: nama@sumbersira.id.',
+    );
+    for (final salah in [
+      'ad(min)@sumbersira.id',
+      'admin:1@sumbersira.id',
+      'a&b@sumbersira.id',
+      '"admin"@sumbersira.id',
+      "admin'@sumbersira.id",
+      'ad min@sumbersira.id',
+    ]) {
+      expect(
+        Validators.email(salah),
+        contains('hanya boleh berisi huruf, angka'),
+        reason: salah,
+      );
     }
-    expect(Validators.email('admin@@sumbersira.id'), 'Email hanya boleh punya satu tanda @.');
+    expect(
+      Validators.email('admin@@sumbersira.id'),
+      'Email hanya boleh punya satu tanda @.',
+    );
     expect(Validators.email('admin..sira@sumbersira.id'), isNotNull);
     expect(Validators.email('.admin@sumbersira.id'), isNotNull);
   });
@@ -47,18 +67,39 @@ void main() {
   });
 
   test('total tiket memakai angka dari server, bukan harga bawaan', () {
-    final t = Ticket(code: 'TK-2001', name: 'Rani', whatsapp: '081211112222', adults: 2, parking: Parking.motor, boughtAt: '10.00', amount: 13000);
+    final t = Ticket(
+      code: 'TK-2001',
+      name: 'Rani',
+      whatsapp: '081211112222',
+      adults: 2,
+      parking: Parking.motor,
+      boughtAt: '10.00',
+      amount: 13000,
+    );
     expect(t.total, 13000);
     expect(t.people, 2);
     // Respons tanpa total tidak ditebak memakai harga lokal.
-    final tanpaTotal = Ticket(code: 'TK-2002', name: 'Rani', adults: 1, boughtAt: '10.00');
+    final tanpaTotal = Ticket(
+      code: 'TK-2002',
+      name: 'Rani',
+      adults: 1,
+      boughtAt: '10.00',
+    );
     expect(tanpaTotal.total, isNull);
   });
 
   test('riwayat tiket dan booking dicari lewat nomor WhatsApp', () {
     final s = AppState.instance;
     final before = s.ticketsFor('081299998888').length;
-    final t = Ticket(code: 'TK-3001', name: 'Dewi', whatsapp: nomorWa('+62 812-9999-8888'), adults: 1, parking: Parking.none, boughtAt: '10.00', mine: true);
+    final t = Ticket(
+      code: 'TK-3001',
+      name: 'Dewi',
+      whatsapp: nomorWa('+62 812-9999-8888'),
+      adults: 1,
+      parking: Parking.none,
+      boughtAt: '10.00',
+      mine: true,
+    );
     s.tickets.add(t);
     expect(s.ticketsFor('081299998888').first.code, t.code);
     expect(s.ticketsFor('081299998888').length, before + 1);
@@ -70,7 +111,10 @@ void main() {
       name: 'Dewi',
       whatsapp: nomorWa('6281299998888'),
       slot: '08-09',
-      lines: const [BookingLine(name: 'Ban Besar', qty: 2, price: 10000), BookingLine(name: 'ATV', qty: 1, price: 25000)],
+      lines: const [
+        BookingLine(name: 'Ban Besar', qty: 2, price: 10000),
+        BookingLine(name: 'ATV', qty: 1, price: 25000),
+      ],
       orderedAt: '10.00',
     );
     s.bookings.add(b);

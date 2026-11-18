@@ -30,4 +30,3 @@ class MahasiswaRepository {
   // Memeriksa apakah suatu nim sudah pernah ada di dalam list _data
   bool nimSudahAda(String nim) => _data.any((m) => m.nim == nim);
 }
-

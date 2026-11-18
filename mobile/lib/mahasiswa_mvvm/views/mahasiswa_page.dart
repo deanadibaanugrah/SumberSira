@@ -5,6 +5,7 @@
 
 // Mengimpor material widget bawaan Flutter
 import 'package:flutter/material.dart';
+
 // Mengimpor repository konkret
 import '../repositories/mahasiswa_repository.dart';
 // Mengimpor viewmodel
@@ -87,8 +88,10 @@ class _MahasiswaPageState extends State<MahasiswaPage> {
                     children: [
                       // Menampilkan pesan error berwarna merah bila ada
                       if (vm.pesanError != null)
-                        Text(vm.pesanError!,
-                            style: const TextStyle(color: Colors.red)),
+                        Text(
+                          vm.pesanError!,
+                          style: const TextStyle(color: Colors.red),
+                        ),
                       // Daftar list mahasiswa yang dapat discroll
                       Expanded(
                         child: ListView.builder(
@@ -117,4 +120,3 @@ class _MahasiswaPageState extends State<MahasiswaPage> {
     );
   }
 }
-

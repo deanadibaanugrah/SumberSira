@@ -42,8 +42,16 @@ class _MainShellState extends State<MainShell> {
   static const _tabs = [
     (CupertinoIcons.house, CupertinoIcons.house_fill, 'Beranda'),
     (CupertinoIcons.ticket, CupertinoIcons.ticket_fill, 'Tiket & Booking'),
-    (CupertinoIcons.photo_on_rectangle, CupertinoIcons.photo_fill_on_rectangle_fill, 'Galeri'),
-    (CupertinoIcons.person_crop_circle, CupertinoIcons.person_crop_circle_fill, 'Profil'),
+    (
+      CupertinoIcons.photo_on_rectangle,
+      CupertinoIcons.photo_fill_on_rectangle_fill,
+      'Galeri',
+    ),
+    (
+      CupertinoIcons.person_crop_circle,
+      CupertinoIcons.person_crop_circle_fill,
+      'Profil',
+    ),
   ];
 
   @override
@@ -53,15 +61,16 @@ class _MainShellState extends State<MainShell> {
       extendBody: true,
       body: AppBackground(
         // IndexedStack menjaga isi tiap tab tetap tersimpan saat berpindah tab.
-        child: IndexedStack(index: _index, children: const [
-          HomeTab(),
-          TicketsTab(),
-          GalleryTab(),
-          ProfileTab(),
-        ]),
+        child: IndexedStack(
+          index: _index,
+          children: const [HomeTab(), TicketsTab(), GalleryTab(), ProfileTab()],
+        ),
       ),
       // [P5 Navigasi Tab] Tab bar bawah untuk berpindah antar tab.
-      bottomNavigationBar: _GlassTabBar(index: _index, onChanged: (i) => setState(() => _index = i)),
+      bottomNavigationBar: _GlassTabBar(
+        index: _index,
+        onChanged: (i) => setState(() => _index = i),
+      ),
     );
   }
 }
@@ -90,34 +99,61 @@ class _GlassTabBar extends StatelessWidget {
               padding: const EdgeInsets.all(6),
               child: SizedBox(
                 height: AppSpace.tabBar - 12,
-                child: Row(children: [
-                  for (final (i, (icon, activeIcon, label)) in _MainShellState._tabs.indexed)
-                    Expanded(
-                      child: Semantics(
-                        button: true,
-                        selected: i == index,
-                        label: label,
-                        excludeSemantics: true,
-                        child: GestureDetector(
-                          behavior: HitTestBehavior.opaque,
-                          onTap: () => onChanged(i),
-                          child: AnimatedContainer(
-                            duration: still ? Duration.zero : const Duration(milliseconds: 220),
-                            curve: Curves.easeOutCubic,
-                            decoration: BoxDecoration(color: i == index ? AppColors.leaf12 : Colors.transparent, borderRadius: BorderRadius.circular(26)),
-                            child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-                              Icon(i == index ? activeIcon : icon, size: 23, color: i == index ? AppColors.leaf : AppColors.abu),
-                              const SizedBox(height: 3),
-                              FittedBox(
-                                fit: BoxFit.scaleDown,
-                                child: Text(label, maxLines: 1, style: AppText.tabLabel.copyWith(color: i == index ? AppColors.forest : AppColors.abu)),
+                child: Row(
+                  children: [
+                    for (final (i, (icon, activeIcon, label))
+                        in _MainShellState._tabs.indexed)
+                      Expanded(
+                        child: Semantics(
+                          button: true,
+                          selected: i == index,
+                          label: label,
+                          excludeSemantics: true,
+                          child: GestureDetector(
+                            behavior: HitTestBehavior.opaque,
+                            onTap: () => onChanged(i),
+                            child: AnimatedContainer(
+                              duration: still
+                                  ? Duration.zero
+                                  : const Duration(milliseconds: 220),
+                              curve: Curves.easeOutCubic,
+                              decoration: BoxDecoration(
+                                color: i == index
+                                    ? AppColors.leaf12
+                                    : Colors.transparent,
+                                borderRadius: BorderRadius.circular(26),
                               ),
-                            ]),
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(
+                                    i == index ? activeIcon : icon,
+                                    size: 23,
+                                    color: i == index
+                                        ? AppColors.leaf
+                                        : AppColors.abu,
+                                  ),
+                                  const SizedBox(height: 3),
+                                  FittedBox(
+                                    fit: BoxFit.scaleDown,
+                                    child: Text(
+                                      label,
+                                      maxLines: 1,
+                                      style: AppText.tabLabel.copyWith(
+                                        color: i == index
+                                            ? AppColors.forest
+                                            : AppColors.abu,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                ]),
+                  ],
+                ),
               ),
             ),
           ),

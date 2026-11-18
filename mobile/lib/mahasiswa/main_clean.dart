@@ -6,6 +6,7 @@
 
 // Mengimpor paket material design bawaan Flutter
 import 'package:flutter/material.dart';
+
 // Mengimpor implementasi konkret repository memori dari lapisan data
 import 'data/repositories/mahasiswa_repository_memory.dart';
 // Mengimpor use case ambil data dari lapisan domain
@@ -33,9 +34,13 @@ void main() {
   );
 
   // 3. Menjalankan aplikasi Flutter dengan MaterialApp dan halaman awal MahasiswaPage
-  runApp(MaterialApp(
-    debugShowCheckedModeBanner: false, // Menyembunyikan pita debug di pojok kanan atas
-    home: MahasiswaPage(vm: vm),        // Menampilkan MahasiswaPage dengan injeksi viewmodel
-  ));
+  runApp(
+    MaterialApp(
+      debugShowCheckedModeBanner:
+          false, // Menyembunyikan pita debug di pojok kanan atas
+      home: MahasiswaPage(
+        vm: vm,
+      ), // Menampilkan MahasiswaPage dengan injeksi viewmodel
+    ),
+  );
 }
-

@@ -38,14 +38,16 @@ class CrowdState extends ChangeNotifier {
 
   // Label keramaian dari persen kapasitas, aturan yang sama dengan backend: di bawah 40% Sepi,
   // sampai 75% Sedang, di atasnya Ramai. Dipakai untuk warna batang grafik.
-  static String labelFor(int percent) => percent < 40 ? 'Sepi' : (percent <= 75 ? 'Sedang' : 'Ramai');
+  static String labelFor(int percent) =>
+      percent < 40 ? 'Sepi' : (percent <= 75 ? 'Sedang' : 'Ramai');
 
   // Mengambil data terbaru dari server. Gagal: data terakhir tetap dipakai dan penanda
   // "tidak terbaru" menyala (diberi tahu sekali, bukan tiap percobaan).
   Future<void> refresh() async {
     try {
       final info = await ApiClient.fetchCrowd();
-      final berubah = _info == null ||
+      final berubah =
+          _info == null ||
           _info!.inside != info.inside ||
           _info!.percent != info.percent ||
           _info!.label != info.label ||
@@ -78,7 +80,10 @@ class CrowdState extends ChangeNotifier {
   }
 
   // Membandingkan isi prakiraan supaya hanya memberi tahu pendengar bila datanya benar-benar berubah.
-  static bool _forecastSama(List<({String hour, int count})> a, List<({String hour, int count})> b) {
+  static bool _forecastSama(
+    List<({String hour, int count})> a,
+    List<({String hour, int count})> b,
+  ) {
     if (a.length != b.length) return false;
     for (var i = 0; i < a.length; i++) {
       if (a[i].hour != b[i].hour || a[i].count != b[i].count) return false;

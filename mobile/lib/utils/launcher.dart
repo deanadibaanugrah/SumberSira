@@ -13,11 +13,21 @@ Future<void> bukaTautan(BuildContext context, String url) async {
     ok = false;
   }
   if (!ok && context.mounted) {
-    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Tautan tidak bisa dibuka di perangkat ini.')));
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Tautan tidak bisa dibuka di perangkat ini.'),
+      ),
+    );
   }
 }
 
 // Membuka chat WhatsApp ke nomor pemesan dengan pesan yang sudah terisi (format wa.me).
 // Di versi nyata pesan ini dikirim otomatis oleh server lewat WhatsApp Business API.
-Future<void> kirimWhatsApp(BuildContext context, String whatsapp, String pesan) =>
-    bukaTautan(context, 'https://wa.me/${nomorWaInternasional(whatsapp)}?text=${Uri.encodeComponent(pesan)}');
+Future<void> kirimWhatsApp(
+  BuildContext context,
+  String whatsapp,
+  String pesan,
+) => bukaTautan(
+  context,
+  'https://wa.me/${nomorWaInternasional(whatsapp)}?text=${Uri.encodeComponent(pesan)}',
+);

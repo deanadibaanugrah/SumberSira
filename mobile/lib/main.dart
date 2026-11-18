@@ -80,31 +80,44 @@ class SumberSiraApp extends StatelessWidget {
         final uri = Uri.parse(settings.name ?? '');
         final args = settings.arguments ?? uri.queryParameters['kode'];
         return switch (uri.path) {
-          AppRoutes.eticket when args is String => MaterialPageRoute(settings: settings, builder: (_) => ETicketScreen(code: args)),
-          AppRoutes.checkout when args is BookingDraft => MaterialPageRoute(settings: settings, builder: (_) => CheckoutScreen(draft: args)),
-          AppRoutes.payment when args is Booking => MaterialPageRoute(settings: settings, builder: (_) => PaymentScreen(booking: args)),
-          AppRoutes.invoice when args is String => MaterialPageRoute(settings: settings, builder: (_) => InvoiceScreen(code: args)),
+          AppRoutes.eticket when args is String => MaterialPageRoute(
+            settings: settings,
+            builder: (_) => ETicketScreen(code: args),
+          ),
+          AppRoutes.checkout when args is BookingDraft => MaterialPageRoute(
+            settings: settings,
+            builder: (_) => CheckoutScreen(draft: args),
+          ),
+          AppRoutes.payment when args is Booking => MaterialPageRoute(
+            settings: settings,
+            builder: (_) => PaymentScreen(booking: args),
+          ),
+          AppRoutes.invoice when args is String => MaterialPageRoute(
+            settings: settings,
+            builder: (_) => InvoiceScreen(code: args),
+          ),
           AppRoutes.praktikumClean => MaterialPageRoute(
-              settings: settings,
-              builder: (_) {
-                final repo = MahasiswaRepositoryMemory();
-                final vm = MahasiswaViewModel(
-                  ambilMahasiswa: AmbilMahasiswa(repo),
-                  tambahMahasiswa: TambahMahasiswa(repo),
-                  hapusMahasiswa: HapusMahasiswa(repo),
-                );
-                return MahasiswaPage(vm: vm);
-              },
-            ),
+            settings: settings,
+            builder: (_) {
+              final repo = MahasiswaRepositoryMemory();
+              final vm = MahasiswaViewModel(
+                ambilMahasiswa: AmbilMahasiswa(repo),
+                tambahMahasiswa: TambahMahasiswa(repo),
+                hapusMahasiswa: HapusMahasiswa(repo),
+              );
+              return MahasiswaPage(vm: vm);
+            },
+          ),
           AppRoutes.praktikumMvvm => MaterialPageRoute(
-              settings: settings,
-              builder: (_) => const mvvm.MahasiswaPage(),
-            ),
+            settings: settings,
+            builder: (_) => const mvvm.MahasiswaPage(),
+          ),
           _ => null,
         };
       },
       // Rute tidak dikenal atau datanya tidak ada: kembali ke Beranda.
-      onUnknownRoute: (_) => MaterialPageRoute(builder: (_) => const MainShell()),
+      onUnknownRoute: (_) =>
+          MaterialPageRoute(builder: (_) => const MainShell()),
     );
   }
 }

@@ -42,4 +42,3 @@ class MahasiswaRepositoryMemory implements MahasiswaRepository {
     _data.removeWhere((m) => m.nim == nim);
   }
 }
-

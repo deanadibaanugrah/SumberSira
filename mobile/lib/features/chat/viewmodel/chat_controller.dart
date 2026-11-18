@@ -4,7 +4,11 @@ import '../../../data/api_client.dart';
 
 // Satu pesan di kotak chat. fromBot true = balasan Tanya Sira, false = pertanyaan pengunjung.
 class ChatMessage {
-  const ChatMessage({required this.fromBot, required this.text, this.source = ''});
+  const ChatMessage({
+    required this.fromBot,
+    required this.text,
+    this.source = '',
+  });
 
   final bool fromBot;
   final String text;
@@ -19,7 +23,10 @@ class ChatController extends ChangeNotifier {
   static final ChatController instance = ChatController._();
 
   final List<ChatMessage> messages = [
-    const ChatMessage(fromBot: true, text: 'Halo! Aku Tanya Sira 👋 Ada yang bisa dibantu soal Sumber Sira?'),
+    const ChatMessage(
+      fromBot: true,
+      text: 'Halo! Aku Tanya Sira 👋 Ada yang bisa dibantu soal Sumber Sira?',
+    ),
   ];
   bool busy = false;
   // Status koneksi terakhir ke backend. Header chat memakai ini supaya tidak menulis "Online" saat server mati.
@@ -64,20 +71,26 @@ class ChatController extends ChangeNotifier {
     try {
       final jawaban = await ApiClient.askChat(question);
       online = true;
-      _add(ChatMessage(
-        fromBot: true,
-        text: jawaban.answer,
-        // matched = pertanyaan cocok dengan FAQ pengelola; bila tidak, server mencatatnya untuk admin.
-        source: jawaban.matched ? 'FAQ pengelola' : 'Pertanyaan dicatat untuk admin',
-      ));
+      _add(
+        ChatMessage(
+          fromBot: true,
+          text: jawaban.answer,
+          // matched = pertanyaan cocok dengan FAQ pengelola; bila tidak, server mencatatnya untuk admin.
+          source: jawaban.matched
+              ? 'FAQ pengelola'
+              : 'Pertanyaan dicatat untuk admin',
+        ),
+      );
     } on ApiException catch (e) {
       online = !e.offline;
-      _add(ChatMessage(
-        fromBot: true,
-        text: e.offline
-            ? 'Server belum terjangkau di ${ApiClient.baseUrl}. Pastikan backend menyala, atau ubah alamat server di Profil → Server Backend.'
-            : e.message,
-      ));
+      _add(
+        ChatMessage(
+          fromBot: true,
+          text: e.offline
+              ? 'Server belum terjangkau di ${ApiClient.baseUrl}. Pastikan backend menyala, atau ubah alamat server di Profil → Server Backend.'
+              : e.message,
+        ),
+      );
     } finally {
       busy = false;
       notifyListeners();

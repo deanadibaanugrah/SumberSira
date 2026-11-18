@@ -72,14 +72,22 @@ class Ticket {
       adults: j['adults'] as int,
       kids: (j['kids'] as int?) ?? 0,
       parking: Parking.values.byName(j['parking'] as String),
-      payment: PaymentMethod.values.firstWhere((v) => v.name == (pay?['method'] as String?), orElse: () => PaymentMethod.qris),
+      payment: PaymentMethod.values.firstWhere(
+        (v) => v.name == (pay?['method'] as String?),
+        orElse: () => PaymentMethod.qris,
+      ),
       arrival: (j['arrival'] as String?) ?? '',
       status: TicketStatus.values.byName(j['status'] as String),
       boughtAt: jamWib(j['createdAt'] as String),
       date: tanggalPanjang(j['visitDate'] as String),
-      checkInAt: j['checkInAt'] == null ? null : jamWib(j['checkInAt'] as String),
+      checkInAt: j['checkInAt'] == null
+          ? null
+          : jamWib(j['checkInAt'] as String),
       amount: (j['amount'] as num?)?.toInt(),
-      paymentStatus: PaymentStatus.values.firstWhere((v) => v.name == (j['paymentStatus'] as String?), orElse: () => PaymentStatus.pending),
+      paymentStatus: PaymentStatus.values.firstWhere(
+        (v) => v.name == (j['paymentStatus'] as String?),
+        orElse: () => PaymentStatus.pending,
+      ),
       paymentId: pay?['id'] as String?,
       paymentProvider: pay?['provider'] as String?,
       qrString: pay?['qrString'] as String?,
@@ -91,10 +99,13 @@ class Ticket {
   }
 
   // "2026-11-11T03:42:00.000Z" -> "10.42" (WIB = UTC+7, tidak bergantung zona waktu HP).
-  static String jamWib(String iso) => DateFormat('HH.mm').format(DateTime.parse(iso).toUtc().add(const Duration(hours: 7)));
+  static String jamWib(String iso) =>
+      DateFormat('HH.mm')
+          .format(DateTime.parse(iso).toUtc().add(const Duration(hours: 7)));
 
   // "2026-11-12" -> "Kamis, 12 November 2026". Butuh initializeDateFormatting('id_ID') yang sudah dipanggil di main().
-  static String tanggalPanjang(String ymd) => DateFormat('EEEE, d MMMM yyyy', 'id_ID').format(DateTime.parse(ymd));
+  static String tanggalPanjang(String ymd) =>
+      DateFormat('EEEE, d MMMM yyyy', 'id_ID').format(DateTime.parse(ymd));
 
   final String code;
   final String name;
@@ -131,12 +142,13 @@ class Ticket {
 
   // Teks baris Pembayaran di e-tiket, sesuai metode dan status pembayaran.
   String get labelPembayaran => switch (payment) {
-        PaymentMethod.qris => switch (paymentStatus) {
-            PaymentStatus.paid => 'QRIS, lunas',
-            PaymentStatus.expired => 'QRIS · Kedaluwarsa',
-            PaymentStatus.failed || PaymentStatus.cancelled => 'QRIS · Gagal',
-            _ => 'QRIS · Menunggu pembayaran',
-          },
-        PaymentMethod.cash => paymentStatus == PaymentStatus.paid ? 'Tunai, lunas' : 'Tunai di loket',
-      };
+    PaymentMethod.qris => switch (paymentStatus) {
+      PaymentStatus.paid => 'QRIS, lunas',
+      PaymentStatus.expired => 'QRIS · Kedaluwarsa',
+      PaymentStatus.failed || PaymentStatus.cancelled => 'QRIS · Gagal',
+      _ => 'QRIS · Menunggu pembayaran',
+    },
+    PaymentMethod.cash =>
+      paymentStatus == PaymentStatus.paid ? 'Tunai, lunas' : 'Tunai di loket',
+  };
 }

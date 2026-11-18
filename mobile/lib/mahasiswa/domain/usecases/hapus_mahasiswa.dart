@@ -17,4 +17,3 @@ class HapusMahasiswa {
   // Method execute: menerima nim mahasiswa yang akan dihapus lalu mengeksekusi method hapus() pada repository
   void execute(String nim) => repository.hapus(nim);
 }
-

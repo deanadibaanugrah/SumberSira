@@ -5,6 +5,7 @@
 
 // Mengimpor paket material design bawaan Flutter untuk widget UI
 import 'package:flutter/material.dart';
+
 // Mengimpor MahasiswaViewModel dari folder viewmodels sejajar
 import '../viewmodels/mahasiswa_viewmodel.dart';
 
@@ -70,12 +71,16 @@ class _MahasiswaPageState extends State<MahasiswaPage> {
             // TextField pertama: input untuk memasukkan NIM
             TextField(
               controller: nimController, // Menghubungkan controller NIM
-              decoration: const InputDecoration(labelText: 'NIM'), // Label teks petunjuk
+              decoration: const InputDecoration(
+                labelText: 'NIM',
+              ), // Label teks petunjuk
             ),
             // TextField kedua: input untuk memasukkan Nama Mahasiswa
             TextField(
               controller: namaController, // Menghubungkan controller Nama
-              decoration: const InputDecoration(labelText: 'Nama'), // Label teks petunjuk
+              decoration: const InputDecoration(
+                labelText: 'Nama',
+              ), // Label teks petunjuk
             ),
             // SizedBox memberi jarak vertikal setinggi 12 pixel
             const SizedBox(height: 12),
@@ -90,7 +95,8 @@ class _MahasiswaPageState extends State<MahasiswaPage> {
             Expanded(
               // ListenableBuilder mendengarkan perubahan state dari widget.vm (ChangeNotifier)
               child: ListenableBuilder(
-                listenable: widget.vm, // ViewModel yang didengarkan perubahannya
+                listenable:
+                    widget.vm, // ViewModel yang didengarkan perubahannya
                 builder: (context, child) {
                   // Mengambil data list mahasiswa terbaru dari ViewModel
                   final daftar = widget.vm.daftar;
@@ -107,17 +113,24 @@ class _MahasiswaPageState extends State<MahasiswaPage> {
                       Expanded(
                         // ListView.builder membangun elemen daftar secara efisien (lazy loading)
                         child: ListView.builder(
-                          itemCount: daftar.length, // Jumlah item sesuai panjang list data
+                          itemCount: daftar
+                              .length, // Jumlah item sesuai panjang list data
                           itemBuilder: (context, index) {
                             // Mengambil satu data objek Mahasiswa pada indeks saat ini
                             final m = daftar[index];
                             // ListTile menampilkan satu baris item data mahasiswa
                             return ListTile(
-                              title: Text(m.nama), // Judul baris: Nama Mahasiswa
-                              subtitle: Text('NIM: ${m.nim}'), // Subtitle baris: NIM
+                              title: Text(
+                                m.nama,
+                              ), // Judul baris: Nama Mahasiswa
+                              subtitle: Text(
+                                'NIM: ${m.nim}',
+                              ), // Subtitle baris: NIM
                               // Trailing: tombol ikon hapus di sisi paling kanan baris
                               trailing: IconButton(
-                                icon: const Icon(Icons.delete), // Ikon tempat sampah (delete)
+                                icon: const Icon(
+                                  Icons.delete,
+                                ), // Ikon tempat sampah (delete)
                                 // Memanggil method hapus pada ViewModel dengan parameter nim mahasiswa ini
                                 onPressed: () => widget.vm.hapus(m.nim),
                               ),
@@ -136,4 +149,3 @@ class _MahasiswaPageState extends State<MahasiswaPage> {
     );
   }
 }
-

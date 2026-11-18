@@ -6,14 +6,16 @@
 
 // Mengimpor paket dasar Material UI Flutter
 import 'package:flutter/material.dart';
+
 // Mengimpor view halaman MahasiswaPage versi MVVM
 import 'views/mahasiswa_page.dart';
 
 // Fungsi utama aplikasi untuk menjalankan versi MVVM
 void main() {
-  runApp(const MaterialApp(
-    debugShowCheckedModeBanner: false, // Menghilangkan banner debug
-    home: MahasiswaPage(),              // Menampilkan MahasiswaPage versi MVVM
-  ));
+  runApp(
+    const MaterialApp(
+      debugShowCheckedModeBanner: false, // Menghilangkan banner debug
+      home: MahasiswaPage(), // Menampilkan MahasiswaPage versi MVVM
+    ),
+  );
 }
-

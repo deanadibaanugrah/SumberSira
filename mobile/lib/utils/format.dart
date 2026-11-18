@@ -1,12 +1,17 @@
 import 'package:intl/intl.dart';
 
 // [P6 Package intl] Format angka ke Rupiah: 45000 -> "Rp45.000".
-final _rupiah = NumberFormat.currency(locale: 'id_ID', symbol: 'Rp', decimalDigits: 0);
+final _rupiah = NumberFormat.currency(
+  locale: 'id_ID',
+  symbol: 'Rp',
+  decimalDigits: 0,
+);
 String rupiah(int value) => _rupiah.format(value);
 
 // [P6 Package intl] Tanggal hari ini dalam Bahasa Indonesia, mis. "Senin, 12 Oktober 2026".
 // Butuh initializeDateFormatting('id_ID') yang sudah dipanggil di main().
-String tanggalHariIni() => DateFormat('EEEE, d MMMM yyyy', 'id_ID').format(DateTime.now());
+String tanggalHariIni() =>
+    DateFormat('EEEE, d MMMM yyyy', 'id_ID').format(DateTime.now());
 
 // Menyamakan penulisan nomor WhatsApp supaya pencarian riwayat tidak gagal karena beda format.
 // "+62 812-3456-7890", "62812..." dan "0812..." semuanya menjadi "081234567890".

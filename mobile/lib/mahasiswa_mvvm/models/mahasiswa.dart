@@ -13,8 +13,7 @@ class Mahasiswa {
 
   // Konstruktor konstan dengan parameter wajib (required) untuk nim dan nama
   const Mahasiswa({
-    required this.nim,  // Wajib menyertakan nim
+    required this.nim, // Wajib menyertakan nim
     required this.nama, // Wajib menyertakan nama
   });
 }
-

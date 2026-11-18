@@ -19,4 +19,3 @@ class AmbilMahasiswa {
   // Method execute: titik eksekusi use case, memanggil ambilSemua() dari repository dan mengembalikan List<Mahasiswa>
   List<Mahasiswa> execute() => repository.ambilSemua();
 }
-

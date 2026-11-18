@@ -1,23 +1,24 @@
-import 'dart:ui' as ui;
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
 import 'package:share_plus/share_plus.dart';
 
+import '../data/api_client.dart';
+import '../data/app_state.dart';
+import '../models/gallery.dart';
 import '../theme/app_theme.dart';
-import '../utils/photo_enhance.dart';
-import '../utils/photo_io.dart';
+import '../utils/photo_upload.dart';
 import '../widgets/app_background.dart';
 import '../widgets/common.dart';
 import '../widgets/glass.dart';
+import '../widgets/photo_form.dart';
 
-// AI Photo Studio: memperbagus foto dari galeri atau kamera secara otomatis, seperti tombol "Auto" di aplikasi edit foto
-// profesional tetapi tidak berlebihan. Foto dianalisis (warna, kecerahan, kontras), lalu warnanya diseimbangkan dan
-// dihidupkan. Pengguna mengatur kekuatan dan gaya, membandingkan dengan foto asli, lalu menyimpan atau membagikan hasilnya.
-// Semua diproses di HP, foto tidak diunggah ke server.
+// AI Photo Studio: memperbagus foto dari galeri atau kamera. Foto diunggah ke backend (POST /ai-photo),
+// server memperbaiki warna dan ketajamannya, lalu aplikasi menampilkan foto asli dan hasilnya.
+// Hasil bisa disimpan/dibagikan lewat sistem, atau dibagikan ke Galeri Komunitas (menunggu persetujuan admin).
 class AiPhotoScreen extends StatefulWidget {
   const AiPhotoScreen({super.key});
 
@@ -29,108 +30,151 @@ class _AiPhotoScreenState extends State<AiPhotoScreen> {
   static const _repo = 'https://raw.githubusercontent.com/deanadibaanugrah/SumberSira/main/mobile/assets/images';
 
   final _picker = ImagePicker();
-  ui.Image? _image;
-  PhotoStats? _stats;
-  EnhancePlan? _plan;
-  EnhancePreset _preset = EnhancePreset.alami;
-  // [P4 Slider] Kekuatan perbaikan 0 sampai 100: 0 = foto asli, 100 = perbaikan penuh.
-  double _strength = 70;
-  // [P4 Switch] Tampilkan geseran perbandingan dengan foto asli (true) atau hanya hasilnya (false).
-  bool _compare = true;
-  bool _busy = false;
+  AiPhotoResult? _result;
+  // Tiga penanda terpisah agar tombol yang sedang berjalan tidak memutar tombol lain.
+  bool _processing = false;
+  bool _saving = false;
+  bool _sharing = false;
+  // True setelah hasil berhasil dibagikan ke galeri (satu job hanya boleh sekali).
+  bool _shared = false;
   String? _error;
 
-  @override
-  void dispose() {
-    _image?.dispose();
-    super.dispose();
-  }
-
-  List<double>? get _matrix => _plan == null ? null : colorMatrix(_plan!, _strength / 100);
-
-  // Membaca foto, menganalisisnya, lalu menyusun rencana perbaikan sesuai gaya yang dipilih.
-  Future<void> _load(Uint8List bytes) async {
-    setState(() {
-      _busy = true;
-      _error = null;
-    });
-    try {
-      final image = await decodePhoto(bytes);
-      final stats = await analyzeImage(image);
-      if (!mounted) return;
-      final old = _image;
-      setState(() {
-        _image = image;
-        _stats = stats;
-        _plan = planEnhancement(stats, _preset);
-        _busy = false;
-      });
-      old?.dispose();
-    } catch (e, st) {
-      debugPrint('AI Photo Studio: foto gagal dibaca: $e\n$st');
-      if (!mounted) return;
-      setState(() {
-        _busy = false;
-        _error = 'Foto tidak bisa dibaca. Coba foto lain (JPG, PNG, atau WebP).';
-      });
-    }
-  }
+  bool get _busy => _processing || _saving || _sharing;
+  String get _ownerAwal => AppState.instance.myTickets.isNotEmpty ? AppState.instance.myTickets.first.name : '';
 
   Future<void> _pick(ImageSource source) async {
+    final XFile? file;
     try {
-      final file = await _picker.pickImage(source: source);
-      if (file == null) return;
-      await _load(await file.readAsBytes());
+      file = await _picker.pickImage(source: source, maxWidth: 2048, maxHeight: 2048, imageQuality: 90);
     } catch (_) {
       if (!mounted) return;
       setState(() => _error = source == ImageSource.camera ? 'Kamera tidak bisa dibuka di perangkat ini.' : 'Galeri tidak bisa dibuka.');
+      return;
     }
+    if (file == null) return;
+
+    // Batas 4 MB dan tipe JPEG/PNG/WebP sama dengan aturan backend.
+    final masalah = await validatePhotoFile(file);
+    if (!mounted) return;
+    if (masalah != null) {
+      setState(() => _error = masalah);
+      return;
+    }
+    final bytes = await file.readAsBytes();
+    if (!mounted) return;
+    await _processBytes(bytes, file.name);
   }
 
   // Foto bawah air bawaan aplikasi, untuk mencoba tanpa memilih foto sendiri.
   Future<void> _useSample() async {
-    final data = await rootBundle.load('assets/images/onboarding-bawah-air.jpg');
-    // Hanya bagian milik foto ini (di web, ByteData bisa berupa potongan dari buffer yang lebih besar).
-    await _load(data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes));
-  }
-
-  void _setPreset(EnhancePreset p) {
-    setState(() {
-      _preset = p;
-      if (_stats != null) _plan = planEnhancement(_stats!, p);
-    });
-  }
-
-  // Menyimpan hasil sebagai PNG lewat lembar bagikan sistem (bisa disimpan ke galeri atau dikirim ke WhatsApp).
-  Future<void> _share() async {
-    final image = _image, matrix = _matrix;
-    if (image == null || matrix == null || _busy) return;
-    setState(() => _busy = true);
+    if (_busy) return;
     try {
-      final png = await renderPng(image, matrix);
+      final data = await rootBundle.load('assets/images/onboarding-bawah-air.jpg');
+      if (!mounted) return;
+      // Hanya bagian milik foto ini (di web, ByteData bisa berupa potongan dari buffer yang lebih besar).
+      await _processBytes(data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes), 'contoh-bawah-air.jpg');
+    } catch (_) {
+      if (!mounted) return;
+      setState(() => _error = 'Foto contoh tidak bisa dibaca.');
+    }
+  }
+
+  // Unggah foto ke server; jawabannya berisi URL foto asli dan hasil perbaikan.
+  Future<void> _processBytes(List<int> bytes, String fileName) async {
+    setState(() {
+      _processing = true;
+      _error = null;
+      _result = null;
+      _shared = false;
+    });
+    try {
+      final result = await ApiClient.enhancePhoto(fileName: fileName, fileBytes: bytes);
+      if (!mounted) return;
+      setState(() {
+        _processing = false;
+        if (result.done) {
+          _result = result;
+        } else {
+          // Job tersimpan tapi gagal diproses (422 PROCESSING_FAILED).
+          _error = result.error ?? 'Foto belum selesai diproses. Coba lagi.';
+        }
+      });
+    } on ApiException catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _processing = false;
+        _error = e.message;
+      });
+    }
+  }
+
+  // Mengunduh hasil dari server lalu membukanya di lembar bagikan sistem (simpan ke galeri HP atau kirim).
+  Future<void> _share() async {
+    final result = _result;
+    if (result == null || _busy) return;
+    setState(() => _saving = true);
+    try {
+      final res = await http.get(Uri.parse(result.resultUrl)).timeout(const Duration(seconds: 30));
+      if (res.statusCode != 200) throw Exception('unduh gagal');
       await SharePlus.instance.share(ShareParams(
-        files: [XFile.fromData(png, mimeType: 'image/png', name: 'foto-sumber-sira.png')],
+        files: [XFile.fromData(res.bodyBytes, mimeType: 'image/jpeg', name: 'foto-sumber-sira.jpg')],
         text: 'Foto diperbagus dengan AI Photo Studio Sumber Sira',
       ));
     } catch (_) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(kIsWeb ? 'Bagikan belum didukung di browser ini. Coba lewat aplikasi di HP.' : 'Foto belum bisa disimpan. Coba lagi.')));
-      }
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text(kIsWeb ? 'Bagikan belum didukung di browser ini. Coba lewat aplikasi di HP.' : 'Foto belum bisa disimpan. Coba lagi.'),
+      ));
     } finally {
-      if (mounted) setState(() => _busy = false);
+      if (mounted) setState(() => _saving = false);
+    }
+  }
+
+  // Bagikan hasil AI ke Galeri Komunitas (POST /ai-photo/:id/share-to-gallery). Masuk sebagai pending.
+  Future<void> _shareToGallery() async {
+    final result = _result;
+    if (result == null || _busy || _shared) return;
+    final isi = await showGlassSheet<PhotoDetails>(
+      context,
+      builder: (_) => PhotoForm(
+        heading: 'Bagikan ke Galeri',
+        hint: 'Hasil AI akan tampil setelah disetujui admin.',
+        ownerAwal: _ownerAwal,
+        buttonLabel: 'Bagikan',
+      ),
+    );
+    if (isi == null || !mounted) return;
+
+    setState(() => _sharing = true);
+    try {
+      await ApiClient.shareAiPhotoToGallery(id: result.id, title: isi.title, owner: isi.owner);
+      if (!mounted) return;
+      setState(() => _shared = true);
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Foto dikirim ke galeri. Menunggu persetujuan admin.')));
+    } on ApiException catch (e) {
+      if (!mounted) return;
+      // DUPLICATE berarti job ini sudah pernah dibagikan; tombol tidak perlu dicoba lagi.
+      if (e.code == 'DUPLICATE') setState(() => _shared = true);
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.message)));
+    } finally {
+      if (mounted) setState(() => _sharing = false);
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final image = _image;
+    final result = _result;
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: const PageAppBar(title: 'AI Photo Studio'),
       body: AppBackground(
         child: ResponsiveBody(children: [
-          if (image == null) _empty() else _CompareView(image: image, matrix: _matrix!, compare: _compare),
-          if (_busy) const Padding(padding: EdgeInsets.only(top: 12), child: LinearProgressIndicator(minHeight: 3)),
+          if (result != null)
+            _BeforeAfter(originalUrl: result.originalUrl, resultUrl: result.resultUrl)
+          else if (_processing)
+            _progress()
+          else
+            _empty(),
           if (_error != null)
             Padding(padding: const EdgeInsets.only(top: 12), child: Text(_error!, style: AppText.footnote.copyWith(color: AppColors.coral))),
           const SizedBox(height: 14),
@@ -141,54 +185,26 @@ class _AiPhotoScreenState extends State<AiPhotoScreen> {
           ]),
           const SizedBox(height: 8),
           TextButton(onPressed: _busy ? null : _useSample, child: const Text('Coba dengan foto contoh bawah air')),
-          if (image != null && _stats != null) ...[
-            _diagnosis(_stats!),
-            GroupedList(top: 12, indent: 16, children: [
-              Padding(
-                padding: const EdgeInsets.fromLTRB(16, 14, 16, 2),
-                child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                  Row(children: [
-                    const Icon(CupertinoIcons.slider_horizontal_3, size: 20, color: AppColors.leaf),
-                    const SizedBox(width: 14),
-                    const Expanded(child: Text('Kekuatan', style: AppText.body)),
-                    Text('${_strength.round()}%', style: AppText.number(17, color: AppColors.forest)),
-                  ]),
-                  // onChanged dijalankan selama Slider digeser; setState() memperbarui foto seketika.
-                  Slider(value: _strength, max: 100, divisions: 20, label: '${_strength.round()}%', onChanged: (v) => setState(() => _strength = v)),
-                  const SizedBox(height: 2),
-                  Wrap(spacing: 8, runSpacing: 6, children: [
-                    for (final p in EnhancePreset.values)
-                      ChoiceChip(
-                        label: Text(p.label, style: AppText.footnote.copyWith(fontWeight: FontWeight.w600, color: _preset == p ? AppColors.forest : AppColors.ink)),
-                        selected: _preset == p,
-                        onSelected: (_) => _setPreset(p),
-                        selectedColor: AppColors.leaf12,
-                        showCheckmark: false,
-                        side: BorderSide(color: _preset == p ? AppColors.leaf : AppColors.line),
-                      ),
-                  ]),
-                  Padding(padding: const EdgeInsets.only(top: 8, bottom: 6), child: Text(_preset.hint, style: AppText.caption)),
-                ]),
-              ),
-              SwitchListTile(
-                contentPadding: const EdgeInsets.fromLTRB(16, 2, 12, 2),
-                value: _compare,
-                onChanged: (v) => setState(() => _compare = v),
-                secondary: const Icon(CupertinoIcons.square_split_2x1, size: 20, color: AppColors.leaf),
-                title: const Text('Bandingkan dengan foto asli', style: AppText.body),
-              ),
-            ]),
+          if (result != null) ...[
             const SizedBox(height: 14),
-            PrimaryButton(label: 'Simpan atau Bagikan', icon: CupertinoIcons.share, loading: _busy, onPressed: _share),
+            TintedButton(
+              label: _shared ? 'Terkirim ke Galeri' : (_sharing ? 'Mengirim...' : 'Bagikan ke Galeri'),
+              icon: CupertinoIcons.square_arrow_up,
+              onPressed: (_busy || _shared) ? null : _shareToGallery,
+            ),
+            const SizedBox(height: 8),
+            PrimaryButton(label: 'Simpan atau Bagikan', icon: CupertinoIcons.share, loading: _saving, onPressed: _busy ? null : _share),
+            const SizedBox(height: 6),
+            Text('Hasil yang dibagikan ke galeri menunggu persetujuan admin.', textAlign: TextAlign.center, style: AppText.footnote),
           ],
           GroupedList(
             header: 'Cara kerja',
-            footer: 'Foto diproses di HP kamu dan tidak diunggah ke server.',
+            footer: 'Foto diunggah ke server Sumber Sira untuk diperbaiki. Hasilnya bisa disimpan atau dibagikan ke Galeri Komunitas.',
             children: [
               for (final (i, step) in const [
                 'Pilih foto dari galeri atau ambil dengan kamera.',
-                'Aplikasi menganalisis warna, kecerahan, dan kontras, lalu menyusun perbaikan otomatis seperti tombol Auto di aplikasi edit foto profesional.',
-                'Atur kekuatan dan gaya sampai terlihat natural, bandingkan dengan foto asli, lalu simpan atau bagikan.',
+                'Server menganalisis warna, kecerahan, dan kontras, lalu memperbaikinya otomatis seperti tombol Auto di aplikasi edit foto profesional.',
+                'Bandingkan dengan foto asli, lalu simpan, bagikan, atau kirim ke Galeri Komunitas.',
               ].indexed)
                 Padding(
                   padding: const EdgeInsets.fromLTRB(16, 13, 16, 13),
@@ -241,81 +257,79 @@ class _AiPhotoScreenState extends State<AiPhotoScreen> {
         ),
       );
 
-  // Keterangan kondisi foto hasil analisis, mis. "Warna terlalu biru".
-  Widget _diagnosis(PhotoStats stats) => Padding(
-        padding: const EdgeInsets.only(top: 6),
+  // Selama server memproses foto.
+  Widget _progress() => AspectRatio(
+        aspectRatio: 4 / 3,
         child: AppCard(
-          padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
-          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            const Text('Hasil analisis foto', style: AppText.subheadline),
-            const SizedBox(height: 8),
-            for (final d in diagnose(stats))
-              Padding(
-                padding: const EdgeInsets.only(bottom: 4),
-                child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                  const Padding(padding: EdgeInsets.only(top: 3), child: Icon(CupertinoIcons.checkmark_alt_circle_fill, size: 15, color: AppColors.leaf)),
-                  const SizedBox(width: 8),
-                  Expanded(child: Text(d, style: AppText.footnote.copyWith(color: AppColors.ink))),
-                ]),
-              ),
+          child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+            const SizedBox(width: 28, height: 28, child: CircularProgressIndicator(strokeWidth: 2.4, color: AppColors.leaf)),
+            const SizedBox(height: 14),
+            const Text('Memperbaiki foto di server...', style: AppText.headline),
+            const SizedBox(height: 4),
+            Text('Biasanya hanya beberapa detik.', style: AppText.footnote),
           ]),
         ),
       );
 }
 
-// Foto dengan geseran perbandingan: sisi kiri foto asli, sisi kanan hasil. Geser garisnya untuk membandingkan.
-class _CompareView extends StatefulWidget {
-  const _CompareView({required this.image, required this.matrix, required this.compare});
+// Perbandingan sebelum/sesudah dari dua URL server: sisi kiri foto asli, sisi kanan hasil.
+// Geser garisnya untuk melihat bagian yang sama pada kedua foto.
+class _BeforeAfter extends StatefulWidget {
+  const _BeforeAfter({required this.originalUrl, required this.resultUrl});
 
-  final ui.Image image;
-  final List<double> matrix;
-  final bool compare;
+  final String originalUrl;
+  final String resultUrl;
 
   @override
-  State<_CompareView> createState() => _CompareViewState();
+  State<_BeforeAfter> createState() => _BeforeAfterState();
 }
 
-class _CompareViewState extends State<_CompareView> {
+class _BeforeAfterState extends State<_BeforeAfter> {
   double _split = .5;
 
   @override
   Widget build(BuildContext context) {
-    final ratio = (widget.image.width / widget.image.height).clamp(.75, 1.5).toDouble();
     return ClipRRect(
       borderRadius: BorderRadius.circular(22),
       child: AspectRatio(
-        aspectRatio: ratio,
+        aspectRatio: 4 / 3,
         child: LayoutBuilder(builder: (context, box) {
           final x = box.maxWidth * _split;
           return GestureDetector(
-            onHorizontalDragUpdate: widget.compare ? (d) => setState(() => _split = (_split + d.delta.dx / box.maxWidth).clamp(.04, .96)) : null,
+            onHorizontalDragUpdate: (d) => setState(() => _split = (_split + d.delta.dx / box.maxWidth).clamp(.04, .96)),
             child: Stack(fit: StackFit.expand, children: [
               // Hasil perbaikan (di bawah).
-              ColorFiltered(colorFilter: ColorFilter.matrix(widget.matrix), child: RawImage(image: widget.image, fit: BoxFit.cover)),
-              if (widget.compare) ...[
-                // Foto asli hanya terlihat di sebelah kiri garis.
-                ClipRect(clipper: _LeftClipper(x), child: RawImage(image: widget.image, fit: BoxFit.cover)),
-                Positioned(left: x - 1, top: 0, bottom: 0, child: Container(width: 2, color: Colors.white)),
-                Positioned(
-                  left: x - 18,
-                  top: box.maxHeight / 2 - 18,
-                  child: Container(
-                    width: 36,
-                    height: 36,
-                    decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle, boxShadow: [BoxShadow(color: Color(0x33000000), blurRadius: 8)]),
-                    child: const Icon(CupertinoIcons.arrow_left_right, size: 18, color: AppColors.forest),
-                  ),
+              _network(widget.resultUrl),
+              // Foto asli hanya terlihat di sebelah kiri garis.
+              ClipRect(clipper: _LeftClipper(x), child: _network(widget.originalUrl)),
+              Positioned(left: x - 1, top: 0, bottom: 0, child: Container(width: 2, color: Colors.white)),
+              Positioned(
+                left: x - 18,
+                top: box.maxHeight / 2 - 18,
+                child: Container(
+                  width: 36,
+                  height: 36,
+                  decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle, boxShadow: [BoxShadow(color: Color(0x33000000), blurRadius: 8)]),
+                  child: const Icon(CupertinoIcons.arrow_left_right, size: 18, color: AppColors.forest),
                 ),
-                Positioned(left: 10, bottom: 10, child: _tag('Asli')),
-                Positioned(right: 10, bottom: 10, child: _tag('Hasil')),
-              ] else
-                Positioned(right: 10, bottom: 10, child: _tag('Hasil')),
+              ),
+              Positioned(left: 10, bottom: 10, child: _tag('Asli')),
+              Positioned(right: 10, bottom: 10, child: _tag('Hasil')),
             ]),
           );
         }),
       ),
     );
   }
+
+  Widget _network(String url) => Image.network(
+        url,
+        fit: BoxFit.cover,
+        errorBuilder: (_, _, _) => ColoredBox(
+          color: AppColors.abuMuda,
+          child: const Center(child: Icon(CupertinoIcons.photo, size: 32, color: AppColors.abu)),
+        ),
+      );
 
   Widget _tag(String label) => Glass(
         radius: 14,

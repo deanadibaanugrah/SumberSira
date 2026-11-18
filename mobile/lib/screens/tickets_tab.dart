@@ -61,7 +61,7 @@ class _TicketsTabState extends State<TicketsTab> {
     try {
       await _state.syncHistory(wa);
     } on ApiException catch (e) {
-      if (mounted) _syncError = e.offline ? 'Tidak bisa terhubung ke server. Menampilkan riwayat yang tersimpan di perangkat.' : e.message;
+      if (mounted) _syncError = e.offline ? 'Tidak dapat terhubung ke server.' : e.message;
     }
     if (mounted) setState(() => _syncing = false);
   }
@@ -152,7 +152,7 @@ class _TicketsTabState extends State<TicketsTab> {
                           const Text('Tunjukkan QR di pintu, tanpa antre', style: AppText.footnote),
                           const SizedBox(height: 10),
                           Row(crossAxisAlignment: CrossAxisAlignment.baseline, textBaseline: TextBaseline.alphabetic, children: [
-                            Text(rupiah(Ticket.pricePerPerson), style: AppText.hero(28)),
+                            Text(rupiah(_state.hargaTiket), style: AppText.hero(28)),
                             const SizedBox(width: 4),
                             const Text('/ orang', style: AppText.footnote),
                           ]),

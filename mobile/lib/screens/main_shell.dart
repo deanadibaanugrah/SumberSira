@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
-import '../data/app_state.dart';
+import '../data/crowd_state.dart';
 import '../theme/app_theme.dart';
 import '../widgets/app_background.dart';
 import '../widgets/glass.dart';
@@ -22,16 +22,16 @@ class _MainShellState extends State<MainShell> {
   // State: tab yang sedang dibuka (0 Beranda, 1 Tiket & Booking, 2 Galeri, 3 Profil).
   int _index = 0;
 
-  // Live Crowd dan grafik per jam diperbarui dari server selama kerangka utama terbuka.
+  // Live Crowd diperbarui dari server tiap 30 detik selama kerangka utama terbuka.
   @override
   void initState() {
     super.initState();
-    AppState.instance.startLive();
+    CrowdState.instance.startLive();
   }
 
   @override
   void dispose() {
-    AppState.instance.stopLive();
+    CrowdState.instance.stopLive();
     super.dispose();
   }
 

@@ -4,6 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import '../data/app_state.dart';
+import '../data/crowd_state.dart';
 import '../data/dummy_data.dart';
 import '../theme/app_theme.dart';
 import '../utils/routes.dart';
@@ -69,8 +70,9 @@ class HomeTab extends StatelessWidget {
   // [P5 Modal Bottom Sheet] Lembar kaca notifikasi yang muncul dari bawah layar.
   void _showNotifications(BuildContext context) {
     final s = AppState.instance;
+    final c = CrowdState.instance;
     final items = [
-      (CupertinoIcons.chart_bar, 'Crowd sekarang ${s.crowdLabel} (${s.percent}%)', 'Jam sepi terbaik 08.00-09.00 atau setelah 15.00'),
+      (CupertinoIcons.chart_bar, 'Crowd sekarang ${c.crowdLabel} (${c.percent}%)', 'Jam sepi terbaik 08.00-09.00 atau setelah 15.00'),
       (CupertinoIcons.chat_bubble_text, 'E-tiket dan invoice dikirim lewat WhatsApp', 'Riwayat dicari dengan nomor WhatsApp di Tiket & Booking'),
       (CupertinoIcons.bell, s.quietReminder ? 'Pengingat jam sepi aktif' : 'Pengingat jam sepi nonaktif', 'Atur di menu Profil'),
     ];
@@ -115,7 +117,7 @@ class HomeTab extends StatelessWidget {
     ]);
   }
 
-  // Grafik batang jumlah pengunjung per jam dan waktu terbaik berkunjung (jam yang biasanya paling sepi).
+  // Grafik batang prakiraan jumlah pengunjung per jam dari server dan saran waktu terbaik berkunjung.
   Widget _recommendation() => AppCard(
         padding: const EdgeInsets.fromLTRB(14, 16, 16, 14),
         child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
@@ -125,26 +127,19 @@ class HomeTab extends StatelessWidget {
           const SizedBox(height: 10),
           const Padding(padding: EdgeInsets.only(left: 2), child: CrowdLegend()),
           const Padding(padding: EdgeInsets.symmetric(vertical: 14), child: Divider()),
-          ListenableBuilder(
-            listenable: AppState.instance,
-            builder: (context, _) {
-              // Dari riwayat hari-hari sebelumnya bila ada; kalau belum, saran umum.
-              final quiet = AppState.instance.hourly?.quietest;
-              final text = quiet == null ? '08.00-09.00 atau setelah 15.00' : 'Sekitar pukul ${quiet.toString().padLeft(2, '0')}.00';
-              return Row(children: [
-                const SizedBox(width: 2),
-                const Icon(CupertinoIcons.clock, size: 20, color: AppColors.leaf),
-                const SizedBox(width: 14),
-                Expanded(
-                  child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                    Text(quiet == null ? 'Waktu terbaik berkunjung' : 'Biasanya paling sepi', style: AppText.subheadline.copyWith(color: AppColors.ink, fontWeight: FontWeight.w600)),
-                    const SizedBox(height: 2),
-                    Text(text, style: AppText.number(15, weight: FontWeight.w500, color: AppColors.abu)),
-                  ]),
-                ),
-              ]);
-            },
-          ),
+          // Saran umum: server tidak menyediakan jam paling sepi dari riwayat.
+          Row(children: [
+            const SizedBox(width: 2),
+            const Icon(CupertinoIcons.clock, size: 20, color: AppColors.leaf),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                Text('Waktu terbaik berkunjung', style: AppText.subheadline.copyWith(color: AppColors.ink, fontWeight: FontWeight.w600)),
+                const SizedBox(height: 2),
+                Text('08.00-09.00 atau setelah 15.00', style: AppText.number(15, weight: FontWeight.w500, color: AppColors.abu)),
+              ]),
+            ),
+          ]),
         ]),
       );
 }

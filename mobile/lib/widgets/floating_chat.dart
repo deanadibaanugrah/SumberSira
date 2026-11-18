@@ -5,7 +5,6 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
 import '../data/chat_controller.dart';
-import '../data/dummy_data.dart';
 import '../theme/app_theme.dart';
 import 'common.dart';
 import 'glass.dart';
@@ -13,7 +12,7 @@ import 'glass.dart';
 // Chatbot Tanya Sira yang mengambang di Beranda.
 // Tertutup: gelembung kaca Hijau Tua berisi ikon chat yang bisa digeser ke mana saja.
 // Diketuk: membesar menjadi panel chat kaca (bukan layar penuh, bukan halaman baru).
-// Dua cara bertanya: "Jawab cepat" (FAQ pengelola lalu AI dari data Sumber Sira) atau "Tanya pengelola" (dibalas manusia, lebih lama).
+// Jawaban berasal dari backend (POST /chat); pertanyaan yang belum cocok dicatat untuk admin.
 class FloatingChat extends StatefulWidget {
   const FloatingChat({super.key});
 
@@ -34,7 +33,6 @@ class _FloatingChatState extends State<FloatingChat> {
 
   void _setOpen(bool open) {
     setState(() => _open = open);
-    _chat.setPanelOpen(open);
   }
 
   @override
@@ -82,7 +80,7 @@ class _FloatingChatState extends State<FloatingChat> {
     });
   }
 
-  // Gelembung chat: diketuk = buka chat, digeser = pindah posisi. Titik coral = ada balasan pengelola yang belum dibaca.
+  // Gelembung chat: diketuk = buka chat, digeser = pindah posisi.
   Widget _bubble(Offset pos) => Semantics(
         button: true,
         label: 'Buka chatbot Tanya Sira',
@@ -93,22 +91,7 @@ class _FloatingChatState extends State<FloatingChat> {
           onPanStart: (_) => setState(() => _dragging = true),
           onPanUpdate: (d) => setState(() => _pos = (_pos ?? pos) + d.delta),
           onPanEnd: (_) => setState(() => _dragging = false),
-          child: ListenableBuilder(
-            listenable: _chat,
-            builder: (_, _) => Stack(alignment: Alignment.center, children: [
-              const Icon(CupertinoIcons.chat_bubble_2_fill, color: Colors.white, size: 26),
-              if (_chat.unread > 0)
-                Positioned(
-                  right: 12,
-                  top: 11,
-                  child: Container(
-                    width: 12,
-                    height: 12,
-                    decoration: BoxDecoration(color: AppColors.coral, shape: BoxShape.circle, border: Border.all(color: Colors.white, width: 1.5)),
-                  ),
-                ),
-            ]),
-          ),
+          child: const Icon(CupertinoIcons.chat_bubble_2_fill, color: Colors.white, size: 26),
         ),
       );
 }
@@ -199,7 +182,6 @@ class _ChatPanelState extends State<_ChatPanel> {
               IconButton(tooltip: 'Tutup chat', onPressed: widget.onClose, icon: const Icon(CupertinoIcons.xmark, color: AppColors.ink, size: 19)),
             ]),
           ),
-          _modeBar(),
           Expanded(
             child: ListView(
               controller: _scroll,
@@ -207,28 +189,12 @@ class _ChatPanelState extends State<_ChatPanel> {
               children: [
                 for (final (i, m) in chat.messages.indexed) ...[
                   _bubble(m),
-                  if (m.offerManagerFor != null)
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: 12),
-                      child: Align(
-                        alignment: Alignment.centerLeft,
-                        child: ActionChip(
-                          avatar: const Icon(CupertinoIcons.person_crop_circle, size: 16, color: AppColors.forest),
-                          label: Text('Tanya pengelola', style: AppText.footnote.copyWith(fontWeight: FontWeight.w600, color: AppColors.forest)),
-                          onPressed: chat.busy ? null : () => chat.askManager(m.offerManagerFor!, echo: false),
-                          visualDensity: VisualDensity.compact,
-                          backgroundColor: AppColors.leaf12,
-                          side: BorderSide.none,
-                          shape: const StadiumBorder(),
-                        ),
-                      ),
-                    ),
-                  // Pertanyaan cepat tampil di bawah sapaan pertama (mode jawab cepat).
-                  if (i == 0 && chat.mode == ChatMode.fast)
+                  // Pertanyaan cepat dari backend tampil di bawah sapaan pertama.
+                  if (i == 0)
                     Padding(
                       padding: const EdgeInsets.only(bottom: 12),
                       child: Wrap(spacing: 6, runSpacing: 6, children: [
-                        for (final q in DummyData.quickQuestions)
+                        for (final q in chat.quickQuestions)
                           ActionChip(
                             label: Text(q, style: AppText.footnote.copyWith(fontWeight: FontWeight.w600, color: AppColors.forest)),
                             onPressed: chat.busy ? null : () => _send(q),
@@ -255,7 +221,7 @@ class _ChatPanelState extends State<_ChatPanel> {
                   onSubmitted: (_) => _send(),
                   style: AppText.subheadline.copyWith(color: AppColors.ink),
                   decoration: InputDecoration(
-                    hintText: chat.mode == ChatMode.fast ? 'Tulis pertanyaan...' : 'Tulis pertanyaan untuk pengelola...',
+                    hintText: 'Tulis pertanyaan...',
                     hintStyle: AppText.subheadline,
                     isDense: true,
                     border: OutlineInputBorder(borderRadius: BorderRadius.circular(22), borderSide: BorderSide.none),
@@ -278,51 +244,6 @@ class _ChatPanelState extends State<_ChatPanel> {
     );
   }
 
-  // Pilihan cara bertanya: jawab cepat (FAQ + AI) atau tanya pengelola (menunggu dibalas manusia).
-  Widget _modeBar() => Padding(
-        padding: const EdgeInsets.fromLTRB(12, 10, 12, 0),
-        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Row(children: [
-            Expanded(child: _modeChip(ChatMode.fast, CupertinoIcons.bolt_fill, 'Jawab cepat')),
-            const SizedBox(width: 8),
-            Expanded(child: _modeChip(ChatMode.manager, CupertinoIcons.person_crop_circle, 'Tanya pengelola')),
-          ]),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(4, 6, 4, 0),
-            child: Text(
-              chat.mode == ChatMode.fast ? 'Dijawab langsung oleh FAQ dan AI dari data Sumber Sira.' : 'Dijawab pengelola. Lebih lama, balasan muncul di sini.',
-              style: AppText.caption,
-            ),
-          ),
-        ]),
-      );
-
-  Widget _modeChip(ChatMode value, IconData icon, String label) {
-    final active = chat.mode == value;
-    return Semantics(
-      button: true,
-      selected: active,
-      label: label,
-      child: GestureDetector(
-        onTap: () => chat.setMode(value),
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 180),
-          padding: const EdgeInsets.symmetric(vertical: 8),
-          decoration: BoxDecoration(
-            color: active ? AppColors.forest : Colors.white,
-            borderRadius: BorderRadius.circular(18),
-            border: Border.all(color: active ? AppColors.forest : AppColors.line),
-          ),
-          child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-            Icon(icon, size: 14, color: active ? Colors.white : AppColors.forest),
-            const SizedBox(width: 6),
-            Flexible(child: Text(label, maxLines: 1, overflow: TextOverflow.ellipsis, style: AppText.footnote.copyWith(fontWeight: FontWeight.w600, color: active ? Colors.white : AppColors.ink))),
-          ]),
-        ),
-      ),
-    );
-  }
-
   // Gelembung "sedang mengetik" selama menunggu server.
   Widget _typing() => Padding(
         padding: const EdgeInsets.only(bottom: 10),
@@ -333,7 +254,7 @@ class _ChatPanelState extends State<_ChatPanel> {
               color: Colors.white,
               borderRadius: BorderRadius.only(topLeft: Radius.circular(6), topRight: Radius.circular(20), bottomLeft: Radius.circular(20), bottomRight: Radius.circular(20)),
             ),
-            child: Text(chat.mode == ChatMode.fast ? 'Tanya Sira sedang mencari jawaban...' : 'Mengirim ke pengelola...', style: AppText.footnote),
+            child: const Text('Tanya Sira sedang mencari jawaban...', style: AppText.footnote),
           ),
         ]),
       );

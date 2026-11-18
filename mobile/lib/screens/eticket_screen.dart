@@ -15,8 +15,8 @@ import '../widgets/common.dart';
 import '../widgets/crowd_widgets.dart';
 
 // Halaman hasil input: e-tiket berisi QR kode tiket (hero), status, dan detail pesanan.
-// Selama halaman terbuka, status tiket diperiksa ke server tiap 6 detik, jadi begitu petugas memindai
-// QR di pintu masuk, tampilan langsung berubah jadi "Di dalam".
+// Selama halaman terbuka, tiket dibaca ulang dari server tiap 5 detik, jadi begitu petugas memindai
+// QR di pintu masuk (atau pembayaran tunai dikonfirmasi di loket), tampilan langsung diperbarui.
 class ETicketScreen extends StatefulWidget {
   const ETicketScreen({super.key, required this.code});
 
@@ -36,7 +36,7 @@ class _ETicketScreenState extends State<ETicketScreen> {
   void initState() {
     super.initState();
     AppState.instance.refreshTicket(code);
-    _poll = Timer.periodic(const Duration(seconds: 6), (_) => AppState.instance.refreshTicket(code));
+    _poll = Timer.periodic(const Duration(seconds: 5), (_) => AppState.instance.refreshTicket(code));
   }
 
   @override
@@ -86,7 +86,7 @@ class _ETicketScreenState extends State<ETicketScreen> {
               ('WhatsApp', t.whatsapp.isEmpty ? '-' : t.whatsapp),
               ('Berlaku', t.date.isEmpty ? tanggalHariIni() : t.date),
               ('Dibeli', 'Pukul ${t.boughtAt}'),
-              ('Pembayaran', t.payment == PaymentMethod.cash ? 'Tunai di loket' : 'QRIS, lunas'),
+              ('Pembayaran', t.labelPembayaran),
               ('Total', rupiah(t.total)),
             ];
             final last = rows.length - 1;
@@ -144,11 +144,6 @@ class _ETicketScreenState extends State<ETicketScreen> {
                 ]),
               ),
               const SizedBox(height: 20),
-              // Simulasi hanya untuk tiket contoh di perangkat. Tiket asli dipindai petugas lewat web admin.
-              if (t.status == TicketStatus.waiting && !t.synced) ...[
-                TintedButton(label: 'Simulasi scan petugas (demo)', icon: CupertinoIcons.qrcode_viewfinder, onPressed: () => AppState.instance.checkIn(t.code)),
-                const SizedBox(height: 10),
-              ],
               // Tanpa login: e-tiket dikirim ke WhatsApp pemesan dan riwayatnya dicari lewat nomor itu.
               if (t.whatsapp.isNotEmpty) ...[
                 TintedButton(label: 'Kirim E-Tiket ke WhatsApp', icon: CupertinoIcons.paperplane, onPressed: () => kirimWhatsApp(context, t.whatsapp, _waMessage(t))),

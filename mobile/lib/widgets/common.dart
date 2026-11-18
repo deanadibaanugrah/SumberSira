@@ -261,7 +261,8 @@ class GroupedList extends StatelessWidget {
       if (header != null) SectionLabel(header!, top: top),
       ClipRRect(
         borderRadius: BorderRadius.circular(AppSpace.radius),
-        child: ColoredBox(
+        // Material (bukan ColoredBox) agar latar belakang dan efek sentuh ListTile di dalamnya tetap terlihat.
+        child: Material(
           color: Colors.white,
           child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
             for (final (i, row) in children.indexed) ...[

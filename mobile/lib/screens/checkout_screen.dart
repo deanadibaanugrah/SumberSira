@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
+import '../data/api_client.dart';
 import '../data/app_state.dart';
 import '../models/booking.dart';
 import '../theme/app_theme.dart';
@@ -26,6 +27,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   final _formKey = GlobalKey<FormState>();
   final _name = TextEditingController();
   late final _whatsapp = TextEditingController(text: AppState.instance.savedWhatsapp);
+  // True selama booking dikirim ke server (tombol bayar menampilkan loading).
+  bool _paying = false;
 
   @override
   void dispose() {
@@ -34,13 +37,30 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     super.dispose();
   }
 
-  // Bayar dengan QRIS: cek validator, lalu buka halaman scan QRIS sambil membawa pesanan.
-  // Booking baru disimpan setelah pembayaran QRIS selesai.
-  void _pay() {
+  // Bayar dengan QRIS: cek validator, buat booking di server (POST /bookings — kode, total, dan
+  // harga per item dihitung server), lalu buka halaman pembayaran membawa booking dari server.
+  Future<void> _pay() async {
+    if (_paying) return;
     if (!_formKey.currentState!.validate()) return;
-    AppState.instance.saveWhatsapp(_whatsapp.text);
-    final request = BookingRequest(draft: widget.draft, name: _name.text, whatsapp: _whatsapp.text);
-    Navigator.pushNamed(context, AppRoutes.payment, arguments: request);
+    setState(() => _paying = true);
+    try {
+      final booking = await AppState.instance.createBookingOnline(draft: widget.draft, name: _name.text, whatsapp: _whatsapp.text);
+      AppState.instance.saveWhatsapp(_whatsapp.text);
+      if (!mounted) return;
+      // [P5 Named Route] Buka halaman bayar QRIS membawa booking yang sudah ada di server.
+      Navigator.pushNamed(context, AppRoutes.payment, arguments: booking);
+    } on ApiException catch (e) {
+      if (!mounted) return;
+      // Wahana dinonaktifkan admin setelah layar dibuka: beri tahu, muat ulang daftar, kembali ke Sewa & Booking.
+      final wahanaHilang = e.code == 'RIDE_UNAVAILABLE';
+      if (wahanaHilang) AppState.instance.tandaiWahanaStale();
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text(wahanaHilang ? '${e.message} Daftar wahana dimuat ulang.' : e.message),
+      ));
+      if (wahanaHilang) Navigator.pop(context);
+    } finally {
+      if (mounted) setState(() => _paying = false);
+    }
   }
 
   @override
@@ -131,7 +151,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
           ]),
         ),
       ),
-      bottomNavigationBar: TotalBar(label: 'Total', amount: draft.total, button: 'Bayar dengan QRIS', onPressed: _pay),
+      bottomNavigationBar: TotalBar(label: 'Total', amount: draft.total, button: 'Bayar dengan QRIS', onPressed: _pay, loading: _paying),
     );
   }
 }

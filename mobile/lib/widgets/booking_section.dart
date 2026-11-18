@@ -19,6 +19,7 @@ import 'glass.dart';
 class BookingController extends ChangeNotifier {
   BookingController() {
     _bookingCount = AppState.instance.bookings.length;
+    _revision = AppState.instance.wahanaRevision;
     AppState.instance.addListener(_onStateChanged);
   }
 
@@ -26,13 +27,15 @@ class BookingController extends ChangeNotifier {
   List<Wahana> _loaded = const [];
   bool offline = false; // true = server tidak terjangkau, memakai data bawaan di assets
   final Map<String, int> qty = {};
+  // Pilihan jam booking. Awalnya dari data bawaan; diganti id dari server (GET /booking-slots).
+  List<String> slots = DummyData.bookingSlots;
   String slot = DummyData.bookingSlots.first;
   late int _bookingCount;
+  late int _revision;
 
-  // Membaca assets/data/wahana.json (mock JSON) lalu mengubahnya menjadi daftar objek Wahana.
-  // async/await karena membaca file butuh waktu; hasilnya ditampilkan lewat FutureBuilder.
-    // Mengambil wahana dari backend (GET /rides). Kalau server tidak terjangkau, aplikasi memakai
-  // data bawaan assets/data/wahana.json supaya tetap bisa dicoba, dan banner "Coba lagi" ditampilkan.
+  // Mengambil wahana dari backend (GET /rides) dan pilihan jam dari backend (GET /booking-slots).
+  // Kalau server tidak terjangkau, aplikasi memakai data bawaan supaya tetap bisa dicoba,
+  // dan banner "Coba lagi" ditampilkan.
   Future<List<Wahana>> _load() async {
     try {
       _loaded = await ApiClient.fetchWahana();
@@ -41,6 +44,15 @@ class BookingController extends ChangeNotifier {
       final raw = await rootBundle.loadString('assets/data/wahana.json');
       _loaded = (jsonDecode(raw) as List<dynamic>).map((e) => Wahana.fromJson(e as Map<String, dynamic>)).toList();
       offline = true;
+    }
+    try {
+      final pilihan = await ApiClient.fetchBookingSlots();
+      if (pilihan.isNotEmpty) {
+        slots = [for (final s in pilihan) s.id];
+        if (!slots.contains(slot)) slot = slots.first;
+      }
+    } catch (_) {
+      // server tidak terjangkau: jam bawaan tetap dipakai
     }
     notifyListeners();
     return _loaded;
@@ -65,6 +77,7 @@ class BookingController extends ChangeNotifier {
   }
 
   // Tombol Lanjut Booking: minimal satu item, lalu buka Checkout sambil membawa isi booking.
+  // Setiap baris membawa rideId supaya Checkout bisa mengirim items:[{rideId, qty}] ke server.
   void next(BuildContext context) {
     final chosen = _loaded.where((w) => (qty[w.id] ?? 0) > 0).toList();
     if (chosen.isEmpty) {
@@ -75,15 +88,21 @@ class BookingController extends ChangeNotifier {
     }
     final draft = BookingDraft(
       slot: slot,
-      lines: [for (final w in chosen) BookingLine(name: w.label, qty: qty[w.id]!, price: w.price)],
+      lines: [for (final w in chosen) BookingLine(name: w.label, qty: qty[w.id]!, price: w.price, rideId: w.id)],
     );
     // [P5 Kirim data antar halaman] Isi booking dikirim sebagai arguments ke rute Checkout.
     Navigator.pushNamed(context, AppRoutes.checkout, arguments: draft);
   }
 
-  // Setelah booking berhasil dibayar, pilihan item dikosongkan lagi.
+  // Setelah booking berhasil dibayar, pilihan item dikosongkan lagi. Daftar wahana dimuat ulang
+  // saat AppState menandai daftarnya basi (mis. ada wahana dinonaktifkan admin).
   void _onStateChanged() {
-    final count = AppState.instance.bookings.length;
+    final s = AppState.instance;
+    if (s.wahanaRevision != _revision) {
+      _revision = s.wahanaRevision;
+      reload();
+    }
+    final count = s.bookings.length;
     if (count == _bookingCount) return;
     _bookingCount = count;
     qty.clear();
@@ -115,15 +134,15 @@ class BookingSection extends StatelessWidget {
           final categories = {for (final w in items) w.category};
           return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
             const SectionLabel('Jam kunjungan', top: 20),
-            // Jam booking selang 1 jam, bisa digeser ke samping. Yang dipilih berwarna Hijau Tua.
+            // Jam booking selang 1 jam (id dari server), bisa digeser ke samping. Yang dipilih berwarna Hijau Tua.
             SizedBox(
               height: 44,
               child: ListView.separated(
                 scrollDirection: Axis.horizontal,
-                itemCount: DummyData.bookingSlots.length,
+                itemCount: controller.slots.length,
                 separatorBuilder: (_, _) => const SizedBox(width: 8),
                 itemBuilder: (_, i) {
-                  final s = DummyData.bookingSlots[i];
+                  final s = controller.slots[i];
                   final active = s == controller.slot;
                   return Pressable(
                     onTap: () => controller.setSlot(s),

@@ -8,29 +8,32 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sumber_sira/data/api_client.dart';
 import 'package:sumber_sira/data/app_state.dart';
 import 'package:sumber_sira/data/chat_controller.dart';
-import 'package:sumber_sira/models/live.dart';
+import 'package:sumber_sira/data/crowd_state.dart';
 import 'package:sumber_sira/models/ticket.dart';
 
-// Uji ke backend sungguhan (bukan tiruan): beli tiket, scan petugas, Live Crowd, dan chat Tanya Sira dua mode.
+// Uji ke backend sungguhan (bukan tiruan): beli tiket, scan petugas, Live Crowd, dan chat Tanya Sira.
 // Hanya jalan bila backend menyala dan tes dijalankan dengan:
 //   flutter test --dart-define=API_URL=http://localhost:4100 --dart-define=E2E=1 test/backend_e2e_test.dart
 // Tanpa E2E=1 tes ini dilewati, jadi `flutter test` biasa tetap tidak butuh server.
 const _e2e = String.fromEnvironment('E2E') == '1';
 
 // Akun demo dari seed backend (hanya untuk lingkungan lokal).
-Future<Map<String, String>> _adminHeaders() async {
+Future<Map<String, String>> _login(String email, String password) async {
   final res = await http.post(
     Uri.parse('${ApiClient.baseUrl}/auth/login'),
     headers: {'content-type': 'application/json'},
-    body: jsonEncode({
-      'email': 'petugas@sumbersira.id',
-      'password': 'petugas123',
-    }),
+    body: jsonEncode({'email': email, 'password': password}),
   );
   expect(res.statusCode, 200);
   final cookie = res.headers['set-cookie']!.split(';').first;
   return {'content-type': 'application/json', 'cookie': cookie};
 }
+
+// Petugas loket: cukup untuk tiket, booking, dan pembayaran.
+Future<Map<String, String>> _adminHeaders() => _login('petugas@sumbersira.id', 'petugas123');
+
+// Pengelola (admin): untuk FAQ, ulasan, galeri, dan insight.
+Future<Map<String, String>> _pengelolaHeaders() => _login('admin@sumbersira.id', 'sumbersira');
 
 void main() {
   group(
@@ -49,13 +52,14 @@ void main() {
 
       test('beli tiket di aplikasi, petugas scan, Live Crowd dan status e-tiket ikut berubah', () async {
         final s = AppState.instance;
+        final c = CrowdState.instance;
         final headers = await _adminHeaders();
 
-        await s.refreshCrowd();
-        expect(s.isLive, isTrue);
-        expect(s.hourly, isNotNull);
-        expect(s.hourly!.hours, [8, 9, 10, 11, 12, 13, 14, 15, 16]);
-        final insideBefore = s.inside;
+        // Prakiraan per jam dari server: jam 08 sampai 16.
+        await c.refresh();
+        expect(c.isLive, isTrue);
+        expect(c.forecast.map((f) => f.hour), ['08', '09', '10', '11', '12', '13', '14', '15', '16']);
+        final insideBefore = c.inside;
 
         // Beli tiket: kode dan harga ditentukan server.
         final t = await s.buyTicketOnline(
@@ -77,8 +81,15 @@ void main() {
         expect(s.ticketsFor(wa).first.code, t.code);
 
         // Tiket yang belum discan tidak menaikkan Live Crowd.
-        await s.refreshCrowd();
-        expect(s.inside, insideBefore);
+        await c.refresh();
+        expect(c.inside, insideBefore);
+
+        // Petugas mengonfirmasi pembayaran tunai di loket, baru tiket boleh discan masuk.
+        final bayar = await http.post(
+          Uri.parse('${ApiClient.baseUrl}/admin/tickets/${t.code}/confirm-cash'),
+          headers: headers,
+        );
+        expect(bayar.statusCode, 200);
 
         // Petugas memindai di web admin (di sini lewat API yang sama).
         final list = jsonDecode(
@@ -87,13 +98,11 @@ void main() {
             headers: headers,
           )).body,
         ) as Map<String, dynamic>;
-        final id =
-            (list['tickets'] as List).firstWhere(
-                  (e) => e['code'] == t.code,
-                )['id']
-                as String;
+        final ketemu =
+            (list['items'] as List).any((e) => e['code'] == t.code);
+        expect(ketemu, isTrue, reason: 'tiket baru harus muncul di daftar admin');
         final ci = await http.post(
-          Uri.parse('${ApiClient.baseUrl}/admin/tickets/$id/check-in'),
+          Uri.parse('${ApiClient.baseUrl}/admin/tickets/${t.code}/check-in'),
           headers: headers,
         );
         expect(ci.statusCode, 200);
@@ -102,19 +111,19 @@ void main() {
         await s.refreshTicket(t.code);
         expect(s.find(t.code)!.status, TicketStatus.inside);
         expect(s.find(t.code)!.checkInAt, matches(RegExp(r'^\d\d\.\d\d$')));
-        await s.refreshCrowd();
-        expect(s.inside, insideBefore + 3);
+        await c.refresh();
+        expect(c.inside, insideBefore + 3);
 
         // Keluar: Live Crowd turun lagi.
         final co = await http.post(
-          Uri.parse('${ApiClient.baseUrl}/admin/tickets/$id/check-out'),
+          Uri.parse('${ApiClient.baseUrl}/admin/tickets/${t.code}/check-out'),
           headers: headers,
         );
         expect(co.statusCode, 200);
         await s.refreshTicket(t.code);
         expect(s.find(t.code)!.status, TicketStatus.out);
-        await s.refreshCrowd();
-        expect(s.inside, insideBefore);
+        await c.refresh();
+        expect(c.inside, insideBefore);
       });
 
       test('riwayat tiket dicari lewat nomor WhatsApp dari server', () async {
@@ -122,16 +131,8 @@ void main() {
         expect(remote, isNotEmpty);
         expect(remote.every((t) => t.whatsapp == wa), isTrue);
         expect(remote.first.date, isNotEmpty);
-        await expectLater(
-          ApiClient.fetchTickets('123'),
-          throwsA(
-            isA<ApiException>().having(
-              (e) => e.code,
-              'code',
-              'INVALID_WHATSAPP',
-            ),
-          ),
-        );
+        // Nomor tidak valid tidak membuat galat: backend membalas daftar kosong.
+        expect(await ApiClient.fetchTickets('123'), isEmpty);
       });
 
       test('isian salah ditolak server dengan pesan yang jelas', () async {
@@ -147,90 +148,141 @@ void main() {
           ),
           throwsA(
             isA<ApiException>().having(
-              (e) => e.message,
-              'message',
-              'Nomor WhatsApp tidak valid.',
+              (e) => e.code,
+              'code',
+              'VALIDATION',
             ),
           ),
         );
       });
 
-      test('chat jawab cepat: FAQ pengelola, lalu pertanyaan di luar data ditawarkan ke pengelola', () async {
+      test('booking sewa dibuat di server lalu QRIS dibayar (mode simulasi)', () async {
+        final rides = await ApiClient.fetchWahana();
+        final slots = await ApiClient.fetchBookingSlots();
+        expect(rides, isNotEmpty);
+        expect(slots, isNotEmpty);
+
+        final ride = rides.first;
+        final booking = await ApiClient.createBooking(
+          name: 'Uji Booking',
+          whatsapp: wa,
+          slot: slots.first.id,
+          items: [(rideId: ride.id, qty: 2)],
+        );
+        expect(booking.code, matches(RegExp(r'^SS-\d{8}-\d{3}$')));
+        expect(booking.amount, ride.price * 2);
+        expect(booking.lines.single.qty, 2);
+        expect(booking.paymentStatus, PaymentStatus.pending);
+        expect(booking.paymentId, isNotNull);
+
+        // QRIS baru dibuat: masih menunggu dan punya teks QR untuk dipindai.
+        final awal = await ApiClient.fetchPayment(booking.paymentId!);
+        expect(awal.status, 'pending');
+        expect(awal.qrString, isNotNull, reason: 'mode simulasi selalu memberi teks QR');
+        expect(awal.simulasi, isTrue);
+
+        // Mode simulasi: server menandai lunas, lalu booking ikut berubah.
+        final lunas = await ApiClient.simulatePayment(awal.id);
+        expect(lunas.status, 'paid');
+
+        final terbaru = await ApiClient.fetchBooking(booking.code, wa);
+        expect(terbaru.paymentStatus, PaymentStatus.paid);
+        final daftar = await ApiClient.fetchBookings(wa);
+        expect(daftar.map((b) => b.code), contains(booking.code));
+      });
+
+      test('tiket QRIS: QR dari server, lunas setelah simulasi bayar', () async {
+        final t = await ApiClient.buyTicket(
+          name: 'Uji QRIS',
+          whatsapp: wa,
+          adults: 1,
+          kids: 0,
+          parking: Parking.none,
+          payment: PaymentMethod.qris,
+          arrival: '10.00 - 12.00',
+        );
+        expect(t.paymentStatus, PaymentStatus.pending);
+        expect(t.paymentId, isNotNull);
+
+        final p = await ApiClient.fetchPayment(t.paymentId!);
+        expect(p.qrString, isNotNull);
+        expect(p.simulasi, isTrue);
+
+        await ApiClient.simulatePayment(p.id);
+        final terbaru = await ApiClient.fetchTicket(t.code, wa);
+        expect(terbaru.paymentStatus, PaymentStatus.paid);
+      });
+
+      test('chat: pertanyaan cocok dijawab FAQ, yang tidak cocok dicatat untuk admin', () async {
         final chat = ChatController.instance;
         await chat.init();
-        expect(chat.deviceId, startsWith('app-'));
+        expect(chat.quickQuestions, isNotEmpty);
 
-        final faq = await ApiClient.askChat(
-          'jam buka nya jam berapa?',
-          chat.deviceId,
-        );
-        expect(faq.source, ChatSource.faq);
+        final faq = await ApiClient.askChat('jam buka nya jam berapa?');
+        expect(faq.matched, isTrue);
         expect(faq.answer, contains('08.00'));
 
         final unknown = await ApiClient.askChat(
           'boleh bawa drone ke kolam?',
-          chat.deviceId,
         );
-        expect(unknown.answer, isNull);
-        expect(unknown.canAskManager, isTrue);
+        expect(unknown.matched, isFalse);
+        expect(unknown.answer, isNotEmpty);
       });
 
-      test('chat tanya pengelola: balasan masuk sekali saja, lalu pertanyaan serupa dijawab otomatis', () async {
-        final chat = ChatController.instance;
-        await chat.init();
-        final headers = await _adminHeaders();
+      test('pertanyaan tak cocok tampil di admin; dibuat FAQ lalu pertanyaan dihapus', () async {
+        final headers = await _pengelolaHeaders();
         final question =
             'Apakah ada tempat penitipan barang ${DateTime.now().millisecondsSinceEpoch}?';
 
-        await chat.askManager(question);
-        expect(chat.messages.last.source, 'Pengelola');
-        expect(chat.messages.last.text, contains('dikirim ke pengelola'));
+        final unknown = await ApiClient.askChat(question);
+        expect(unknown.matched, isFalse);
 
-        // Belum dijawab: tidak ada balasan.
-        final before = chat.messages.length;
-        await chat.checkReplies();
-        expect(chat.messages.length, before);
-
-        // Pengelola menjawab dari web admin dan menyimpannya jadi FAQ.
-        final overview = jsonDecode(
-          (await http.get(
-            Uri.parse('${ApiClient.baseUrl}/admin/chat/overview'),
-            headers: headers,
-          )).body,
+        // Pertanyaan tercatat di daftar belum terjawab.
+        final daftar = await http.get(
+          Uri.parse('${ApiClient.baseUrl}/admin/faq/unanswered'),
+          headers: headers,
+        );
+        expect(daftar.statusCode, 200);
+        final items = jsonDecode(daftar.body) as List;
+        final item = items.firstWhere(
+          (q) => q['question'] == question,
         ) as Map<String, dynamic>;
-        final qid =
-            (overview['pending'] as List).firstWhere(
-                  (q) => q['question'] == question,
-                )['id']
-                as String;
-        final ans = await http.post(
-          Uri.parse('${ApiClient.baseUrl}/admin/chat/questions/$qid/answer'),
+        final id = item['id'] as String;
+
+        // "Jawab" = buat FAQ baru, lalu hapus pertanyaan itu dari daftar.
+        final buat = await http.post(
+          Uri.parse('${ApiClient.baseUrl}/admin/faq'),
           headers: headers,
           body: jsonEncode({
+            // Backend membatasi kata kunci maksimal 30 karakter, jadi pakai frasa pendek.
+            'keys': ['penitipan barang', 'loker'],
             'answer': 'Ada loker di dekat pintu masuk, Rp5.000 per pemakaian.',
-            'saveAsFaq': true,
+            'sortOrder': 99,
+            'active': true,
           }),
         );
-        expect(ans.statusCode, 200);
+        expect(buat.statusCode, 201);
+        final faq = jsonDecode(buat.body) as Map<String, dynamic>;
 
-        // Balasan muncul di chat pengunjung, hanya sekali.
-        await chat.checkReplies();
-        expect(
-          chat.messages.last.text,
-          contains('Ada loker di dekat pintu masuk'),
+        final hapus = await http.delete(
+          Uri.parse('${ApiClient.baseUrl}/admin/faq/unanswered/$id'),
+          headers: headers,
         );
-        expect(chat.messages.last.source, 'Pengelola');
-        final count = chat.messages.length;
-        await chat.checkReplies();
-        expect(chat.messages.length, count);
+        expect(hapus.statusCode, 200);
 
-        // Pertanyaan yang sama kini dijawab cepat dari FAQ.
-        final again = await ApiClient.askChat(question, chat.deviceId);
-        expect(again.source, ChatSource.faq);
+        // Pertanyaan serupa kini dijawab dari FAQ baru.
+        final again = await ApiClient.askChat('apakah ada penitipan barang?');
+        expect(again.matched, isTrue);
         expect(again.answer, contains('loker'));
+
+        // Bersihkan FAQ uji agar data backend tidak menumpuk.
+        await http.delete(
+          Uri.parse('${ApiClient.baseUrl}/admin/faq/${faq['id']}'),
+          headers: headers,
+        );
       });
 
-      test('server tidak terjangkau: ApiException offline, dan chat memakai jawaban di perangkat', () async {
+      test('server tidak terjangkau: permintaan langsung melempar galat', () async {
         // Port yang tidak dipakai: simulasi server mati dengan memanggil alamat lain lewat http langsung.
         await expectLater(
           http
@@ -238,8 +290,6 @@ void main() {
               .timeout(const Duration(seconds: 3)),
           throwsA(anything),
         );
-        expect(jawabanTanyaSira('parkir bus berapa?'), contains('20rb'));
-        expect(jawabanTanyaSira('boleh bawa drone?'), isNull);
       });
     },
     skip: _e2e ? null : 'Butuh backend menyala. Jalankan dengan --dart-define=E2E=1 (lihat catatan di atas file).',

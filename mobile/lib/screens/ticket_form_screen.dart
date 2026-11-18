@@ -1,10 +1,14 @@
+import 'dart:async';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 
 import '../data/app_state.dart';
 import '../data/api_client.dart';
+import '../data/crowd_state.dart';
 import '../data/dummy_data.dart';
+import '../models/payment.dart';
 import '../models/ticket.dart';
 import '../theme/app_theme.dart';
 import '../utils/format.dart';
@@ -26,6 +30,7 @@ class TicketFormScreen extends StatefulWidget {
 }
 
 class _TicketFormScreenState extends State<TicketFormScreen> {
+  final _state = AppState.instance;
   // [P6 Form] Kunci form untuk menjalankan semua validator sekaligus lewat validate().
   final _formKey = GlobalKey<FormState>();
   // [P4 TextEditingController] Membaca isi kolom nama dan WhatsApp (nomor terakhir diisi dari shared_preferences).
@@ -41,7 +46,8 @@ class _TicketFormScreenState extends State<TicketFormScreen> {
   // True selama tiket dikirim ke server (tombol bayar menampilkan loading).
   bool _paying = false;
 
-  int get _total => _adults * Ticket.pricePerPerson + _parking.price;
+  // Tarif dari server (AppState.refreshPricing). Bila server tidak terjangkau, dipakai harga bawaan model.
+  int get _total => _adults * _state.hargaTiket + (_state.parkirTarif[_parking] ?? _parking.price);
 
   // Ikon tiap pilihan parkir dan metode pembayaran.
   static const _parkingIcons = {
@@ -56,6 +62,13 @@ class _TicketFormScreenState extends State<TicketFormScreen> {
   void initState() {
     super.initState();
     _loadSlots();
+    // Tarif terbaru dari server (GET /pricing); ketika sampai, form di-render ulang lewat listener AppState.
+    _state.addListener(_tarifBerubah);
+    _state.refreshPricing();
+  }
+
+  void _tarifBerubah() {
+    if (mounted) setState(() {});
   }
 
   // Jam datang diambil dari backend (GET /time-slots). Kalau gagal, daftar bawaan tetap dipakai.
@@ -73,13 +86,16 @@ class _TicketFormScreenState extends State<TicketFormScreen> {
   }
   @override
   void dispose() {
+    _state.removeListener(_tarifBerubah);
     _name.dispose();
     _whatsapp.dispose();
     super.dispose();
   }
 
-  // Tombol bayar: cek validator, cek persetujuan, lalu bayar (QRIS lewat sheet, tunai langsung jadi).
-  // Tiket dibuat di server supaya petugas bisa memindainya dan Live Crowd ikut naik. Harga dihitung server.
+  // Tombol bayar: cek validator dan persetujuan, buat tiket di server (POST /tickets), lalu
+  // QRIS membuka sheet pembayaran mengikuti pola bagian 6 planning; tunai langsung ke e-tiket
+  // dengan status "menunggu pembayaran di loket". Tiket dibuat di server supaya petugas bisa
+  // memindainya dan Live Crowd ikut naik. Harga dihitung server.
   Future<void> _pay() async {
     if (_paying) return;
     if (!_formKey.currentState!.validate()) return;
@@ -87,13 +103,9 @@ class _TicketFormScreenState extends State<TicketFormScreen> {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Centang persetujuan aturan kunjungan dulu.')));
       return;
     }
-    if (_payment == PaymentMethod.qris) {
-      final paid = await showGlassSheet<bool>(context, builder: (_) => _QrisSheet(total: _total));
-      if (paid != true || !mounted) return;
-    }
     setState(() => _paying = true);
     try {
-      final ticket = await AppState.instance.buyTicketOnline(
+      final ticket = await _state.buyTicketOnline(
         name: _name.text,
         whatsapp: _whatsapp.text,
         adults: _adults,
@@ -102,8 +114,13 @@ class _TicketFormScreenState extends State<TicketFormScreen> {
         payment: _payment,
         arrival: _arrival,
       );
-      AppState.instance.saveWhatsapp(_whatsapp.text);
+      _state.saveWhatsapp(_whatsapp.text);
       if (!mounted) return;
+      // QRIS: tiket sudah ada di server dengan pembayaran pending; QR asli ditunggu lunas lewat sheet.
+      if (_payment == PaymentMethod.qris) {
+        await showGlassSheet<bool>(context, builder: (_) => _QrisSheet(ticket: ticket));
+        if (!mounted) return;
+      }
       // [P5 Named Route] Pindah ke e-tiket sambil mengirim kode tiket sebagai argumen.
       Navigator.pushReplacementNamed(context, AppRoutes.eticket, arguments: ticket.code);
     } on ApiException catch (e) {
@@ -128,14 +145,14 @@ class _TicketFormScreenState extends State<TicketFormScreen> {
           child: ResponsiveBody(children: [
             // Keramaian saat ini (live) sebagai pertimbangan sebelum datang.
             ListenableBuilder(
-              listenable: AppState.instance,
+              listenable: CrowdState.instance,
               builder: (_, _) => AppCard(
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                 child: Row(children: [
                   const LiveDot(),
                   const SizedBox(width: 12),
                   Expanded(
-                    child: Text('Sekarang ${AppState.instance.inside} orang di dalam · ${AppState.instance.crowdLabel} (${AppState.instance.percent}%)',
+                    child: Text('Sekarang ${CrowdState.instance.inside} orang di dalam · ${CrowdState.instance.crowdLabel} (${CrowdState.instance.percent}%)',
                         style: AppText.subheadline.copyWith(color: AppColors.ink, fontWeight: FontWeight.w600)),
                   ),
                 ]),
@@ -147,7 +164,7 @@ class _TicketFormScreenState extends State<TicketFormScreen> {
               indent: 16,
               footer: 'Berlaku untuk hari ini, ${tanggalHariIni()}',
               children: [
-                _counterRow('Usia 3 tahun ke atas', '${rupiah(Ticket.pricePerPerson)} / orang', _adults, 1, 30, (v) => setState(() => _adults = v)),
+                _counterRow('Usia 3 tahun ke atas', '${rupiah(_state.hargaTiket)} / orang', _adults, 1, 30, (v) => setState(() => _adults = v)),
                 _counterRow('Anak di bawah 3 tahun', 'Gratis', _kids, 0, 10, (v) => setState(() => _kids = v)),
               ],
             ),
@@ -225,7 +242,7 @@ class _TicketFormScreenState extends State<TicketFormScreen> {
         button: _payment == PaymentMethod.qris ? 'Bayar dengan QRIS' : 'Pesan, Bayar di Loket',
         onPressed: _pay,
         loading: _paying,
-      ),
+        ),
     );
   }
 
@@ -236,9 +253,10 @@ class _TicketFormScreenState extends State<TicketFormScreen> {
         trailing: StepperControl(value: value, min: min, max: max, label: title, onChanged: onChanged),
       );
 
-  // Kotak pilihan parkir: ikon kendaraan, nama, dan tarif. Yang dipilih berlatar Hijau Daun 12% dan bergaris Hijau Daun.
+  // Kotak pilihan parkir: ikon kendaraan, nama, dan tarif dari server. Yang dipilih berlatar Hijau Daun 12% dan bergaris Hijau Daun.
   Widget _parkingTile(Parking p) {
     final active = p == _parking;
+    final tarif = _state.parkirTarif[p] ?? p.price;
     return Semantics(
       selected: active,
       child: AppCard(
@@ -252,21 +270,125 @@ class _TicketFormScreenState extends State<TicketFormScreen> {
           const SizedBox(height: 6),
           Text(p.label, style: AppText.footnote.copyWith(color: active ? AppColors.forest : AppColors.ink, fontWeight: FontWeight.w600)),
           const SizedBox(height: 1),
-          Text(p.price == 0 ? '-' : rupiah(p.price), style: AppText.number(11, weight: FontWeight.w500, color: AppColors.abu)),
+          Text(tarif == 0 ? '-' : rupiah(tarif), style: AppText.number(11, weight: FontWeight.w500, color: AppColors.abu)),
         ]),
       ),
     );
   }
 }
 
-// Sheet pembayaran QRIS (simulasi): QR berisi nominal, lalu tombol "Saya Sudah Bayar".
-class _QrisSheet extends StatelessWidget {
-  const _QrisSheet({required this.total});
+// Sheet pembayaran QRIS: QR asli dari server (dibuat bersama tiket). Status pembayaran diperiksa
+// ke server tiap 3 detik selama sheet tampil. Backend mode simulasi menampilkan tombol "Saya Sudah
+// Bayar"; mode sungguhan hanya menampilkan indikator menunggu sampai dibayar dari aplikasi pembayaran.
+class _QrisSheet extends StatefulWidget {
+  const _QrisSheet({required this.ticket});
 
-  final int total;
+  final Ticket ticket;
+
+  @override
+  State<_QrisSheet> createState() => _QrisSheetState();
+}
+
+class _QrisSheetState extends State<_QrisSheet> {
+  late PaymentInfo _pay;
+  Timer? _poll;
+  // True selama tombol "Saya Sudah Bayar" (mode simulasi) sedang memproses.
+  bool _confirming = false;
+
+  @override
+  void initState() {
+    super.initState();
+    // Data pembayaran dari respons pembuatan tiket; id dipakai untuk polling.
+    _pay = PaymentInfo(
+      id: widget.ticket.paymentId ?? '',
+      status: widget.ticket.paymentStatus.name,
+      amount: widget.ticket.total,
+      provider: widget.ticket.paymentProvider,
+      qrString: widget.ticket.qrString,
+      qrUrl: widget.ticket.qrUrl,
+      expiresAt: widget.ticket.expiresAt,
+    );
+    _poll = Timer.periodic(const Duration(seconds: 3), (_) => _periksa());
+  }
+
+  @override
+  void dispose() {
+    _poll?.cancel();
+    super.dispose();
+  }
+
+  // Polling GET /payments/:id (bagian 6 planning). Berhenti sendiri saat status sudah final.
+  Future<void> _periksa() async {
+    if (_pay.id.isEmpty || _pay.selesai || _pay.tutup) return;
+    try {
+      final p = await ApiClient.fetchPayment(_pay.id);
+      if (!mounted) return;
+      setState(() => _pay = p);
+      if (p.selesai) _tuntaskan();
+    } on ApiException {
+      // server tidak terjangkau: dicoba lagi pada polling berikutnya
+    }
+  }
+
+  // Lunas: hentikan polling lalu tutup sheet; pemanggil melanjutkan ke e-tiket.
+  void _tuntaskan() {
+    _poll?.cancel();
+    Navigator.pop(context, true);
+  }
+
+  // Tombol "Saya Sudah Bayar" (hanya mode simulasi backend): minta server menandai lunas.
+  Future<void> _sudahBayar() async {
+    if (_confirming || _pay.id.isEmpty) return;
+    setState(() => _confirming = true);
+    try {
+      final p = await ApiClient.simulatePayment(_pay.id);
+      if (!mounted) return;
+      setState(() {
+        _pay = p;
+        _confirming = false;
+      });
+      if (p.selesai) _tuntaskan();
+    } on ApiException catch (e) {
+      if (!mounted) return;
+      setState(() => _confirming = false);
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.message)));
+    }
+  }
+
+  // Teks QR untuk dipindai; bila server hanya mengirim URL gambar, tampilkan gambar itu.
+  Widget _qr() {
+    final q = _pay.qrString;
+    if (q != null && q.isNotEmpty) {
+      return QrImageView(
+        data: q,
+        size: 190,
+        eyeStyle: const QrEyeStyle(eyeShape: QrEyeShape.square, color: AppColors.ink),
+        dataModuleStyle: const QrDataModuleStyle(dataModuleShape: QrDataModuleShape.square, color: AppColors.ink),
+      );
+    }
+    final url = _pay.qrUrl;
+    if (url != null && url.isNotEmpty) {
+      return ClipRRect(borderRadius: BorderRadius.circular(12), child: Image.network(url, width: 190, height: 190, fit: BoxFit.cover));
+    }
+    // Cadangan: QR kode tiket, sama dengan yang discan petugas.
+    return QrImageView(
+      data: widget.ticket.code,
+      size: 190,
+      eyeStyle: const QrEyeStyle(eyeShape: QrEyeShape.square, color: AppColors.ink),
+      dataModuleStyle: const QrDataModuleStyle(dataModuleShape: QrDataModuleShape.square, color: AppColors.ink),
+    );
+  }
+
+  // Pesan ketika pembayaran tidak bisa dilanjutkan (expired, failed, cancelled).
+  String get _pesanAkhir => switch (_pay.status) {
+        'expired' => 'Batas waktu pembayaran habis.',
+        'failed' => 'Pembayaran gagal diproses.',
+        _ => 'Pembayaran dibatalkan.',
+      };
 
   @override
   Widget build(BuildContext context) {
+    final tutup = _pay.tutup;
     return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
       const Text('Bayar dengan QRIS', textAlign: TextAlign.center, style: AppText.headline),
       const SizedBox(height: 4),
@@ -276,26 +398,38 @@ class _QrisSheet extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.all(14),
           decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(22), border: Border.all(color: AppColors.line)),
-          // Package qr_flutter: membuat gambar QR dari teks (warna Ink sesuai palet).
-          child: QrImageView(
-            data: 'QRIS SUMBER SIRA $total',
-            size: 190,
-            eyeStyle: const QrEyeStyle(eyeShape: QrEyeShape.square, color: AppColors.ink),
-            dataModuleStyle: const QrDataModuleStyle(dataModuleShape: QrDataModuleShape.square, color: AppColors.ink),
-          ),
+          // Package qr_flutter: membuat gambar QR dari teks QRIS asli dari server (warna Ink sesuai palet).
+          child: Opacity(opacity: tutup ? .45 : 1, child: _qr()),
         ),
       ),
       const SizedBox(height: 14),
-      Text(rupiah(total), textAlign: TextAlign.center, style: AppText.hero(34)),
+      Text(rupiah(_pay.amount), textAlign: TextAlign.center, style: AppText.hero(34)),
+      const SizedBox(height: 14),
+      if (tutup) ...[
+        Text(_pesanAkhir, textAlign: TextAlign.center, style: AppText.subheadline.copyWith(color: AppColors.coral, fontWeight: FontWeight.w600)),
+        const SizedBox(height: 4),
+        Text('Tiket sudah tercatat. Cek statusnya lagi lewat Riwayat.', textAlign: TextAlign.center, style: AppText.footnote),
+      ] else ...[
+        // Indikator menunggu: mode sungguhan tetap di sini sampai pembayaran terkonfirmasi server.
+        Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+          const SizedBox(width: 14, height: 14, child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.leaf)),
+          const SizedBox(width: 10),
+          Text('Menunggu pembayaran...', style: AppText.subheadline),
+        ]),
+      ],
       const SizedBox(height: 20),
-      // [P5 Navigator.pop] Menutup sheet sambil mengirim hasil (false = batal, true = sudah bayar).
-      PrimaryButton(label: 'Saya Sudah Bayar', onPressed: () => Navigator.pop(context, true)),
-      const SizedBox(height: 4),
-      TextButton(
-        style: TextButton.styleFrom(foregroundColor: AppColors.abu, minimumSize: const Size.fromHeight(44)),
-        onPressed: () => Navigator.pop(context, false),
-        child: const Text('Batal', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 17)),
-      ),
+      if (tutup) ...[
+        PrimaryButton(label: 'Tutup', onPressed: () => Navigator.pop(context, false)),
+      ] else ...[
+        // [P5 Navigator.pop] Tombol simulasi (mode uji backend) menandai lunas lalu menutup sheet.
+        if (_pay.simulasi) PrimaryButton(label: 'Saya Sudah Bayar', onPressed: _sudahBayar, loading: _confirming),
+        const SizedBox(height: 4),
+        TextButton(
+          style: TextButton.styleFrom(foregroundColor: AppColors.abu, minimumSize: const Size.fromHeight(44)),
+          onPressed: () => Navigator.pop(context, false),
+          child: const Text('Batal', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 17)),
+        ),
+      ],
     ]);
   }
 }

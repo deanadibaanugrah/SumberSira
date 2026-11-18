@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import Link from "next/link";
+import Link from "@/components/HardLink";
 import { RotateCcw, TriangleAlert } from "lucide-react";
 
 // Error boundary per segmen (Next.js App Router). Menangkap galat saat render

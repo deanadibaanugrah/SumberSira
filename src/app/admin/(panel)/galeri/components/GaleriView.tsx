@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 
 import { AdminHeader } from "@/components/admin/ui";
-import type { AdminGalleryPhoto } from "@/lib/auth/dal";
+import type { AdminGalleryPhoto } from "@/models/admin";
 
 import { setStatusGaleri } from "../actions";
 import FotoGrid from "./FotoGrid";

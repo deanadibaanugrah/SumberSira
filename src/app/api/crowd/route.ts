@@ -1,4 +1,4 @@
-import { apiFetch } from "@/lib/server/api";
+import { apiFetch } from "@/repositories/api-server";
 
 // GET /api/crowd: Live Crowd publik (tanpa login), dipakai widget di halaman login dan dashboard admin.
 // Bentuk asli backend: jumlah orang di dalam, persen kapasitas, label, dan prakiraan puncak per jam.

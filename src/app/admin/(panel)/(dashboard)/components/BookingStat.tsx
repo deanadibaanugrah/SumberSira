@@ -3,7 +3,7 @@
 import { CalendarCheck } from "lucide-react";
 
 import { StatCard } from "@/components/admin/ui";
-import { useDashboard } from "@/lib/dashboard-store";
+import { useDashboard } from "@/viewmodels/dashboard-viewmodel";
 
 // Kartu Booking Sewa Hari Ini: jumlah booking yang dibuat hari ini, dari GET /admin/dashboard.
 export default function BookingStat() {

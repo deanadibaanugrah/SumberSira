@@ -5,7 +5,7 @@ import { useState } from "react";
 import type { FormEvent } from "react";
 
 import { Card, CardTitle, PrimaryButton, SecondaryButton, inputClass, labelClass } from "@/components/admin/ui";
-import type { AdminPricing } from "@/lib/auth/dal";
+import type { AdminPricing } from "@/models/admin";
 import { rupiah } from "@/lib/format";
 
 import { simpanPricing } from "../actions";

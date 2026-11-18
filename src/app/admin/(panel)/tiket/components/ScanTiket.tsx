@@ -3,7 +3,7 @@ import type { FormEvent, RefObject } from "react";
 
 import ProgressBar from "@/components/charts/ProgressBar";
 import { Card, CardTitle, PrimaryButton } from "@/components/admin/ui";
-import type { useTiket } from "@/lib/tiket-store";
+import type { useTiket } from "@/viewmodels/tiket-viewmodel";
 
 // Warna batang kapasitas sesuai status keramaian.
 const BAR: Record<string, string> = { Sepi: "bg-leaf", Sedang: "bg-leaf/30", Ramai: "bg-coral" };

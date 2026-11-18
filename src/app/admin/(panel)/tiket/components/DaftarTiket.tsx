@@ -2,7 +2,8 @@ import { Banknote, LogIn, LogOut } from "lucide-react";
 
 import { Card, CardTitle, FilterPills, StatusPill } from "@/components/admin/ui";
 import { rupiah } from "@/lib/format";
-import { PARKIR_LABEL, checkIn, checkOut, jumlahOrang, konfirmasiTunai, type Ticket, type useTiket } from "@/lib/tiket-store";
+import { PARKIR_LABEL, checkIn, checkOut, jumlahOrang, konfirmasiTunai, type useTiket } from "@/viewmodels/tiket-viewmodel";
+import type { Ticket } from "@/models/ticket";
 
 // Pilihan filter status tiket.
 const FILTERS = ["Semua", "Belum masuk", "Di dalam", "Keluar"];

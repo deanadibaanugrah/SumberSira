@@ -2,9 +2,10 @@
 
 import { useMemo } from "react";
 
-import { useCrowd } from "@/lib/crowd-store";
-import { ApiError, api } from "@/lib/live/http";
-import { createPollStore } from "@/lib/live/poll-store";
+import { useCrowd } from "@/viewmodels/crowd-viewmodel";
+import { ApiError, api } from "@/repositories/http-client";
+import { createPollStore } from "@/viewmodels/poll-store";
+import type { Ticket } from "@/models/ticket";
 
 // Tiket masuk online, sekarang dari backend (bukan lagi localStorage).
 // Tiket dibeli pengunjung di aplikasi lalu muncul di sini; petugas menekan Check-in atau Keluar, dan angka Live Crowd
@@ -30,13 +31,7 @@ type ApiTicket = {
 };
 type ApiList = { total: number; page: number; limit: number; items: ApiTicket[] };
 
-// Bentuk satu tiket untuk tampilan: status berbahasa Indonesia dan jam berformat 10.42 (WIB).
-export type Ticket = {
-  id: string; code: string; name: string; whatsapp: string; adults: number; kids: number; parking: string;
-  payment: string; paymentStatus: string; total: number;
-  status: "Belum masuk" | "Di dalam" | "Keluar"; boughtAt: string; checkInAt: string | null; checkOutAt: string | null;
-  boughtAtMs: number; checkInMs: number | null; checkOutMs: number | null; fromApp: boolean; visitDate: string;
-};
+
 
 const STATUS = { waiting: "Belum masuk", inside: "Di dalam", out: "Keluar" } as const;
 

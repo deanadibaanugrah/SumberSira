@@ -1,7 +1,7 @@
 import { Pencil, Trash2 } from "lucide-react";
 
 import { Card, CardTitle, IconButton, StatusPill } from "@/components/admin/ui";
-import type { AdminFaq } from "@/lib/auth/dal";
+import type { AdminFaq } from "@/models/admin";
 
 type DaftarFaqProps = {
   faqs: AdminFaq[];

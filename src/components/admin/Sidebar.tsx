@@ -1,14 +1,14 @@
 "use client";
 
 import { CalendarCheck, Clock, Image as ImageIcon, LayoutGrid, LogOut, Menu, MessageCircle, PanelLeftClose, PanelLeftOpen, ChartLine, Star, Tag, Ticket, Users, X } from "lucide-react";
-import Link from "next/link";
+import Link from "@/components/HardLink";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 
 import LogoMark from "@/components/Logo";
 import { logoutAction } from "@/lib/auth/actions";
 import { jamBukaHariIni } from "@/lib/jam-buka";
-import type { AdminProfile } from "@/lib/auth/dal";
+import type { AdminProfile } from "@/models/admin";
 import { can, type Permission } from "@/lib/auth/roles";
 
 // Daftar menu sidebar admin: alamat halaman, nama menu, ikon, dan izin yang dibutuhkan.

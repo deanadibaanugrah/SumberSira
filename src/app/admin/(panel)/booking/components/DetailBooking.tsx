@@ -5,7 +5,8 @@ import { useState } from "react";
 
 import WahanaIcon from "@/components/WahanaIcon";
 import { Avatar, Card, CardTitle, Modal, PrimaryButton, StatusPill } from "@/components/admin/ui";
-import { batalkanPembayaran, tandaiLunas, type Booking } from "@/lib/booking-store";
+import { batalkanPembayaran, tandaiLunas } from "@/viewmodels/booking-viewmodel";
+import type { Booking } from "@/models/booking";
 import { rupiah } from "@/lib/format";
 
 // Ikon item sewa dari id wahana yang dikirim backend (mis. "ban-besar").

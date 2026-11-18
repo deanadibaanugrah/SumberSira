@@ -1,4 +1,4 @@
-import { requirePermission } from "@/lib/auth/dal";
+import { requirePermission } from "@/repositories/admin-repository";
 import { can } from "@/lib/auth/roles";
 
 import BookingView from "./components/BookingView";

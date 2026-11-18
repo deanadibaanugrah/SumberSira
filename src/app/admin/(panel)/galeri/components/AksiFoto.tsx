@@ -1,7 +1,7 @@
 import { Check, X } from "lucide-react";
 
 import { IconButton } from "@/components/admin/ui";
-import type { AdminGalleryPhoto } from "@/lib/auth/dal";
+import type { AdminGalleryPhoto } from "@/models/admin";
 
 import HapusFoto from "./HapusFoto";
 

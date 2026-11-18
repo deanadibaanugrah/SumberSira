@@ -1,6 +1,6 @@
 import { Clock, Ticket } from "lucide-react";
 
-import { apiFetch } from "@/lib/server/api";
+import { apiFetch } from "@/repositories/api-server";
 import { rupiah } from "@/lib/format";
 
 // Info jam buka dan harga tiket masuk. Harga berasal dari backend (GET /pricing); bila backend

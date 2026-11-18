@@ -1,19 +1,12 @@
 import "server-only";
+import type { WahanaInput } from "@/models/wahana";
 
 // Tipe dan validasi form Wahana & Harga. Daftar wahana sendiri dibaca dari backend
 // (`GET /admin/rides`); fungsi di sini hanya membersihkan isi form sebelum dikirim lewat Server Action.
 
-export type WahanaItem = {
-  id: string;
-  name: string;
-  category: string;
-  price: number;
-  unit: string;
-  icon: string;
-  status: string;
-};
 
-export type WahanaInput = { id?: string; name: string; category: string; price: number; unit: string; status: string };
+
+
 
 const CATEGORIES = ["Wahana", "Sewa Alat"];
 const STATUSES = ["Aktif", "Nonaktif"];

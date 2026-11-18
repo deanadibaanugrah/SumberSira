@@ -4,7 +4,7 @@ import { Download } from "lucide-react";
 import { useMemo, useState } from "react";
 
 import { AdminHeader, PrimaryButton } from "@/components/admin/ui";
-import { useBooking } from "@/lib/booking-store";
+import { useBooking } from "@/viewmodels/booking-viewmodel";
 
 import DaftarBooking from "./DaftarBooking";
 import DetailBooking from "./DetailBooking";

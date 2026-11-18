@@ -3,25 +3,19 @@ import "server-only";
 import { forbidden, redirect } from "next/navigation";
 import { cache } from "react";
 
-import { apiFetch, apiJson } from "@/lib/server/api";
-import type { WahanaItem } from "@/lib/server/wahana-store";
+import { apiFetch, apiJson } from "@/repositories/api-server";
+import type { WahanaItem } from "@/models/wahana";
 
-import { describeDevice } from "./device";
-import { ROLE_LABEL, can, type Permission, type Role } from "./roles";
+import { describeDevice } from "../lib/auth/device";
+import { ROLE_LABEL, can, type Permission, type Role } from "../lib/auth/roles";
+import type { AdminProfile, AuthFailure, AdminReview, AdminGalleryPhoto, AdminFaq, AdminUnanswered, AdminInsight, AdminPricing, AdminStaff } from "@/models/admin";
 
 // Data Access Layer (DAL): satu pintu untuk mengecek sesi dan peran.
 // Sesi sekarang dicek ke backend (GET /auth/me), bukan lagi dari memori server Next.js.
 
-export type AdminProfile = {
-  id: string;
-  name: string;
-  email: string;
-  role: Role;
-  roleLabel: string;
-  sessionId: string;
-};
 
-export type AuthFailure = { ok: false; error: "UNAUTHORIZED" | "FORBIDDEN" };
+
+
 
 // Admin yang sedang login, atau null. cache() = hanya satu panggilan ke backend per request.
 export const getOptionalAdmin = cache(async (): Promise<AdminProfile | null> => {
@@ -61,8 +55,7 @@ export async function checkPermission(permission: Permission): Promise<{ ok: tru
   return { ok: true, admin };
 }
 
-// Satu ulasan pengunjung untuk halaman Ulasan & Rating (khusus admin).
-export type AdminReview = { id: string; name: string; stars: number; text: string; createdAt: string };
+
 
 // Daftar semua ulasan, terbaru di atas. Galat backend dikembalikan sebagai kode agar halaman bisa
 // menampilkan pesan yang jelas, bukan daftar kosong yang membingungkan.
@@ -74,18 +67,7 @@ export async function getReviewsForAdmin() {
   return { items: [] as AdminReview[], error: res.code };
 }
 
-// Satu foto galeri untuk halaman Galeri & Konten, termasuk status moderasinya.
-export type AdminGalleryPhoto = {
-  id: string;
-  url: string;
-  title: string;
-  owner: string;
-  ai: boolean;
-  status: "pending" | "approved" | "rejected";
-  storageKey?: string;
-  reviewedAt?: string | null;
-  createdAt: string;
-};
+
 
 // Semua foto (pending, approved, rejected), terbaru di atas. Penyaringan status dilakukan di halaman.
 // Galat backend dikembalikan sebagai kode agar halaman bisa menampilkan pesan yang jelas.
@@ -96,11 +78,9 @@ export async function getGalleryForAdmin() {
   return { items: [] as AdminGalleryPhoto[], error: res.code };
 }
 
-// Satu FAQ pengelola. keys = kata kunci pencocokan; kata pertama dipakai sebagai judul di admin.
-export type AdminFaq = { id: string; keys: string[]; answer: string; sortOrder: number; active: boolean };
 
-// Pertanyaan pengunjung yang tidak cocok dengan FAQ mana pun.
-export type AdminUnanswered = { id: string; question: string; createdAt: string };
+
+
 
 // FAQ dan pertanyaan belum terjawab untuk halaman Chatbot & FAQ (khusus admin).
 // Galat backend dikembalikan sebagai kode agar halaman bisa menampilkan pesan yang jelas.
@@ -117,15 +97,7 @@ export async function getFaqForAdmin() {
   };
 }
 
-// Ringkasan AI Insight dari backend: rating ulasan, keramaian saat ini, jam terpadat, dan saran aturan.
-export type AdminInsight = {
-  rating: number;
-  reviewCount: number;
-  distribution: Record<"1" | "2" | "3" | "4" | "5", number>;
-  crowd: { inside: number; percent: number; label: string };
-  peakHour: string;
-  suggestions: string[];
-};
+
 
 // Analisis admin (khusus admin). Galat dikembalikan sebagai kode agar halaman bisa memberi pesan jelas.
 export async function getInsightForAdmin() {
@@ -135,12 +107,7 @@ export async function getInsightForAdmin() {
   return { data: null, error: res.code };
 }
 
-// Harga tiket, kapasitas, dan tarif parkir. Bentuk ini sama dengan yang dipakai PUT /admin/pricing.
-export type AdminPricing = {
-  ticketPricePerPerson: number;
-  capacity: number;
-  parking: { none: number; motor: number; mobil: number; bus: number };
-};
+
 
 // Harga untuk halaman Wahana & Harga: admin dan petugas boleh melihat, hanya admin boleh mengubah.
 export async function getPricingForAdmin() {
@@ -150,15 +117,7 @@ export async function getPricingForAdmin() {
   return { pricing: null, canEdit: can(admin.role, "wahana:ubah"), error: res.code };
 }
 
-// Satu akun petugas/admin untuk halaman Akun Petugas (khusus admin).
-export type AdminStaff = {
-  id: string;
-  name: string;
-  email: string;
-  role: Role;
-  active: boolean;
-  createdAt: string;
-};
+
 
 // Daftar semua akun. Galat dikembalikan sebagai kode agar halaman bisa menampilkan pesan yang jelas.
 export async function getStaffForAdmin() {

@@ -1,7 +1,7 @@
 import { KeyRound, ShieldCheck } from "lucide-react";
 
 import { Card, CardTitle } from "@/components/admin/ui";
-import type { AdminProfile } from "@/lib/auth/dal";
+import type { AdminProfile } from "@/models/admin";
 
 // Kartu Profil: nama, email, peran, dan hak akses admin yang sedang login.
 export default function Profil({ admin }: { admin: AdminProfile }) {

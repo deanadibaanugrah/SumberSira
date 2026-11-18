@@ -1,6 +1,6 @@
 import { LayoutGrid, MapPin, Smartphone } from "lucide-react";
 import Image from "next/image";
-import Link from "next/link";
+import Link from "@/components/HardLink";
 
 import LogoMark from "@/components/Logo";
 import { FOTO } from "@/lib/foto";

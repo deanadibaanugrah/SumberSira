@@ -1,4 +1,4 @@
-import type { AdminUnanswered } from "@/lib/auth/dal";
+import type { AdminUnanswered } from "@/models/admin";
 
 type BelumTerjawabProps = {
   pending: AdminUnanswered[];

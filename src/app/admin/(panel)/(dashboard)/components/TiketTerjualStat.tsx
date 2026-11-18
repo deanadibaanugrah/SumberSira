@@ -3,7 +3,7 @@
 import { Ticket } from "lucide-react";
 
 import { StatCard } from "@/components/admin/ui";
-import { useTiket } from "@/lib/tiket-store";
+import { useTiket } from "@/viewmodels/tiket-viewmodel";
 
 // Kartu Tiket Terjual Hari Ini di dashboard, angkanya dari tiket yang dibeli pengunjung (backend).
 export default function TiketTerjualStat() {

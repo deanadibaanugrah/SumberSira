@@ -2,8 +2,8 @@
 
 import { revalidatePath } from "next/cache";
 
-import { checkPermission } from "@/lib/auth/dal";
-import { apiFetch } from "@/lib/server/api";
+import { checkPermission } from "@/repositories/admin-repository";
+import { apiFetch } from "@/repositories/api-server";
 
 // Server Action untuk menghapus ulasan. Hanya admin (izin "ulasan"); backend juga mengecek ulang.
 

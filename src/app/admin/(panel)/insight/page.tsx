@@ -1,4 +1,4 @@
-import { getInsightForAdmin, requirePermission } from "@/lib/auth/dal";
+import { getInsightForAdmin, requirePermission } from "@/repositories/admin-repository";
 
 import InsightView from "./components/InsightView";
 

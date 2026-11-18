@@ -1,5 +1,5 @@
 import { AdminHeader } from "@/components/admin/ui";
-import { getMySessions, requirePermission } from "@/lib/auth/dal";
+import { getMySessions, requirePermission } from "@/repositories/admin-repository";
 
 import GantiPassword from "./components/GantiPassword";
 import Profil from "./components/Profil";

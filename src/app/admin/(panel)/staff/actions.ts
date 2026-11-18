@@ -2,8 +2,9 @@
 
 import { revalidatePath } from "next/cache";
 
-import { checkPermission, type AdminStaff } from "@/lib/auth/dal";
-import { apiJson } from "@/lib/server/api";
+import { checkPermission } from "@/repositories/admin-repository";
+import type { AdminStaff } from "@/models/admin";
+import { apiJson } from "@/repositories/api-server";
 import { validatePassword } from "@/lib/validation/password";
 
 // Server Action untuk Akun Petugas. Hanya admin (izin "staff"); backend mengecek ulang sesi dan peran.

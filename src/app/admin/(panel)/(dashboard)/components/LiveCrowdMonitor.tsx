@@ -3,7 +3,7 @@
 import BarChart from "@/components/charts/BarChart";
 import { Card, CardTitle } from "@/components/admin/ui";
 import { niceTicks } from "@/lib/nice-ticks";
-import { useCrowd } from "@/lib/crowd-store";
+import { useCrowd } from "@/viewmodels/crowd-viewmodel";
 
 // Prakiraan puncak keramaian per jam dari server (/crowd → forecast, dari HOURLY_FORECAST backend).
 // Tiap batang = perkiraan jumlah orang di dalam pada jam itu. Jam dengan keramaian Sedang ke atas diberi warna hijau tua.

@@ -1,4 +1,4 @@
-import { getOptionalAdmin } from "@/lib/auth/dal";
+import { getOptionalAdmin } from "@/repositories/admin-repository";
 
 // GET /api/admin/me: data admin yang sedang login (contoh Route Handler yang dilindungi).
 // Bisa dipanggil dari browser (cookie sesi) atau dari Postman dengan header "Authorization: Bearer <token>"

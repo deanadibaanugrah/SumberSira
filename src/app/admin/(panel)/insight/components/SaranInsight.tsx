@@ -1,7 +1,7 @@
 import { Sparkles } from "lucide-react";
 
 import { Card, CardTitle } from "@/components/admin/ui";
-import type { AdminInsight } from "@/lib/auth/dal";
+import type { AdminInsight } from "@/models/admin";
 
 // Saran dari aturan backend (keramaian dan ulasan terbaru), maksimal lima kalimat.
 export default function SaranInsight({ data }: { data: AdminInsight }) {

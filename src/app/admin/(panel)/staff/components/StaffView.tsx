@@ -5,7 +5,7 @@ import { useState } from "react";
 import type { FormEvent } from "react";
 
 import { AdminHeader, Avatar, Card, CardTitle, IconButton, Modal, PrimaryButton, SecondaryButton, StatusPill, inputClass, labelClass } from "@/components/admin/ui";
-import type { AdminStaff } from "@/lib/auth/dal";
+import type { AdminStaff } from "@/models/admin";
 import { ROLE_LABEL } from "@/lib/auth/roles";
 
 import { resetPasswordStaff, simpanStaff } from "../actions";

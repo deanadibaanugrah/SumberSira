@@ -1,11 +1,11 @@
 "use client";
 
 import { Ticket, TrendingUp, Users } from "lucide-react";
-import Link from "next/link";
+import Link from "@/components/HardLink";
 
-import { useCrowd } from "@/lib/crowd-store";
-import { useDashboard } from "@/lib/dashboard-store";
-import { useTiket } from "@/lib/tiket-store";
+import { useCrowd } from "@/viewmodels/crowd-viewmodel";
+import { useDashboard } from "@/viewmodels/dashboard-viewmodel";
+import { useTiket } from "@/viewmodels/tiket-viewmodel";
 
 // Kartu hijau ringkasan hari ini: angka dari dashboard backend, tiket live, dan Live Crowd.
 export default function RingkasanHariIni({ canInsight }: { canInsight: boolean }) {

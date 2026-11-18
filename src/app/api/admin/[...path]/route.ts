@@ -1,6 +1,6 @@
 import type { NextRequest } from "next/server";
 
-import { apiFetch } from "@/lib/server/api";
+import { apiFetch } from "@/repositories/api-server";
 
 // Penerus (BFF) dari browser ke backend untuk data admin: dashboard, tiket, booking, dan pembayaran.
 // Browser memanggil /api/admin/tiket/... ; di sini sesi login ikut diteruskan ke backend, dan backend-lah yang

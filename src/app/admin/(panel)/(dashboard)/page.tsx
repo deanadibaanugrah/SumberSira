@@ -2,7 +2,7 @@ import { Download } from "lucide-react";
 
 import PolaKeramaian from "@/components/admin/PolaKeramaian";
 import { AdminHeader, PrimaryButton } from "@/components/admin/ui";
-import { requirePermission } from "@/lib/auth/dal";
+import { requirePermission } from "@/repositories/admin-repository";
 import { can } from "@/lib/auth/roles";
 
 import BookingMasuk from "./components/BookingMasuk";

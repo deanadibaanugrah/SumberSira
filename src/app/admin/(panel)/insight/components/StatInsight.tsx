@@ -1,7 +1,7 @@
 import { Clock, Star, Users } from "lucide-react";
 
 import { StatCard } from "@/components/admin/ui";
-import type { AdminInsight } from "@/lib/auth/dal";
+import type { AdminInsight } from "@/models/admin";
 
 // Tiga kartu ringkasan: rating ulasan, keramaian saat ini, dan jam terpadat.
 export default function StatInsight({ data }: { data: AdminInsight }) {

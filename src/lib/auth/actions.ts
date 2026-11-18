@@ -4,10 +4,10 @@ import { revalidatePath } from "next/cache";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
-import { apiFetch, apiJson } from "@/lib/server/api";
+import { apiFetch, apiJson } from "@/repositories/api-server";
 
 import { SESSION_COOKIE } from "./constants";
-import { checkPermission } from "./dal";
+import { checkPermission } from "../../repositories/admin-repository";
 import { attemptLogin } from "./login";
 import { safeAdminPath } from "./redirect";
 import { validatePassword } from "@/lib/validation/password";

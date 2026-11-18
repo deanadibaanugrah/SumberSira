@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 
-import { getOptionalAdmin } from "@/lib/auth/dal";
+import { getOptionalAdmin } from "@/repositories/admin-repository";
 import { safeAdminPath } from "@/lib/auth/redirect";
 
 import BrandMobile from "./components/BrandMobile";

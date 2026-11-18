@@ -6,7 +6,7 @@ import { useState } from "react";
 import type { FormEvent } from "react";
 
 import { AdminHeader, PrimaryButton } from "@/components/admin/ui";
-import type { AdminFaq, AdminUnanswered } from "@/lib/auth/dal";
+import type { AdminFaq, AdminUnanswered } from "@/models/admin";
 
 import { hapusFaq, hapusPertanyaan, simpanFaq } from "../actions";
 import AlurJawaban from "./AlurJawaban";

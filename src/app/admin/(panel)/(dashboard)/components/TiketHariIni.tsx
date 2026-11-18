@@ -1,11 +1,11 @@
 "use client";
 
 import { ArrowRight } from "lucide-react";
-import Link from "next/link";
+import Link from "@/components/HardLink";
 
 import ProgressBar from "@/components/charts/ProgressBar";
 import { Avatar } from "@/components/admin/ui";
-import { jumlahOrang, useTiket } from "@/lib/tiket-store";
+import { jumlahOrang, useTiket } from "@/viewmodels/tiket-viewmodel";
 
 // Warna batang keramaian sesuai status.
 const BAR: Record<string, string> = { Sepi: "bg-leaf", Sedang: "bg-leaf/30", Ramai: "bg-coral" };

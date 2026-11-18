@@ -1,4 +1,4 @@
-import { getPricingForAdmin, getWahanaForAdmin } from "@/lib/auth/dal";
+import { getPricingForAdmin, getWahanaForAdmin } from "@/repositories/admin-repository";
 
 import WahanaView from "./components/WahanaView";
 

@@ -1,6 +1,6 @@
 import "server-only";
 
-import { BACKEND_COOKIE, apiFetch } from "@/lib/server/api";
+import { BACKEND_COOKIE, apiFetch } from "@/repositories/api-server";
 import { validateEmail } from "@/lib/validation/email";
 
 import type { Role } from "./roles";

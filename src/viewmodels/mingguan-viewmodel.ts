@@ -1,20 +1,16 @@
 "use client";
 
-import { api } from "@/lib/live/http";
-import { createPollStore } from "@/lib/live/poll-store";
-import { tanggalHariIni } from "@/lib/tiket-store";
+import { api } from "@/repositories/http-client";
+import { createPollStore } from "@/viewmodels/poll-store";
+import { tanggalHariIni } from "@/viewmodels/tiket-viewmodel";
+import type { HariData, MingguanData } from "@/models/mingguan";
 
 // Agregasi mingguan yang dihitung di sisi klien dari data kontrak backend:
 // daftar tiket per tanggal (7 hari terakhir) + daftar booking. Backend belum punya endpoint mingguan,
 // jadi pendapatan harian, heatmap keramaian, dan wahana terlaris dihitung dari data itu.
 
-export type HariData = { date: string; day: string; tiket: number; sewa: number };
-export type MingguanData = {
-  days: HariData[];
-  total: number;
-  pola: { hours: string[]; days: { date: string; day: string; values: number[] }[]; note: string };
-  wahana: { id: string; name: string; count: number }[];
-};
+
+
 
 // Jam operasional yang ditampilkan di heatmap (08.00-17.00).
 const JAM = ["08", "09", "10", "11", "12", "13", "14", "15", "16", "17"];

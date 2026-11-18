@@ -1,4 +1,4 @@
-import { getFaqForAdmin, requirePermission } from "@/lib/auth/dal";
+import { getFaqForAdmin, requirePermission } from "@/repositories/admin-repository";
 
 import FaqView from "./components/FaqView";
 

@@ -1,4 +1,4 @@
-import type { AdminGalleryPhoto } from "@/lib/auth/dal";
+import type { AdminGalleryPhoto } from "@/models/admin";
 
 // Label Indonesia untuk status foto backend, dipakai StatusPill di halaman Galeri & Konten.
 export const LABEL_STATUS: Record<AdminGalleryPhoto["status"], string> = {

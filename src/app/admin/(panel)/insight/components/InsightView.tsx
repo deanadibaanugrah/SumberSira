@@ -1,5 +1,5 @@
 import { AdminHeader } from "@/components/admin/ui";
-import type { AdminInsight } from "@/lib/auth/dal";
+import type { AdminInsight } from "@/models/admin";
 
 import SaranInsight from "./SaranInsight";
 import SebaranRating from "./SebaranRating";

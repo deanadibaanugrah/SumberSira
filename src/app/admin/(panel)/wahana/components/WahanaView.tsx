@@ -4,8 +4,8 @@ import { Plus } from "lucide-react";
 import { useMemo, useState, useTransition } from "react";
 
 import { AdminHeader, PrimaryButton } from "@/components/admin/ui";
-import type { AdminPricing } from "@/lib/auth/dal";
-import type { WahanaItem } from "@/lib/server/wahana-store";
+import type { AdminPricing } from "@/models/admin";
+import type { WahanaItem } from "@/models/wahana";
 
 import { hapusWahana, simpanWahana, type WahanaActionResult } from "../actions";
 import DaftarWahana from "./DaftarWahana";

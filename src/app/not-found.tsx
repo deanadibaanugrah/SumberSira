@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/components/HardLink";
 import { Compass } from "lucide-react";
 
 // Halaman 404 untuk semua route yang tidak ada, termasuk hasil notFound().

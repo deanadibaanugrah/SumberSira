@@ -2,10 +2,10 @@
 
 import { Clock, Ticket, Users } from "lucide-react";
 
-import { useCrowd } from "@/lib/crowd-store";
+import { useCrowd } from "@/viewmodels/crowd-viewmodel";
 import { jamBukaHariIni } from "@/lib/jam-buka";
 
-// Widget kaca yang melayang di halaman login: angka Live Crowd nyata dari tiket yang discan (src/lib/crowd-store.ts, tanpa login).
+// Widget kaca yang melayang di halaman login: angka Live Crowd nyata dari tiket yang discan (src/viewmodels/crowd-viewmodel.ts, tanpa login).
 const glass = "rounded-[24px] border border-white/20 bg-white/10 p-5 text-white shadow-[0_20px_50px_rgba(0,0,0,0.25)] backdrop-blur-xl";
 // Jari-jari dan keliling cincin progres di widget Live Crowd.
 const R = 34;

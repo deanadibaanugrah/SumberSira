@@ -1,10 +1,10 @@
 "use client";
 
 import { Ellipsis } from "lucide-react";
-import Link from "next/link";
+import Link from "@/components/HardLink";
 
 import { Avatar, Card, CardTitle, StatusPill } from "@/components/admin/ui";
-import { terbaru, useBooking } from "@/lib/booking-store";
+import { terbaru, useBooking } from "@/viewmodels/booking-viewmodel";
 
 // Tabel 3 booking sewa terbaru dari backend, dengan tautan ke halaman Booking.
 export default function BookingMasuk() {

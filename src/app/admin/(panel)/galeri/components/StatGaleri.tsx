@@ -1,7 +1,7 @@
 import { Check, Clock, Image as ImageIcon } from "lucide-react";
 
 import { StatCard } from "@/components/admin/ui";
-import type { AdminGalleryPhoto } from "@/lib/auth/dal";
+import type { AdminGalleryPhoto } from "@/models/admin";
 
 // Kartu ringkasan jumlah foto: semua foto masuk, yang menunggu review, dan yang tampil di aplikasi.
 export default function StatGaleri({ photos }: { photos: AdminGalleryPhoto[] }) {

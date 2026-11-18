@@ -1,5 +1,5 @@
 import { ShieldAlert } from "lucide-react";
-import Link from "next/link";
+import Link from "@/components/HardLink";
 
 // Tampilan saat forbidden() dipanggil di DAL: sudah login (autentikasi berhasil),
 // tetapi perannya tidak punya izin (otorisasi gagal). Next.js mengirim status 403 Forbidden.

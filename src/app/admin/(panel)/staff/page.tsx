@@ -1,4 +1,4 @@
-import { getStaffForAdmin, requirePermission } from "@/lib/auth/dal";
+import { getStaffForAdmin, requirePermission } from "@/repositories/admin-repository";
 
 import StaffView from "./components/StaffView";
 

@@ -1,7 +1,7 @@
 import { cookies } from "next/headers";
 
 import { SESSION_COOKIE } from "@/lib/auth/constants";
-import { apiFetch } from "@/lib/server/api";
+import { apiFetch } from "@/repositories/api-server";
 
 // POST /api/auth/logout: mencabut token yang dikirim di header "Authorization: Bearer <token>" (atau cookie sesi).
 // Pencabutan dilakukan di backend (POST /auth/logout), jadi token yang sama langsung ditolak (401) oleh API admin.

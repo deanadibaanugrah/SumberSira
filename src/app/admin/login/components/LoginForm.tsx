@@ -1,7 +1,7 @@
 "use client";
 
 import { ArrowLeft, ArrowRight, Eye, EyeOff, Loader2, Lock, Mail, ShieldCheck } from "lucide-react";
-import Link from "next/link";
+import Link from "@/components/HardLink";
 import { useActionState, useState } from "react";
 
 import { loginAction } from "@/lib/auth/actions";

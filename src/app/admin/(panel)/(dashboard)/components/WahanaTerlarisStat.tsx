@@ -3,10 +3,10 @@
 import { Ticket } from "lucide-react";
 
 import { StatCard } from "@/components/admin/ui";
-import { useMingguan } from "@/lib/mingguan-store";
+import { useMingguan } from "@/viewmodels/mingguan-viewmodel";
 
 // Kartu Wahana Terlaris: agregasi klien dari booking 7 hari terakhir
-// (backend belum punya endpoint mingguan, lihat src/lib/mingguan-store.ts).
+// (backend belum punya endpoint mingguan, lihat src/viewmodels/mingguan-viewmodel.ts).
 export default function WahanaTerlarisStat() {
   const { data, ready, error } = useMingguan();
   const top = data?.wahana[0];

@@ -4,11 +4,11 @@ import { Info } from "lucide-react";
 
 import Heatmap from "@/components/charts/Heatmap";
 import { Card, CardTitle } from "@/components/admin/ui";
-import { useMingguan } from "@/lib/mingguan-store";
+import { useMingguan } from "@/viewmodels/mingguan-viewmodel";
 
 // Heatmap keramaian 7 hari terakhir (persen kapasitas puncak per jam), dihitung dari tiket yang discan masuk.
 // Catatan di bawahnya dibuat dari angka (hari dan jam tertinggi), bukan dari AI.
-// Backend tidak punya endpoint mingguan, jadi angkanya diagregasi di klien (src/lib/mingguan-store.ts).
+// Backend tidak punya endpoint mingguan, jadi angkanya diagregasi di klien (src/viewmodels/mingguan-viewmodel.ts).
 export default function PolaKeramaian() {
   const { data, ready, error } = useMingguan();
   const pola = data?.pola;

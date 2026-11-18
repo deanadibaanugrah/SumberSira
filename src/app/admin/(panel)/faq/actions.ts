@@ -2,8 +2,8 @@
 
 import { revalidatePath } from "next/cache";
 
-import { checkPermission } from "@/lib/auth/dal";
-import { apiJson } from "@/lib/server/api";
+import { checkPermission } from "@/repositories/admin-repository";
+import { apiJson } from "@/repositories/api-server";
 
 // Server Action untuk Chatbot & FAQ. Hanya admin (izin "faq"); backend juga mengecek ulang sesi dan peran.
 // Backend hanya punya CRUD FAQ dan daftar pertanyaan belum terjawab, jadi "menjawab" pertanyaan dilakukan

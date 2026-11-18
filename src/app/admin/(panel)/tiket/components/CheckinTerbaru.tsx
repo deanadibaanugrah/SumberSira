@@ -1,7 +1,8 @@
 import { RefreshCw } from "lucide-react";
 
 import { Avatar, Card, CardTitle } from "@/components/admin/ui";
-import { jumlahOrang, type Ticket } from "@/lib/tiket-store";
+import { jumlahOrang } from "@/viewmodels/tiket-viewmodel";
+import type { Ticket } from "@/models/ticket";
 
 // Daftar check-in terbaru dan tombol untuk memuat ulang data dari server.
 export default function CheckinTerbaru({ recent, ready, onRefresh }: { recent: Ticket[]; ready: boolean; onRefresh: () => void }) {

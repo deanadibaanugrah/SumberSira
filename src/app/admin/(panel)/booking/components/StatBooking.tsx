@@ -3,8 +3,8 @@
 import { CalendarCheck, Check, Clock, XCircle } from "lucide-react";
 
 import { StatCard } from "@/components/admin/ui";
-import { ringkasanBooking, useBooking } from "@/lib/booking-store";
-import { tanggalHariIni } from "@/lib/tiket-store";
+import { ringkasanBooking, useBooking } from "@/viewmodels/booking-viewmodel";
+import { tanggalHariIni } from "@/viewmodels/tiket-viewmodel";
 
 // Kartu ringkasan jumlah booking per status pembayaran (dari backend).
 export default function StatBooking() {

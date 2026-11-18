@@ -3,7 +3,7 @@
 import { Check } from "lucide-react";
 
 import { Avatar, Card, CardTitle, FilterPills, StatusPill } from "@/components/admin/ui";
-import type { Booking } from "@/lib/booking-store";
+import type { Booking } from "@/models/booking";
 
 // Pilihan filter status booking. "Batal" mencakup kedaluwarsa dan dibatalkan.
 const FILTERS = ["Semua", "Menunggu", "Lunas", "Batal"];

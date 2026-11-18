@@ -2,9 +2,11 @@
 
 import { revalidatePath } from "next/cache";
 
-import { checkPermission, type AdminPricing } from "@/lib/auth/dal";
-import { apiFetch, apiJson } from "@/lib/server/api";
-import { parseWahanaInput, type WahanaItem } from "@/lib/server/wahana-store";
+import { checkPermission } from "@/repositories/admin-repository";
+import type { AdminPricing } from "@/models/admin";
+import { apiFetch, apiJson } from "@/repositories/api-server";
+import { parseWahanaInput } from "@/lib/validation/wahana";
+import type { WahanaItem } from "@/models/wahana";
 
 // Server Action khusus admin untuk Wahana & Harga.
 // Setiap action tetap mengecek peran di sini, dan backend mengecek ulang (batas keamanan sebenarnya ada di backend).

@@ -1,7 +1,7 @@
 import { LifeBuoy, Package, Ticket } from "lucide-react";
 
 import { StatCard } from "@/components/admin/ui";
-import type { WahanaItem } from "@/lib/server/wahana-store";
+import type { WahanaItem } from "@/models/wahana";
 
 // Kartu ringkasan jumlah item.
 export default function StatWahana({ items }: { items: WahanaItem[] }) {

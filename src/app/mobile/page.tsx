@@ -1,6 +1,6 @@
 import { ArrowLeft, MonitorSmartphone, Smartphone } from "lucide-react";
 import Image from "next/image";
-import Link from "next/link";
+import Link from "@/components/HardLink";
 
 import mobileBooking from "../../../desain/screenshot/mobile-booking.png";
 import mobileHome from "../../../desain/screenshot/mobile-home.png";

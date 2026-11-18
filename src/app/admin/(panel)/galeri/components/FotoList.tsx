@@ -1,5 +1,5 @@
 import { StatusPill } from "@/components/admin/ui";
-import type { AdminGalleryPhoto } from "@/lib/auth/dal";
+import type { AdminGalleryPhoto } from "@/models/admin";
 
 import AiBadge from "./AiBadge";
 import AksiFoto from "./AksiFoto";

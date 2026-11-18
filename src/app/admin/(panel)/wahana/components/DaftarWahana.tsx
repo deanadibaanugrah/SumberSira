@@ -3,7 +3,7 @@ import { Pencil, Trash2 } from "lucide-react";
 import WahanaIcon from "@/components/WahanaIcon";
 import { Card, CardTitle, FilterPills, IconButton, StatusPill } from "@/components/admin/ui";
 import { rupiah } from "@/lib/format";
-import type { WahanaItem } from "@/lib/server/wahana-store";
+import type { WahanaItem } from "@/models/wahana";
 
 // Pilihan filter kategori.
 const FILTERS = ["Semua", "Sewa Alat", "Wahana"];

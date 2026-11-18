@@ -2,8 +2,8 @@
 
 import { revalidatePath } from "next/cache";
 
-import { checkPermission } from "@/lib/auth/dal";
-import { apiFetch } from "@/lib/server/api";
+import { checkPermission } from "@/repositories/admin-repository";
+import { apiFetch } from "@/repositories/api-server";
 
 // Server Action untuk moderasi galeri (setujui, tolak, hapus). Hanya admin (izin "galeri");
 // backend juga mengecek ulang sesi dan peran.

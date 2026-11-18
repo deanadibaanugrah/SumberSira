@@ -1,7 +1,7 @@
 import { MessageSquare, Star } from "lucide-react";
 
 import { AdminHeader, Avatar, Card, CardTitle, StatCard } from "@/components/admin/ui";
-import { getReviewsForAdmin, requirePermission } from "@/lib/auth/dal";
+import { getReviewsForAdmin, requirePermission } from "@/repositories/admin-repository";
 
 import HapusUlasan from "./components/HapusUlasan";
 

@@ -2,10 +2,10 @@
 
 import { Card, CardTitle } from "@/components/admin/ui";
 import { rupiah } from "@/lib/format";
-import { useMingguan } from "@/lib/mingguan-store";
+import { useMingguan } from "@/viewmodels/mingguan-viewmodel";
 
 // Total pendapatan seminggu dan grafik batang per hari (tiket dan sewa), agregasi klien dari backend
-// (src/lib/mingguan-store.ts). Perbandingan dengan minggu sebelumnya tidak tersedia, jadi pil tren dihilangkan.
+// (src/viewmodels/mingguan-viewmodel.ts). Perbandingan dengan minggu sebelumnya tidak tersedia, jadi pil tren dihilangkan.
 export default function PendapatanMingguan() {
   const { data, ready, error } = useMingguan();
   const days = data?.days ?? [];

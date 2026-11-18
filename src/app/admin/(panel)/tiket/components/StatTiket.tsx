@@ -1,7 +1,7 @@
 import { DoorOpen, LogIn, Ticket, Users } from "lucide-react";
 
 import { StatCard } from "@/components/admin/ui";
-import type { useTiket } from "@/lib/tiket-store";
+import type { useTiket } from "@/viewmodels/tiket-viewmodel";
 
 // Kartu ringkasan: terjual, orang di dalam, kapasitas, belum datang.
 export default function StatTiket({ tiket }: { tiket: ReturnType<typeof useTiket> }) {

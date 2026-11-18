@@ -3,7 +3,7 @@
 import { Users } from "lucide-react";
 
 import { StatCard } from "@/components/admin/ui";
-import { useCrowd } from "@/lib/crowd-store";
+import { useCrowd } from "@/viewmodels/crowd-viewmodel";
 
 // Kartu Tingkat Keramaian di dashboard, dari Live Crowd publik (/crowd) —
 // angka yang sama dengan yang dilihat pengunjung di aplikasi.

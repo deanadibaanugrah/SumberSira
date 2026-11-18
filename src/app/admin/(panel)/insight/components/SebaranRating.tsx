@@ -2,7 +2,7 @@ import { Star } from "lucide-react";
 
 import ProgressBar from "@/components/charts/ProgressBar";
 import { Card, CardTitle } from "@/components/admin/ui";
-import type { AdminInsight } from "@/lib/auth/dal";
+import type { AdminInsight } from "@/models/admin";
 
 // Persentase satu bintang dari seluruh ulasan.
 const pct = (n: number, total: number) => (total === 0 ? 0 : Math.round((n / total) * 100));

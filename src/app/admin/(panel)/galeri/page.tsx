@@ -1,4 +1,4 @@
-import { getGalleryForAdmin, requirePermission } from "@/lib/auth/dal";
+import { getGalleryForAdmin, requirePermission } from "@/repositories/admin-repository";
 
 import GaleriView from "./components/GaleriView";
 

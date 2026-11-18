@@ -3,10 +3,10 @@
 import WahanaIcon from "@/components/WahanaIcon";
 import ProgressBar from "@/components/charts/ProgressBar";
 import { Card, CardTitle } from "@/components/admin/ui";
-import { useMingguan } from "@/lib/mingguan-store";
+import { useMingguan } from "@/viewmodels/mingguan-viewmodel";
 
 // Peringkat wahana dengan booking terbanyak 7 hari terakhir, agregasi klien dari daftar booking
-// (backend belum punya endpoint mingguan, lihat src/lib/mingguan-store.ts).
+// (backend belum punya endpoint mingguan, lihat src/viewmodels/mingguan-viewmodel.ts).
 export default function WahanaPopuler() {
   const { data, ready, error } = useMingguan();
   const list = data?.wahana ?? [];

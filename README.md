@@ -244,7 +244,7 @@ hari itu (WIB) yang dihitung. Check-in menaikkan grafik, check-out atau keluar m
 Alurnya: pengunjung membeli tiket di aplikasi (`POST /tickets`, harga dihitung server) lalu tiketnya muncul di `/admin/tiket`.
 Petugas menekan Check-in (atau mengetik kode, mis. `1036`), dan angka di web admin, widget di halaman login, dan Beranda
 aplikasi ikut naik. E-tiket di aplikasi memeriksa statusnya tiap 6 detik, jadi langsung berubah jadi "Di dalam" begitu discan.
-Data web admin ada di `src/lib/tiket-store.ts` (mengambil dari backend tiap 5 detik, dan tombol Check-in langsung mengubah tampilan
+Data web admin ada di `src/viewmodels/tiket-viewmodel.ts` (mengambil dari backend tiap 5 detik, dan tombol Check-in langsung mengubah tampilan
 sebelum jawaban server datang). Untuk mencoba grafik tanpa menunggu pengunjung sungguhan: `npm run seed:demo` di backend.
 
 ## Autentikasi & Otorisasi Admin (Pertemuan 9)
@@ -262,7 +262,7 @@ akun itu (peran admin atau petugas).
 | Login lewat API (token) | `POST /api/auth/login` dengan body JSON email + password diteruskan ke backend dan mengembalikan token `Bearer` (token sesi dari backend). Token dipakai di header `Authorization: Bearer <token>` (mis. `GET /api/admin/me`), `POST /api/auth/logout` mencabutnya di backend. Validasi dan batas percobaan sama dengan form | `src/app/api/auth/`, `src/lib/auth/login.ts` |
 | Validasi email | Wajib satu tanda @ dan ada titik setelah @, hanya huruf, angka, titik, garis bawah, dan tanda hubung. Karakter seperti `( : & " '` dan spasi ditolak. Dicek di browser (pesan di bawah kolom email, form tidak dikirim) dan dicek ulang di server (form maupun API, API membalas `400`) | `src/lib/validation/email.ts`, `LoginForm.tsx`, `login.ts` |
 | proxy.ts | Cek kasar: tanpa cookie sesi diarahkan ke `/admin/login?next=...`. Cookie ada belum tentu valid | `src/proxy.ts` |
-| DAL (Data Access Layer) | Satu pintu cek sesi dan peran: `server-only`, `cache()`, data admin dikirim tanpa hash password | `src/lib/auth/dal.ts` |
+| DAL (Data Access Layer) | Satu pintu cek sesi dan peran: `server-only`, `cache()`, data admin dikirim tanpa hash password | `src/repositories/admin-repository.ts` |
 | Layout / page | Layout `(panel)` hanya mengambil data untuk sidebar; setiap `page.tsx` cek izin sendiri lewat DAL | `src/app/admin/(panel)/` |
 | RBAC | Peran `admin` dan `petugas` dengan daftar izin. Menu sidebar disaring sesuai peran (hanya tampilan) | `src/lib/auth/roles.ts`, `Sidebar.tsx` |
 | 401 vs 403 | Belum login: dialihkan ke login, API membalas 401. Sudah login tapi tidak berizin: halaman 403 (`forbidden()`) | `dal.ts`, `(panel)/forbidden.tsx`, `src/app/api/admin/me/route.ts` |
@@ -294,7 +294,7 @@ Login Google (OAuth) dan MFA belum dibuat karena butuh akun penyedia (Google Clo
 |---|---|
 | Gunakan Next.js | Next.js 16 App Router + TypeScript (`src/app`) |
 | UTS fokus frontend web, minimal 3 slide (admin) | 6 halaman admin di `src/app/admin` |
-| Animasi grafik di admin | `src/components/charts/`: batang pill tumbuh dari bawah (`BarChart`), garis keramaian digambar kiri ke kanan (`AreaChart`), donat rincian pembayaran muncul (`DonutChart`), batang parkir mengisi (`ProgressBar`) |
+| Animasi grafik di admin | `src/components/charts/`: batang pill tumbuh dari bawah (`BarChart`), kotak heatmap muncul berurutan (`Heatmap`), batang progres mengisi (`ProgressBar`) |
 | Introduction web | `src/app/(intro)/page.tsx` |
 | Tiap section halaman jadi file sendiri (Pertemuan 10) | Folder `components/` di dalam folder tiap halaman, `page.tsx` hanya menyusun section |
 
@@ -333,25 +333,30 @@ src/app/               Halaman (App Router). Tiap halaman punya folder component
   admin/(panel)/loading.tsx  Kerangka yang tampil seketika saat pindah halaman
   api/auth/            login (token Bearer untuk Postman) dan logout lewat API
 src/proxy.ts           Cek kasar cookie sesi sebelum masuk /admin (dulu middleware.ts)
-src/components/        Komponen yang dipakai banyak halaman
-  charts/              BarChart, AreaChart, DonutChart, Heatmap (admin), ProgressBar (beranimasi)
-  admin/               AdminShell, Sidebar (menu sesuai peran), ui.tsx (AdminHeader, Card, StatCard, ...)
+src/components/        View bersama yang dipakai banyak halaman
+  charts/              BarChart, Heatmap (admin), ProgressBar (beranimasi)
+  admin/               AdminShell, Sidebar (menu sesuai peran), ui.tsx (AdminHeader, Card, StatCard, ...), PolaKeramaian
   Logo.tsx              Logo Sumber Sira (lingkaran hijau tua: tetes air, percikan, riak, tulisan SUMBER SIRA), juga di src/app/icon.svg
   WahanaIcon.tsx        Ikon per wahana
 src/data/              Katalog wahana bawaan (wahana.ts)
-src/lib/
-  tiket-store.ts       Tiket masuk online + angka Live Crowd (dari backend, diperbarui berkala)
-  booking-store.ts     Daftar booking admin (halaman per halaman) dan aksi pembayaran
-  dashboard-store.ts   Ringkasan dashboard (dari backend, diperbarui berkala)
-  crowd-store.ts       Live Crowd publik untuk halaman login
-  mingguan-store.ts    Agregasi 7 hari (heatmap, wahana populer, pendapatan) dari data backend
-  live/                Penyimpan data berkala (poll-store) dan pemanggil API (http)
-  auth/                Autentikasi & otorisasi admin: dal.ts (Data Access Layer), roles.ts (peran dan izin),
-                       actions.ts (login, logout, cabut sesi, ganti password), login.ts (alur login yang sama
-                       untuk form dan API), constants.ts, redirect.ts, device.ts
-  validation/email.ts  Aturan email yang dipakai form di browser dan pengecekan di server
-  server/api.ts        Pemanggil backend dari server Next.js (meneruskan sesi dan User-Agent)
-  server/wahana-store.ts  Data wahana di server untuk Server Action khusus admin
+
+Struktur MVVM web (View = `app/` + `components/`):
+src/models/            Model: bentuk data (admin, ticket, booking, crowd, dashboard, mingguan, wahana)
+src/viewmodels/        ViewModel: state dan aksi untuk View (React hook), diperbarui berkala dari backend
+  poll-store.ts        Dasar semua ViewModel: ambil data berkala, bagi ke semua komponen, simpan antar halaman
+  tiket-viewmodel.ts   Tiket masuk online, Live Crowd admin, check-in dan keluar
+  booking-viewmodel.ts Daftar booking admin (halaman per halaman) dan aksi pembayaran
+  dashboard-viewmodel.ts Ringkasan dashboard
+  crowd-viewmodel.ts   Live Crowd publik untuk halaman login
+  mingguan-viewmodel.ts Agregasi 7 hari (heatmap, wahana populer, pendapatan)
+src/repositories/      Repository: satu-satunya tempat yang bicara ke backend
+  http-client.ts       Pemanggil API dari browser (/api/...)
+  api-server.ts        Pemanggil backend dari server Next.js (meneruskan sesi dan User-Agent)
+  admin-repository.ts  Data Access Layer: cek sesi dan peran, serta ambil data halaman admin dari backend
+src/lib/               Utilitas tanpa state
+  auth/                roles.ts (peran dan izin), actions.ts (login, logout, cabut sesi, ganti password), login.ts (alur login
+                       yang sama untuk form dan API), constants.ts, redirect.ts, device.ts
+  validation/          email.ts, password.ts, wahana.ts (aturan yang dipakai form di browser dan pengecekan di server)
   nice-ticks.ts        Skala sumbu grafik batang keramaian
   whatsapp.ts          Pesan invoice WhatsApp
   format.ts            Format Rupiah dan kode booking

@@ -4,7 +4,7 @@ import { ScanLine } from "lucide-react";
 import { useMemo, useRef, useState } from "react";
 
 import { AdminHeader, PrimaryButton } from "@/components/admin/ui";
-import { checkIn, useTiket } from "@/lib/tiket-store";
+import { checkIn, useTiket } from "@/viewmodels/tiket-viewmodel";
 
 import CheckinTerbaru from "./CheckinTerbaru";
 import DaftarTiket from "./DaftarTiket";

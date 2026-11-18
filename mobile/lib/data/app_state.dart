@@ -33,6 +33,7 @@ class AppState extends ChangeNotifier {
   static const _waKey = 'whatsapp_terakhir';
   static const _reminderKey = 'pengingat_jam_sepi';
   static const _onboardingKey = 'sudah_onboarding';
+  static const _apiUrlKey = 'custom_api_url';
   String savedWhatsapp = '';
   bool quietReminder = false;
   bool onboardingDone = false;
@@ -44,6 +45,25 @@ class AppState extends ChangeNotifier {
     savedWhatsapp = prefs.getString(_waKey) ?? '';
     quietReminder = prefs.getBool(_reminderKey) ?? false;
     onboardingDone = prefs.getBool(_onboardingKey) ?? false;
+    final customUrl = prefs.getString(_apiUrlKey) ?? '';
+    if (customUrl.isNotEmpty) ApiClient.customBaseUrl = customUrl;
+  }
+
+  // Menyimpan alamat URL server backend kustom (berguna saat pengujian di HP fisik).
+  Future<void> setApiUrl(String url) async {
+    final prefs = await SharedPreferences.getInstance();
+    final trimmed = url.trim();
+    if (trimmed.isEmpty) {
+      await prefs.remove(_apiUrlKey);
+      ApiClient.customBaseUrl = '';
+    } else {
+      final clean = trimmed.endsWith('/') ? trimmed.substring(0, trimmed.length - 1) : trimmed;
+      await prefs.setString(_apiUrlKey, clean);
+      ApiClient.customBaseUrl = clean;
+    }
+    await refreshPricing();
+    await refreshReviews();
+    notifyListeners();
   }
 
   // Tarif tiket dan parkir dari server (GET /pricing). Bila server tidak terjangkau,

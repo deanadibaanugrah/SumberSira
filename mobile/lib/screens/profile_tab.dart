@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
+import '../data/api_client.dart';
 import '../data/app_state.dart';
 import '../theme/app_theme.dart';
 import '../utils/launcher.dart';
@@ -14,6 +15,50 @@ class ProfileTab extends StatelessWidget {
 
   static const _maps = 'https://www.google.com/maps/search/?api=1&query=Sumber+Sira+Putukrejo+Malang';
   static const _route = 'https://www.google.com/maps/dir/?api=1&destination=Sumber+Sira+Putukrejo+Malang';
+
+  void _ubahServerDialog(BuildContext context) {
+    final controller = TextEditingController(text: ApiClient.baseUrl);
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Alamat Server Backend'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Alamat backend saat ini untuk menghubungkan aplikasi ke server:',
+              style: AppText.footnote,
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: controller,
+              decoration: const InputDecoration(
+                hintText: 'http://localhost:4000',
+                border: OutlineInputBorder(),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              AppState.instance.setApiUrl('');
+              Navigator.pop(ctx);
+            },
+            child: const Text('Reset Bawaan'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              AppState.instance.setApiUrl(controller.text.trim());
+              Navigator.pop(ctx);
+            },
+            child: const Text('Simpan'),
+          ),
+        ],
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -67,6 +112,14 @@ class ProfileTab extends StatelessWidget {
                 secondary: const Icon(CupertinoIcons.bell, color: AppColors.leaf, size: 20),
                 title: const Text('Ingatkan saat sepi', style: AppText.body),
                 subtitle: Text(s.quietReminder ? 'Aktif, tersimpan di perangkat' : 'Nonaktif', style: AppText.footnote),
+              ),
+              ListTile(
+                contentPadding: const EdgeInsets.fromLTRB(16, 2, 12, 2),
+                leading: const Icon(CupertinoIcons.antenna_radiowaves_left_right, color: AppColors.leaf, size: 20),
+                title: const Text('Server Backend', style: AppText.body),
+                subtitle: Text(ApiClient.baseUrl, style: AppText.footnote),
+                trailing: const Icon(CupertinoIcons.chevron_right, size: 16, color: AppColors.abu),
+                onTap: () => _ubahServerDialog(context),
               ),
             ]),
             GroupedList(header: 'Info kunjungan', children: [

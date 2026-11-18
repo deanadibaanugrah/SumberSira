@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 
 import '../models/booking.dart';
@@ -26,9 +27,26 @@ class ApiException implements Exception {
 
 // Pintu tunggal ke backend SumberSira.
 class ApiClient {
-  // Emulator Android memakai 10.0.2.2 (= localhost laptop).
-  // HP fisik: flutter run --dart-define=API_URL=http://IP-LAPTOP:4000
-  static const baseUrl = String.fromEnvironment('API_URL', defaultValue: 'http://10.0.2.2:4000');
+  // URL kustom yang bisa diatur pengguna di dalam aplikasi (disimpan via SharedPreferences)
+  static String customBaseUrl = '';
+
+  // Penentuan baseUrl otomatis berdasarkan platform dan lingkungan:
+  // - Bila customBaseUrl diisi di aplikasi, prioritaskan nilai tersebut.
+  // - Bila diberikan via argument --dart-define=API_URL=..., gunakan nilai itu.
+  // - Bila di Web (Chrome) atau Desktop (Windows): otomatis memakai http://localhost:4000.
+  // - Bila di Android: memakai http://10.0.2.2:4000 (standar emulator Android).
+  static String get baseUrl {
+    if (customBaseUrl.isNotEmpty) return customBaseUrl;
+    const envUrl = String.fromEnvironment('API_URL');
+    if (envUrl.isNotEmpty) return envUrl;
+    if (kIsWeb ||
+        defaultTargetPlatform == TargetPlatform.windows ||
+        defaultTargetPlatform == TargetPlatform.macOS ||
+        defaultTargetPlatform == TargetPlatform.linux) {
+      return 'http://localhost:4000';
+    }
+    return 'http://10.0.2.2:4000';
+  }
   static const _timeout = Duration(seconds: 8);
   // Unggah foto dan proses AI Photo butuh waktu lebih lama daripada permintaan JSON biasa.
   static const _uploadTimeout = Duration(seconds: 45);

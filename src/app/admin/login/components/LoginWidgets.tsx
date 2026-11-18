@@ -44,18 +44,22 @@ export function CrowdWidget({ className = "" }) {
   );
 }
 
-// Widget jumlah tiket online terjual hari ini dengan grafik batang kecil.
+// Widget prakiraan pengunjung hari ini dari server (/crowd → forecast) dengan grafik batang kecil.
+// Saat server belum terjangkau, batangnya memakai bentuk dekoratif seperti desain awal.
 export function TiketWidget({ className = "" }) {
   const t = useCrowd();
-  const bars = [30, 45, 38, 60, 52, 80, 100];
+  const forecast = t.forecast;
+  const bars = forecast.length ? forecast.map((f) => f.count) : [30, 45, 38, 60, 52, 80, 100];
+  const top = Math.max(...bars, 1);
+  const total = forecast.reduce((s, f) => s + f.count, 0);
   return (
     <div className={`${glass} ${className}`} style={{ animation: "float-y 7s ease-in-out 1.2s infinite" }}>
-      <p className="flex items-center gap-2 text-xs text-white/75"><Ticket size={14} /> Tiket online hari ini</p>
-      <p className="mt-2 font-display text-[28px] font-semibold leading-none tabular-nums">{t.ready ? t.sold : "-"}<span className="ml-1 font-sans text-sm font-normal text-white/70">tiket</span></p>
+      <p className="flex items-center gap-2 text-xs text-white/75"><Ticket size={14} /> Prakiraan pengunjung hari ini</p>
+      <p className="mt-2 font-display text-[28px] font-semibold leading-none tabular-nums">{t.ready ? total : "-"}<span className="ml-1 font-sans text-sm font-normal text-white/70">orang</span></p>
       <div className="mt-3 flex h-10 items-end gap-1.5" aria-hidden="true">
         {bars.map((h, i) => (
           <span key={i} className={`flex-1 origin-bottom rounded-[4px] animate-grow-up ${i === bars.length - 1 ? "bg-white" : "bg-white/30"}`}
-                style={{ height: `${h}%`, animationDelay: `${300 + i * 80}ms` }} />
+                style={{ height: `${Math.round((h / top) * 100)}%`, animationDelay: `${300 + i * 80}ms` }} />
         ))}
       </div>
     </div>

@@ -1,33 +1,39 @@
 "use client";
 
-import { MessageCircle, Ticket, TrendingUp, Users } from "lucide-react";
+import { Ticket, TrendingUp, Users } from "lucide-react";
 import Link from "next/link";
 
-import { useChat } from "@/lib/chat-store";
-import { useInsight } from "@/lib/insight-store";
-import { jam } from "@/lib/tiket-store";
+import { useCrowd } from "@/lib/crowd-store";
+import { useDashboard } from "@/lib/dashboard-store";
+import { useTiket } from "@/lib/tiket-store";
 
-// Kartu hijau ringkasan hari ini: angka nyata dari tiket yang discan dan pertanyaan yang menunggu pengelola. Tanpa AI.
-export default function RingkasanHariIni({ canInsight, canFaq }: { canInsight: boolean; canFaq: boolean }) {
-  const { data } = useInsight();
-  const peak = data?.summary.peak;
+// Kartu hijau ringkasan hari ini: angka dari dashboard backend, tiket live, dan Live Crowd.
+// Baris "pertanyaan chatbot menunggu" belum ditampilkan karena backend belum punya endpoint rekapnya
+// (baru tersedia lewat /admin/faq/unanswered di fase Chatbot & FAQ).
+export default function RingkasanHariIni({ canInsight }: { canInsight: boolean }) {
+  const d = useDashboard();
+  const t = useTiket();
+  const c = useCrowd();
+  // Puncak keramaian dari prakiraan server: jam dengan perkiraan orang terbanyak.
+  const puncak = (c.data?.forecast ?? []).reduce<{ hour: string; count: number } | null>(
+    (a, f) => (!a || f.count > a.count ? f : a), null);
+  const kapasitas = c.capacity || 300;
   return (
     <section className="flex flex-col rounded-3xl bg-gradient-to-b from-forest to-ink p-6 text-white">
       <div className="flex items-center gap-3">
         <span className="grid size-10 place-items-center rounded-full bg-white/12"><TrendingUp size={18} aria-hidden="true" /></span>
         <div>
           <h2 className="text-lg font-semibold leading-tight">Ringkasan Hari Ini</h2>
-          <p className="text-[13px] text-white/70">{data ? "Dari tiket yang discan" : "Memuat..."}</p>
+          <p className="text-[13px] text-white/70">{d.data ? "Dari tiket yang discan" : "Memuat..."}</p>
         </div>
       </div>
       <ul className="mt-5 space-y-2">
-        <Baris icon={TrendingUp} title={peak ? `Puncak ${String(peak.hour).padStart(2, "0")}.00, ${peak.peak} orang` : "Belum ada pengunjung masuk"}
-               sub={peak ? `${peak.percent}% dari kapasitas` : "Grafik naik saat tiket discan masuk"} />
-        <Baris icon={Ticket} title={`${data?.summary.sold ?? 0} tiket terjual`} sub={`${data?.crowd?.waiting ?? 0} orang belum datang`} />
-        {/* Pertanyaan chatbot hanya diambil untuk peran yang boleh membuka halaman Chatbot & FAQ */}
-        {canFaq
-          ? <Pertanyaan />
-          : <Baris icon={Users} title={`${data?.crowd?.inside ?? 0} orang di dalam`} sub={data?.crowd ? `Keramaian ${data.crowd.label}` : "-"} />}
+        <Baris icon={TrendingUp}
+               title={puncak ? `Prakiraan puncak ${puncak.hour}.00, ${puncak.count} orang` : "Belum ada pengunjung masuk"}
+               sub={puncak ? `${Math.round((puncak.count / kapasitas) * 100)}% dari kapasitas` : "Grafik naik saat tiket discan masuk"} />
+        <Baris icon={Ticket} title={`${d.data?.ticketsToday ?? t.sold} tiket terjual`}
+               sub={`${d.data?.pendingCash ?? 0} pembayaran tunai menunggu konfirmasi`} />
+        <Baris icon={Users} title={`${c.inside} orang di dalam`} sub={`Keramaian ${c.label}`} />
       </ul>
       {canInsight && (
         <Link href="/admin/insight"
@@ -36,17 +42,6 @@ export default function RingkasanHariIni({ canInsight, canFaq }: { canInsight: b
         </Link>
       )}
     </section>
-  );
-}
-
-// Baris pertanyaan yang menunggu jawaban pengelola (dari halaman Chatbot & FAQ).
-function Pertanyaan() {
-  const { data } = useChat();
-  const n = data?.pending.length ?? 0;
-  const terlama = data?.pending[0];
-  return (
-    <Baris icon={MessageCircle} title={n === 0 ? "Tidak ada pertanyaan menunggu" : `${n} pertanyaan menunggu jawaban`}
-           sub={terlama ? `Terlama masuk pukul ${jam(terlama.askedAt)}` : "Semua sudah dijawab"} />
   );
 }
 

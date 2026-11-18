@@ -111,6 +111,10 @@ const PILL = {
   "Di dalam": "border-transparent bg-leaf/12 text-forest",
   "Belum masuk": "border-ink/10 bg-white text-ink",
   Keluar: "border-ink/10 bg-white text-abu",
+  Menunggu: "border-transparent bg-leaf/12 text-forest",
+  Lunas: "border-ink/10 bg-white text-forest",
+  Kedaluwarsa: "border-ink/10 bg-white text-abu",
+  Batal: "border-ink/10 bg-white text-ink",
 };
 // Warna titik kecil di depan teks status.
 const DOT = {
@@ -124,6 +128,10 @@ const DOT = {
   "Di dalam": "bg-leaf",
   "Belum masuk": "bg-leaf",
   Keluar: "bg-abu",
+  Menunggu: "bg-leaf",
+  Lunas: "bg-leaf",
+  Kedaluwarsa: "bg-abu",
+  Batal: "bg-coral",
 };
 
 // Status berbentuk pill dengan titik warna di depannya.

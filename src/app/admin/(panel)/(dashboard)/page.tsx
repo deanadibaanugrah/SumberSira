@@ -34,7 +34,7 @@ export default async function DashboardPage() {
         {/* Baris 2: grafik pengunjung per jam dan kartu ringkasan hari ini */}
         <div className="grid gap-5 xl:grid-cols-[736fr_380fr]">
           <LiveCrowdMonitor />
-          <RingkasanHariIni canInsight={can(admin.role, "insight")} canFaq={can(admin.role, "faq")} />
+          <RingkasanHariIni canInsight={can(admin.role, "insight")} />
         </div>
 
         {/* Baris 3: tabel 3 booking sewa terbaru */}

@@ -4,12 +4,14 @@ import { Plus } from "lucide-react";
 import { useMemo, useState, useTransition } from "react";
 
 import { AdminHeader, PrimaryButton } from "@/components/admin/ui";
+import type { AdminPricing } from "@/lib/auth/dal";
 import type { WahanaItem } from "@/lib/server/wahana-store";
 
 import { hapusWahana, simpanWahana, type WahanaActionResult } from "../actions";
 import DaftarWahana from "./DaftarWahana";
 import FormWahana from "./FormWahana";
 import PesanAkses from "./PesanAkses";
+import PricingCard from "./PricingCard";
 import StatWahana from "./StatWahana";
 
 // Admin 7/7: Wahana & Harga. Daftar sewa alat/wahana, filter kategori, tambah, edit, hapus.
@@ -26,7 +28,19 @@ const ERROR_TEXT = {
 };
 
 // initialItems = data dari server, canEdit = peran ini boleh mengubah data (hanya untuk tampilan).
-export default function WahanaView({ initialItems, canEdit }: { initialItems: WahanaItem[]; canEdit: boolean }) {
+export default function WahanaView({
+  initialItems,
+  canEdit,
+  initialPricing,
+  pricingError,
+  canEditPricing,
+}: {
+  initialItems: WahanaItem[];
+  canEdit: boolean;
+  initialPricing: AdminPricing | null;
+  pricingError: string | null;
+  canEditPricing: boolean;
+}) {
   // Data wahana, filter kategori, isi form (null = form tertutup), dan pesan error dari server.
   const [items, setItems] = useState(initialItems);
   const [filter, setFilter] = useState("Semua");
@@ -69,6 +83,8 @@ export default function WahanaView({ initialItems, canEdit }: { initialItems: Wa
 
       <DaftarWahana visible={visible} filter={filter} onFilter={setFilter}
                     onEdit={(w) => { setForm({ ...w, price: String(w.price) }); setError(""); }} onRemove={remove} />
+
+      <PricingCard pricing={initialPricing} error={pricingError} canEdit={canEditPricing} />
 
       {form && (
         <FormWahana form={form} onChange={setForm} error={error} pending={pending} onSave={save}

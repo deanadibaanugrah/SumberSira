@@ -4,12 +4,13 @@ import { revalidatePath } from "next/cache";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
-import { apiFetch } from "@/lib/server/api";
+import { apiFetch, apiJson } from "@/lib/server/api";
 
 import { SESSION_COOKIE } from "./constants";
 import { checkPermission } from "./dal";
 import { attemptLogin } from "./login";
 import { safeAdminPath } from "./redirect";
+import { validatePassword } from "@/lib/validation/password";
 
 export type LoginState = { error?: string; email?: string } | undefined;
 
@@ -57,6 +58,31 @@ export async function revokeSessionAction(sessionId: unknown) {
 
   revalidatePath("/admin/akun");
   return { ok: true as const };
+}
+
+export type ChangePasswordResult = { ok: true; message: string } | { ok: false; error: string };
+
+// Ganti password sendiri (POST /auth/change-password). Sesi lain dicabut backend, sesi ini tetap aktif.
+export async function changePasswordAction(currentPassword: unknown, newPassword: unknown): Promise<ChangePasswordResult> {
+  const auth = await checkPermission("akun");
+  if ("error" in auth) return auth;
+  if (
+    typeof currentPassword !== "string" ||
+    currentPassword.length === 0 ||
+    typeof newPassword !== "string" ||
+    validatePassword(newPassword) !== null
+  ) {
+    return { ok: false, error: "VALIDATION" };
+  }
+
+  const res = await apiJson("/auth/change-password", {
+    method: "POST",
+    body: JSON.stringify({ currentPassword, newPassword }),
+  });
+  if (!("data" in res)) return { ok: false, error: res.code === "BACKEND_UNREACHABLE" ? "BACKEND_UNREACHABLE" : res.code };
+
+  revalidatePath("/admin/akun");
+  return { ok: true, message: "Password diganti. Sesi di perangkat lain sudah dicabut." };
 }
 
 // Keluar dari semua perangkat lain

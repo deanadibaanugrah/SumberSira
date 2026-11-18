@@ -2,10 +2,15 @@ import type { NextRequest } from "next/server";
 
 import { apiFetch } from "@/lib/server/api";
 
-// Penerus (BFF) dari browser ke backend untuk data tiket, insight, dan chatbot.
+// Penerus (BFF) dari browser ke backend untuk data admin: dashboard, tiket, booking, dan pembayaran.
 // Browser memanggil /api/admin/tiket/... ; di sini sesi login ikut diteruskan ke backend, dan backend-lah yang
-// memutuskan boleh atau tidaknya (401/403). Hanya tiga bagian ini yang diteruskan, bukan seluruh /admin backend.
-const TARGET: Record<string, string> = { tiket: "/admin/tickets", insight: "/admin/insight", chat: "/admin/chat" };
+// memutuskan boleh atau tidaknya (401/403). Hanya bagian-bagian ini yang diteruskan, bukan seluruh /admin backend.
+const TARGET: Record<string, string> = {
+  dashboard: "/admin/dashboard",
+  tiket: "/admin/tickets",
+  booking: "/admin/bookings",
+  payment: "/admin/payments",
+};
 
 async function forward(req: NextRequest, ctx: { params: Promise<{ path: string[] }> }) {
   const { path } = await ctx.params;

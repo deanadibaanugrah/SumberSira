@@ -1,8 +1,8 @@
-import { LogIn, LogOut } from "lucide-react";
+import { Banknote, LogIn, LogOut } from "lucide-react";
 
 import { Card, CardTitle, FilterPills, StatusPill } from "@/components/admin/ui";
 import { rupiah } from "@/lib/format";
-import { PARKIR, checkIn, checkOut, jumlahOrang, type Ticket, type useTiket } from "@/lib/tiket-store";
+import { PARKIR, checkIn, checkOut, jumlahOrang, konfirmasiTunai, type Ticket, type useTiket } from "@/lib/tiket-store";
 
 // Pilihan filter status tiket.
 const FILTERS = ["Semua", "Belum masuk", "Di dalam", "Keluar"];
@@ -57,13 +57,19 @@ export default function DaftarTiket({ tiket, visible, filter, onFilter, query, o
                 <td className="font-mono">{t.checkInAt ?? "-"}</td>
                 <td><StatusPill status={t.status} /></td>
                 <td className="pr-3 text-right">
-                  {/* Tiket belum masuk: tombol Check-in */}
-                  {t.status === "Belum masuk" && (
+                  {/* Tiket tunai yang belum lunas: konfirmasi pembayaran dulu (check-in ditolak backend selama belum lunas) */}
+                  {t.payment === "cash" && t.paymentStatus === "pending" ? (
+                    <button type="button" onClick={async () => onHasil(await konfirmasiTunai(t.code))}
+                            className="inline-flex h-8 items-center gap-1.5 rounded-full bg-forest px-3 text-xs font-semibold text-white hover:brightness-125">
+                      <Banknote size={14} /> Konfirmasi Tunai
+                    </button>
+                  ) : t.status === "Belum masuk" ? (
+                    /* Tiket belum masuk: tombol Check-in */
                     <button type="button" onClick={async () => onHasil(await checkIn(t.code))}
                             className="inline-flex h-8 items-center gap-1.5 rounded-full bg-forest px-3 text-xs font-semibold text-white hover:brightness-125">
                       <LogIn size={14} /> Check-in
                     </button>
-                  )}
+                  ) : null}
                   {/* Pengunjung di dalam: tombol Keluar */}
                   {t.status === "Di dalam" && (
                     <button type="button" onClick={async () => onHasil(await checkOut(t.code))}
@@ -77,7 +83,9 @@ export default function DaftarTiket({ tiket, visible, filter, onFilter, query, o
             ))}
             {visible.length === 0 && (
               <tr><td colSpan={8} className="rounded-2xl bg-paper px-5 py-10 text-center text-abu">
-                {tiket.ready ? (tiket.sold === 0 ? "Belum ada tiket untuk hari ini. Tiket yang dibeli di aplikasi akan muncul di sini." : "Tidak ada tiket yang cocok.") : "Memuat tiket..."}
+                {tiket.ready
+                  ? (tiket.sold === 0 ? "Belum ada tiket untuk hari ini. Tiket yang dibeli di aplikasi akan muncul di sini." : "Tidak ada tiket yang cocok.")
+                  : tiket.error ? "Tidak bisa terhubung ke server." : "Memuat tiket..."}
               </td></tr>
             )}
           </tbody>

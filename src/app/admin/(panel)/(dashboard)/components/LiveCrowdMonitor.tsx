@@ -2,14 +2,15 @@
 
 import BarChart from "@/components/charts/BarChart";
 import { Card, CardTitle } from "@/components/admin/ui";
-import { niceTicks, useInsight } from "@/lib/insight-store";
+import { niceTicks } from "@/lib/nice-ticks";
+import { useCrowd } from "@/lib/crowd-store";
 
-// Grafik jumlah orang di dalam per jam hari ini, dihitung dari tiket yang discan: check-in menaikkan, keluar menurunkan.
-// Tiap batang = puncak jumlah orang di dalam pada jam itu. Jam dengan keramaian Sedang ke atas diberi warna hijau tua.
+// Prakiraan puncak keramaian per jam dari server (/crowd → forecast, dari HOURLY_FORECAST backend).
+// Tiap batang = perkiraan jumlah orang di dalam pada jam itu. Jam dengan keramaian Sedang ke atas diberi warna hijau tua.
 export default function LiveCrowdMonitor() {
-  const { data, ready } = useInsight();
-  const hours = data?.hourly ?? [];
-  const chart = hours.map((h) => ({ label: `${String(h.hour).padStart(2, "0")}.00`, value: h.peak }));
+  const { data, ready, error } = useCrowd();
+  const capacity = data?.capacity ?? 300;
+  const chart = (data?.forecast ?? []).map((f) => ({ label: `${f.hour}.00`, value: f.count }));
   const kosong = chart.every((d) => d.value === 0);
   return (
     <Card>
@@ -24,13 +25,14 @@ export default function LiveCrowdMonitor() {
       </CardTitle>
       <div className="mt-8">
         {chart.length > 0 ? (
-          <BarChart data={chart} ticks={niceTicks(Math.max(...chart.map((d) => d.value)))} highlight={(_, i) => hours[i].percent >= 40} tooltip={(d) => `${d.value} orang`} />
+          <BarChart data={chart} ticks={niceTicks(Math.max(...chart.map((d) => d.value)))}
+                    highlight={(d) => d.value >= capacity * 0.4} tooltip={(d) => `${d.value} orang`} />
         ) : (
           <p className="grid h-[174px] place-items-center rounded-2xl bg-paper px-6 text-center text-sm text-abu">
-            {ready ? "Grafik mulai terisi pukul 08.00, saat tiket pertama discan masuk." : "Memuat grafik..."}
+            {!ready ? (error ? "Tidak bisa terhubung ke server." : "Memuat grafik...") : "Prakiraan keramaian belum tersedia hari ini."}
           </p>
         )}
-        {chart.length > 0 && kosong && <p className="mt-4 text-center text-[13px] text-abu">Belum ada pengunjung yang discan masuk hari ini.</p>}
+        {chart.length > 0 && kosong && <p className="mt-4 text-center text-[13px] text-abu">Prakiraan keramaian belum tersedia hari ini.</p>}
       </div>
     </Card>
   );

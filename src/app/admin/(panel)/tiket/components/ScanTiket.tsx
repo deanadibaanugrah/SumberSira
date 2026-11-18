@@ -3,7 +3,7 @@ import type { FormEvent, RefObject } from "react";
 
 import ProgressBar from "@/components/charts/ProgressBar";
 import { Card, CardTitle, PrimaryButton } from "@/components/admin/ui";
-import { KAPASITAS, type useTiket } from "@/lib/tiket-store";
+import type { useTiket } from "@/lib/tiket-store";
 
 // Warna batang kapasitas sesuai status keramaian.
 const BAR = { Sepi: "bg-leaf", Sedang: "bg-leaf/30", Ramai: "bg-coral" };
@@ -51,7 +51,7 @@ export default function ScanTiket({ tiket, kode, onKode, onScan, inputRef, hasil
         <div className="flex flex-wrap items-end justify-between gap-3">
           <div>
             <p className="text-[13px] text-abu">Pengunjung di dalam sekarang</p>
-            <p className="mt-1 font-display text-[32px] font-semibold leading-none tabular-nums text-forest">{tiket.inside}<span className="ml-1.5 font-sans text-base font-normal text-abu">/ {KAPASITAS} orang</span></p>
+            <p className="mt-1 font-display text-[32px] font-semibold leading-none tabular-nums text-forest">{tiket.inside}<span className="ml-1.5 font-sans text-base font-normal text-abu">/ {tiket.capacity} orang</span></p>
           </div>
           <span className="inline-flex items-center gap-1.5 rounded-full border border-ink/10 bg-white px-3 py-1.5 text-xs font-semibold text-ink">
             <span className={`size-1.5 rounded-full ${BAR[tiket.label]}`} aria-hidden="true" />{tiket.label} · {tiket.percent}%

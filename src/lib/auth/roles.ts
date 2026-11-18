@@ -12,10 +12,13 @@ export type Permission =
   | "tiket"
   | "insight"
   | "galeri"
+  | "ulasan"
   | "faq"
   | "wahana:lihat"
   | "wahana:ubah"
-  | "akun";
+  | "staff"
+  | "akun"
+  | "booking:kelola";
 
 // Label peran yang tampil di kartu profil sidebar.
 export const ROLE_LABEL: Record<Role, string> = {
@@ -24,8 +27,9 @@ export const ROLE_LABEL: Record<Role, string> = {
 };
 
 // Izin tiap peran. Admin boleh semua; petugas loket hanya mengurus tiket, booking, dan melihat harga.
+// "booking:kelola" = menandai lunas / membatalkan pembayaran (admin saja; petugas hanya memantau status).
 const PERMISSIONS: Record<Role, Permission[]> = {
-  admin: ["dashboard", "booking", "tiket", "insight", "galeri", "faq", "wahana:lihat", "wahana:ubah", "akun"],
+  admin: ["dashboard", "booking", "tiket", "insight", "galeri", "ulasan", "faq", "wahana:lihat", "wahana:ubah", "staff", "akun", "booking:kelola"],
   petugas: ["dashboard", "booking", "tiket", "wahana:lihat", "akun"],
 };
 

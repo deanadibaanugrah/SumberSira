@@ -1,3 +1,5 @@
+"use client";
+
 import LogoMark from "@/components/Logo";
 
 import { CrowdWidget, JamBukaWidget, TiketWidget } from "./LoginWidgets";

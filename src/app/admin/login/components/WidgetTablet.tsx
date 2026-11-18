@@ -1,3 +1,5 @@
+"use client";
+
 import { CrowdWidget, JamBukaWidget, TiketWidget } from "./LoginWidgets";
 
 // Layar sedang (tablet/laptop kecil): widget live ditampilkan di bawah form.

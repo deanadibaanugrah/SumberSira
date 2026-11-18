@@ -1,6 +1,6 @@
 import LogoMark from "@/components/Logo";
 
-import { CrowdWidget, RatingWidget, TiketWidget } from "./LoginWidgets";
+import { CrowdWidget, JamBukaWidget, TiketWidget } from "./LoginWidgets";
 
 // Kiri (layar lebar): cerita singkat + widget live.
 export default function LoginIntro() {
@@ -17,12 +17,12 @@ export default function LoginIntro() {
         Kelola wisata mata air dalam satu dasbor
       </h1>
       <p className="mt-4 max-w-[480px] text-[15px] leading-relaxed text-white/80 animate-fade-up" style={{ animationDelay: "200ms" }}>
-        Pantau keramaian dari tiket online, konfirmasi booking, dan rangkum ulasan pengunjung dengan AI.
+        Pantau keramaian dari tiket yang discan, konfirmasi booking, dan jawab pertanyaan pengunjung.
       </p>
       <div className="mt-10 grid max-w-[560px] grid-cols-2 gap-4">
         <CrowdWidget className="row-span-2 self-center" />
         <TiketWidget />
-        <RatingWidget />
+        <JamBukaWidget />
       </div>
     </section>
   );

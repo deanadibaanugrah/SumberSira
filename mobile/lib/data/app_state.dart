@@ -1,6 +1,3 @@
-import 'dart:convert';
-import 'dart:math';
-
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -8,10 +5,11 @@ import '../models/booking.dart';
 import '../models/review.dart';
 import '../models/ticket.dart';
 import '../utils/format.dart';
-import 'dummy_data.dart';
+import 'api_client.dart';
 
-// Penyimpanan data sederhana tanpa backend. Layar yang mendengarkan AppState
-// otomatis diperbarui (ChangeNotifier) saat ada tiket baru, booking baru, atau tiket discan.
+// Penyimpanan data aplikasi. Tiket, booking, dan tarif diambil dari backend; Live Crowd dipisah ke CrowdState
+// (data/crowd_state.dart). Layar yang mendengarkan AppState otomatis diperbarui (ChangeNotifier) saat ada
+// tiket baru, booking baru, atau tiket discan petugas.
 // Aplikasi pengunjung tidak memakai login: riwayat tiket dan booking dikelompokkan per nomor WhatsApp.
 class AppState extends ChangeNotifier {
   AppState._();
@@ -19,40 +17,53 @@ class AppState extends ChangeNotifier {
 
   static const int capacity = 300;
 
-  final List<Ticket> tickets = DummyData.seedTickets();
+  final List<Ticket> tickets = [];
   final List<Booking> bookings = [];
-  final List<Review> reviews = [...DummyData.reviews];
+  // Ulasan dari server (GET /reviews). Rata-rata dan jumlahnya juga dari server.
+  List<Review> reviews = [];
+  double reviewRating = 0;
+  int reviewCount = 0;
+  bool reviewsReady = false;
+  bool reviewsLoading = false;
+  String? reviewsError;
 
-  // Kunci data yang disimpan di perangkat, tetap ada walau aplikasi ditutup.
+  // Kunci pengaturan yang disimpan di perangkat, tetap ada walau aplikasi ditutup.
+  // Riwayat tidak lagi disimpan di perangkat: tiket dan booking dibaca dari server per nomor WhatsApp.
+  // Kunci riwayat lama (riwayat_tiket/riwayat_booking) sengaja dibiarkan terabaikan tanpa galat.
   static const _waKey = 'whatsapp_terakhir';
   static const _reminderKey = 'pengingat_jam_sepi';
   static const _onboardingKey = 'sudah_onboarding';
-  static const _ticketsKey = 'riwayat_tiket';
-  static const _bookingsKey = 'riwayat_booking';
   String savedWhatsapp = '';
   bool quietReminder = false;
   bool onboardingDone = false;
 
-  // [P6 Plugin shared_preferences] Membaca pengaturan dan riwayat tersimpan saat aplikasi dibuka.
+  // [P6 Plugin shared_preferences] Membaca pengaturan tersimpan saat aplikasi dibuka.
   // [P2 Null Safety] Operator ?? memberi nilai bawaan kalau data belum pernah disimpan.
   Future<void> loadSettings() async {
     final prefs = await SharedPreferences.getInstance();
     savedWhatsapp = prefs.getString(_waKey) ?? '';
     quietReminder = prefs.getBool(_reminderKey) ?? false;
     onboardingDone = prefs.getBool(_onboardingKey) ?? false;
-    for (final raw in prefs.getStringList(_ticketsKey) ?? const <String>[]) {
-      tickets.add(Ticket.fromJson(jsonDecode(raw) as Map<String, dynamic>));
-    }
-    for (final raw in prefs.getStringList(_bookingsKey) ?? const <String>[]) {
-      bookings.add(Booking.fromJson(jsonDecode(raw) as Map<String, dynamic>));
-    }
   }
 
-  // Menyimpan tiket dan booking milik perangkat ini sebagai daftar teks JSON.
-  Future<void> _saveHistory() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setStringList(_ticketsKey, [for (final t in tickets.where((t) => t.mine)) jsonEncode(t.toJson())]);
-    await prefs.setStringList(_bookingsKey, [for (final b in bookings) jsonEncode(b.toJson())]);
+  // Tarif tiket dan parkir dari server (GET /pricing). Bila server tidak terjangkau,
+  // dipakai harga bawaan di model (Ticket.pricePerPerson dan tarif di enum Parking).
+  int hargaTiket = Ticket.pricePerPerson;
+  final Map<Parking, int> parkirTarif = {for (final p in Parking.values) p: p.price};
+
+  // Mengambil tarif terbaru dari server. Gagal diam-diam: tarif bawaan tetap dipakai.
+  Future<void> refreshPricing() async {
+    try {
+      final p = await ApiClient.fetchPricing();
+      hargaTiket = p.ticketPricePerPerson;
+      for (final t in p.parking) {
+        final cocok = Parking.values.where((v) => v.name == t.key).toList();
+        if (cocok.isNotEmpty) parkirTarif[cocok.first] = t.price;
+      }
+      notifyListeners();
+    } on ApiException {
+      // server tidak terjangkau: tarif bawaan
+    }
   }
 
   // Menyimpan pilihan pengingat jam sepi (Switch di Profil).
@@ -96,51 +107,100 @@ class AppState extends ChangeNotifier {
     return bookings.where((b) => nomorWa(b.whatsapp) == wa).toList().reversed.toList();
   }
 
-  // Live Crowd = jumlah orang dari tiket yang sudah discan masuk, dibagi kapasitas.
-  int get inside => tickets.where((t) => t.status == TicketStatus.inside).fold(0, (sum, t) => sum + t.people);
-  int get percent => (inside / capacity * 100).round();
-  String get crowdLabel => labelFor(percent);
-
-  // Label keramaian dari persen kapasitas: di bawah 40% Sepi, sampai 75% Sedang, di atasnya Ramai.
-  static String labelFor(int percent) => percent < 40 ? 'Sepi' : (percent <= 75 ? 'Sedang' : 'Ramai');
-
-  // Membuat tiket baru dari form. Kodenya melanjutkan nomor tiket terakhir.
-  Ticket buyTicket({required String name, required String whatsapp, required int adults, required int kids, required Parking parking, PaymentMethod payment = PaymentMethod.qris, String arrival = ''}) {
-    final next = tickets.map((t) => int.parse(t.code.substring(3))).reduce(max) + 1;
-    final ticket = Ticket(
-      code: 'TK-$next',
-      name: name.trim(),
-      whatsapp: nomorWa(whatsapp),
-      adults: adults,
-      kids: kids,
-      parking: parking,
-      payment: payment,
-      arrival: arrival,
-      boughtAt: jamSekarang(),
-      date: tanggalHariIni(),
-      mine: true,
-    );
-    tickets.add(ticket);
+  // Beli tiket lewat server. Harga dan kode ditentukan server, jadi tiket yang tampil sama dengan yang dilihat petugas.
+  // Melempar ApiException bila gagal (server tidak terjangkau atau isian ditolak).
+  Future<Ticket> buyTicketOnline({required String name, required String whatsapp, required int adults, required int kids, required Parking parking, PaymentMethod payment = PaymentMethod.qris, String arrival = ''}) async {
+    final ticket = await ApiClient.buyTicket(name: name, whatsapp: nomorWa(whatsapp), adults: adults, kids: kids, parking: parking, payment: payment, arrival: arrival);
+    _upsert(ticket);
     notifyListeners();
-    _saveHistory();
     return ticket;
   }
 
-  // Menyimpan booking setelah pembayaran QRIS selesai. Kode: SS-tanggal-nomor urut, mis. SS-20261014-043.
-  Booking addBooking(BookingRequest request) {
-    final booking = Booking(
-      code: 'SS-${tanggalKode()}-${(43 + bookings.length).toString().padLeft(3, '0')}',
-      name: request.name.trim(),
-      whatsapp: nomorWa(request.whatsapp),
-      slot: request.draft.slot,
-      lines: request.draft.lines,
-      orderedAt: jamSekarang(),
-      date: tanggalHariIni(),
-    );
-    bookings.add(booking);
+  // Menambah tiket, atau mengganti yang kodenya sama.
+  void _upsert(Ticket ticket) {
+    final i = tickets.indexWhere((t) => t.code == ticket.code);
+    i >= 0 ? tickets[i] = ticket : tickets.add(ticket);
+  }
+
+  // Riwayat tiket satu nomor WhatsApp dari server (tanpa login). Hasilnya digabung ke daftar di memori;
+  // tidak ada lagi salinan riwayat di perangkat.
+  Future<void> syncHistory(String whatsapp) async {
+    final wa = nomorWa(whatsapp);
+    if (wa.isEmpty) return;
+    final tiket = await ApiClient.fetchTickets(wa);
+    final pesanan = await ApiClient.fetchBookings(wa);
+    for (final t in tiket) {
+      _upsert(t);
+    }
+    for (final b in pesanan) {
+      _upsertBooking(b);
+    }
     notifyListeners();
-    _saveHistory();
+  }
+
+  // Memperbarui satu tiket dari server (GET /tickets/:code?whatsapp=): status check-in dan status
+  // pembayaran bisa berubah kapan saja (petugas memindai, tunai dikonfirmasi di loket). Tiket yang
+  // belum ada di perangkat diadopsi bila nomor WhatsApp tersimpan cocok. Gagal diam-diam: tampilan
+  // tetap memakai data terakhir.
+  Future<void> refreshTicket(String code) async {
+    final t = find(code);
+    // Tiket lama tanpa data server tidak perlu diperbarui.
+    if (t != null && !t.synced) return;
+    final wa = (t != null && t.whatsapp.isNotEmpty) ? t.whatsapp : savedWhatsapp;
+    if (wa.isEmpty) return;
+    try {
+      final latest = await ApiClient.fetchTicket(code, wa);
+      final berubah = t == null ||
+          t.status != latest.status ||
+          t.checkInAt != latest.checkInAt ||
+          t.paymentStatus != latest.paymentStatus;
+      _upsert(latest);
+      if (berubah) notifyListeners();
+    } on ApiException {
+      // server tidak terjangkau atau tiket tidak dikenal: tampilkan status terakhir
+    }
+  }
+
+  // Membuat booking di server (dipanggil dari Checkout, saat pengguna menekan tombol bayar).
+  // Kode, total, dan harga per item ditentukan server; jika ada wahana dinonaktifkan admin,
+  // melempar ApiException dengan kode RIDE_UNAVAILABLE.
+  Future<Booking> createBookingOnline({required BookingDraft draft, required String name, required String whatsapp}) async {
+    final item = [for (final l in draft.lines) if (l.rideId != null) (rideId: l.rideId!, qty: l.qty)];
+    final booking = await ApiClient.createBooking(name: name, whatsapp: nomorWa(whatsapp), slot: draft.slot, items: item);
+    _upsertBooking(booking);
+    notifyListeners();
     return booking;
+  }
+
+  // Menambah booking, atau mengganti yang kodenya sama.
+  void _upsertBooking(Booking booking) {
+    final i = bookings.indexWhere((b) => b.code == booking.code);
+    i >= 0 ? bookings[i] = booking : bookings.add(booking);
+  }
+
+  // Memperbarui satu booking dari server (GET /bookings/:code): status pembayaran bisa berubah.
+  // Gagal diam-diam: faktur tetap memakai data terakhir.
+  Future<void> refreshBooking(String code) async {
+    final b = findBooking(code);
+    if (b != null && !b.synced) return;
+    final wa = (b != null && b.whatsapp.isNotEmpty) ? b.whatsapp : savedWhatsapp;
+    if (wa.isEmpty) return;
+    try {
+      final latest = await ApiClient.fetchBooking(code, wa);
+      final berubah = b == null || b.paymentStatus != latest.paymentStatus;
+      _upsertBooking(latest);
+      if (berubah) notifyListeners();
+    } on ApiException {
+      // server tidak terjangkau: tampilkan data terakhir
+    }
+  }
+
+  // Penanda bahwa daftar wahana perlu dimuat ulang dari server (mis. ada wahana dinonaktifkan admin
+  // setelah layar dibuka). BookingController mendengarkan perubahan penanda ini.
+  int wahanaRevision = 0;
+  void tandaiWahanaStale() {
+    wahanaRevision++;
+    notifyListeners();
   }
 
   Ticket? find(String code) {
@@ -157,29 +217,31 @@ class AppState extends ChangeNotifier {
     return null;
   }
 
-  // Simulasi scan petugas di pintu masuk: status jadi Di dalam dan Live Crowd naik.
-  void checkIn(String code) {
-    final t = find(code);
-    if (t == null || t.status != TicketStatus.waiting) return;
-    t.status = TicketStatus.inside;
-    t.checkInAt = jamSekarang();
+  // Mengambil ulasan terbaru, rata-rata bintang, dan jumlah ulasan dari server.
+  // Gagal terhubung: data terakhir tetap tampil dan pesan galat disimpan untuk layar.
+  Future<void> refreshReviews() async {
+    reviewsLoading = true;
+    reviewsError = null;
     notifyListeners();
-    if (t.mine) _saveHistory();
+    try {
+      final summary = await ApiClient.fetchReviews();
+      reviews = summary.items;
+      reviewRating = summary.rating;
+      reviewCount = summary.count;
+      reviewsReady = true;
+    } on ApiException catch (e) {
+      reviewsError = e.message;
+    } finally {
+      reviewsLoading = false;
+      notifyListeners();
+    }
   }
 
-  // Ulasan baru tampil paling atas (disimpan di memori saja).
-  void addReview(Review review) {
-    reviews.insert(0, review);
-    notifyListeners();
+  // Kirim ulasan baru ke server (POST /reviews), lalu muat ulang daftar dan rata-ratanya.
+  // Nama memakai pemesan tiket terakhir di perangkat; bila belum ada tiket, "Pengunjung".
+  Future<void> submitReview({required int stars, required String text}) async {
+    final name = myTickets.isNotEmpty ? myTickets.first.name : 'Pengunjung';
+    await ApiClient.postReview(name: name, stars: stars, text: text);
+    await refreshReviews();
   }
-
-  // Rata-rata bintang, dihitung dari ringkasan 132 ulasan (4,8) ditambah ulasan baru di aplikasi.
-  double get rating {
-    const baseCount = 132, baseRating = 4.8;
-    final added = reviews.length - DummyData.reviews.length;
-    final newStars = reviews.take(added).fold(0, (sum, r) => sum + r.stars);
-    return (baseRating * baseCount + newStars) / (baseCount + added);
-  }
-
-  int get reviewCount => 132 + reviews.length - DummyData.reviews.length;
 }

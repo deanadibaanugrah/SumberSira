@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
+import '../data/api_client.dart';
 import '../data/app_state.dart';
 import '../models/booking.dart';
 import '../models/ticket.dart';
@@ -35,6 +36,9 @@ class _TicketsTabState extends State<TicketsTab> {
   // Nomor yang sedang ditampilkan riwayatnya, dan nomor tersimpan terakhir yang sudah diketahui.
   late String _query;
   late String _lastSaved;
+  // Pencarian riwayat ke server sedang berjalan, dan pesan bila server tidak terjangkau.
+  bool _syncing = false;
+  String? _syncError;
 
   @override
   void initState() {
@@ -44,6 +48,22 @@ class _TicketsTabState extends State<TicketsTab> {
     _query = _lastSaved;
     _whatsapp = TextEditingController(text: _lastSaved);
     _state.addListener(_onStateChanged);
+    _sync(_query);
+  }
+
+  // Mengambil riwayat tiket nomor ini dari server. Bila gagal, riwayat yang tersimpan di perangkat tetap tampil.
+  Future<void> _sync(String wa) async {
+    if (wa.isEmpty) return;
+    setState(() {
+      _syncing = true;
+      _syncError = null;
+    });
+    try {
+      await _state.syncHistory(wa);
+    } on ApiException catch (e) {
+      if (mounted) _syncError = e.offline ? 'Tidak dapat terhubung ke server.' : e.message;
+    }
+    if (mounted) setState(() => _syncing = false);
   }
 
   // Setelah membeli tiket atau booking dengan nomor baru, kolom pencarian ikut berganti ke nomor itu.
@@ -69,6 +89,7 @@ class _TicketsTabState extends State<TicketsTab> {
     if (!_formKey.currentState!.validate()) return;
     FocusScope.of(context).unfocus();
     setState(() => _query = nomorWa(_whatsapp.text));
+    _sync(_query);
   }
 
   @override
@@ -131,7 +152,7 @@ class _TicketsTabState extends State<TicketsTab> {
                           const Text('Tunjukkan QR di pintu, tanpa antre', style: AppText.footnote),
                           const SizedBox(height: 10),
                           Row(crossAxisAlignment: CrossAxisAlignment.baseline, textBaseline: TextBaseline.alphabetic, children: [
-                            Text(rupiah(Ticket.pricePerPerson), style: AppText.hero(28)),
+                            Text(rupiah(_state.hargaTiket), style: AppText.hero(28)),
                             const SizedBox(width: 4),
                             const Text('/ orang', style: AppText.footnote),
                           ]),
@@ -178,6 +199,8 @@ class _TicketsTabState extends State<TicketsTab> {
           ]),
         ),
         const SizedBox(height: 8),
+        if (_syncing) const Padding(padding: EdgeInsets.only(top: 8), child: LinearProgressIndicator(minHeight: 3)),
+        if (_syncError != null) Padding(padding: const EdgeInsets.only(top: 8), child: Text(_syncError!, style: AppText.footnote.copyWith(color: AppColors.coral))),
         if (_query.isEmpty)
           _empty('Masukkan nomor WhatsApp yang dipakai saat membeli untuk melihat riwayat tiket dan invoice.')
         else if (tickets.isEmpty && bookings.isEmpty)

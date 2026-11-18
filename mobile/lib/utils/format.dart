@@ -8,12 +8,6 @@ String rupiah(int value) => _rupiah.format(value);
 // Butuh initializeDateFormatting('id_ID') yang sudah dipanggil di main().
 String tanggalHariIni() => DateFormat('EEEE, d MMMM yyyy', 'id_ID').format(DateTime.now());
 
-// Jam sekarang dengan format 10.42.
-String jamSekarang() => DateFormat('HH.mm').format(DateTime.now());
-
-// Tanggal ringkas untuk kode booking, mis. 20261014.
-String tanggalKode() => DateFormat('yyyyMMdd').format(DateTime.now());
-
 // Menyamakan penulisan nomor WhatsApp supaya pencarian riwayat tidak gagal karena beda format.
 // "+62 812-3456-7890", "62812..." dan "0812..." semuanya menjadi "081234567890".
 String nomorWa(String value) {

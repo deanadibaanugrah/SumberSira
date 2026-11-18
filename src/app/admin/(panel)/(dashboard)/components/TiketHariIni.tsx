@@ -5,7 +5,7 @@ import Link from "next/link";
 
 import ProgressBar from "@/components/charts/ProgressBar";
 import { Avatar } from "@/components/admin/ui";
-import { KAPASITAS, jumlahOrang, useTiket } from "@/lib/tiket-store";
+import { jumlahOrang, useTiket } from "@/lib/tiket-store";
 
 // Bagian dashboard yang ikut berubah saat tiket discan (data dari src/lib/tiket-store.js).
 // Warna batang keramaian sesuai status.
@@ -41,7 +41,7 @@ export default function TiketHariIni() {
 
       <p className="mt-5 flex items-end gap-2">
         <span className="font-display text-[40px] font-semibold leading-none tabular-nums text-forest">{t.inside}</span>
-        <span className="pb-1 text-sm text-abu">/ {KAPASITAS} orang di dalam</span>
+        <span className="pb-1 text-sm text-abu">/ {t.capacity} orang di dalam</span>
       </p>
       <div className="mt-3">
         <ProgressBar value={t.percent} fillClass={BAR[t.label]} trackClass="bg-ink/10" height="h-3" />

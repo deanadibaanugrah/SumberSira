@@ -1,20 +1,18 @@
-import { CalendarCheck, Star, Ticket, TrendingUp, Users } from "lucide-react";
-
 import { StatCard } from "@/components/admin/ui";
-import { STATS } from "@/data/dummy";
 
+import BookingStat from "./BookingStat";
 import LiveCrowdStat from "./LiveCrowdStat";
+import TiketTerjualStat from "./TiketTerjualStat";
+import WahanaTerlarisStat from "./WahanaTerlarisStat";
 
-// Ikon untuk 4 kartu ringkasan.
-const STAT_ICONS = [CalendarCheck, Ticket, Users, Star];
-
-// Baris 1: empat kartu ringkasan. Kartu ketiga (keramaian) memakai angka live dari tiket.
+// Baris 1: empat kartu ringkasan, angkanya live dari backend (dashboard, tiket, Live Crowd).
 export default function StatRingkasan() {
   return (
     <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
-      {STATS.map((s, i) => (i === 2
-        ? <LiveCrowdStat key={s.label} />
-        : <StatCard key={s.label} variant="tall" icon={STAT_ICONS[i]} solid={i === 0} trendIcon={TrendingUp} {...s} />))}
+      <BookingStat />
+      <WahanaTerlarisStat />
+      <LiveCrowdStat />
+      <TiketTerjualStat />
     </div>
   );
 }

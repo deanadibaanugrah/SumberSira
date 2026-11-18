@@ -1,25 +1,26 @@
 import { Download } from "lucide-react";
 
+import PolaKeramaian from "@/components/admin/PolaKeramaian";
 import { AdminHeader, PrimaryButton } from "@/components/admin/ui";
 import { requirePermission } from "@/lib/auth/dal";
+import { can } from "@/lib/auth/roles";
 
 import BookingMasuk from "./components/BookingMasuk";
-import InsightAi from "./components/InsightAi";
 import LiveCrowdMonitor from "./components/LiveCrowdMonitor";
 import PendapatanMingguan from "./components/PendapatanMingguan";
-import PolaKeramaian from "./components/PolaKeramaian";
+import RingkasanHariIni from "./components/RingkasanHariIni";
 import StatRingkasan from "./components/StatRingkasan";
 import TiketHariIni from "./components/TiketHariIni";
 import Today from "./components/Today";
 import WahanaPopuler from "./components/WahanaPopuler";
 
-// Admin 1/7: Dashboard Overview. Kartu ringkasan, grafik keramaian beranimasi, Insight AI, booking masuk,
+// Admin 1/7: Dashboard Overview. Kartu ringkasan, grafik keramaian beranimasi, ringkasan hari ini, booking masuk,
 // lalu di bawah: heatmap keramaian seminggu, tiket online hari ini (live), wahana terpopuler, dan pendapatan 7 hari.
 // Tiap bagian ada di folder components/, halaman ini hanya menyusun barisnya.
 // Folder (dashboard) adalah route group, jadi alamatnya tetap /admin.
 export default async function DashboardPage() {
   // Halaman server: cek login dan izin lewat DAL sebelum data dashboard ditampilkan.
-  await requirePermission("dashboard");
+  const admin = await requirePermission("dashboard");
   return (
     <>
       <AdminHeader title="Halo, Pak Yono!"
@@ -30,10 +31,10 @@ export default async function DashboardPage() {
         {/* Baris 1: empat kartu ringkasan */}
         <StatRingkasan />
 
-        {/* Baris 2: grafik pengunjung per jam dan kartu Insight AI */}
+        {/* Baris 2: grafik pengunjung per jam dan kartu ringkasan hari ini */}
         <div className="grid gap-5 xl:grid-cols-[736fr_380fr]">
           <LiveCrowdMonitor />
-          <InsightAi />
+          <RingkasanHariIni canInsight={can(admin.role, "insight")} />
         </div>
 
         {/* Baris 3: tabel 3 booking sewa terbaru */}

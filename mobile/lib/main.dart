@@ -1,7 +1,10 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:intl/date_symbol_data_local.dart';
 
 import 'data/app_state.dart';
+import 'data/chat_controller.dart';
 import 'models/booking.dart';
 import 'screens/about_screen.dart';
 import 'screens/ai_photo_screen.dart';
@@ -22,9 +25,21 @@ import 'utils/routes.dart';
 // serta riwayat yang tersimpan di perangkat (shared_preferences) sebelum aplikasi tampil.
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await initializeDateFormatting('id_ID');
-  await AppState.instance.loadSettings();
+  // Setiap langkah persiapan dibungkus try/catch: kegagalan kecil (format tanggal atau
+  // penyimpanan lokal) tidak boleh membuat aplikasi berhenti sebelum runApp sehingga layar putih.
+  try {
+    await initializeDateFormatting('id_ID');
+  } catch (e) {
+    debugPrint('initializeDateFormatting gagal: $e');
+  }
+  try {
+    await AppState.instance.loadSettings();
+  } catch (e) {
+    debugPrint('loadSettings gagal: $e');
+  }
   runApp(const SumberSiraApp());
+  // Pertanyaan cepat dimuat setelah UI tampil. Bila server belum terjangkau, daftar bawaan tetap dipakai.
+  unawaited(ChatController.instance.init());
 }
 
 // Akar aplikasi: tema, daftar rute (navigasi antar layar), dan layar pertama (Splash).
@@ -56,7 +71,7 @@ class SumberSiraApp extends StatelessWidget {
         return switch (uri.path) {
           AppRoutes.eticket when args is String => MaterialPageRoute(settings: settings, builder: (_) => ETicketScreen(code: args)),
           AppRoutes.checkout when args is BookingDraft => MaterialPageRoute(settings: settings, builder: (_) => CheckoutScreen(draft: args)),
-          AppRoutes.payment when args is BookingRequest => MaterialPageRoute(settings: settings, builder: (_) => PaymentScreen(request: args)),
+          AppRoutes.payment when args is Booking => MaterialPageRoute(settings: settings, builder: (_) => PaymentScreen(booking: args)),
           AppRoutes.invoice when args is String => MaterialPageRoute(settings: settings, builder: (_) => InvoiceScreen(code: args)),
           _ => null,
         };

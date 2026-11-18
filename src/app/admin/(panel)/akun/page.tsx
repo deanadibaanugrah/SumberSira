@@ -1,6 +1,7 @@
 import { AdminHeader } from "@/components/admin/ui";
 import { getMySessions, requirePermission } from "@/lib/auth/dal";
 
+import GantiPassword from "./components/GantiPassword";
 import Profil from "./components/Profil";
 import SesiLogin from "./components/SesiLogin";
 
@@ -17,6 +18,9 @@ export default async function AkunPage() {
       <div className="mt-6 grid gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)]">
         <Profil admin={admin} />
         <SesiLogin sessions={sessions} />
+      </div>
+      <div className="mt-5">
+        <GantiPassword />
       </div>
     </>
   );

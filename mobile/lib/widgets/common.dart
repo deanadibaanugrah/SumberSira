@@ -145,7 +145,8 @@ class TintedButton extends StatelessWidget {
 
   final String label;
   final IconData icon;
-  final VoidCallback onPressed;
+  // null = tombol nonaktif (mis. saat foto sedang diproses).
+  final VoidCallback? onPressed;
   final double height;
 
   @override
@@ -260,7 +261,8 @@ class GroupedList extends StatelessWidget {
       if (header != null) SectionLabel(header!, top: top),
       ClipRRect(
         borderRadius: BorderRadius.circular(AppSpace.radius),
-        child: ColoredBox(
+        // Material (bukan ColoredBox) agar latar belakang dan efek sentuh ListTile di dalamnya tetap terlihat.
+        child: Material(
           color: Colors.white,
           child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
             for (final (i, row) in children.indexed) ...[
@@ -380,13 +382,15 @@ class StatusChip extends StatelessWidget {
 
 // Isi bar bawah form pemesanan (kaca mengambang): total di kiri, tombol aksi kaca Hijau Tua di kanan.
 class TotalBar extends StatelessWidget {
-  const TotalBar({super.key, required this.label, required this.amount, required this.button, required this.onPressed, this.buttonWidth = 190});
+  const TotalBar({super.key, required this.label, required this.amount, required this.button, required this.onPressed, this.buttonWidth = 190, this.loading = false});
 
   final String label;
   final int amount;
   final String button;
   final VoidCallback onPressed;
   final double buttonWidth;
+  // True saat menunggu server: tombol menampilkan loading dan tidak bisa ditekan dua kali.
+  final bool loading;
 
   @override
   Widget build(BuildContext context) {
@@ -400,7 +404,7 @@ class TotalBar extends StatelessWidget {
           ]),
         ),
         const SizedBox(width: 12),
-        SizedBox(width: buttonWidth, child: PrimaryButton(label: button, glass: true, onPressed: onPressed)),
+        SizedBox(width: buttonWidth, child: PrimaryButton(label: button, glass: true, loading: loading, onPressed: onPressed)),
       ]),
     );
   }

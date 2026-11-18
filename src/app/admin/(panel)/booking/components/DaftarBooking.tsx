@@ -1,23 +1,32 @@
+"use client";
+
 import { Check } from "lucide-react";
 
 import { Avatar, Card, CardTitle, FilterPills, StatusPill } from "@/components/admin/ui";
-import { BOOKINGS, BOOKING_TOTALS } from "@/data/dummy";
+import type { Booking } from "@/lib/booking-store";
 
-// Pilihan filter status booking.
-const FILTERS = ["Semua", "Baru", "Diproses", "Selesai"];
+// Pilihan filter status booking. "Batal" mencakup kedaluwarsa dan dibatalkan.
+const FILTERS = ["Semua", "Menunggu", "Lunas", "Batal"];
 
 type DaftarBookingProps = {
-  visible: typeof BOOKINGS;
-  selectedId: number;
-  onSelect: (id: number) => void;
+  visible: Booking[];
+  selectedCode: string | null;
+  onSelect: (code: string) => void;
   filter: string;
   onFilter: (value: string) => void;
   query: string;
   onQuery: (value: string) => void;
+  total: number;
+  page: number;
+  onPage: (page: number) => void;
+  ready: boolean;
+  error: string | null;
 };
 
 // Daftar booking: filter status, kotak cari (layar kecil), tabel, dan nomor halaman.
-export default function DaftarBooking({ visible, selectedId, onSelect, filter, onFilter, query, onQuery }: DaftarBookingProps) {
+export default function DaftarBooking({ visible, selectedCode, onSelect, filter, onFilter, query, onQuery, total, page, onPage, ready, error }: DaftarBookingProps) {
+  // Nomor halaman mengikuti total data (100 booking per halaman).
+  const pages = Math.max(1, Math.ceil(total / 100));
   return (
     <Card className="flex flex-col px-4! pt-5!">
       <div className="px-2">
@@ -41,10 +50,10 @@ export default function DaftarBooking({ visible, selectedId, onSelect, filter, o
           </thead>
           <tbody>
             {visible.map((r) => {
-              const active = r.id === selectedId;
+              const active = r.code === selectedCode;
               return (
-                <tr key={r.id} onClick={() => onSelect(r.id)} tabIndex={0} aria-label={`Lihat detail booking ${r.name}`}
-                    onKeyDown={(e) => e.key === "Enter" && onSelect(r.id)}
+                <tr key={r.code} onClick={() => onSelect(r.code)} tabIndex={0} aria-label={`Lihat detail booking ${r.name}`}
+                    onKeyDown={(e) => e.key === "Enter" && onSelect(r.code)}
                     className={`cursor-pointer outline-none transition [&>td:first-child]:rounded-l-2xl [&>td:last-child]:rounded-r-2xl [&>td]:border-y-[1.5px] [&>td:first-child]:border-l-[1.5px] [&>td:last-child]:border-r-[1.5px] focus-visible:[&>td]:border-leaf ${
                       active ? "bg-leaf/12 [&>td]:border-leaf" : "bg-paper hover:bg-leaf/12 [&>td]:border-transparent"}`}>
                   <td className="h-[60px] pl-4">
@@ -55,30 +64,32 @@ export default function DaftarBooking({ visible, selectedId, onSelect, filter, o
                       <Avatar name={r.name} size={32} />
                       <span>
                         <span className="block font-semibold leading-tight text-ink">{r.name}</span>
-                        <span className="block text-xs text-abu">{r.qty}</span>
+                        <span className="block text-xs text-abu">{r.lines.reduce((s, l) => s + l.qty, 0)} item</span>
                       </span>
                     </span>
                   </td>
-                  <td className="text-ink">{r.items}</td>
-                  <td className="font-mono text-ink">{r.time}</td>
+                  <td className="text-ink">{r.lines.map((l) => `${l.qty}x ${l.name}`).join(", ") || "-"}</td>
+                  <td className="font-mono text-ink">{r.slotLabel}</td>
                   <td className="pr-4"><StatusPill status={r.status} /></td>
                 </tr>
               );
             })}
             {visible.length === 0 && (
-              <tr><td colSpan={4} className="rounded-2xl bg-paper px-5 py-10 text-center text-abu">Tidak ada booking yang cocok.</td></tr>
+              <tr><td colSpan={4} className="rounded-2xl bg-paper px-5 py-10 text-center text-abu">
+                {!ready ? (error ? "Tidak bisa terhubung ke server." : "Memuat booking...") : "Tidak ada booking yang cocok."}
+              </td></tr>
             )}
           </tbody>
         </table>
       </div>
 
       <div className="mt-auto flex flex-wrap items-center justify-between gap-3 px-2 pt-6">
-        <p className="text-sm text-abu">Menampilkan {visible.length} dari {BOOKING_TOTALS.hariIni} booking</p>
-        {/* Data contoh hanya satu halaman; nomor halaman lain ditampilkan sebagai gambaran. */}
+        <p className="text-sm text-abu">Menampilkan {visible.length} dari {total} booking</p>
+        {/* Nomor halaman mengikuti jumlah data; halaman aktif disorot dan bisa diklik */}
         <div className="flex gap-2 text-sm font-semibold" aria-label="Halaman">
-          {[1, 2, 3, 4].map((n) => (
-            <span key={n} aria-current={n === 1 ? "page" : undefined}
-                  className={`grid size-10 place-items-center rounded-full ${n === 1 ? "bg-forest text-white" : "bg-paper text-ink"}`}>{n}</span>
+          {Array.from({ length: pages }, (_, i) => i + 1).map((n) => (
+            <button key={n} type="button" aria-current={n === page ? "page" : undefined} onClick={() => onPage(n)}
+                    className={`grid size-10 place-items-center rounded-full transition ${n === page ? "bg-forest text-white" : "bg-paper text-ink hover:bg-leaf/12"}`}>{n}</button>
           ))}
         </div>
       </div>

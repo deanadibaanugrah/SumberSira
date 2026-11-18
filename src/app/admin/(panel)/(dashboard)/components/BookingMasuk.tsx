@@ -1,11 +1,17 @@
+"use client";
+
 import { Ellipsis } from "lucide-react";
 import Link from "next/link";
 
 import { Avatar, Card, CardTitle, StatusPill } from "@/components/admin/ui";
-import { BOOKINGS } from "@/data/dummy";
+import { terbaru, useBooking } from "@/lib/booking-store";
 
-// Tabel 3 booking sewa terbaru dengan tautan ke halaman Booking.
+// Tabel 3 booking sewa terbaru dari backend, dengan tautan ke halaman Booking.
 export default function BookingMasuk() {
+  const { rows, ready } = useBooking();
+  const data = terbaru(rows).slice(0, 3);
+  // Daftar item sewa satu booking, mis. "2x Ban Besar, 1x Loker".
+  const items = (b: (typeof data)[number]) => b.lines.map((l) => `${l.qty}x ${l.name}`).join(", ") || "-";
   return (
     <Card className="px-4! pb-2! pt-5!">
       <CardTitle className="px-2"
@@ -24,13 +30,13 @@ export default function BookingMasuk() {
             </tr>
           </thead>
           <tbody>
-            {BOOKINGS.slice(0, 3).map((b) => (
-              <tr key={b.id} className="bg-paper [&>td:first-child]:rounded-l-2xl [&>td:last-child]:rounded-r-2xl">
+            {data.map((b) => (
+              <tr key={b.code} className="bg-paper [&>td:first-child]:rounded-l-2xl [&>td:last-child]:rounded-r-2xl">
                 <td className="h-10 py-1 pl-3">
                   <span className="flex items-center gap-3"><Avatar name={b.name} size={28} /><span className="font-semibold text-ink">{b.name}</span></span>
                 </td>
-                <td className="text-ink">{b.items}</td>
-                <td className="font-mono text-ink">{b.time}</td>
+                <td className="text-ink">{items(b)}</td>
+                <td className="font-mono text-ink">{b.slotLabel}</td>
                 <td><StatusPill status={b.status} /></td>
                 <td className="pr-3 text-right">
                   <Link href="/admin/booking" aria-label={`Buka booking ${b.name}`} className="inline-grid size-8 place-items-center rounded-full text-abu hover:bg-white">
@@ -39,6 +45,12 @@ export default function BookingMasuk() {
                 </td>
               </tr>
             ))}
+            {!ready && (
+              <tr><td colSpan={5} className="rounded-2xl bg-paper px-5 py-8 text-center text-abu">Memuat booking...</td></tr>
+            )}
+            {ready && data.length === 0 && (
+              <tr><td colSpan={5} className="rounded-2xl bg-paper px-5 py-8 text-center text-abu">Belum ada booking.</td></tr>
+            )}
           </tbody>
         </table>
       </div>

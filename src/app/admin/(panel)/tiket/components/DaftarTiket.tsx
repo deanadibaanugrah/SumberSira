@@ -1,8 +1,8 @@
-import { LogIn, LogOut } from "lucide-react";
+import { Banknote, LogIn, LogOut } from "lucide-react";
 
 import { Card, CardTitle, FilterPills, StatusPill } from "@/components/admin/ui";
 import { rupiah } from "@/lib/format";
-import { PARKIR, checkIn, checkOut, jumlahOrang, type Ticket, type useTiket } from "@/lib/tiket-store";
+import { PARKIR, checkIn, checkOut, jumlahOrang, konfirmasiTunai, type Ticket, type useTiket } from "@/lib/tiket-store";
 
 // Pilihan filter status tiket.
 const FILTERS = ["Semua", "Belum masuk", "Di dalam", "Keluar"];
@@ -45,11 +45,11 @@ export default function DaftarTiket({ tiket, visible, filter, onFilter, query, o
           </thead>
           <tbody>
             {visible.map((t) => (
-              <tr key={t.code} className={`[&>td:first-child]:rounded-l-2xl [&>td:last-child]:rounded-r-2xl ${t.mine ? "bg-leaf/12" : "bg-paper"}`}>
+              <tr key={t.id} className={`[&>td:first-child]:rounded-l-2xl [&>td:last-child]:rounded-r-2xl ${t.fromApp ? "bg-leaf/12" : "bg-paper"}`}>
                 <td className="h-12 pl-4 font-mono font-medium">{t.code}</td>
                 <td>
                   <span className="font-semibold">{t.name}</span>
-                  {t.mine && <span className="ml-2 rounded-full bg-white px-2 py-0.5 text-[11px] text-forest">dari aplikasi</span>}
+                  <span className="ml-2 rounded-full bg-white px-2 py-0.5 text-[11px] text-forest">{t.fromApp ? "dari aplikasi" : "loket"}</span>
                 </td>
                 <td>{jumlahOrang(t)}{t.kids > 0 && <span className="text-abu"> ({t.kids} balita)</span>}</td>
                 <td>{PARKIR_LABEL[t.parking]}</td>
@@ -57,16 +57,22 @@ export default function DaftarTiket({ tiket, visible, filter, onFilter, query, o
                 <td className="font-mono">{t.checkInAt ?? "-"}</td>
                 <td><StatusPill status={t.status} /></td>
                 <td className="pr-3 text-right">
-                  {/* Tiket belum masuk: tombol Check-in */}
-                  {t.status === "Belum masuk" && (
-                    <button type="button" onClick={() => onHasil(checkIn(t.code))}
+                  {/* Tiket tunai yang belum lunas: konfirmasi pembayaran dulu (check-in ditolak backend selama belum lunas) */}
+                  {t.payment === "cash" && t.paymentStatus === "pending" ? (
+                    <button type="button" onClick={async () => onHasil(await konfirmasiTunai(t.code))}
+                            className="inline-flex h-8 items-center gap-1.5 rounded-full bg-forest px-3 text-xs font-semibold text-white hover:brightness-125">
+                      <Banknote size={14} /> Konfirmasi Tunai
+                    </button>
+                  ) : t.status === "Belum masuk" ? (
+                    /* Tiket belum masuk: tombol Check-in */
+                    <button type="button" onClick={async () => onHasil(await checkIn(t.code))}
                             className="inline-flex h-8 items-center gap-1.5 rounded-full bg-forest px-3 text-xs font-semibold text-white hover:brightness-125">
                       <LogIn size={14} /> Check-in
                     </button>
-                  )}
+                  ) : null}
                   {/* Pengunjung di dalam: tombol Keluar */}
                   {t.status === "Di dalam" && (
-                    <button type="button" onClick={() => onHasil(checkOut(t.code))}
+                    <button type="button" onClick={async () => onHasil(await checkOut(t.code))}
                             className="inline-flex h-8 items-center gap-1.5 rounded-full bg-white px-3 text-xs font-semibold text-ink hover:bg-ink/10">
                       <LogOut size={14} /> Keluar
                     </button>
@@ -76,7 +82,11 @@ export default function DaftarTiket({ tiket, visible, filter, onFilter, query, o
               </tr>
             ))}
             {visible.length === 0 && (
-              <tr><td colSpan={8} className="rounded-2xl bg-paper px-5 py-10 text-center text-abu">Tidak ada tiket yang cocok.</td></tr>
+              <tr><td colSpan={8} className="rounded-2xl bg-paper px-5 py-10 text-center text-abu">
+                {tiket.ready
+                  ? (tiket.sold === 0 ? "Belum ada tiket untuk hari ini. Tiket yang dibeli di aplikasi akan muncul di sini." : "Tidak ada tiket yang cocok.")
+                  : tiket.error ? "Tidak bisa terhubung ke server." : "Memuat tiket..."}
+              </td></tr>
             )}
           </tbody>
         </table>

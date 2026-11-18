@@ -4,6 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import '../data/app_state.dart';
+import '../data/crowd_state.dart';
 import '../data/dummy_data.dart';
 import '../theme/app_theme.dart';
 import '../utils/routes.dart';
@@ -32,7 +33,7 @@ class HomeTab extends StatelessWidget {
         _quickMenu(context),
         const SectionTitle('Jelajahi'),
         const FullBleed(child: _HeroCarousel()),
-        const SectionTitle('Rekomendasi Kunjungan', subtitle: 'Prediksi jumlah pengunjung per jam hari ini'),
+        const SectionTitle('Keramaian Hari Ini', subtitle: 'Jumlah orang di dalam per jam, dari tiket yang discan'),
         _recommendation(),
       ],
     );
@@ -69,8 +70,9 @@ class HomeTab extends StatelessWidget {
   // [P5 Modal Bottom Sheet] Lembar kaca notifikasi yang muncul dari bawah layar.
   void _showNotifications(BuildContext context) {
     final s = AppState.instance;
+    final c = CrowdState.instance;
     final items = [
-      (CupertinoIcons.chart_bar, 'Crowd sekarang ${s.crowdLabel} (${s.percent}%)', 'Jam sepi terbaik 08.00-09.00 atau setelah 15.00'),
+      (CupertinoIcons.chart_bar, 'Crowd sekarang ${c.crowdLabel} (${c.percent}%)', 'Jam sepi terbaik 08.00-09.00 atau setelah 15.00'),
       (CupertinoIcons.chat_bubble_text, 'E-tiket dan invoice dikirim lewat WhatsApp', 'Riwayat dicari dengan nomor WhatsApp di Tiket & Booking'),
       (CupertinoIcons.bell, s.quietReminder ? 'Pengingat jam sepi aktif' : 'Pengingat jam sepi nonaktif', 'Atur di menu Profil'),
     ];
@@ -115,7 +117,7 @@ class HomeTab extends StatelessWidget {
     ]);
   }
 
-  // Rekomendasi kunjungan: grafik batang jumlah pengunjung per jam dan waktu terbaik berkunjung.
+  // Grafik batang prakiraan jumlah pengunjung per jam dari server dan saran waktu terbaik berkunjung.
   Widget _recommendation() => AppCard(
         padding: const EdgeInsets.fromLTRB(14, 16, 16, 14),
         child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
@@ -125,6 +127,7 @@ class HomeTab extends StatelessWidget {
           const SizedBox(height: 10),
           const Padding(padding: EdgeInsets.only(left: 2), child: CrowdLegend()),
           const Padding(padding: EdgeInsets.symmetric(vertical: 14), child: Divider()),
+          // Saran umum: server tidak menyediakan jam paling sepi dari riwayat.
           Row(children: [
             const SizedBox(width: 2),
             const Icon(CupertinoIcons.clock, size: 20, color: AppColors.leaf),

@@ -65,11 +65,17 @@ class CrowdHero extends StatelessWidget {
         // Sebelum server menjawab, tampilkan status kosong yang jujur, bukan angka 0.
         final ready = s.ready;
         final label = s.crowdLabel ?? 'Belum terhubung';
-        final color = ready ? crowdColor(label) : AppColors.abu;
+        // Kartu kaca terang: Sepi Hijau Daun, Sedang Hijau Tua, Ramai Coral (di kaca putih, bukan putih).
+        final color = !ready
+            ? AppColors.abu
+            : switch (label) {
+                'Sepi' => AppColors.leaf,
+                'Ramai' => AppColors.coral,
+                _ => AppColors.forest,
+              };
         return Glass(
-          tone: GlassTone.dark,
-          radius: 24,
-          padding: const EdgeInsets.fromLTRB(18, 16, 18, 18),
+          radius: 28,
+          padding: const EdgeInsets.fromLTRB(18, 16, 18, 16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
@@ -77,28 +83,25 @@ class CrowdHero extends StatelessWidget {
                 children: [
                   LiveDot(color: color),
                   const SizedBox(width: 8),
-                  Text(
-                    'Crowd saat ini',
-                    style: AppText.footnote.copyWith(color: AppColors.putih72),
-                  ),
+                  Text('Crowd saat ini', style: AppText.footnote),
                   const Spacer(),
                   Text(
                     ready ? '${s.inside}/${s.capacity} orang' : '— orang',
                     style: AppText.number(
                       13,
                       weight: FontWeight.w500,
-                      color: AppColors.putih72,
+                      color: AppColors.abu,
                     ),
                   ),
                 ],
               ),
-              const SizedBox(height: 10),
+              const SizedBox(height: 8),
               Row(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   Text(
                     ready ? '${s.percent}%' : '—',
-                    style: AppText.hero(52, color: Colors.white),
+                    style: AppText.hero(48, color: AppColors.forest),
                   ),
                   const SizedBox(width: 12),
                   Padding(
@@ -106,28 +109,23 @@ class CrowdHero extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        StatusChip(label: label, dot: color, onDark: true),
+                        StatusChip(label: label, dot: color, tinted: true),
                         const SizedBox(height: 4),
-                        Text(
-                          'kapasitas terisi',
-                          style: AppText.footnote.copyWith(
-                            color: AppColors.putih72,
-                          ),
-                        ),
+                        Text('kapasitas terisi', style: AppText.footnote),
                       ],
                     ),
                   ),
                 ],
               ),
               if (ready) ...[
-                const SizedBox(height: 14),
+                const SizedBox(height: 12),
                 ClipRRect(
                   borderRadius: BorderRadius.circular(4),
                   child: LinearProgressIndicator(
                     value: (s.percent! / 100).clamp(0, 1).toDouble(),
                     minHeight: 8,
-                    backgroundColor: AppColors.kaca,
-                    color: color,
+                    backgroundColor: AppColors.leaf12,
+                    color: color == AppColors.forest ? AppColors.leaf : color,
                   ),
                 ),
               ],
@@ -140,7 +138,7 @@ class CrowdHero extends StatelessWidget {
                           ? 'Tidak terbaru: server tidak terjangkau'
                           : 'Dari tiket yang discan petugas di pintu masuk')
                     : 'Belum terhubung ke server',
-                style: AppText.caption.copyWith(color: AppColors.putih72),
+                style: AppText.caption,
               ),
             ],
           ),

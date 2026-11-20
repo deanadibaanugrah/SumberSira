@@ -6,6 +6,7 @@ import '../../../utils/format.dart';
 import '../../../widgets/common.dart';
 import '../../../widgets/glass.dart';
 import '../viewmodel/booking_controller.dart';
+import '../../../widgets/motion.dart';
 
 // Daftar Sewa & Booking: pilihan jam di atas, lalu list per kategori (Sewa Alat, Wahana) dengan stepper.
 class BookingSection extends StatelessWidget {
@@ -75,9 +76,11 @@ class BookingSection extends StatelessWidget {
                       ),
                       const SizedBox(width: 8),
                       Expanded(child: Text(error, style: AppText.footnote)),
-                      TextButton(
-                        onPressed: controller.reload,
-                        child: const Text('Coba lagi'),
+                      PressScale(
+                        child: TextButton(
+                          onPressed: controller.reload,
+                          child: const Text('Coba lagi'),
+                        ),
                       ),
                     ],
                   ),

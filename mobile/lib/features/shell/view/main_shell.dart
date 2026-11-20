@@ -6,6 +6,7 @@ import '../../crowd/viewmodel/crowd_state.dart';
 import '../../../theme/app_theme.dart';
 import '../../../widgets/app_background.dart';
 import '../../../widgets/glass.dart';
+import '../../../widgets/motion.dart';
 import '../../gallery/view/gallery_tab.dart';
 import '../../home/view/home_tab.dart';
 import '../../profile/view/profile_tab.dart';
@@ -94,7 +95,8 @@ class _MainShellState extends State<MainShell> {
   }
 }
 
-// Tab bar Liquid Glass: kapsul kaca mengambang. Tab aktif = ikon penuh Hijau Daun di atas pill Hijau Daun 12%.
+// Tab bar Liquid Glass: kapsul kaca mengambang. Kapsul penanda meluncur dengan pegas ke tab yang dipilih dan
+// memanjang saat bergerak. Ikon tab aktif berganti ke ikon penuh Hijau Daun dan melonjak kecil.
 class _GlassTabBar extends StatelessWidget {
   const _GlassTabBar({required this.index, required this.onChanged});
 
@@ -118,59 +120,88 @@ class _GlassTabBar extends StatelessWidget {
               padding: const EdgeInsets.all(6),
               child: SizedBox(
                 height: AppSpace.tabBar - 12,
-                child: Row(
+                child: Stack(
                   children: [
-                    for (final (i, (icon, activeIcon, label))
-                        in _MainShellState._tabs.indexed)
-                      Expanded(
-                        child: Semantics(
-                          button: true,
-                          selected: i == index,
-                          label: label,
-                          excludeSemantics: true,
-                          child: GestureDetector(
-                            behavior: HitTestBehavior.opaque,
-                            onTap: () => onChanged(i),
-                            child: AnimatedContainer(
-                              duration: still
-                                  ? Duration.zero
-                                  : const Duration(milliseconds: 220),
-                              curve: Curves.easeOutCubic,
-                              decoration: BoxDecoration(
-                                color: i == index
-                                    ? AppColors.leaf12
-                                    : Colors.transparent,
-                                borderRadius: BorderRadius.circular(26),
-                              ),
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Icon(
-                                    i == index ? activeIcon : icon,
-                                    size: 23,
-                                    color: i == index
-                                        ? AppColors.leaf
-                                        : AppColors.abu,
-                                  ),
-                                  const SizedBox(height: 3),
-                                  FittedBox(
-                                    fit: BoxFit.scaleDown,
-                                    child: Text(
-                                      label,
-                                      maxLines: 1,
-                                      style: AppText.tabLabel.copyWith(
-                                        color: i == index
-                                            ? AppColors.forest
-                                            : AppColors.abu,
+                    Positioned.fill(
+                      child: LiquidPill(
+                        index: index,
+                        count: _MainShellState._tabs.length,
+                        decoration: BoxDecoration(
+                          color: AppColors.leaf12,
+                          borderRadius: BorderRadius.circular(26),
+                        ),
+                      ),
+                    ),
+                    Row(
+                      children: [
+                        for (final (i, (icon, activeIcon, label))
+                            in _MainShellState._tabs.indexed)
+                          Expanded(
+                            child: Semantics(
+                              button: true,
+                              selected: i == index,
+                              label: label,
+                              excludeSemantics: true,
+                              child: GestureDetector(
+                                behavior: HitTestBehavior.opaque,
+                                onTap: () {
+                                  if (i != index) AppMotion.tick();
+                                  onChanged(i);
+                                },
+                                child: PressScale(
+                                  scale: .92,
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      AnimatedScale(
+                                        scale: i == index ? 1.12 : 1,
+                                        duration: still
+                                            ? Duration.zero
+                                            : const Duration(milliseconds: 360),
+                                        curve: Curves.easeOutBack,
+                                        child: TweenAnimationBuilder<Color?>(
+                                          tween: ColorTween(
+                                            end: i == index
+                                                ? AppColors.leaf
+                                                : AppColors.abu,
+                                          ),
+                                          duration: still
+                                              ? Duration.zero
+                                              : const Duration(
+                                                  milliseconds: 220,
+                                                ),
+                                          builder: (_, color, _) => Icon(
+                                            i == index ? activeIcon : icon,
+                                            size: 23,
+                                            color: color,
+                                          ),
+                                        ),
                                       ),
-                                    ),
+                                      const SizedBox(height: 3),
+                                      FittedBox(
+                                        fit: BoxFit.scaleDown,
+                                        child: AnimatedDefaultTextStyle(
+                                          duration: still
+                                              ? Duration.zero
+                                              : const Duration(
+                                                  milliseconds: 220,
+                                                ),
+                                          style: AppText.tabLabel.copyWith(
+                                            color: i == index
+                                                ? AppColors.forest
+                                                : AppColors.abu,
+                                          ),
+                                          child: Text(label, maxLines: 1),
+                                        ),
+                                      ),
+                                    ],
                                   ),
-                                ],
+                                ),
                               ),
                             ),
                           ),
-                        ),
-                      ),
+                      ],
+                    ),
                   ],
                 ),
               ),

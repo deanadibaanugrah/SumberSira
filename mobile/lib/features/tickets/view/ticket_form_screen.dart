@@ -17,6 +17,7 @@ import '../../../widgets/app_background.dart';
 import '../../../widgets/common.dart';
 import '../../crowd/view/crowd_widgets.dart';
 import '../../../widgets/glass.dart';
+import '../../../widgets/motion.dart';
 
 // Form beli tiket masuk. StatefulWidget karena isinya berubah saat pengguna mengisi.
 // Unsur materi: Form + TextFormField + validator (P6), TextEditingController, DropdownButton,
@@ -307,9 +308,11 @@ class _TicketFormScreenState extends State<TicketFormScreen> {
                       Expanded(
                         child: Text(_slotsError!, style: AppText.footnote),
                       ),
-                      TextButton(
-                        onPressed: _loadSlots,
-                        child: const Text('Coba lagi'),
+                      PressScale(
+                        child: TextButton(
+                          onPressed: _loadSlots,
+                          child: const Text('Coba lagi'),
+                        ),
                       ),
                     ],
                   ),
@@ -708,15 +711,17 @@ class _QrisSheetState extends State<_QrisSheet> {
               loading: _confirming,
             ),
           const SizedBox(height: 4),
-          TextButton(
-            style: TextButton.styleFrom(
-              foregroundColor: AppColors.abu,
-              minimumSize: const Size.fromHeight(44),
-            ),
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text(
-              'Batal',
-              style: TextStyle(fontWeight: FontWeight.w600, fontSize: 17),
+          PressScale(
+            child: TextButton(
+              style: TextButton.styleFrom(
+                foregroundColor: AppColors.abu,
+                minimumSize: const Size.fromHeight(44),
+              ),
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text(
+                'Batal',
+                style: TextStyle(fontWeight: FontWeight.w600, fontSize: 17),
+              ),
             ),
           ),
         ],

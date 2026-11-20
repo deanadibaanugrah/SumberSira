@@ -15,6 +15,7 @@ import '../../../widgets/app_background.dart';
 import '../../../widgets/common.dart';
 import '../../../widgets/glass.dart';
 import '../../../widgets/photo_form.dart';
+import '../../../widgets/motion.dart';
 
 // AI Photo Studio: memperbagus foto dari galeri atau kamera. Foto diunggah ke backend (POST /ai-photo),
 // server memperbaiki warna dan ketajamannya, lalu aplikasi menampilkan foto asli dan hasilnya.
@@ -253,9 +254,11 @@ class _AiPhotoScreenState extends State<AiPhotoScreen> {
               ],
             ),
             const SizedBox(height: 8),
-            TextButton(
-              onPressed: _busy ? null : _useSample,
-              child: const Text('Coba dengan foto contoh bawah air'),
+            PressScale(
+              child: TextButton(
+                onPressed: _busy ? null : _useSample,
+                child: const Text('Coba dengan foto contoh bawah air'),
+              ),
             ),
             if (result != null) ...[
               const SizedBox(height: 14),

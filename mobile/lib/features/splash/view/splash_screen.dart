@@ -85,17 +85,30 @@ class _SplashScreenState extends State<SplashScreen>
                   child: Stack(
                     children: [
                       // Foto latar yang pelan-pelan membesar.
-                      Positioned(
-                        left: 0,
-                        right: 0,
-                        top: 0,
-                        height: photoH + 40,
+                      Positioned.fill(
                         child: ClipRect(
                           child: ScaleTransition(
                             scale: Tween(begin: 1.05, end: 1.18).animate(_zoom),
                             child: Image.asset(
                               'assets/images/splash-sumber-sira.jpg',
                               fit: BoxFit.cover,
+                            ),
+                          ),
+                        ),
+                      ),
+                      // Peredam Hijau Tua: bening di atas, pekat di bawah supaya teks putih terbaca.
+                      const Positioned.fill(
+                        child: DecoratedBox(
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              begin: Alignment.topCenter,
+                              end: Alignment.bottomCenter,
+                              stops: [0, .42, 1],
+                              colors: [
+                                Color(0x401B4332),
+                                Color(0x661B4332),
+                                Color(0xF01B4332),
+                              ],
                             ),
                           ),
                         ),
@@ -114,17 +127,14 @@ class _SplashScreenState extends State<SplashScreen>
                         bottom: 0,
                         child: Container(
                           padding: EdgeInsets.only(bottom: inset.bottom),
-                          decoration: const BoxDecoration(
-                            gradient: AppColors.headerGradient,
-                            borderRadius: BorderRadius.vertical(
-                              top: Radius.circular(36),
-                            ),
-                          ),
                           child: Column(
                             children: [
                               // Ruang untuk separuh logo yang menumpuk di tepi lembar ditambah ruang kosong logo.
                               const SizedBox(height: 86),
-                              Text('Sumber Sira', style: AppText.largeTitle()),
+                              Text(
+                                'Sumber Sira',
+                                style: AppText.display(44, color: Colors.white),
+                              ),
                               const SizedBox(height: 4),
                               Text(
                                 'Kunjungan Jernih Tanpa Antre',

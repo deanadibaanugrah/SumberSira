@@ -11,6 +11,7 @@ import '../../../widgets/app_background.dart';
 import '../../../widgets/common.dart';
 import '../../../widgets/glass.dart';
 import '../../../widgets/photo_form.dart';
+import '../../../widgets/motion.dart';
 
 // Tab Galeri: foto kiriman pengunjung yang sudah disetujui admin (menu Galeri & Konten di web admin).
 // Daftar dari GET /gallery; foto baru dikirim lewat POST /gallery dan menunggu persetujuan admin.
@@ -206,20 +207,21 @@ class _GalleryTabState extends State<GalleryTab> {
         : const <GalleryPhoto>[];
     return TabPage(
       title: 'Galeri',
+      lightHeader: true,
       header: TabHeader(
+        light: true,
         title: 'Galeri',
         subtitle: 'Foto pengunjung dan suasana Sumber Sira',
         trailing: Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
           decoration: BoxDecoration(
-            color: AppColors.kaca,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: AppColors.kaca),
+            color: AppColors.leaf12,
+            borderRadius: BorderRadius.circular(999),
           ),
           child: Text(
             _loading ? 'Memuat...' : '${_photos.length} foto',
             style: AppText.footnote.copyWith(
-              color: Colors.white,
+              color: AppColors.forest,
               fontWeight: FontWeight.w600,
             ),
           ),
@@ -432,10 +434,12 @@ class _InfoCard extends StatelessWidget {
           ],
           if (onRetry != null) ...[
             const SizedBox(height: 8),
-            TextButton.icon(
-              onPressed: onRetry,
-              icon: const Icon(CupertinoIcons.refresh, size: 18),
-              label: const Text('Coba lagi'),
+            PressScale(
+              child: TextButton.icon(
+                onPressed: onRetry,
+                icon: const Icon(CupertinoIcons.refresh, size: 18),
+                label: const Text('Coba lagi'),
+              ),
             ),
           ],
         ],

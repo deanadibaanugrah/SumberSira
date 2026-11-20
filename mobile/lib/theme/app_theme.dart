@@ -43,6 +43,27 @@ class AppColors {
     end: Alignment.bottomCenter,
     colors: [forest, ink],
   );
+
+  // Header hijau hangat (Hijau Tua ke Hijau Daun), dipakai layar tanpa foto seperti Profil.
+  static const heroGradient = LinearGradient(
+    begin: Alignment.topCenter,
+    end: Alignment.bottomCenter,
+    colors: [forest, leaf],
+  );
+
+  // Peredam di atas foto header: Hijau Tua pekat di atas, hampir bening di bawah, supaya teks putih terbaca.
+  static const photoScrimTop = LinearGradient(
+    begin: Alignment.topCenter,
+    end: Alignment.bottomCenter,
+    colors: [Color(0x941B4332), Color(0x0F1B4332)],
+  );
+
+  // Peredam di dasar foto (mis. keterangan kartu foto).
+  static const photoScrimBottom = LinearGradient(
+    begin: Alignment.topCenter,
+    end: Alignment.bottomCenter,
+    colors: [Color(0x001B4332), Color(0x991B4332)],
+  );
 }
 
 // Ukuran dan jarak bersama: margin layar 20, jarak antar bagian 28, padding kartu 16.
@@ -50,7 +71,7 @@ class AppSpace {
   static const margin = 20.0;
   static const section = 28.0;
   static const card = 16.0;
-  static const radius = 20.0;
+  static const radius = 24.0;
   // Tinggi tab bar mengambang dan jarak dari tepi bawah.
   static const tabBar = 64.0;
   static const tabGap = 12.0;
@@ -69,6 +90,19 @@ class AppText {
         color: color,
         letterSpacing: -.3,
       );
+
+  // Judul bagian dan judul halaman berkarakter (serif Fraunces).
+  static TextStyle display(
+    double size, {
+    Color color = AppColors.forest,
+    FontWeight weight = FontWeight.w600,
+  }) => GoogleFonts.fraunces(
+    fontSize: size,
+    height: 1.18,
+    fontWeight: weight,
+    color: color,
+    letterSpacing: -.2,
+  );
 
   // Angka hero, mis. "62%", "Rp45.000", "4.8". Digit sama lebar supaya angka tidak bergeser.
   static TextStyle hero(double size, {Color color = AppColors.forest}) =>

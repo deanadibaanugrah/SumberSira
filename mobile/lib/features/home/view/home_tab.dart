@@ -12,7 +12,6 @@ import '../../../widgets/common.dart';
 import '../../crowd/view/crowd_widgets.dart';
 import '../../chat/view/floating_chat.dart';
 import '../../../widgets/glass.dart';
-import '../../../widgets/logo_mark.dart';
 
 // Banner geser Beranda: konten promosi tetap dengan foto asli Sumber Sira (bukan data operasional).
 // Harga tidak ditulis di sini supaya tidak berbeda dari tarif yang diatur di server.
@@ -76,73 +75,92 @@ class HomeTab extends StatelessWidget {
     );
   }
 
-  // Header gelap yang ikut tergulir: logo, nama, lokasi, lonceng, lalu hero Crowd saat ini.
-  Widget _header(BuildContext context) => Container(
-    margin: const EdgeInsets.only(bottom: 4),
-    padding: EdgeInsets.fromLTRB(
-      AppSpace.margin,
-      MediaQuery.paddingOf(context).top + 12,
-      16,
-      20,
-    ),
-    decoration: const BoxDecoration(
-      gradient: AppColors.headerGradient,
-      borderRadius: BorderRadius.vertical(bottom: Radius.circular(32)),
-    ),
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
+  // Header berfoto yang ikut tergulir: lokasi, nama, lonceng, lalu kartu kaca Crowd saat ini
+  // yang menimpa tepi bawah foto.
+  Widget _header(BuildContext context) {
+    final top = MediaQuery.paddingOf(context).top;
+    return Stack(
       children: [
-        Row(
-          children: [
-            const LogoMark(size: 42, ring: true),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
+        Positioned(
+          top: 0,
+          left: 0,
+          right: 0,
+          height: top + 232,
+          child: ClipRRect(
+            borderRadius: const BorderRadius.vertical(
+              bottom: Radius.circular(36),
+            ),
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                // [P4 Image.asset] Foto kolam dari folder assets.
+                Image.asset('assets/images/hero-sawah.jpg', fit: BoxFit.cover),
+                const DecoratedBox(
+                  decoration: BoxDecoration(gradient: AppColors.photoScrimTop),
+                ),
+              ],
+            ),
+          ),
+        ),
+        Padding(
+          padding: EdgeInsets.fromLTRB(
+            AppSpace.margin,
+            top + 16,
+            AppSpace.margin,
+            20,
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    'Sumber Sira',
-                    style: AppText.headline.copyWith(
-                      color: Colors.white,
-                      fontSize: 18,
-                      fontWeight: FontWeight.w700,
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            const Icon(
+                              CupertinoIcons.location_solid,
+                              size: 13,
+                              color: AppColors.putih72,
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              'Desa Putukrejo, Malang',
+                              style: AppText.footnote.copyWith(
+                                color: AppColors.putih72,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          'Sumber Sira',
+                          style: AppText.display(32, color: Colors.white),
+                        ),
+                      ],
                     ),
                   ),
-                  const SizedBox(height: 2),
-                  Row(
-                    children: [
-                      const Icon(
-                        CupertinoIcons.location_solid,
-                        size: 13,
-                        color: AppColors.putih72,
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        'Desa Putukrejo, Malang',
-                        style: AppText.footnote.copyWith(
-                          color: AppColors.putih72,
-                        ),
-                      ),
-                    ],
+                  // Lonceng notifikasi dengan titik Hijau Daun.
+                  GlassIconButton(
+                    icon: CupertinoIcons.bell,
+                    tooltip: 'Notifikasi',
+                    tone: GlassTone.dark,
+                    badge: true,
+                    onPressed: () => _showNotifications(context),
                   ),
                 ],
               ),
-            ),
-            // Lonceng notifikasi dengan titik Hijau Daun.
-            GlassIconButton(
-              icon: CupertinoIcons.bell,
-              tooltip: 'Notifikasi',
-              tone: GlassTone.dark,
-              badge: true,
-              onPressed: () => _showNotifications(context),
-            ),
-          ],
+              const SizedBox(height: 30),
+              const CrowdHero(),
+            ],
+          ),
         ),
-        const SizedBox(height: 20),
-        const CrowdHero(),
       ],
-    ),
-  );
+    );
+  }
 
   // [P5 Modal Bottom Sheet] Lembar kaca notifikasi yang muncul dari bawah layar.
   void _showNotifications(BuildContext context) {
@@ -303,7 +321,7 @@ class _HeroCarousel extends StatefulWidget {
 }
 
 class _HeroCarouselState extends State<_HeroCarousel> {
-  final _controller = PageController(viewportFraction: .86);
+  final _controller = PageController(viewportFraction: .74);
   int _page = 0;
   Timer? _timer;
 
@@ -333,7 +351,7 @@ class _HeroCarouselState extends State<_HeroCarousel> {
     return Column(
       children: [
         SizedBox(
-          height: 236,
+          height: 280,
           child: PageView.builder(
             controller: _controller,
             itemCount: _homeSlides.length,
@@ -343,19 +361,25 @@ class _HeroCarouselState extends State<_HeroCarousel> {
               return Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 6),
                 child: ClipRRect(
-                  borderRadius: BorderRadius.circular(24),
+                  borderRadius: BorderRadius.circular(28),
                   child: Stack(
                     fit: StackFit.expand,
                     children: [
                       // [P4 Image.asset] Foto dari folder assets yang didaftarkan di pubspec.yaml.
                       Image.asset(s.image, fit: BoxFit.cover),
+                      const DecoratedBox(
+                        decoration: BoxDecoration(
+                          gradient: AppColors.photoScrimBottom,
+                        ),
+                      ),
                       Positioned(
-                        left: 12,
-                        right: 12,
-                        bottom: 12,
-                        // Kaca terang + teks Ink supaya tetap terbaca di foto yang terang.
+                        left: 10,
+                        right: 10,
+                        bottom: 10,
+                        // Kaca Hijau Tua + teks putih supaya tetap terbaca di foto terang maupun gelap.
                         child: Glass(
-                          radius: 18,
+                          tone: GlassTone.tint,
+                          radius: 20,
                           shadow: false,
                           padding: const EdgeInsets.fromLTRB(14, 11, 14, 12),
                           child: Column(
@@ -365,7 +389,7 @@ class _HeroCarouselState extends State<_HeroCarousel> {
                               Text(
                                 s.label,
                                 style: AppText.caption.copyWith(
-                                  color: AppColors.forest,
+                                  color: AppColors.putih72,
                                   letterSpacing: .6,
                                   fontWeight: FontWeight.w600,
                                 ),
@@ -373,16 +397,22 @@ class _HeroCarouselState extends State<_HeroCarousel> {
                               const SizedBox(height: 3),
                               Text(
                                 s.title,
-                                maxLines: 1,
+                                maxLines: 2,
                                 overflow: TextOverflow.ellipsis,
-                                style: AppText.headline,
+                                style: AppText.headline.copyWith(
+                                  color: Colors.white,
+                                  fontSize: 15,
+                                  height: 1.25,
+                                ),
                               ),
                               const SizedBox(height: 2),
                               Text(
                                 s.text,
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
-                                style: AppText.footnote,
+                                style: AppText.footnote.copyWith(
+                                  color: AppColors.putih72,
+                                ),
                               ),
                             ],
                           ),

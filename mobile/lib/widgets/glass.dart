@@ -3,6 +3,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 
 import '../theme/app_theme.dart';
+import 'motion.dart';
 
 // Jenis kaca: light = di atas latar terang (Putih 72%), dark = di atas header gelap atau foto
 // (Putih 12%), tint = CTA primer (Hijau Tua 85%).
@@ -145,14 +146,15 @@ class GlassIconButton extends StatelessWidget {
   }
 }
 
-// Efek tekan gaya iOS: elemen sedikit mengecil saat ditekan. Mati bila animasi dikurangi.
-class Pressable extends StatefulWidget {
+// Efek tekan gaya iOS: elemen mengecil dengan pegas saat ditekan lalu kembali memantul tipis.
+// Mati bila animasi dikurangi.
+class Pressable extends StatelessWidget {
   const Pressable({
     super.key,
     required this.child,
     required this.onTap,
     this.semanticLabel,
-    this.scale = .97,
+    this.scale = .96,
   });
 
   final Widget child;
@@ -161,34 +163,14 @@ class Pressable extends StatefulWidget {
   final double scale;
 
   @override
-  State<Pressable> createState() => _PressableState();
-}
-
-class _PressableState extends State<Pressable> {
-  bool _down = false;
-
-  void _set(bool value) {
-    if (_down != value) setState(() => _down = value);
-  }
-
-  @override
   Widget build(BuildContext context) {
-    final still = MediaQuery.disableAnimationsOf(context);
     return Semantics(
-      button: widget.onTap != null,
-      label: widget.semanticLabel,
+      button: onTap != null,
+      label: semanticLabel,
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
-        onTap: widget.onTap,
-        onTapDown: widget.onTap == null ? null : (_) => _set(true),
-        onTapUp: (_) => _set(false),
-        onTapCancel: () => _set(false),
-        child: AnimatedScale(
-          scale: _down && !still ? widget.scale : 1,
-          duration: const Duration(milliseconds: 120),
-          curve: Curves.easeOut,
-          child: widget.child,
-        ),
+        onTap: onTap,
+        child: onTap == null ? child : PressScale(scale: scale, child: child),
       ),
     );
   }

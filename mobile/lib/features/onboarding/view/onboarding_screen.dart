@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../../../data/app_state.dart';
 import '../../../theme/app_theme.dart';
 import '../../../utils/routes.dart';
-import '../../../widgets/app_background.dart';
 import '../../../widgets/common.dart';
+import '../../../widgets/glass.dart';
+import '../../../widgets/motion.dart';
 
 // Onboarding 3 halaman yang bisa digeser (PageView): air jernih, booking tanpa antre, foto AI.
-// Tombol Kembali/Lanjut, titik penanda halaman, dan Lewati. Halaman terakhir: Mulai Jelajahi.
+// Foto memenuhi layar, lembar kaca di bawah berisi titik penanda, judul, penjelasan, dan tombol Kembali/Lanjut.
+// Halaman terakhir: Mulai Jelajahi. Lewati ada di pojok kanan atas.
 // Halaman pindah sendiri tiap 3 detik (titik aktif terisi sebagai penanda waktu) dan berhenti di halaman terakhir.
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key});
@@ -102,103 +105,170 @@ class _OnboardingScreenState extends State<OnboardingScreen>
 
   @override
   Widget build(BuildContext context) {
+    final page = _pages[_page];
     return Scaffold(
-      body: AppBackground(
-        child: SafeArea(
-          child: Center(
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 480),
+      backgroundColor: AppColors.forest,
+      body: AnnotatedRegion<SystemUiOverlayStyle>(
+        value: SystemUiOverlayStyle.light,
+        child: Stack(
+          children: [
+            // Foto memenuhi layar dan bisa digeser kiri-kanan.
+            Positioned.fill(
+              child: NotificationListener<ScrollNotification>(
+                onNotification: _onScroll,
+                child: PageView.builder(
+                  controller: _controller,
+                  itemCount: _pages.length,
+                  onPageChanged: (i) {
+                    setState(() => _page = i);
+                    _restartTimer();
+                  },
+                  itemBuilder: (_, i) => _OnboardingPhoto(_pages[i].image),
+                ),
+              ),
+            ),
+            // Penanda halaman ke berapa dari 3 dan tombol Lewati, di atas foto.
+            SafeArea(
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(
                   AppSpace.margin,
-                  4,
+                  8,
                   AppSpace.margin,
-                  20,
+                  0,
                 ),
-                child: Column(
+                child: Row(
                   children: [
-                    SizedBox(
-                      height: 48,
-                      child: Row(
-                        children: [
-                          // Penanda halaman ke berapa dari 3.
-                          Text(
-                            '${_page + 1} / ${_pages.length}',
-                            style: AppText.number(
-                              13,
-                              weight: FontWeight.w600,
-                              color: AppColors.abu,
-                            ),
-                          ),
-                          const Spacer(),
-                          if (!_isLast)
-                            TextButton(
-                              style: TextButton.styleFrom(
-                                foregroundColor: AppColors.forest,
-                                minimumSize: const Size(44, 44),
-                              ),
-                              onPressed: _finish,
-                              child: const Text(
-                                'Lewati',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.w600,
-                                  fontSize: 17,
-                                ),
-                              ),
-                            ),
-                        ],
+                    Glass(
+                      tone: GlassTone.dark,
+                      radius: 22,
+                      shadow: false,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 12,
                       ),
-                    ),
-                    Expanded(
-                      child: NotificationListener<ScrollNotification>(
-                        onNotification: _onScroll,
-                        child: PageView.builder(
-                          controller: _controller,
-                          itemCount: _pages.length,
-                          onPageChanged: (i) {
-                            setState(() => _page = i);
-                            _restartTimer();
-                          },
-                          itemBuilder: (_, i) =>
-                              _OnboardingPage(page: _pages[i], dots: _dots()),
+                      child: Text(
+                        '${_page + 1} / ${_pages.length}',
+                        style: AppText.number(
+                          13,
+                          weight: FontWeight.w600,
+                          color: Colors.white,
                         ),
                       ),
                     ),
-                    const SizedBox(height: 16),
-                    Row(
-                      children: [
-                        // Halaman pertama tidak punya tombol Kembali, jadi diganti ruang kosong.
-                        Expanded(
-                          child: _page == 0
-                              ? const SizedBox()
-                              : TextButton(
-                                  style: TextButton.styleFrom(
-                                    minimumSize: const Size.fromHeight(50),
-                                    foregroundColor: AppColors.forest,
-                                    backgroundColor: AppColors.leaf12,
-                                    shape: const StadiumBorder(),
-                                    textStyle: AppText.headline,
-                                  ),
-                                  onPressed: () => _goTo(_page - 1),
-                                  child: const Text('Kembali'),
-                                ),
-                        ),
-                        const SizedBox(width: 14),
-                        Expanded(
-                          child: PrimaryButton(
-                            label: _isLast ? 'Mulai Jelajahi' : 'Lanjut',
-                            onPressed: _isLast
-                                ? _finish
-                                : () => _goTo(_page + 1),
+                    const Spacer(),
+                    if (!_isLast)
+                      Pressable(
+                        onTap: _finish,
+                        semanticLabel: 'Lewati',
+                        child: Glass(
+                          tone: GlassTone.dark,
+                          radius: 22,
+                          shadow: false,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 18,
+                            vertical: 12,
+                          ),
+                          child: const Text(
+                            'Lewati',
+                            style: TextStyle(
+                              fontWeight: FontWeight.w600,
+                              fontSize: 15,
+                              color: Colors.white,
+                            ),
                           ),
                         ),
-                      ],
-                    ),
+                      ),
                   ],
                 ),
               ),
             ),
-          ),
+            // Lembar kaca di bawah: titik penanda, judul, penjelasan, tombol.
+            Align(
+              alignment: Alignment.bottomCenter,
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 480),
+                child: Glass(
+                  borderRadius: const BorderRadius.vertical(
+                    top: Radius.circular(36),
+                  ),
+                  shadow: false,
+                  child: SafeArea(
+                    top: false,
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(24, 22, 24, 20),
+                      child: AnimatedSize(
+                        duration: const Duration(milliseconds: 250),
+                        curve: Curves.easeOutCubic,
+                        alignment: Alignment.topCenter,
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            _dots(),
+                            const SizedBox(height: 18),
+                            AnimatedSwitcher(
+                              duration: const Duration(milliseconds: 250),
+                              child: Column(
+                                key: ValueKey(_page),
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(page.title, style: AppText.display(28)),
+                                  const SizedBox(height: 10),
+                                  Text(
+                                    page.text,
+                                    style: AppText.subheadline.copyWith(
+                                      height: 1.45,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(height: 22),
+                            Row(
+                              children: [
+                                // Halaman pertama tidak punya tombol Kembali, jadi diganti ruang kosong.
+                                if (_page != 0) ...[
+                                  Expanded(
+                                    child: PressScale(
+                                      child: TextButton(
+                                        style: TextButton.styleFrom(
+                                          minimumSize: const Size.fromHeight(
+                                            50,
+                                          ),
+                                          foregroundColor: AppColors.forest,
+                                          backgroundColor: AppColors.leaf12,
+                                          shape: const StadiumBorder(),
+                                          textStyle: AppText.headline,
+                                        ),
+                                        onPressed: () => _goTo(_page - 1),
+                                        child: const Text('Kembali'),
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 14),
+                                ],
+                                Expanded(
+                                  flex: 2,
+                                  child: PrimaryButton(
+                                    label: _isLast
+                                        ? 'Mulai Jelajahi'
+                                        : 'Lanjut',
+                                    onPressed: _isLast
+                                        ? _finish
+                                        : () => _goTo(_page + 1),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -208,13 +278,12 @@ class _OnboardingScreenState extends State<OnboardingScreen>
   Widget _dots() => AnimatedBuilder(
     animation: _timer,
     builder: (context, _) => Row(
-      mainAxisAlignment: MainAxisAlignment.center,
       children: [
         for (var i = 0; i < _pages.length; i++)
           AnimatedContainer(
             duration: const Duration(milliseconds: 250),
-            margin: const EdgeInsets.symmetric(horizontal: 4),
-            width: i == _page ? 24 : 8,
+            margin: const EdgeInsets.only(right: 6),
+            width: i == _page ? 26 : 8,
             height: 8,
             alignment: Alignment.centerLeft,
             clipBehavior: Clip.antiAlias,
@@ -240,45 +309,34 @@ class _OnboardingScreenState extends State<OnboardingScreen>
   );
 }
 
-// Isi satu halaman onboarding: foto (hero), titik penanda, judul, dan penjelasan.
-class _OnboardingPage extends StatelessWidget {
-  const _OnboardingPage({required this.page, required this.dots});
+// Foto satu halaman onboarding, memenuhi layar dengan peredam Hijau Tua di atas dan bawah.
+class _OnboardingPhoto extends StatelessWidget {
+  const _OnboardingPhoto(this.image);
 
-  final ({String image, String title, String text}) page;
-  final Widget dots;
+  final String image;
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, box) => SingleChildScrollView(
-        child: Column(
-          children: [
-            ClipRRect(
-              borderRadius: BorderRadius.circular(32),
-              child: Image.asset(
-                page.image,
-                height: box.maxHeight * .58,
-                width: double.infinity,
-                fit: BoxFit.cover,
-              ),
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        Image.asset(image, fit: BoxFit.cover),
+        const DecoratedBox(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              stops: [0, .3, .6, 1],
+              colors: [
+                Color(0x801B4332),
+                Color(0x001B4332),
+                Color(0x001B4332),
+                Color(0x8C1B4332),
+              ],
             ),
-            const SizedBox(height: 24),
-            dots,
-            const SizedBox(height: 20),
-            Text(
-              page.title,
-              textAlign: TextAlign.center,
-              style: AppText.title2.copyWith(fontSize: 26, height: 32 / 26),
-            ),
-            const SizedBox(height: 10),
-            Text(
-              page.text,
-              textAlign: TextAlign.center,
-              style: AppText.subheadline.copyWith(height: 1.45),
-            ),
-          ],
+          ),
         ),
-      ),
+      ],
     );
   }
 }

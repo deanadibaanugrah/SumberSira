@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../theme/app_theme.dart';
+import 'glass.dart';
+import 'motion.dart';
 
 // Latar semua layar: Abu Muda, supaya kartu putih terlihat jelas.
 class AppBackground extends StatelessWidget {
@@ -59,6 +61,7 @@ class TabPage extends StatefulWidget {
     required this.children,
     this.overlay,
     this.bottomExtra = 0,
+    this.lightHeader = false,
   });
 
   final String title;
@@ -66,6 +69,8 @@ class TabPage extends StatefulWidget {
   final List<Widget> children;
   final Widget? overlay;
   final double bottomExtra;
+  // true bila header berlatar terang (ikon status bar gelap sejak awal).
+  final bool lightHeader;
 
   @override
   State<TabPage> createState() => _TabPageState();
@@ -99,7 +104,7 @@ class _TabPageState extends State<TabPage> {
     final inset = MediaQuery.paddingOf(context);
     // Ikon status bar putih di atas header gelap, gelap saat bar kaca terang muncul.
     return AnnotatedRegion<SystemUiOverlayStyle>(
-      value: _collapsed
+      value: (_collapsed || widget.lightHeader)
           ? SystemUiOverlayStyle.dark
           : SystemUiOverlayStyle.light,
       child: Stack(
@@ -201,47 +206,107 @@ class TabHeader extends StatelessWidget {
     this.subtitle,
     this.trailing,
     this.child,
+    this.photo,
+    this.light = false,
   });
 
   final String title;
   final String? subtitle;
   final Widget? trailing;
   final Widget? child;
+  // Foto latar header (aset). Tanpa foto, header memakai gradien hijau.
+  final String? photo;
+  // light = judul langsung di atas latar Abu Muda tanpa blok berwarna (mis. Galeri).
+  final bool light;
 
   @override
   Widget build(BuildContext context) {
+    final top = MediaQuery.paddingOf(context).top + 16;
+    if (light) {
+      return Padding(
+        padding: EdgeInsets.fromLTRB(
+          AppSpace.margin,
+          top + 8,
+          AppSpace.margin,
+          4,
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Expanded(child: Text(title, style: AppText.display(32))),
+                ?trailing,
+              ],
+            ),
+            if (subtitle != null) ...[
+              const SizedBox(height: 4),
+              Text(
+                subtitle!,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: AppText.subheadline,
+              ),
+            ],
+            if (child != null) ...[const SizedBox(height: 16), child!],
+          ],
+        ),
+      );
+    }
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
-      padding: EdgeInsets.fromLTRB(
-        AppSpace.margin,
-        MediaQuery.paddingOf(context).top + 16,
-        AppSpace.margin,
-        22,
+      clipBehavior: Clip.antiAlias,
+      decoration: BoxDecoration(
+        gradient: photo == null ? AppColors.heroGradient : null,
+        color: photo == null ? null : AppColors.forest,
+        borderRadius: const BorderRadius.vertical(bottom: Radius.circular(36)),
       ),
-      decoration: const BoxDecoration(
-        gradient: AppColors.headerGradient,
-        borderRadius: BorderRadius.vertical(bottom: Radius.circular(32)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
+      child: Stack(
         children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Expanded(child: Text(title, style: AppText.largeTitle())),
-              ?trailing,
-            ],
-          ),
-          if (subtitle != null) ...[
-            const SizedBox(height: 4),
-            Text(
-              subtitle!,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: AppText.footnote.copyWith(color: AppColors.putih72),
+          if (photo != null) ...[
+            Positioned.fill(child: Image.asset(photo!, fit: BoxFit.cover)),
+            const Positioned.fill(
+              child: DecoratedBox(
+                decoration: BoxDecoration(gradient: AppColors.photoScrimTop),
+              ),
             ),
           ],
-          if (child != null) ...[const SizedBox(height: 18), child!],
+          Padding(
+            padding: EdgeInsets.fromLTRB(
+              AppSpace.margin,
+              top,
+              AppSpace.margin,
+              24,
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Expanded(
+                      child: Text(
+                        title,
+                        style: AppText.display(32, color: Colors.white),
+                      ),
+                    ),
+                    ?trailing,
+                  ],
+                ),
+                if (subtitle != null) ...[
+                  const SizedBox(height: 6),
+                  Text(
+                    subtitle!,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: AppText.footnote.copyWith(color: AppColors.putih72),
+                  ),
+                ],
+                if (child != null) ...[const SizedBox(height: 20), child!],
+              ],
+            ),
+          ),
         ],
       ),
     );
@@ -249,6 +314,7 @@ class TabHeader extends StatelessWidget {
 }
 
 // Kontrol bersegmen gaya iOS di atas header gelap: track kaca, pilihan aktif putih dengan teks Hijau Tua.
+// Kapsul putih meluncur dengan pegas ke segmen yang dipilih.
 class HeaderSegments extends StatelessWidget {
   const HeaderSegments({
     super.key,
@@ -263,67 +329,61 @@ class HeaderSegments extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final still = MediaQuery.disableAnimationsOf(context);
-    return Container(
-      height: 40,
-      padding: const EdgeInsets.all(3),
-      decoration: BoxDecoration(
-        color: AppColors.kaca,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: AppColors.kaca),
-      ),
-      child: LayoutBuilder(
-        builder: (context, box) {
-          final w = box.maxWidth / labels.length;
-          return Stack(
-            children: [
-              AnimatedPositioned(
-                duration: still
-                    ? Duration.zero
-                    : const Duration(milliseconds: 240),
-                curve: Curves.easeOutCubic,
-                left: w * index,
-                top: 0,
-                bottom: 0,
-                width: w,
-                child: DecoratedBox(
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(17),
-                  ),
+    return Glass(
+      radius: 24,
+      shadow: false,
+      padding: const EdgeInsets.all(4),
+      child: SizedBox(
+        height: 40,
+        child: Stack(
+          children: [
+            Positioned.fill(
+              child: LiquidPill(
+                index: index,
+                count: labels.length,
+                decoration: BoxDecoration(
+                  color: AppColors.forest,
+                  borderRadius: BorderRadius.circular(20),
                 ),
               ),
-              Row(
-                children: [
-                  for (final (i, label) in labels.indexed)
-                    Expanded(
-                      child: Semantics(
-                        button: true,
-                        selected: i == index,
-                        child: GestureDetector(
-                          behavior: HitTestBehavior.opaque,
-                          onTap: () => onChanged(i),
+            ),
+            Row(
+              children: [
+                for (final (i, label) in labels.indexed)
+                  Expanded(
+                    child: Semantics(
+                      button: true,
+                      selected: i == index,
+                      child: GestureDetector(
+                        behavior: HitTestBehavior.opaque,
+                        onTap: () => onChanged(i),
+                        child: PressScale(
+                          scale: .94,
                           child: Center(
-                            child: Text(
-                              label,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
+                            child: AnimatedDefaultTextStyle(
+                              duration: const Duration(milliseconds: 200),
+                              curve: Curves.easeOut,
                               style: AppText.footnote.copyWith(
                                 fontWeight: FontWeight.w600,
                                 color: i == index
-                                    ? AppColors.forest
-                                    : AppColors.putih72,
+                                    ? Colors.white
+                                    : AppColors.abu,
+                              ),
+                              child: Text(
+                                label,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
                               ),
                             ),
                           ),
                         ),
                       ),
                     ),
-                ],
-              ),
-            ],
-          );
-        },
+                  ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }

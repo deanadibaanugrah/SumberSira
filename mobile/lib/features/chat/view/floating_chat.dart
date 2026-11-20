@@ -8,6 +8,7 @@ import '../viewmodel/chat_controller.dart';
 import '../../../theme/app_theme.dart';
 import '../../../widgets/common.dart';
 import '../../../widgets/glass.dart';
+import '../../../widgets/motion.dart';
 
 // Chatbot Tanya Sira yang mengambang di Beranda.
 // Tertutup: gelembung kaca Hijau Tua berisi ikon chat yang bisa digeser ke mana saja.
@@ -113,10 +114,14 @@ class _FloatingChatState extends State<FloatingChat> {
       onPanStart: (_) => setState(() => _dragging = true),
       onPanUpdate: (d) => setState(() => _pos = (_pos ?? pos) + d.delta),
       onPanEnd: (_) => setState(() => _dragging = false),
-      child: const Icon(
-        CupertinoIcons.chat_bubble_2_fill,
-        color: Colors.white,
-        size: 26,
+      child: const PressScale(
+        scale: .88,
+        haptic: true,
+        child: Icon(
+          CupertinoIcons.chat_bubble_2_fill,
+          color: Colors.white,
+          size: 26,
+        ),
       ),
     ),
   );
@@ -232,13 +237,15 @@ class _ChatPanelState extends State<_ChatPanel> {
                       ],
                     ),
                   ),
-                  IconButton(
-                    tooltip: 'Tutup chat',
-                    onPressed: widget.onClose,
-                    icon: const Icon(
-                      CupertinoIcons.xmark,
-                      color: AppColors.ink,
-                      size: 19,
+                  PressScale(
+                    child: IconButton(
+                      tooltip: 'Tutup chat',
+                      onPressed: widget.onClose,
+                      icon: const Icon(
+                        CupertinoIcons.xmark,
+                        color: AppColors.ink,
+                        size: 19,
+                      ),
                     ),
                   ),
                 ],

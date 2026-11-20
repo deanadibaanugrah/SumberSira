@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
 import '../utils/format.dart';
 import 'glass.dart';
+import 'motion.dart';
 
 // [P3 StatelessWidget] Kartu konten: permukaan putih solid, sudut 20, tanpa bayangan.
 // onTap opsional (sedikit mengecil saat ditekan); color dan borderColor untuk kartu yang dipilih.
@@ -37,6 +38,14 @@ class AppCard extends StatelessWidget {
         border: borderColor == null
             ? null
             : Border.all(color: borderColor!, width: 1.5),
+        // Bayangan Hijau Tua tipis supaya kartu terangkat lembut dari latar Abu Muda.
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x121B4332),
+            blurRadius: 16,
+            offset: Offset(0, 4),
+          ),
+        ],
       ),
       child: Padding(padding: padding, child: child),
     );
@@ -57,11 +66,11 @@ class IconBadge extends StatelessWidget {
     return Container(
       width: size,
       height: size,
-      decoration: BoxDecoration(
+      decoration: const BoxDecoration(
         color: AppColors.leaf12,
-        borderRadius: BorderRadius.circular(size * .3),
+        shape: BoxShape.circle,
       ),
-      child: Icon(icon, size: size * .5, color: AppColors.leaf),
+      child: Icon(icon, size: size * .46, color: AppColors.forest),
     );
   }
 }
@@ -75,50 +84,43 @@ class PageAppBar extends StatelessWidget implements PreferredSizeWidget {
   final bool showBack;
 
   @override
-  Size get preferredSize => const Size.fromHeight(52);
+  Size get preferredSize => const Size.fromHeight(64);
 
   @override
   Widget build(BuildContext context) {
     final solid = MediaQuery.highContrastOf(context);
     final bar = DecoratedBox(
       decoration: BoxDecoration(
-        color: solid ? Colors.white : AppColors.glass,
-        border: const Border(bottom: BorderSide(color: AppColors.line)),
+        color: solid
+            ? AppColors.abuMuda
+            : AppColors.abuMuda.withValues(alpha: .86),
       ),
       child: SafeArea(
         bottom: false,
         child: SizedBox(
-          height: 52,
-          child: Stack(
-            alignment: Alignment.center,
-            children: [
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 60),
-                child: Text(
-                  title,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: AppText.headline,
-                ),
-              ),
-              if (showBack)
-                Positioned(
-                  left: 6,
-                  child: IconButton(
+          height: 64,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: AppSpace.margin),
+            child: Row(
+              children: [
+                if (showBack) ...[
+                  GlassIconButton(
+                    icon: CupertinoIcons.chevron_back,
                     tooltip: 'Kembali',
-                    constraints: const BoxConstraints.tightFor(
-                      width: 44,
-                      height: 44,
-                    ),
-                    icon: const Icon(
-                      CupertinoIcons.chevron_back,
-                      size: 24,
-                      color: AppColors.leaf,
-                    ),
                     onPressed: () => Navigator.maybePop(context),
                   ),
+                  const SizedBox(width: 12),
+                ],
+                Expanded(
+                  child: Text(
+                    title,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: AppText.display(21),
+                  ),
                 ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
@@ -165,43 +167,45 @@ class PrimaryButton extends StatelessWidget {
     return SizedBox(
       width: double.infinity,
       height: height,
-      child: ElevatedButton(
-        style: ElevatedButton.styleFrom(
-          elevation: 0,
-          backgroundColor: bg,
-          foregroundColor: fg,
-          disabledBackgroundColor: AppColors.line,
-          disabledForegroundColor: AppColors.abu,
-          padding: const EdgeInsets.symmetric(horizontal: 18),
-          shape: const StadiumBorder(),
-          textStyle: AppText.headline,
-        ),
-        onPressed: loading ? null : onPressed,
-        child: loading
-            ? const SizedBox(
-                width: 20,
-                height: 20,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2.2,
-                  color: AppColors.forest,
-                ),
-              )
-            : Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  if (icon != null) ...[
-                    Icon(icon, size: 20),
-                    const SizedBox(width: 8),
-                  ],
-                  Flexible(
-                    child: Text(
-                      label,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
+      child: PressScale(
+        child: ElevatedButton(
+          style: ElevatedButton.styleFrom(
+            elevation: 0,
+            backgroundColor: bg,
+            foregroundColor: fg,
+            disabledBackgroundColor: AppColors.line,
+            disabledForegroundColor: AppColors.abu,
+            padding: const EdgeInsets.symmetric(horizontal: 18),
+            shape: const StadiumBorder(),
+            textStyle: AppText.headline,
+          ),
+          onPressed: loading ? null : onPressed,
+          child: loading
+              ? const SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2.2,
+                    color: AppColors.forest,
                   ),
-                ],
-              ),
+                )
+              : Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (icon != null) ...[
+                      Icon(icon, size: 20),
+                      const SizedBox(width: 8),
+                    ],
+                    Flexible(
+                      child: Text(
+                        label,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
+                ),
+        ),
       ),
     );
   }
@@ -225,17 +229,19 @@ class TintedButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return TextButton.icon(
-      style: TextButton.styleFrom(
-        minimumSize: Size.fromHeight(height),
-        foregroundColor: AppColors.forest,
-        backgroundColor: AppColors.leaf12,
-        shape: const StadiumBorder(),
-        textStyle: AppText.headline,
+    return PressScale(
+      child: TextButton.icon(
+        style: TextButton.styleFrom(
+          minimumSize: Size.fromHeight(height),
+          foregroundColor: AppColors.forest,
+          backgroundColor: AppColors.leaf12,
+          shape: const StadiumBorder(),
+          textStyle: AppText.headline,
+        ),
+        onPressed: onPressed,
+        icon: Icon(icon, size: 20),
+        label: Text(label, maxLines: 1, overflow: TextOverflow.ellipsis),
       ),
-      onPressed: onPressed,
-      icon: Icon(icon, size: 20),
-      label: Text(label, maxLines: 1, overflow: TextOverflow.ellipsis),
     );
   }
 }
@@ -293,15 +299,17 @@ class StepperControl extends StatelessWidget {
 
   Widget _button(IconData icon, VoidCallback? onTap, String tooltip) => Tooltip(
     message: tooltip,
-    child: InkResponse(
-      onTap: onTap,
-      radius: 22,
-      child: SizedBox.square(
-        dimension: 44,
-        child: Icon(
-          icon,
-          size: 19,
-          color: onTap == null ? AppColors.leaf30 : AppColors.forest,
+    child: PressScale(
+      child: InkResponse(
+        onTap: onTap,
+        radius: 22,
+        child: SizedBox.square(
+          dimension: 44,
+          child: Icon(
+            icon,
+            size: 19,
+            color: onTap == null ? AppColors.leaf30 : AppColors.forest,
+          ),
         ),
       ),
     ),
@@ -353,7 +361,7 @@ class SectionTitle extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(title, style: AppText.title2),
+                Text(title, style: AppText.display(22)),
                 if (subtitle != null) ...[
                   const SizedBox(height: 2),
                   Text(

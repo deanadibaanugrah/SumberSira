@@ -6,6 +6,7 @@ import '../../../data/app_state.dart';
 import '../../../theme/app_theme.dart';
 import '../../../widgets/app_background.dart';
 import '../../../widgets/common.dart';
+import '../../../widgets/motion.dart';
 
 // Ulasan & Rating: ringkasan nilai (angka hero), form tulis ulasan, dan daftar ulasan terbaru.
 // Data daftar dan rata-rata berasal dari backend (GET /reviews); ulasan baru dikirim lewat POST /reviews.
@@ -121,24 +122,26 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
                         Row(
                           children: [
                             for (var i = 1; i <= 5; i++)
-                              IconButton(
-                                tooltip: '$i bintang',
-                                constraints: const BoxConstraints.tightFor(
-                                  width: 48,
-                                  height: 48,
-                                ),
-                                padding: EdgeInsets.zero,
-                                onPressed: _sending
-                                    ? null
-                                    : () => setState(() => _stars = i),
-                                icon: Icon(
-                                  i <= _stars
-                                      ? CupertinoIcons.star_fill
-                                      : CupertinoIcons.star,
-                                  size: 32,
-                                  color: i <= _stars
-                                      ? AppColors.leaf
-                                      : AppColors.leaf30,
+                              PressScale(
+                                child: IconButton(
+                                  tooltip: '$i bintang',
+                                  constraints: const BoxConstraints.tightFor(
+                                    width: 48,
+                                    height: 48,
+                                  ),
+                                  padding: EdgeInsets.zero,
+                                  onPressed: _sending
+                                      ? null
+                                      : () => setState(() => _stars = i),
+                                  icon: Icon(
+                                    i <= _stars
+                                        ? CupertinoIcons.star_fill
+                                        : CupertinoIcons.star,
+                                    size: 32,
+                                    color: i <= _stars
+                                        ? AppColors.leaf
+                                        : AppColors.leaf30,
+                                  ),
                                 ),
                               ),
                           ],
@@ -238,14 +241,16 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
                             if (!s.reviewsLoading &&
                                 s.reviewsError != null) ...[
                               const SizedBox(height: 8),
-                              TextButton.icon(
-                                onPressed: () =>
-                                    AppState.instance.refreshReviews(),
-                                icon: const Icon(
-                                  CupertinoIcons.refresh,
-                                  size: 18,
+                              PressScale(
+                                child: TextButton.icon(
+                                  onPressed: () =>
+                                      AppState.instance.refreshReviews(),
+                                  icon: const Icon(
+                                    CupertinoIcons.refresh,
+                                    size: 18,
+                                  ),
+                                  label: const Text('Coba lagi'),
                                 ),
-                                label: const Text('Coba lagi'),
                               ),
                             ],
                           ],

@@ -9,6 +9,7 @@ import '../../../utils/launcher.dart';
 import '../../../widgets/app_background.dart';
 import '../../../widgets/common.dart';
 import '../../../widgets/glass.dart';
+import '../../../widgets/motion.dart';
 
 // Tab Profil: identitas pengunjung (tanpa login), pengaturan pengingat, info wisata, dan tautan ke peta.
 class ProfileTab extends StatelessWidget {
@@ -75,36 +76,42 @@ class ProfileTab extends StatelessWidget {
             ),
           ),
           actions: [
-            TextButton(
-              onPressed: () {
-                AppState.instance.setApiUrl('');
-                Navigator.pop(ctx);
-              },
-              child: const Text('Reset Bawaan'),
+            PressScale(
+              child: TextButton(
+                onPressed: () {
+                  AppState.instance.setApiUrl('');
+                  Navigator.pop(ctx);
+                },
+                child: const Text('Reset Bawaan'),
+              ),
             ),
-            TextButton(
-              onPressed: menguji
-                  ? null
-                  : () async {
-                      setState(() {
-                        menguji = true;
-                        hasil = null;
-                      });
-                      final ok = await ApiClient.checkHealth(controller.text);
-                      if (!ctx.mounted) return;
-                      setState(() {
-                        menguji = false;
-                        hasil = ok ? 'Terhubung ke server.' : 'Tidak bisa terhubung. Pastikan backend menyala dan alamatnya benar.';
-                      });
-                    },
-              child: Text(menguji ? 'Menguji...' : 'Tes Koneksi'),
+            PressScale(
+              child: TextButton(
+                onPressed: menguji
+                    ? null
+                    : () async {
+                        setState(() {
+                          menguji = true;
+                          hasil = null;
+                        });
+                        final ok = await ApiClient.checkHealth(controller.text);
+                        if (!ctx.mounted) return;
+                        setState(() {
+                          menguji = false;
+                          hasil = ok ? 'Terhubung ke server.' : 'Tidak bisa terhubung. Pastikan backend menyala dan alamatnya benar.';
+                        });
+                      },
+                child: Text(menguji ? 'Menguji...' : 'Tes Koneksi'),
+              ),
             ),
-            ElevatedButton(
-              onPressed: () {
-                AppState.instance.setApiUrl(controller.text.trim());
-                Navigator.pop(ctx);
-              },
-              child: const Text('Simpan'),
+            PressScale(
+              child: ElevatedButton(
+                onPressed: () {
+                  AppState.instance.setApiUrl(controller.text.trim());
+                  Navigator.pop(ctx);
+                },
+                child: const Text('Simpan'),
+              ),
             ),
           ],
         ),

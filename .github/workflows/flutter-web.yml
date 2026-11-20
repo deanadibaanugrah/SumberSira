@@ -29,6 +29,8 @@ jobs:
       - uses: actions/checkout@v4
       - uses: subosito/flutter-action@v2
         with:
+          # Versi dikunci sama dengan yang dipakai di laptop pengembang, supaya hasil CI tidak berubah saat Flutter stable naik versi.
+          flutter-version: "3.47.1"
           channel: stable
           cache: true
       - run: flutter pub get

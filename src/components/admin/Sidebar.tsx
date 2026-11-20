@@ -84,7 +84,9 @@ export default function Sidebar({ admin }: { admin: AdminProfile }) {
                         title={collapsed ? label : undefined}
                         className={`group/menu relative flex h-12 items-center gap-3 rounded-full text-sm tracking-[-0.015em] transition ${alignWhenCollapsed} ${
                           collapsed ? "lg:mx-auto lg:size-11 lg:p-0" : "pl-4 pr-1"} ${
-                          active ? "bg-leaf/12 font-semibold text-forest" : "text-ink hover:bg-paper"}`}>
+                          active ? "font-semibold text-forest" : "text-ink hover:bg-paper"}`}>
+                    {/* Kapsul penanda menu aktif: elemen tersendiri supaya bisa meluncur antar menu saat pindah halaman */}
+                    {active && <span aria-hidden="true" className="menu-pill absolute inset-0 -z-10 rounded-full bg-leaf/12" />}
                     <Icon size={20} strokeWidth={active ? 2.25 : 1.75} aria-hidden="true" className={`shrink-0 ${active ? "text-leaf" : "text-abu"}`} />
                     <span className={`min-w-[150px] truncate ${hideWhenCollapsed}`}>{label}</span>
                     {collapsed && (

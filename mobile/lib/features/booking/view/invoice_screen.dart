@@ -11,6 +11,7 @@ import '../../../utils/launcher.dart';
 import '../../../utils/routes.dart';
 import '../../../widgets/app_background.dart';
 import '../../../widgets/common.dart';
+import '../../../widgets/glass.dart';
 
 // Booking Berhasil & Invoice: tampil setelah pembayaran QRIS, berisi tanda berhasil (hero), QR kode booking,
 // dan rincian yang sudah dibayar. Juga dibuka dari Riwayat di Tiket & Booking. Faktur dibaca dari server
@@ -72,29 +73,50 @@ class _InvoiceScreenState extends State<InvoiceScreen> {
             child: ResponsiveBody(
               children: [
                 const SizedBox(height: 12),
-                // Tanda status: lunas = berhasil, selain itu masih menunggu pembayaran.
-                Icon(
-                  lunas
-                      ? CupertinoIcons.checkmark_seal_fill
-                      : CupertinoIcons.clock_fill,
-                  size: 76,
-                  color: lunas ? AppColors.leaf : AppColors.abu,
+                // Kartu status hijau: lunas = berhasil, selain itu masih menunggu pembayaran.
+                Container(
+                  padding: const EdgeInsets.fromLTRB(22, 26, 22, 24),
+                  decoration: BoxDecoration(
+                    gradient: AppColors.heroGradient,
+                    borderRadius: BorderRadius.circular(32),
+                  ),
+                  child: Column(
+                    children: [
+                      Glass(
+                        tone: GlassTone.dark,
+                        radius: 36,
+                        shadow: false,
+                        child: SizedBox.square(
+                          dimension: 72,
+                          child: Icon(
+                            lunas
+                                ? CupertinoIcons.checkmark_alt
+                                : CupertinoIcons.clock_fill,
+                            size: 38,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        lunas ? 'Booking Berhasil!' : 'Menunggu Pembayaran',
+                        textAlign: TextAlign.center,
+                        style: AppText.display(30, color: Colors.white),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        lunas
+                            ? 'Pembayaran QRIS diterima. Tunjukkan QR ini di pintu masuk.'
+                            : 'Pembayaran QRIS belum lunas. Status di sini ikut diperbarui dari server.',
+                        textAlign: TextAlign.center,
+                        style: AppText.subheadline.copyWith(
+                          color: AppColors.putih72,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-                const SizedBox(height: 14),
-                Text(
-                  lunas ? 'Booking Berhasil!' : 'Menunggu Pembayaran',
-                  textAlign: TextAlign.center,
-                  style: AppText.title2.copyWith(fontSize: 28, height: 34 / 28),
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  lunas
-                      ? 'Pembayaran QRIS diterima. Tunjukkan QR ini di pintu masuk.'
-                      : 'Pembayaran QRIS belum lunas. Status di sini ikut diperbarui dari server.',
-                  textAlign: TextAlign.center,
-                  style: AppText.subheadline,
-                ),
-                const SizedBox(height: 22),
+                const SizedBox(height: 18),
                 // Kartu invoice berbentuk tiket: QR di atas, sobekan, lalu rincian pembayaran.
                 AppCard(
                   radius: 24,

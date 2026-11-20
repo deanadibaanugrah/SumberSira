@@ -107,105 +107,137 @@ class _ETicketScreenState extends State<ETicketScreen> {
               children: [
                 // Kartu e-tiket: judul dan status, QR besar, sobekan tiket, lalu rincian pesanan.
                 AppCard(
-                  radius: 24,
+                  radius: 28,
                   padding: EdgeInsets.zero,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(20, 18, 16, 0),
-                        child: Row(
-                          children: [
-                            const Icon(
-                              CupertinoIcons.ticket,
-                              size: 20,
-                              color: AppColors.leaf,
-                            ),
-                            const SizedBox(width: 10),
-                            const Expanded(
-                              child: Text(
-                                'Tiket Masuk Sumber Sira',
-                                style: AppText.headline,
-                              ),
-                            ),
-                            TicketStatusChip(t.status),
-                          ],
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(20, 20, 20, 12),
-                        child: Column(
-                          children: [
-                            Opacity(
-                              opacity: t.status == TicketStatus.waiting
-                                  ? 1
-                                  : .45,
-                              child: Container(
-                                padding: const EdgeInsets.all(14),
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(22),
-                                  border: Border.all(color: AppColors.line),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(28),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        ColoredBox(
+                          color: AppColors.forest,
+                          child: Column(
+                            children: [
+                              Padding(
+                                padding: const EdgeInsets.fromLTRB(
+                                  20,
+                                  20,
+                                  16,
+                                  0,
                                 ),
-                                child: QrImageView(
-                                  data: t.code,
-                                  size: 200,
-                                  eyeStyle: const QrEyeStyle(
-                                    eyeShape: QrEyeShape.square,
-                                    color: AppColors.ink,
-                                  ),
-                                  dataModuleStyle: const QrDataModuleStyle(
-                                    dataModuleShape: QrDataModuleShape.square,
-                                    color: AppColors.ink,
-                                  ),
+                                child: Row(
+                                  children: [
+                                    const Icon(
+                                      CupertinoIcons.ticket_fill,
+                                      size: 20,
+                                      color: Colors.white,
+                                    ),
+                                    const SizedBox(width: 10),
+                                    Expanded(
+                                      child: Text(
+                                        'Tiket Masuk Sumber Sira',
+                                        style: AppText.display(
+                                          18,
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                    ),
+                                    TicketStatusChip(t.status),
+                                  ],
                                 ),
                               ),
-                            ),
-                            const SizedBox(height: 14),
-                            Text(
-                              t.code,
-                              style: AppText.number(
-                                24,
-                                weight: FontWeight.w700,
-                                color: AppColors.forest,
-                              ),
-                            ),
-                            const SizedBox(height: 10),
-                            Text(
-                              _messages[t.status]!,
-                              textAlign: TextAlign.center,
-                              style: AppText.subheadline,
-                            ),
-                            if (t.checkInAt != null) ...[
-                              const SizedBox(height: 6),
-                              Text(
-                                'Masuk ${t.checkInAt}',
-                                style: AppText.number(
-                                  13,
-                                  color: AppColors.forest,
+                              Padding(
+                                padding: const EdgeInsets.fromLTRB(
+                                  20,
+                                  20,
+                                  20,
+                                  22,
+                                ),
+                                child: Column(
+                                  children: [
+                                    Opacity(
+                                      opacity: t.status == TicketStatus.waiting
+                                          ? 1
+                                          : .45,
+                                      child: Container(
+                                        padding: const EdgeInsets.all(14),
+                                        decoration: BoxDecoration(
+                                          color: Colors.white,
+                                          borderRadius: BorderRadius.circular(
+                                            22,
+                                          ),
+                                          border: Border.all(
+                                            color: AppColors.line,
+                                          ),
+                                        ),
+                                        child: QrImageView(
+                                          data: t.code,
+                                          size: 200,
+                                          eyeStyle: const QrEyeStyle(
+                                            eyeShape: QrEyeShape.square,
+                                            color: AppColors.ink,
+                                          ),
+                                          dataModuleStyle:
+                                              const QrDataModuleStyle(
+                                                dataModuleShape:
+                                                    QrDataModuleShape.square,
+                                                color: AppColors.ink,
+                                              ),
+                                        ),
+                                      ),
+                                    ),
+                                    const SizedBox(height: 14),
+                                    Text(
+                                      t.code,
+                                      style: AppText.display(
+                                        28,
+                                        color: Colors.white,
+                                        weight: FontWeight.w700,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 10),
+                                    Text(
+                                      _messages[t.status]!,
+                                      textAlign: TextAlign.center,
+                                      style: AppText.subheadline.copyWith(
+                                        color: AppColors.putih72,
+                                      ),
+                                    ),
+                                    if (t.checkInAt != null) ...[
+                                      const SizedBox(height: 6),
+                                      Text(
+                                        'Masuk ${t.checkInAt}',
+                                        style: AppText.number(
+                                          13,
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                    ],
+                                  ],
                                 ),
                               ),
                             ],
-                          ],
+                          ),
                         ),
-                      ),
-                      const TicketDivider(),
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(20, 4, 20, 16),
-                        child: Column(
-                          children: [
-                            for (final (i, (label, value)) in rows.indexed) ...[
-                              if (i == last)
-                                const Padding(
-                                  padding: EdgeInsets.symmetric(vertical: 6),
-                                  child: Divider(),
-                                ),
-                              DetailRow(label, value, strong: i == last),
+                        const TicketDivider(),
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(20, 4, 20, 16),
+                          child: Column(
+                            children: [
+                              for (final (i, (label, value))
+                                  in rows.indexed) ...[
+                                if (i == last)
+                                  const Padding(
+                                    padding: EdgeInsets.symmetric(vertical: 6),
+                                    child: Divider(),
+                                  ),
+                                DetailRow(label, value, strong: i == last),
+                              ],
                             ],
-                          ],
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
                 const SizedBox(height: 20),

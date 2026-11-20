@@ -297,18 +297,8 @@ class _AiPhotoScreenState extends State<AiPhotoScreen> {
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        SizedBox(
-                          width: 20,
-                          child: Text(
-                            '${i + 1}',
-                            style: AppText.number(
-                              17,
-                              weight: FontWeight.w700,
-                              color: AppColors.forest,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 16),
+                        StepBadge(i + 1),
+                        const SizedBox(width: 14),
                         Expanded(
                           child: Text(
                             step,

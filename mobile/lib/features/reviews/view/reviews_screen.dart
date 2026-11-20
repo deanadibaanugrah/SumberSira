@@ -77,9 +77,11 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
               children: [
                 // Ringkasan rating: angka hero dan bintang, dari server.
                 AppCard(
+                  color: AppColors.forest,
+                  radius: 28,
                   padding: const EdgeInsets.symmetric(
-                    horizontal: 22,
-                    vertical: 20,
+                    horizontal: 24,
+                    vertical: 22,
                   ),
                   child: Row(
                     children: [
@@ -87,18 +89,25 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
                         s.reviewsReady
                             ? s.reviewRating.toStringAsFixed(1)
                             : '–',
-                        style: AppText.hero(56),
+                        style: AppText.hero(56, color: Colors.white),
                       ),
                       const SizedBox(width: 18),
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            _starsRow(s.reviewRating.round(), 22),
+                            _starsRow(
+                              s.reviewRating.round(),
+                              22,
+                              on: AppColors.coral,
+                              off: AppColors.kaca,
+                            ),
                             const SizedBox(height: 6),
                             Text(
                               'dari ${s.reviewCount} ulasan',
-                              style: AppText.footnote,
+                              style: AppText.footnote.copyWith(
+                                color: AppColors.putih72,
+                              ),
                             ),
                           ],
                         ),
@@ -267,14 +276,19 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
   }
 
   // Deretan 5 bintang Hijau Daun: penuh sebanyak nilai, sisanya garis Hijau Daun 30%.
-  Widget _starsRow(int stars, double size) => Row(
+  Widget _starsRow(
+    int stars,
+    double size, {
+    Color on = AppColors.leaf,
+    Color off = AppColors.leaf30,
+  }) => Row(
     mainAxisSize: MainAxisSize.min,
     children: [
       for (var i = 1; i <= 5; i++)
         Icon(
           i <= stars ? CupertinoIcons.star_fill : CupertinoIcons.star,
           size: size,
-          color: i <= stars ? AppColors.leaf : AppColors.leaf30,
+          color: i <= stars ? on : off,
         ),
     ],
   );

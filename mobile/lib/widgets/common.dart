@@ -326,10 +326,31 @@ class SectionLabel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.fromLTRB(16, top, 16, 8),
+      padding: EdgeInsets.fromLTRB(4, top, 4, 10),
+      child: Text(text, style: AppText.display(20)),
+    );
+  }
+}
+
+// Lencana nomor langkah: lingkaran Hijau Tua berisi angka putih (cara bayar, cara kerja).
+class StepBadge extends StatelessWidget {
+  const StepBadge(this.number, {super.key});
+
+  final int number;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 26,
+      height: 26,
+      alignment: Alignment.center,
+      decoration: const BoxDecoration(
+        color: AppColors.forest,
+        shape: BoxShape.circle,
+      ),
       child: Text(
-        text.toUpperCase(),
-        style: AppText.caption.copyWith(letterSpacing: .6),
+        '$number',
+        style: AppText.number(13, weight: FontWeight.w700, color: Colors.white),
       ),
     );
   }

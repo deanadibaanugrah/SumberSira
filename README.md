@@ -387,7 +387,8 @@ src/lib/               Utilitas tanpa state
 ## Catatan desain
 
 - Ukuran mengikuti Figma: frame mobile **375 × 812** dan admin **1440 × 900**. PNG admin di `desain/` diekspor 1,25×
-  (1 px di kode = 1,25 px di PNG). Ukuran teks, jarak, dan kartu diukur dari PNG.
+  (1 px di kode = 1,25 px di PNG), kecuali Chatbot & FAQ yang diekspor 1× dan lebih tinggi karena memuat kartu Alur Jawaban dan
+  Tombol Jawaban Cepat. Ukuran teks, jarak, dan kartu diukur dari PNG.
 - Tampilan mobile mengikuti gaya iOS 27 (Liquid Glass), hanya mode terang, dengan dua lapisan yang jelas:
   lapisan navigasi (tab bar, nav bar saat digulir, CTA mengambang, sheet) dari kaca, lapisan konten (kartu, list, foto, form) permukaan putih solid.
   Kaca terang = Putih 72% + blur + garis tepi Putih 50% + bayangan 0 8 24 Ink 10%; kaca gelap = Putih 12% + blur; CTA primer = Hijau Tua 85%.

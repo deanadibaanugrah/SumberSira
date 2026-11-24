@@ -40,6 +40,8 @@ class AiPhotoResult {
     required this.originalUrl,
     required this.resultUrl,
     this.error,
+    this.strength = 60,
+    this.engine = '',
   });
 
   final String id;
@@ -47,6 +49,9 @@ class AiPhotoResult {
   final String originalUrl;
   final String resultUrl;
   final String? error;
+  // Kekuatan perbaikan 0 sampai 100 dan mesinnya: "ai" = dinilai AI dulu, "otomatis" = statistik foto saja.
+  final int strength;
+  final String engine;
 
   // Job selesai bila status "done"; selain itu hasil belum bisa dibagikan.
   bool get done => status == 'done';
@@ -57,5 +62,7 @@ class AiPhotoResult {
     originalUrl: json['originalUrl'] as String? ?? '',
     resultUrl: json['resultUrl'] as String? ?? '',
     error: json['error'] as String?,
+    strength: (json['strength'] as num?)?.toInt() ?? 60,
+    engine: json['engine'] as String? ?? '',
   );
 }

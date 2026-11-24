@@ -422,14 +422,29 @@ class ApiClient {
   static Future<AiPhotoResult> enhancePhoto({
     required String fileName,
     required List<int> fileBytes,
+    int strength = 60,
   }) async => AiPhotoResult.fromApi(
     _map(
       await postMultipart(
         '/ai-photo',
-        const {},
+        {'strength': '$strength'},
         fileField: 'photo',
         fileName: fileName,
         fileBytes: fileBytes,
+      ),
+    ),
+  );
+
+  // Atur ulang kekuatan perbaikan dari foto asli yang sudah ada di server (POST /ai-photo/:id/strength).
+  static Future<AiPhotoResult> setAiPhotoStrength({
+    required String id,
+    required int strength,
+  }) async => AiPhotoResult.fromApi(
+    _map(
+      await _request(
+        'POST',
+        '/ai-photo/$id/strength',
+        body: {'strength': strength},
       ),
     ),
   );
@@ -465,10 +480,29 @@ class ApiClient {
   }
 
   // Kirim pertanyaan ke Tanya Sira (POST /chat). Pertanyaan yang tidak cocok dicatat server untuk admin.
-  static Future<ChatAnswer> askChat(String message) async =>
-      ChatAnswer.fromJson(
-        _map(
-          await _request('POST', '/chat', body: {'message': message.trim()}),
-        ),
-      );
+  // history = beberapa pesan terakhir supaya pertanyaan lanjutan ("kalau anak-anak?") dimengerti.
+  static Future<ChatAnswer> askChat(
+    String message, {
+    List<({bool fromBot, String text})> history = const [],
+  }) async => ChatAnswer.fromJson(
+    _map(
+      await _request(
+        'POST',
+        '/chat',
+        body: {
+          'message': message.trim(),
+          if (history.isNotEmpty)
+            'history': [
+              for (final h in history)
+                {
+                  'role': h.fromBot ? 'assistant' : 'user',
+                  'text': h.text.length > 600
+                      ? h.text.substring(0, 600)
+                      : h.text,
+                },
+            ],
+        },
+      ),
+    ),
+  );
 }

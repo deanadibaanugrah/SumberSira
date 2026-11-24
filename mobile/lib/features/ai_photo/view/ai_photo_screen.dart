@@ -37,11 +37,15 @@ class _AiPhotoScreenState extends State<AiPhotoScreen> {
   bool _processing = false;
   bool _saving = false;
   bool _sharing = false;
+  // Sedang mengatur ulang kekuatan perbaikan di server (slider).
+  bool _adjusting = false;
+  // Kekuatan perbaikan 0 sampai 100; bawaan 60 sama dengan Figma.
+  double _strength = 60;
   // True setelah hasil berhasil dibagikan ke galeri (satu job hanya boleh sekali).
   bool _shared = false;
   String? _error;
 
-  bool get _busy => _processing || _saving || _sharing;
+  bool get _busy => _processing || _saving || _sharing || _adjusting;
   String get _ownerAwal => AppState.instance.myTickets.isNotEmpty
       ? AppState.instance.myTickets.first.name
       : '';
@@ -109,12 +113,14 @@ class _AiPhotoScreenState extends State<AiPhotoScreen> {
       final result = await ApiClient.enhancePhoto(
         fileName: fileName,
         fileBytes: bytes,
+        strength: _strength.round(),
       );
       if (!mounted) return;
       setState(() {
         _processing = false;
         if (result.done) {
           _result = result;
+          _strength = result.strength.toDouble();
         } else {
           // Job tersimpan tapi gagal diproses (422 PROCESSING_FAILED).
           _error = result.error ?? 'Foto belum selesai diproses. Coba lagi.';
@@ -128,6 +134,80 @@ class _AiPhotoScreenState extends State<AiPhotoScreen> {
       });
     }
   }
+
+  // Atur ulang kekuatan perbaikan dari foto asli yang sudah ada di server, lalu tampilkan hasil barunya.
+  Future<void> _applyStrength(double value) async {
+    final result = _result;
+    if (result == null || _busy) return;
+    setState(() {
+      _adjusting = true;
+      _error = null;
+    });
+    try {
+      final baru = await ApiClient.setAiPhotoStrength(
+        id: result.id,
+        strength: value.round(),
+      );
+      if (!mounted) return;
+      setState(() {
+        _adjusting = false;
+        if (baru.done) _result = baru;
+      });
+    } on ApiException catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _adjusting = false;
+        _error = e.message;
+      });
+    }
+  }
+
+  // Kartu slider kekuatan perbaikan, dengan catatan bahwa hanya warna dan kontras yang diubah.
+  Widget _strengthCard(AiPhotoResult result) => AppCard(
+    padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Row(
+          children: [
+            Expanded(
+              child: Text(
+                'Kekuatan perbaikan',
+                style: AppText.subheadline.copyWith(
+                  color: AppColors.ink,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+            Text(
+              '${_strength.round()}%',
+              style: AppText.number(15, color: AppColors.leaf),
+            ),
+          ],
+        ),
+        Slider(
+          value: _strength,
+          min: 0,
+          max: 100,
+          divisions: 20,
+          label: '${_strength.round()}%',
+          onChanged: _busy ? null : (v) => setState(() => _strength = v),
+          onChangeEnd: _busy ? null : _applyStrength,
+        ),
+        if (_adjusting)
+          const Padding(
+            padding: EdgeInsets.only(bottom: 8),
+            child: LinearProgressIndicator(minHeight: 3),
+          ),
+        Text(
+          result.engine == 'ai'
+              ? 'Foto dinilai AI, lalu warna, kabut, dan kontrasnya diperbaiki. Bentuk, wajah, dan latar tidak diubah.'
+              : 'Warna, kabut, dan kontras diperbaiki otomatis. Bentuk, wajah, dan latar tidak diubah.',
+          style: AppText.footnote,
+        ),
+      ],
+    ),
+  );
 
   // Mengunduh hasil dari server lalu membukanya di lembar bagikan sistem (simpan ke galeri HP atau kirim).
   Future<void> _share() async {
@@ -225,6 +305,10 @@ class _AiPhotoScreenState extends State<AiPhotoScreen> {
               _progress()
             else
               _empty(),
+            if (result != null) ...[
+              const SizedBox(height: 12),
+              _strengthCard(result),
+            ],
             if (_error != null)
               Padding(
                 padding: const EdgeInsets.only(top: 12),
@@ -289,7 +373,7 @@ class _AiPhotoScreenState extends State<AiPhotoScreen> {
               children: [
                 for (final (i, step) in const [
                   'Pilih foto dari galeri atau ambil dengan kamera.',
-                  'Server menganalisis warna, kecerahan, dan kontras, lalu memperbaikinya otomatis seperti tombol Auto di aplikasi edit foto profesional.',
+                  'AI menilai warna, kabut, dan kecerahan foto, lalu server memperbaikinya seperti Auto Color dan Dehaze di aplikasi edit foto profesional. Tidak ada objek, wajah, atau latar yang diubah.',
                   'Bandingkan dengan foto asli, lalu simpan, bagikan, atau kirim ke Galeri Komunitas.',
                 ].indexed)
                   Padding(

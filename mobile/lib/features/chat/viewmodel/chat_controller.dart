@@ -65,19 +65,30 @@ class ChatController extends ChangeNotifier {
   Future<void> send(String text) async {
     final question = text.trim();
     if (question.isEmpty || busy) return;
+    // Riwayat singkat dikirim sebelum pertanyaan baru dimasukkan (maksimal 6 pesan terakhir).
+    final riwayat = [
+      for (final m
+          in messages.length > 6
+              ? messages.sublist(messages.length - 6)
+              : messages)
+        (fromBot: m.fromBot, text: m.text),
+    ];
     _add(ChatMessage(fromBot: false, text: question));
     busy = true;
     notifyListeners();
     try {
-      final jawaban = await ApiClient.askChat(question);
+      final jawaban = await ApiClient.askChat(question, history: riwayat);
       online = true;
       _add(
         ChatMessage(
           fromBot: true,
           text: jawaban.answer,
-          // matched = pertanyaan cocok dengan FAQ pengelola; bila tidak, server mencatatnya untuk admin.
+          // matched = ada jawabannya (dari FAQ pengelola atau dari AI yang hanya memakai data resmi);
+          // bila tidak, server mencatat pertanyaannya untuk admin.
           source: jawaban.matched
-              ? 'FAQ pengelola'
+              ? (jawaban.source == 'ai'
+                    ? 'Dijawab AI dari data resmi'
+                    : 'FAQ pengelola')
               : 'Pertanyaan dicatat untuk admin',
         ),
       );

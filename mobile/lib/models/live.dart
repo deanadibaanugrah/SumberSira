@@ -37,15 +37,22 @@ class CrowdInfo {
   final List<({String hour, int count})> forecast;
 }
 
-// Jawaban POST /chat. matched false = belum ada FAQ yang cocok; server mencatat pertanyaannya untuk admin.
+// Jawaban POST /chat. matched false = belum ada jawabannya; server mencatat pertanyaannya untuk admin.
+// source: "faq" = jawaban tulisan admin, "ai" = dijawab AI dari data resmi.
 class ChatAnswer {
-  const ChatAnswer({required this.answer, required this.matched});
+  const ChatAnswer({
+    required this.answer,
+    required this.matched,
+    this.source = '',
+  });
 
   factory ChatAnswer.fromJson(Map<String, dynamic> j) => ChatAnswer(
     answer: j['answer'] as String? ?? '',
     matched: j['matched'] as bool? ?? false,
+    source: j['source'] as String? ?? '',
   );
 
   final String answer;
   final bool matched;
+  final String source;
 }

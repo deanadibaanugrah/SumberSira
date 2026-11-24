@@ -205,7 +205,7 @@ dibagikan, atau dikirim ke Galeri Komunitas untuk disetujui admin.
 | Halaman hasil input | Tabel ikut berubah setelah aksi | `eticket_screen.dart`, `invoice_screen.dart`, `tickets_tab.dart` |
 | Navigasi dan validasi | Sidebar, redirect login, validasi form | Named routes, tab bawah, validasi nama dan WhatsApp |
 | Data | Dari backend (tiket, booking, pembayaran, keramaian, chat, ulasan, galeri, wahana, harga, akun) | Dari backend (semua fitur; cadangan lokal hanya untuk wahana, jam, dan harga) |
-| AI | Chatbot (FAQ) dan AI Insight berbasis aturan | Chatbot Tanya Sira dan AI Photo Studio (lihat bagian Fitur AI) |
+| AI | Admin mengatur FAQ dan tombol jawaban cepat serta memantau status chatbot AI; halaman Insight berbasis aturan (bukan AI) | Chatbot Tanya Sira dan AI Photo Studio (lihat bagian Fitur AI) |
 
 ## Screenshot
 

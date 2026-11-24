@@ -248,7 +248,7 @@ Tangkapan layar di atas diambil dari aplikasi yang berjalan; desain acuannya ada
 | `/admin` | Dashboard Overview (kartu ringkasan, grafik batang pill beranimasi, ringkasan hari ini, booking masuk, heatmap keramaian seminggu, tiket online hari ini, wahana terpopuler, pendapatan 7 hari). Angka keramaian dan tiket dari tiket yang discan |
 | `/admin/booking` | Booking Sewa & Wahana (filter, cari lewat kotak cari di header, detail booking, konfirmasi/tolak) |
 | `/admin/tiket` | Tiket & Check-in: scan kode tiket di pintu masuk, daftar tiket hari ini, check-in dan keluar |
-| `/admin/insight` | AI Insight: rating dan sebaran ulasan, keramaian saat ini, jam terpadat, dan saran dari `GET /admin/insight`. Bagian lama yang datanya tidak disediakan backend (grafik per 30 menit, rincian tiket, pola 7 hari, pilih tanggal, unduh CSV) disembunyikan. Analisisnya aturan, bukan LLM |
+| `/admin/insight` | Insight (berbasis aturan, bukan AI): rating dan sebaran ulasan, keramaian saat ini, jam terpadat, dan saran dari `GET /admin/insight`. Bagian lama yang datanya tidak disediakan backend (grafik per 30 menit, rincian tiket, pola 7 hari, pilih tanggal, unduh CSV) disembunyikan. Analisisnya aturan, bukan LLM |
 | `/admin/galeri` | Galeri & Konten (moderasi foto kiriman pengunjung dari backend, urut terbaru/terlama, tampilan grid atau daftar) |
 | `/admin/faq` | Chatbot & FAQ: kelola FAQ jawaban cepat, lihat pertanyaan pengunjung yang belum terjawab. Menjawab = membuat FAQ baru lalu menghapus pertanyaan itu |
 | `/admin/wahana` | Wahana & Harga (filter kategori, tambah, edit, hapus) dan harga tiket masuk, kapasitas, serta tarif parkir. Petugas hanya melihat; admin bisa mengubah |

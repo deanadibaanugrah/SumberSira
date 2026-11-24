@@ -37,7 +37,7 @@ export type AdminAiStatus = { enabled: boolean; model: string; dailyLimit: numbe
 // Pertanyaan pengunjung yang tidak cocok dengan FAQ mana pun.
 export type AdminUnanswered = { id: string; question: string; createdAt: string };
 
-// Ringkasan AI Insight dari backend: rating ulasan, keramaian saat ini, jam terpadat, dan saran aturan.
+// Ringkasan Insight dari backend: rating ulasan, keramaian saat ini, jam terpadat, dan saran aturan.
 export type AdminInsight = {
   rating: number;
   reviewCount: number;

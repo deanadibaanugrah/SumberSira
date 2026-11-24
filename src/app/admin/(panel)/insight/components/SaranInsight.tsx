@@ -7,7 +7,7 @@ import type { AdminInsight } from "@/models/admin";
 export default function SaranInsight({ data }: { data: AdminInsight }) {
   return (
     <Card>
-      <CardTitle sub="Dari keramaian saat ini dan ulasan terbaru">Saran AI</CardTitle>
+      <CardTitle sub="Dari keramaian saat ini dan ulasan terbaru">Saran</CardTitle>
       {data.suggestions.length > 0 ? (
         <ul className="mt-5 space-y-3">
           {data.suggestions.map((saran, i) => (

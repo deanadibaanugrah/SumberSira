@@ -16,7 +16,7 @@ export const ADMIN_MENU: { href: string; label: string; icon: typeof LayoutGrid;
   { href: "/admin", label: "Dashboard", icon: LayoutGrid, permission: "dashboard" },
   { href: "/admin/booking", label: "Booking Sewa & Wahana", icon: CalendarCheck, permission: "booking" },
   { href: "/admin/tiket", label: "Tiket & Check-in", icon: Ticket, permission: "tiket" },
-  { href: "/admin/insight", label: "Insight Keramaian", icon: ChartLine, permission: "insight" },
+  { href: "/admin/insight", label: "Insight", icon: ChartLine, permission: "insight" },
   { href: "/admin/galeri", label: "Galeri & Konten", icon: ImageIcon, permission: "galeri" },
   { href: "/admin/ulasan", label: "Ulasan & Rating", icon: Star, permission: "ulasan" },
   { href: "/admin/faq", label: "Chatbot & FAQ", icon: MessageCircle, permission: "faq" },

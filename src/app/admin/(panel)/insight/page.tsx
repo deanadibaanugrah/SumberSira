@@ -2,7 +2,7 @@ import { getInsightForAdmin, requirePermission } from "@/repositories/admin-repo
 
 import InsightView from "./components/InsightView";
 
-// Admin: AI Insight. Analisis dibuat backend dari ulasan dan keramaian (aturan, bukan LLM).
+// Admin: Insight. Analisis dibuat backend dari ulasan dan keramaian (aturan, bukan LLM).
 // Hanya admin (izin "insight"); petugas loket mendapat halaman 403.
 export default async function InsightPage() {
   await requirePermission("insight");

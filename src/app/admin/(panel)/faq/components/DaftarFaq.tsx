@@ -14,7 +14,7 @@ type DaftarFaqProps = {
 export default function DaftarFaq({ faqs, ready, onEdit, onRemove }: DaftarFaqProps) {
   return (
     <Card className="px-4! pt-5!">
-      <CardTitle className="px-2" sub="Dicek paling dulu oleh Tanya Sira, jawabannya cepat dan tanpa AI">Daftar FAQ</CardTitle>
+      <CardTitle className="px-2" sub="Jawaban resmi pengelola: dipakai langsung oleh tombol cepat dan jadi bahan AI saat menjawab pertanyaan bebas">Daftar FAQ</CardTitle>
       <ol className="mt-5 space-y-3">
         {faqs.map((f, i) => {
           const judul = f.keys[0] ?? "(tanpa kata kunci)";

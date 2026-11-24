@@ -6,7 +6,7 @@ import { useState } from "react";
 import type { FormEvent } from "react";
 
 import { AdminHeader, PrimaryButton } from "@/components/admin/ui";
-import type { AdminFaq, AdminUnanswered } from "@/models/admin";
+import type { AdminAiStatus, AdminFaq, AdminUnanswered } from "@/models/admin";
 
 import { hapusFaq, hapusPertanyaan, simpanFaq } from "../actions";
 import AlurJawaban from "./AlurJawaban";
@@ -15,6 +15,7 @@ import DaftarFaq from "./DaftarFaq";
 import FormFaq, { type FormState } from "./FormFaq";
 import { kunciFaq } from "./kunci";
 import StatFaq from "./StatFaq";
+import TombolCepat from "./TombolCepat";
 
 // Pesan untuk pengelola dari kode kesalahan backend.
 function pesan(kode: string): string {
@@ -26,9 +27,9 @@ function pesan(kode: string): string {
   return "Gagal menyimpan. Coba lagi.";
 }
 
-// Admin 6/7: Chatbot & FAQ. Tanya Sira menjawab dari FAQ pengelola; pertanyaan yang belum cocok dicatat
-// di daftar Belum Terjawab. Semua data dari backend (GET /admin/faq dan /admin/faq/unanswered).
-export default function FaqView({ faqs, pending, error }: { faqs: AdminFaq[]; pending: AdminUnanswered[]; error: string | null }) {
+// Admin 6/7: Chatbot & FAQ. Tombol cepat dan FAQ dijawab persis tulisan pengelola, pertanyaan bebas dijawab AI hanya dari data
+// resmi, dan yang tidak diketahui dicatat di daftar Belum Terjawab. Semua data dari backend (/admin/faq/...).
+export default function FaqView({ faqs, pending, tombol, ai, error }: { faqs: AdminFaq[]; pending: AdminUnanswered[]; tombol: string[]; ai: AdminAiStatus | null; error: string | null }) {
   const [form, setForm] = useState<FormState | null>(null);
   const [saving, setSaving] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
@@ -145,6 +146,7 @@ export default function FaqView({ faqs, pending, error }: { faqs: AdminFaq[]; pe
 
       <StatFaq faqAktif={faqAktif} pendingCount={pending.length} />
       <AlurJawaban />
+      <TombolCepat key={tombol.join("|")} tombol={tombol} ai={ai} ready={!error} />
 
       <div className="mt-5 grid grid-cols-1 gap-5 xl:grid-cols-[736fr_380fr]">
         <DaftarFaq faqs={faqs} ready={!error} onEdit={edit} onRemove={hapusSatuFaq} />

@@ -31,6 +31,9 @@ export type AdminGalleryPhoto = {
 // Satu FAQ pengelola. keys = kata kunci pencocokan; kata pertama dipakai sebagai judul di admin.
 export type AdminFaq = { id: string; keys: string[]; answer: string; sortOrder: number; active: boolean };
 
+// Status chatbot AI dari backend: aktif atau belum (butuh kunci di server), model, dan jatah harian.
+export type AdminAiStatus = { enabled: boolean; model: string; dailyLimit: number; usedToday: number };
+
 // Pertanyaan pengunjung yang tidak cocok dengan FAQ mana pun.
 export type AdminUnanswered = { id: string; question: string; createdAt: string };
 

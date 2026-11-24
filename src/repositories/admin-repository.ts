@@ -8,7 +8,7 @@ import type { WahanaItem } from "@/models/wahana";
 
 import { describeDevice } from "../lib/auth/device";
 import { ROLE_LABEL, can, type Permission, type Role } from "../lib/auth/roles";
-import type { AdminProfile, AuthFailure, AdminReview, AdminGalleryPhoto, AdminFaq, AdminUnanswered, AdminInsight, AdminPricing, AdminStaff } from "@/models/admin";
+import type { AdminProfile, AuthFailure, AdminReview, AdminGalleryPhoto, AdminFaq, AdminUnanswered, AdminAiStatus, AdminInsight, AdminPricing, AdminStaff } from "@/models/admin";
 
 // Data Access Layer (DAL): satu pintu untuk mengecek sesi dan peran.
 // Sesi sekarang dicek ke backend (GET /auth/me), bukan lagi dari memori server Next.js.
@@ -86,13 +86,18 @@ export async function getGalleryForAdmin() {
 // Galat backend dikembalikan sebagai kode agar halaman bisa menampilkan pesan yang jelas.
 export async function getFaqForAdmin() {
   await requirePermission("faq");
-  const [faq, tanya] = await Promise.all([
+  const [faq, tanya, tombol, ai] = await Promise.all([
     apiJson<AdminFaq[]>("/admin/faq"),
     apiJson<AdminUnanswered[]>("/admin/faq/unanswered"),
+    apiJson<{ questions: string[] }>("/admin/faq/quick-questions"),
+    apiJson<AdminAiStatus>("/admin/faq/ai-status"),
   ]);
   return {
     faqs: "data" in faq ? faq.data : [],
     unanswered: "data" in tanya ? tanya.data : [],
+    // Tombol jawaban cepat dan status AI hanya pelengkap: kalau gagal dimuat, halaman FAQ tetap tampil.
+    tombol: "data" in tombol ? tombol.data.questions : [],
+    ai: "data" in ai ? ai.data : null,
     error: "data" in faq ? ("data" in tanya ? null : tanya.code) : faq.code,
   };
 }

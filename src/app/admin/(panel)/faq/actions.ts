@@ -70,3 +70,23 @@ export async function hapusPertanyaan(id: unknown): Promise<FaqActionResult> {
   revalidatePath("/admin/faq");
   return { ok: true };
 }
+
+export type TombolResult = { ok: true; questions: string[] } | { ok: false; error: string };
+
+// Simpan tombol jawaban cepat yang tampil di kotak chat aplikasi (PUT /admin/faq/quick-questions, 1 sampai 6 tombol).
+export async function simpanTombolCepat(questions: unknown): Promise<TombolResult> {
+  const auth = await checkPermission("faq");
+  if ("error" in auth) return { ok: false, error: auth.error };
+  if (!Array.isArray(questions)) return { ok: false, error: "VALIDATION" };
+  const bersih = questions.filter((q): q is string => typeof q === "string").map((q) => q.trim()).filter(Boolean);
+  if (bersih.length === 0 || bersih.length > 6) return { ok: false, error: "VALIDATION" };
+
+  const res = await apiJson<{ questions: string[] }>("/admin/faq/quick-questions", {
+    method: "PUT",
+    body: JSON.stringify({ questions: bersih }),
+  });
+  if (!("data" in res)) return { ok: false, error: res.code };
+
+  revalidatePath("/admin/faq");
+  return { ok: true, questions: res.data.questions };
+}

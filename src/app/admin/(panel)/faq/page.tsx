@@ -6,6 +6,6 @@ import FaqView from "./components/FaqView";
 // FAQ dan pertanyaan belum terjawab diambil langsung dari backend agar sama dengan yang dipakai Tanya Sira.
 export default async function FaqPage() {
   await requirePermission("faq");
-  const { faqs, unanswered, error } = await getFaqForAdmin();
-  return <FaqView faqs={faqs} pending={unanswered} error={error} />;
+  const { faqs, unanswered, tombol, ai, error } = await getFaqForAdmin();
+  return <FaqView faqs={faqs} pending={unanswered} tombol={tombol} ai={ai} error={error} />;
 }

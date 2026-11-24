@@ -18,14 +18,8 @@ export default function NotFound() {
 
         <div className="mt-6 flex flex-col items-center justify-center gap-3 sm:flex-row">
           <Link
-            href="/"
-            className="inline-flex h-11 items-center rounded-full bg-forest px-5 text-sm font-semibold text-white transition hover:bg-forest/90"
-          >
-            Kembali ke beranda
-          </Link>
-          <Link
             href="/admin"
-            className="inline-flex h-11 items-center rounded-full bg-paper px-5 text-sm font-semibold text-ink transition hover:bg-leaf/12"
+            className="inline-flex h-11 items-center rounded-full bg-forest px-5 text-sm font-semibold text-white transition hover:bg-forest/90"
           >
             Buka dashboard
           </Link>

@@ -22,6 +22,14 @@ const nextConfig = {
     // Mengaktifkan forbidden() (halaman 403) yang dipakai DAL saat peran admin tidak punya izin.
     authInterrupts: true,
   },
+  // Web ini khusus panel admin; aplikasi pengunjung ada di folder mobile/. Alamat utama langsung ke panel
+  // (belum login akan dilempar ke halaman masuk oleh proxy.ts).
+  async redirects() {
+    return [
+      { source: "/", destination: "/admin", permanent: false },
+      { source: "/mobile", destination: "/admin", permanent: false },
+    ];
+  },
   async headers() {
     return [
       {

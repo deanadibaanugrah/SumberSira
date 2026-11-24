@@ -1,7 +1,6 @@
 "use client";
 
-import { ArrowLeft, ArrowRight, Eye, EyeOff, Loader2, Lock, Mail, ShieldCheck } from "lucide-react";
-import Link from "@/components/HardLink";
+import { ArrowRight, Eye, EyeOff, Loader2, Lock, Mail, ShieldCheck } from "lucide-react";
 import { useActionState, useState } from "react";
 
 import { loginAction } from "@/lib/auth/actions";
@@ -94,9 +93,6 @@ export default function LoginForm({ next }: { next: string }) {
           {!pending && <ArrowRight size={18} className="transition group-hover:translate-x-1" />}
         </button>
 
-        <Link href="/" className="mt-6 flex w-fit items-center gap-2 text-sm text-abu hover:text-forest">
-          <ArrowLeft size={16} /> Kembali ke halaman utama
-        </Link>
       </div>
     </form>
   );

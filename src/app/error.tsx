@@ -46,10 +46,10 @@ export default function ErrorPage({
             Coba lagi
           </button>
           <Link
-            href="/"
+            href="/admin"
             className="inline-flex h-11 items-center rounded-full bg-paper px-5 text-sm font-semibold text-ink transition hover:bg-leaf/12"
           >
-            Kembali ke beranda
+            Kembali ke dashboard
           </Link>
         </div>
       </div>

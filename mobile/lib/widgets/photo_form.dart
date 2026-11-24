@@ -57,7 +57,7 @@ class _PhotoFormState extends State<PhotoForm> {
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text(widget.heading, style: AppText.title2),
+            Text(widget.heading, style: AppText.display(22)),
             const SizedBox(height: 4),
             Text(widget.hint, style: AppText.footnote),
             const SizedBox(height: 16),

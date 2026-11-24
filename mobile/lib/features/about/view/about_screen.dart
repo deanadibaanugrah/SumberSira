@@ -144,9 +144,9 @@ class AboutScreen extends StatelessWidget {
                               const SizedBox(height: 6),
                               Text(
                                 'Tentang Sumber Sira',
-                                style: AppText.title2.copyWith(
-                                  fontSize: 30,
-                                  height: 36 / 30,
+                                style: AppText.display(
+                                  30,
+                                  color: AppColors.ink,
                                 ),
                               ),
                               const SizedBox(height: 4),

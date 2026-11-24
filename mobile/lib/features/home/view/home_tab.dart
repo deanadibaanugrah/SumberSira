@@ -194,7 +194,7 @@ class HomeTab extends StatelessWidget {
       builder: (_) => Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const Text('Notifikasi', style: AppText.title2),
+          Text('Notifikasi', style: AppText.display(22)),
           const SizedBox(height: 14),
           GroupedList(
             children: [

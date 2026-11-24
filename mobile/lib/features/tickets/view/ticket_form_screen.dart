@@ -632,10 +632,10 @@ class _QrisSheetState extends State<_QrisSheet> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const Text(
+        Text(
           'Bayar dengan QRIS',
           textAlign: TextAlign.center,
-          style: AppText.headline,
+          style: AppText.display(22),
         ),
         const SizedBox(height: 4),
         const Text(

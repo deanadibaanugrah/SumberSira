@@ -13,7 +13,7 @@ const MAKS = 6;
 
 // Tombol jawaban cepat yang tampil di kotak chat aplikasi (mis. "Jam buka?", "Harga tiket?"). Admin bisa menambah,
 // mengurangi, dan mengubahnya. Tombol yang teksnya cocok dengan kata kunci sebuah FAQ dijawab persis seperti tulisan FAQ itu.
-// Di bawahnya ada status chatbot AI: aktif atau belum (butuh kunci ANTHROPIC_API_KEY di server).
+// Di bawahnya ada status chatbot AI: aktif atau belum (butuh kunci AI_API_KEY di server).
 export default function TombolCepat({ tombol, ai, ready }: { tombol: string[]; ai: AdminAiStatus | null; ready: boolean }) {
   const [daftar, setDaftar] = useState<string[]>(tombol);
   const [saving, setSaving] = useState(false);
@@ -108,7 +108,7 @@ export default function TombolCepat({ tombol, ai, ready }: { tombol: string[]; a
           ) : (
             <>
               <span className="block text-sm font-semibold text-ink">Chatbot AI belum aktif</span>
-              Tanya Sira masih menjawab dari FAQ saja. Untuk mengaktifkan AI, isi <code className="rounded bg-ink/5 px-1">ANTHROPIC_API_KEY</code> di pengaturan server backend.
+              Tanya Sira masih menjawab dari FAQ saja. Untuk mengaktifkan AI, isi <code className="rounded bg-ink/5 px-1">AI_API_KEY</code> di pengaturan server backend.
             </>
           )}
         </div>

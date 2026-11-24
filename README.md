@@ -163,13 +163,13 @@ Hanya ada **dua** fitur AI. Grafik keramaian dan Insight di admin **bukan AI**: 
 
 **1. Chatbot Tanya Sira (aplikasi pengunjung).** Pertanyaan cepat diambil dari `GET /chat/quick-questions` dan
 **diatur admin** di halaman Chatbot & FAQ (tambah, kurangi, ubah; 1 sampai 6 tombol). Setiap pesan dikirim ke `POST /chat`:
-tombol cepat dijawab persis seperti FAQ buatan admin (tanpa AI); pertanyaan bebas dijawab Claude yang **hanya boleh memakai
+tombol cepat dijawab persis seperti FAQ buatan admin (tanpa AI); pertanyaan bebas dijawab AI (Google Gemini tier gratis) yang **hanya boleh memakai
 data resmi** dari database (harga, parkir, wahana, jam datang, keramaian, dan FAQ admin), tidak boleh mengarang. Bila datanya
 tidak ada, AI berkata belum tahu dan pertanyaan masuk ke daftar Belum Terjawab untuk dijawab admin lewat FAQ baru. Tanpa kunci
-AI (`ANTHROPIC_API_KEY` di backend), chatbot memakai pencocokan kata kunci FAQ. Status AI dan jatah harian tampil di halaman
+AI (`AI_API_KEY` di backend, gratis dari aistudio.google.com), chatbot memakai pencocokan kata kunci FAQ. Status AI dan jatah harian tampil di halaman
 Chatbot & FAQ.
 
-**2. AI Photo Studio (aplikasi pengunjung).** Foto dari galeri atau kamera diunggah ke `POST /ai-photo`. Claude menilai
+**2. AI Photo Studio (aplikasi pengunjung).** Foto dari galeri atau kamera diunggah ke `POST /ai-photo`. AI menilai
 kondisi foto (bawah air atau tidak, kabut, terang-gelap, perlu kontras dan warna berapa) dan hanya mengembalikan angka;
 piksel diolah mesin pengolahan gambar biasa di server (koreksi warna bawah air, buang kabut, kecerahan, kontras lokal,
 vibrance). **Tidak ada model generatif**, jadi bentuk, wajah, dan latar tidak berubah, dan ponsel yang lemah pun mendapat

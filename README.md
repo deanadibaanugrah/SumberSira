@@ -73,13 +73,30 @@ Next.js (web admin) ───┘
    - Flutter web di Chrome: `flutter run -d chrome --dart-define=API_URL=http://localhost:4000`,
    - HP fisik dengan Wi-Fi yang sama dengan laptop: `flutter run --dart-define=API_URL=http://IP-LAPTOP:4000`.
 
-Daftar uji manual ujung ke ujung ada di [`docs/uji-manual.md`](docs/uji-manual.md).
-
 ### Deploy otomatis untuk tim
 
-Panduan lengkap ada di [`docs/deploy.md`](docs/deploy.md). Ringkasnya: backend ke **Render** (membaca
-`render.yaml`), web admin ke **Vercel** (isi `API_URL`), aplikasi pengunjung ke **GitHub Pages** (workflow
-`flutter-web.yml`). Setelah terhubung, setiap push ke `main` langsung terbit dan bisa dipakai tim.
+Setiap push ke `main` langsung terbit: backend ke **Render** (membaca `render.yaml`), web admin ke **Vercel**, aplikasi
+pengunjung ke **GitHub Pages** (workflow `flutter-web.yml`). Database tetap Neon yang sudah ada.
+
+1. **Backend (Render).** New, lalu Blueprint, pilih repo `SumberSira-backend`. Isi `DATABASE_URL` (connection string Neon),
+   `ADMIN_ORIGIN` (URL web admin di Vercel), `PUBLIC_BASE_URL` (URL backend ini), dan `EXTRA_ORIGINS` (URL Flutter web bila
+   dipakai). Setelah selesai, `https://<alamat-render>/health` harus menjawab `{"ok":true}`. Paket gratis Render tidur saat
+   sepi, jadi buka `/health` dulu sebelum demo. Foto yang diunggah disimpan di disk Render yang hilang saat deploy ulang;
+   untuk produksi pakai `STORAGE_DRIVER=vercel-blob` dan isi `BLOB_READ_WRITE_TOKEN`.
+2. **Web admin (Vercel).** Impor repo `Sumber-Sira`, isi `API_URL` dengan URL backend Render, lalu Deploy. Salin URL Vercel
+   itu ke `ADMIN_ORIGIN` di Render, kalau tidak login admin ditolak CORS.
+3. **Aplikasi pengunjung (GitHub Pages).** Settings, Pages, Source: GitHub Actions. Di Settings, Secrets and variables,
+   Actions, Variables, buat `API_URL` berisi URL backend Render. Alamat hasilnya (`https://<pemilik>.github.io/Sumber-Sira/`)
+   ditambahkan ke `EXTRA_ORIGINS` di Render. Tanpa GitHub Pages, bagikan APK dari
+   `flutter build apk --dart-define=API_URL=https://<alamat-render>`.
+4. **Menghidupkan AI (opsional dan gratis).** Ambil kunci di aistudio.google.com (Get API key, tanpa kartu kredit, jangan
+   hubungkan billing), lalu tambahkan variabel `AI_API_KEY` di tab Environment service Render. Di laptop, jalankan `npm run ai:cek`
+   di folder backend untuk memastikan kuncinya bekerja. Hasilnya terlihat di admin, halaman Chatbot & FAQ. Tanpa kunci, chatbot menjawab dari FAQ dan foto tetap diperbaiki otomatis.
+
+Pembayaran demo: `render.yaml` mengisi `ALLOW_SIMULATE_PAY=true` supaya tombol "Saya Sudah Bayar" tetap jalan di mode produksi.
+Bila muncul "Server belum terjangkau": cek `/health` backend, cek alamat di aplikasi (Profil, Server Backend, Tes Koneksi),
+pastikan `API_URL` di Vercel benar, dan deploy ulang service setelah mengubah variabel lingkungan (nilai lama tidak terbaca ulang).
+
 Web admin sudah responsif: di HP tabel berubah menjadi daftar kartu, jadi semua menu tetap bisa dikelola
 dari layar kecil.
 
@@ -218,7 +235,7 @@ Aplikasi pengunjung (Flutter):
 |---|---|---|
 | ![](desain/screenshot/mobile-ulasan.png) | ![](desain/screenshot/mobile-profil.png) | ![](desain/screenshot/mobile-ai-photo.png) |
 
-Ekspor desain Figma lengkap ada di folder `desain/`.
+Tangkapan layar di atas diambil dari aplikasi yang berjalan; desain acuannya ada di file Figma HI-FI Sumber Sira.
 
 ## Halaman
 
@@ -308,14 +325,12 @@ Login Google (OAuth) dan MFA belum dibuat karena butuh akun penyedia (Google Clo
 
 ```
 mobile/                Aplikasi pengunjung (Flutter), lihat bagian Aplikasi Mobile
-desain/                PNG ekspor dari Figma (acuan tampilan: mobile 2×, admin 1,25×)
+desain/                Aset gambar
   foto/                Foto asli Sumber Sira yang dipakai aplikasi (di-import lewat src/lib/foto.ts)
+  screenshot/          Tangkapan layar aplikasi untuk README
+  HI-FI · Web Admin ·  Ekspor PNG desain web admin dari Figma (acuan tampilan, diekspor 1,25×)
 src/app/               Halaman (App Router). Tiap halaman punya folder components/ berisi section-nya,
                        page.tsx hanya menyusun section. Folder (nama) = route group, tidak mengubah alamat
-  (intro)/             Intro web, alamat /
-    page.tsx
-    components/        Hero, Fitur, InfoKunjungan, Footer
-  mobile/page.tsx      Halaman info aplikasi pengunjung (cara menjalankan Flutter dan contoh layar), alamat /mobile
   admin/login/         Halaman login admin, alamat /admin/login
     page.tsx           Server: cek sesi lalu susun section
     components/        LoginBackdrop, LoginIntro, LoginWidgets, BrandMobile, LoginForm, WidgetTablet
@@ -371,9 +386,8 @@ src/lib/               Utilitas tanpa state
 
 ## Catatan desain
 
-- Ukuran mengikuti Figma: frame mobile **375 × 812** dan admin **1440 × 900**. PNG mobile di `desain/`
-  diekspor 2× (1 px di kode = 2 px di PNG), PNG admin diekspor 1,25× (1 px di kode = 1,25 px di PNG).
-  Ukuran teks, jarak, dan kartu diukur dari PNG.
+- Ukuran mengikuti Figma: frame mobile **375 × 812** dan admin **1440 × 900**. PNG admin di `desain/` diekspor 1,25×
+  (1 px di kode = 1,25 px di PNG). Ukuran teks, jarak, dan kartu diukur dari PNG.
 - Tampilan mobile mengikuti gaya iOS 27 (Liquid Glass), hanya mode terang, dengan dua lapisan yang jelas:
   lapisan navigasi (tab bar, nav bar saat digulir, CTA mengambang, sheet) dari kaca, lapisan konten (kartu, list, foto, form) permukaan putih solid.
   Kaca terang = Putih 72% + blur + garis tepi Putih 50% + bayangan 0 8 24 Ink 10%; kaca gelap = Putih 12% + blur; CTA primer = Hijau Tua 85%.
@@ -398,14 +412,14 @@ src/lib/               Utilitas tanpa state
 - Foto aplikasi ada di `desain/foto/` (folder `public/` tidak dipakai lagi) dan di-import lewat `src/lib/foto.ts`,
   jadi Next.js memprosesnya sebagai gambar statis. Foto baru: taruh di `desain/foto/`, lalu tambahkan di `foto.ts`.
   Foto galeri pengunjung diambil dari URL backend (`GET /gallery`), bukan dari file statis.
-- Logo Sumber Sira ada di `src/components/Logo.tsx` (sidebar dan login admin, intro web), versi Flutter di `mobile/lib/widgets/logo_mark.dart`
+- Logo Sumber Sira ada di `src/components/Logo.tsx` (sidebar dan login admin), versi Flutter di `mobile/lib/widgets/logo_mark.dart`
   (Splash, Beranda, Tentang), dan sebagai ikon tab browser di `src/app/icon.svg`. Animasinya: tetes air jatuh dan memantul, percikan,
   riak melebar, lalu tulisan SUMBER SIRA muncul (siklus 9 detik, keyframe `logo-*` di `src/app/globals.css`).
 - Ikon aplikasi juga memakai logo baru: Android di `mobile/android/app/src/main/res/mipmap-*` (ikon adaptif di `mipmap-anydpi-v26`,
   latar `#1A3E2F` di `values/ic_launcher_background.xml`) dan web di `mobile/web/favicon.png` serta `mobile/web/icons/`.
 - Nama aplikasi di HP dan browser: Sumber Sira (`android:label` di `AndroidManifest.xml`, `name` di `mobile/web/manifest.json`).
   Warna tema web dan latar layar pembuka saat di-install dari browser: Hijau Tua `#1B4332`, sama dengan `AppColors.forest`.
-- Yang tidak ada di Figma dan sengaja ditambahkan: halaman intro web, pesan validasi form, dan modal Tambah/Edit di admin.
+- Yang tidak ada di Figma dan sengaja ditambahkan: pesan validasi form, dan modal Tambah/Edit di admin.
 
 ## Yang masih simulasi
 

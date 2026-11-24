@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:intl/date_symbol_data_local.dart';
 
@@ -44,6 +45,36 @@ Future<void> main() async {
   unawaited(ChatController.instance.init());
 }
 
+// Di web dengan jendela lebar (laptop, GitHub Pages), aplikasi ditampilkan sebagai kolom selebar ponsel di tengah layar,
+// seperti desain Figma (375 x 812). Tanpa ini foto onboarding dan semua layar ikut melebar sampai 1920 px dan jadi buram.
+// Di ponsel dan jendela sempit tidak ada yang berubah. MediaQuery ikut disesuaikan supaya layar yang membaca lebarnya
+// (mis. ResponsiveBody) memakai lebar kolom, bukan lebar jendela.
+class _KolomPonsel extends StatelessWidget {
+  const _KolomPonsel({required this.child});
+
+  final Widget child;
+
+  static const double _lebarPonsel = 430;
+
+  @override
+  Widget build(BuildContext context) {
+    final mq = MediaQuery.of(context);
+    if (!kIsWeb || mq.size.width <= 700) return child;
+    return ColoredBox(
+      color: AppColors.ink,
+      child: Center(
+        child: SizedBox(
+          width: _lebarPonsel,
+          child: MediaQuery(
+            data: mq.copyWith(size: Size(_lebarPonsel, mq.size.height)),
+            child: ClipRect(child: child),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 // Akar aplikasi: tema, daftar rute (navigasi antar layar), dan layar pertama (Splash).
 class SumberSiraApp extends StatelessWidget {
   const SumberSiraApp({super.key});
@@ -54,6 +85,7 @@ class SumberSiraApp extends StatelessWidget {
       title: 'Sumber Sira',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light(),
+      builder: (context, child) => _KolomPonsel(child: child ?? const SizedBox.shrink()),
       // [P5 Named Route] initialRoute = layar pertama, routes = daftar nama rute dan halamannya.
       initialRoute: AppRoutes.splash,
       routes: {

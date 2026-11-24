@@ -457,6 +457,7 @@ class ListRow extends StatelessWidget {
   const ListRow({
     super.key,
     this.icon,
+    this.leading,
     required this.title,
     this.subtitle,
     this.trailing,
@@ -467,6 +468,8 @@ class ListRow extends StatelessWidget {
   });
 
   final IconData? icon;
+  // Ikon khusus (mis. gambar ATV) yang menggantikan icon bila diisi.
+  final Widget? leading;
   final String title;
   final String? subtitle;
   final Widget? trailing;
@@ -483,7 +486,10 @@ class ListRow extends StatelessWidget {
         padding: const EdgeInsets.fromLTRB(16, 11, 14, 11),
         child: Row(
           children: [
-            if (icon != null) ...[
+            if (leading != null) ...[
+              leading!,
+              const SizedBox(width: 16),
+            ] else if (icon != null) ...[
               Icon(icon, size: 20, color: iconColor),
               const SizedBox(width: 16),
             ],

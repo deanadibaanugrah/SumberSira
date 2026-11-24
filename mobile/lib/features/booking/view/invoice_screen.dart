@@ -135,7 +135,7 @@ class _InvoiceScreenState extends State<InvoiceScreen> {
                                 borderRadius: BorderRadius.circular(22),
                                 border: Border.all(color: AppColors.line),
                               ),
-                              // Package qr_flutter: QR berisi kode booking yang discan petugas.
+                              // Package qr_flutter: QR berisi kode booking yang di scan petugas.
                               child: QrImageView(
                                 data: b.code,
                                 size: 170,

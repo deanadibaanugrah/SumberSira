@@ -9,7 +9,7 @@ import 'api_client.dart';
 
 // Penyimpanan data aplikasi. Tiket, booking, dan tarif diambil dari backend; Live Crowd dipisah ke CrowdState
 // (data/crowd_state.dart). Layar yang mendengarkan AppState otomatis diperbarui (ChangeNotifier) saat ada
-// tiket baru, booking baru, atau tiket discan petugas.
+// tiket baru, booking baru, atau tiket di scan petugas.
 // Aplikasi pengunjung tidak memakai login: riwayat tiket dan booking dikelompokkan per nomor WhatsApp.
 class AppState extends ChangeNotifier {
   AppState._();
@@ -29,18 +29,24 @@ class AppState extends ChangeNotifier {
   // Riwayat tidak lagi disimpan di perangkat: tiket dan booking dibaca dari server per nomor WhatsApp.
   // Kunci riwayat lama (riwayat_tiket/riwayat_booking) sengaja dibiarkan terabaikan tanpa galat.
   static const _waKey = 'whatsapp_terakhir';
+  static const _nameKey = 'nama_pengunjung';
   static const _reminderKey = 'pengingat_jam_sepi';
   static const _onboardingKey = 'sudah_onboarding';
   static const _apiUrlKey = 'custom_api_url';
   String savedWhatsapp = '';
+  String savedName = '';
   bool quietReminder = false;
   bool onboardingDone = false;
+
+  // Nama yang tampil di Profil dan dipakai saat mengirim ulasan.
+  String get displayName => savedName.trim().isEmpty ? 'Pengunjung' : savedName.trim();
 
   // [P6 Plugin shared_preferences] Membaca pengaturan tersimpan saat aplikasi dibuka.
   // [P2 Null Safety] Operator ?? memberi nilai bawaan kalau data belum pernah disimpan.
   Future<void> loadSettings() async {
     final prefs = await SharedPreferences.getInstance();
     savedWhatsapp = prefs.getString(_waKey) ?? '';
+    savedName = prefs.getString(_nameKey) ?? '';
     quietReminder = prefs.getBool(_reminderKey) ?? false;
     onboardingDone = prefs.getBool(_onboardingKey) ?? false;
     final customUrl = prefs.getString(_apiUrlKey) ?? '';
@@ -87,7 +93,9 @@ class AppState extends ChangeNotifier {
 
   // Mengambil tarif terbaru dari server. Bila gagal, tarif terakhir yang benar tetap dipakai
   // dan pesan galat disimpan untuk layar yang ingin menampilkannya.
-  Future<void> refreshPricing() async {
+  // silent = pengambilan berkala di latar belakang: layar hanya diberi tahu bila datanya berubah.
+  Future<void> refreshPricing({bool silent = false}) async {
+    final sebelum = _pricingSignature();
     try {
       final p = await ApiClient.fetchPricing();
       hargaTiket = p.ticketPricePerPerson;
@@ -101,7 +109,14 @@ class AppState extends ChangeNotifier {
     } on ApiException catch (e) {
       pricingError = e.message;
     }
-    notifyListeners();
+    if (!silent || sebelum != _pricingSignature()) notifyListeners();
+  }
+
+  String _pricingSignature() {
+    final keys = parkirTarif.keys.toList()..sort((a, b) => a.name.compareTo(b.name));
+    return '${hargaTiket ?? '-'}|'
+        '${[for (final k in keys) '${k.name}:${parkirTarif[k]}'].join(',')}|'
+        '${pricingError ?? ''}';
   }
 
   // Menyimpan pilihan pengingat jam sepi (Switch di Profil).
@@ -125,6 +140,20 @@ class AppState extends ChangeNotifier {
     savedWhatsapp = nomorWa(value);
     notifyListeners();
     final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_waKey, savedWhatsapp);
+  }
+
+  // Menyimpan nama dan nomor WhatsApp dari fitur Edit Profil. Nama dipakai saat mengirim ulasan,
+  // nomor dipakai untuk mencari riwayat tiket dan invoice.
+  Future<void> saveProfile({
+    required String name,
+    required String whatsapp,
+  }) async {
+    savedName = name.trim();
+    savedWhatsapp = nomorWa(whatsapp);
+    notifyListeners();
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_nameKey, savedName);
     await prefs.setString(_waKey, savedWhatsapp);
   }
 
@@ -187,9 +216,10 @@ class AppState extends ChangeNotifier {
 
   // Riwayat tiket satu nomor WhatsApp dari server (tanpa login). Hasilnya digabung ke daftar di memori;
   // tidak ada lagi salinan riwayat di perangkat.
-  Future<void> syncHistory(String whatsapp) async {
+  Future<void> syncHistory(String whatsapp, {bool silent = false}) async {
     final wa = nomorWa(whatsapp);
     if (wa.isEmpty) return;
+    final sebelum = _historySignature();
     final tiket = await ApiClient.fetchTickets(wa);
     final pesanan = await ApiClient.fetchBookings(wa);
     for (final t in tiket) {
@@ -198,8 +228,14 @@ class AppState extends ChangeNotifier {
     for (final b in pesanan) {
       _upsertBooking(b);
     }
-    notifyListeners();
+    if (!silent || sebelum != _historySignature()) notifyListeners();
   }
+
+  String _historySignature() => [
+    for (final t in tickets)
+      '${t.code}:${t.status.name}:${t.checkInAt}:${t.paymentStatus.name}:${t.total}',
+    for (final b in bookings) '${b.code}:${b.paymentStatus.name}:${b.total}',
+  ].join('|');
 
   // Memperbarui satu tiket dari server (GET /tickets/:code?whatsapp=): status check-in dan status
   // pembayaran bisa berubah kapan saja (petugas memindai, tunai dikonfirmasi di loket). Tiket yang
@@ -283,6 +319,14 @@ class AppState extends ChangeNotifier {
     notifyListeners();
   }
 
+  // Penanda bahwa galeri perlu dimuat ulang (mis. admin baru menyetujui foto).
+  // GalleryTab mendengarkan perubahan penanda ini dan mengambil daftar terbaru tanpa layar putih.
+  int galleryRevision = 0;
+  void tandaiGaleriStale() {
+    galleryRevision++;
+    notifyListeners();
+  }
+
   Ticket? find(String code) {
     for (final t in tickets) {
       if (t.code == code) return t;
@@ -299,28 +343,39 @@ class AppState extends ChangeNotifier {
 
   // Mengambil ulasan terbaru, rata-rata bintang, dan jumlah ulasan dari server.
   // Gagal terhubung: data terakhir tetap tampil dan pesan galat disimpan untuk layar.
-  Future<void> refreshReviews() async {
-    reviewsLoading = true;
-    reviewsError = null;
-    notifyListeners();
+  Future<void> refreshReviews({bool silent = false}) async {
+    final sebelum = _reviewsSignature();
+    if (!silent) {
+      reviewsLoading = true;
+      reviewsError = null;
+      notifyListeners();
+    }
     try {
       final summary = await ApiClient.fetchReviews();
       reviews = summary.items;
       reviewRating = summary.rating;
       reviewCount = summary.count;
       reviewsReady = true;
+      reviewsError = null;
     } on ApiException catch (e) {
       reviewsError = e.message;
     } finally {
       reviewsLoading = false;
-      notifyListeners();
+      if (!silent || sebelum != _reviewsSignature()) notifyListeners();
     }
   }
 
+  String _reviewsSignature() => '$reviewRating|$reviewCount|'
+      '${[for (final r in reviews) '${r.id}:${r.name}:${r.stars}:${r.text}'].join('|')}|'
+      '${reviewsError ?? ''}';
+
   // Kirim ulasan baru ke server (POST /reviews), lalu muat ulang daftar dan rata-ratanya.
-  // Nama memakai pemesan tiket terakhir di perangkat; bila belum ada tiket, "Pengunjung".
+  // Nama memakai nama di Profil (bisa diedit); bila masih kosong, pakai pemesan tiket terakhir
+  // di perangkat, lalu "Pengunjung".
   Future<void> submitReview({required int stars, required String text}) async {
-    final name = myTickets.isNotEmpty ? myTickets.first.name : 'Pengunjung';
+    final name = savedName.trim().isNotEmpty
+        ? savedName.trim()
+        : (myTickets.isNotEmpty ? myTickets.first.name : 'Pengunjung');
     await ApiClient.postReview(name: name, stars: stars, text: text);
     await refreshReviews();
   }

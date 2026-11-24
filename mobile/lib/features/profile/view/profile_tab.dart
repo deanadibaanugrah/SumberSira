@@ -1,15 +1,13 @@
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-import '../../../data/api_client.dart';
 import '../../../data/app_state.dart';
 import '../../../theme/app_theme.dart';
 import '../../../utils/launcher.dart';
+import '../../../utils/validators.dart';
 import '../../../widgets/app_background.dart';
 import '../../../widgets/common.dart';
 import '../../../widgets/glass.dart';
-import '../../../widgets/motion.dart';
 
 // Tab Profil: identitas pengunjung (tanpa login), pengaturan pengingat, info wisata, dan tautan ke peta.
 class ProfileTab extends StatelessWidget {
@@ -20,98 +18,61 @@ class ProfileTab extends StatelessWidget {
   static const _route =
       'https://www.google.com/maps/dir/?api=1&destination=Sumber+Sira+Putukrejo+Malang';
 
-  // Petunjuk alamat server sesuai platform yang sedang dipakai.
-  String _petunjukServer() {
-    if (kIsWeb) {
-      return 'Browser di laptop: http://localhost:4000. Dibuka dari HP: http://IP-LAPTOP:4000.';
-    }
-    if (defaultTargetPlatform == TargetPlatform.android) {
-      return 'Emulator Android: http://10.0.2.2:4000. HP fisik: http://IP-LAPTOP:4000 (Wi-Fi sama).';
-    }
-    return 'Desktop: http://localhost:4000.';
-  }
-
-  void _ubahServerDialog(BuildContext context) {
-    final controller = TextEditingController(text: ApiClient.baseUrl);
-    String? hasil;
-    var menguji = false;
-    showDialog(
-      context: context,
-      builder: (ctx) => StatefulBuilder(
-        builder: (ctx, setState) => AlertDialog(
-          title: const Text('Alamat Server Backend'),
-          content: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  'Alamat backend yang dipakai aplikasi ini:',
-                  style: AppText.footnote,
-                ),
-                const SizedBox(height: 12),
-                TextField(
-                  controller: controller,
-                  keyboardType: TextInputType.url,
-                  decoration: const InputDecoration(
-                    hintText: 'http://localhost:4000',
-                    border: OutlineInputBorder(),
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Text(_petunjukServer(), style: AppText.caption),
-                if (hasil != null) ...[
-                  const SizedBox(height: 10),
-                  Text(
-                    hasil!,
-                    style: AppText.footnote.copyWith(
-                      color: hasil!.startsWith('Terhubung')
-                          ? AppColors.leaf
-                          : AppColors.coral,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ],
-              ],
+  // Membuka sheet edit profil: nama dan nomor WhatsApp dipakai untuk identitas,
+  // pencarian riwayat, dan nama pengirim ulasan.
+  void _editProfile(BuildContext context, AppState s) {
+    final formKey = GlobalKey<FormState>();
+    final name = TextEditingController(text: s.savedName);
+    final wa = TextEditingController(text: s.savedWhatsapp);
+    showGlassSheet<void>(
+      context,
+      builder: (ctx) => Form(
+        key: formKey,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text('Edit Profil', style: AppText.display(22)),
+            const SizedBox(height: 6),
+            const Text(
+              'Nama dan nomor WhatsApp ini dipakai untuk riwayat tiket dan saat mengirim ulasan.',
+              style: AppText.footnote,
             ),
-          ),
-          actions: [
-            PressScale(
-              child: TextButton(
-                onPressed: () {
-                  AppState.instance.setApiUrl('');
-                  Navigator.pop(ctx);
-                },
-                child: const Text('Reset Bawaan'),
+            const SizedBox(height: 16),
+            TextFormField(
+              controller: name,
+              textInputAction: TextInputAction.next,
+              textCapitalization: TextCapitalization.words,
+              decoration: const InputDecoration(
+                labelText: 'Nama',
+                hintText: 'Masukkan nama kamu',
+                prefixIcon: Icon(CupertinoIcons.person, size: 20),
               ),
+              validator: (v) => Validators.required(v, 'Nama'),
             ),
-            PressScale(
-              child: TextButton(
-                onPressed: menguji
-                    ? null
-                    : () async {
-                        setState(() {
-                          menguji = true;
-                          hasil = null;
-                        });
-                        final ok = await ApiClient.checkHealth(controller.text);
-                        if (!ctx.mounted) return;
-                        setState(() {
-                          menguji = false;
-                          hasil = ok ? 'Terhubung ke server.' : 'Tidak bisa terhubung. Pastikan backend menyala dan alamatnya benar.';
-                        });
-                      },
-                child: Text(menguji ? 'Menguji...' : 'Tes Koneksi'),
+            const SizedBox(height: 12),
+            TextFormField(
+              controller: wa,
+              keyboardType: TextInputType.phone,
+              textInputAction: TextInputAction.done,
+              decoration: const InputDecoration(
+                labelText: 'No. WhatsApp',
+                hintText: '08xxxxxxxxxx',
+                prefixIcon: Icon(CupertinoIcons.phone, size: 20),
               ),
+              validator: Validators.whatsapp,
             ),
-            PressScale(
-              child: ElevatedButton(
-                onPressed: () {
-                  AppState.instance.setApiUrl(controller.text.trim());
-                  Navigator.pop(ctx);
-                },
-                child: const Text('Simpan'),
-              ),
+            const SizedBox(height: 18),
+            PrimaryButton(
+              label: 'Simpan Profil',
+              onPressed: () async {
+                if (!formKey.currentState!.validate()) return;
+                final waBaru = wa.text;
+                await s.saveProfile(name: name.text, whatsapp: waBaru);
+                if (waBaru.trim().isNotEmpty) {
+                  s.syncHistory(waBaru).catchError((_) {});
+                }
+                if (ctx.mounted) Navigator.pop(ctx);
+              },
             ),
           ],
         ),
@@ -162,8 +123,10 @@ class ProfileTab extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Pengunjung',
+                        s.displayName,
                         style: AppText.headline.copyWith(color: Colors.white),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
                       const SizedBox(height: 2),
                       // Tanpa login: identitas pengunjung cukup nomor WhatsApp terakhir yang dipakai.
@@ -197,6 +160,13 @@ class ProfileTab extends StatelessWidget {
                     ],
                   ),
                 ),
+                const SizedBox(width: 8),
+                GlassIconButton(
+                  icon: CupertinoIcons.pencil,
+                  tooltip: 'Edit profil',
+                  tone: GlassTone.dark,
+                  onPressed: () => _editProfile(context, s),
+                ),
               ],
             ),
           ),
@@ -222,22 +192,6 @@ class ProfileTab extends StatelessWidget {
                         : 'Nonaktif',
                     style: AppText.footnote,
                   ),
-                ),
-                ListTile(
-                  contentPadding: const EdgeInsets.fromLTRB(16, 2, 12, 2),
-                  leading: const Icon(
-                    CupertinoIcons.antenna_radiowaves_left_right,
-                    color: AppColors.leaf,
-                    size: 20,
-                  ),
-                  title: const Text('Server Backend', style: AppText.body),
-                  subtitle: Text(ApiClient.baseUrl, style: AppText.footnote),
-                  trailing: const Icon(
-                    CupertinoIcons.chevron_right,
-                    size: 16,
-                    color: AppColors.abu,
-                  ),
-                  onTap: () => _ubahServerDialog(context),
                 ),
               ],
             ),

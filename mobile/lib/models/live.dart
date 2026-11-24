@@ -1,6 +1,6 @@
 // Model data "live" dari backend: keramaian dan chat Tanya Sira.
 
-// Live Crowd saat ini, dihitung backend dari tiket yang discan masuk dan belum keluar.
+// Live Crowd saat ini, dihitung backend dari tiket yang di scan masuk dan belum keluar.
 // forecast = prakiraan jumlah pengunjung per jam hari ini menurut kebiasaan (dari backend).
 class CrowdInfo {
   const CrowdInfo({

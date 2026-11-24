@@ -119,10 +119,10 @@ class Ticket {
   // Tanggal berlaku tiket. Kosong berarti hari ini.
   final String date;
   final bool mine;
-  // True bila tiket ini tercatat di server (bisa discan petugas).
+  // True bila tiket ini tercatat di server (bisa di scan petugas).
   final bool synced;
   TicketStatus status;
-  // [P2 Null Safety] Tanda ? artinya boleh kosong (null) selama tiket belum discan.
+  // [P2 Null Safety] Tanda ? artinya boleh kosong (null) selama tiket belum di scan.
   String? checkInAt;
 
   // Total sebenarnya dihitung server (sumber kebenaran). Null hanya bila respons server tidak memuatnya.

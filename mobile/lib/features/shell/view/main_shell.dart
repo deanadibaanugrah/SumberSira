@@ -1,7 +1,10 @@
+import 'dart:async';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import '../../../data/app_state.dart';
+import '../../chat/viewmodel/chat_controller.dart';
 import '../../crowd/viewmodel/crowd_state.dart';
 import '../../../theme/app_theme.dart';
 import '../../../widgets/app_background.dart';
@@ -20,23 +23,87 @@ class MainShell extends StatefulWidget {
   State<MainShell> createState() => _MainShellState();
 }
 
-class _MainShellState extends State<MainShell> {
+class _MainShellState extends State<MainShell> with WidgetsBindingObserver {
   // State: tab yang sedang dibuka (0 Beranda, 1 Tiket & Booking, 2 Galeri, 3 Profil).
   int _index = 0;
+
+  // Sinkronisasi latar belakang: perubahan dari admin (harga, wahana, galeri, ulasan, status
+  // tiket/booking, pertanyaan cepat chat) ikut tampil tanpa perlu menarik layar atau membuka ulang tab.
+  Timer? _syncTimer;
+  bool _syncing = false;
 
   // Live Crowd diperbarui dari server tiap 30 detik selama kerangka utama terbuka.
   // Tarif juga dimuat sekali di awal supaya info harga di Beranda/Tiket/Profil bukan angka bawaan.
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     CrowdState.instance.startLive();
     AppState.instance.refreshPricing();
+    _startSync();
   }
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    _stopSync();
     CrowdState.instance.stopLive();
     super.dispose();
+  }
+
+  // Berhenti sebentar saat aplikasi tidak terlihat, lalu langsung menyegarkan ketika dibuka lagi.
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      _startSync();
+      _syncNow();
+      CrowdState.instance.refresh();
+    } else if (state == AppLifecycleState.paused ||
+        state == AppLifecycleState.inactive ||
+        state == AppLifecycleState.detached) {
+      _stopSync();
+    }
+  }
+
+  void _startSync() {
+    _syncTimer?.cancel();
+    _syncTimer = Timer.periodic(const Duration(seconds: 15), (_) => _syncNow());
+  }
+
+  void _stopSync() {
+    _syncTimer?.cancel();
+    _syncTimer = null;
+  }
+
+  // Satu putaran sinkronisasi. Tiap permintaan diberi penjaga sendiri supaya satu endpoint yang
+  // gagal (mis. server sedang mati) tidak menghentikan pembaruan bagian lain.
+  Future<void> _syncNow() async {
+    if (_syncing) return;
+    _syncing = true;
+    try {
+      final s = AppState.instance;
+      final wa = s.savedWhatsapp;
+      await Future.wait([
+        _guard(s.refreshPricing(silent: true)),
+        _guard(s.refreshReviews(silent: true)),
+        _guard(ChatController.instance.init()),
+        if (wa.isNotEmpty) _guard(s.syncHistory(wa, silent: true)),
+      ]);
+      if (!mounted) return;
+      // Daftar wahana dan galeri dicek ulang oleh pemilik layarnya masing-masing.
+      s.tandaiWahanaStale();
+      s.tandaiGaleriStale();
+    } finally {
+      _syncing = false;
+    }
+  }
+
+  Future<void> _guard(Future<void> future) async {
+    try {
+      await future;
+    } catch (_) {
+      // Data terakhir tetap dipakai; putaran berikutnya mencoba lagi.
+    }
   }
 
   // Membuka tab: tampilan berganti dengan animasi, dan data tab itu dimuat ulang dari server (seperti hard refresh).
@@ -50,6 +117,7 @@ class _MainShellState extends State<MainShell> {
       final wa = AppState.instance.savedWhatsapp;
       if (wa.isNotEmpty) AppState.instance.syncHistory(wa).catchError((_) {});
     }
+    if (i == 2) AppState.instance.tandaiGaleriStale();
     if (i == 3) AppState.instance.refreshReviews();
   }
 

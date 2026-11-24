@@ -29,6 +29,9 @@ export default function FotoGrid({
           <div className="px-1">
             <p className="mt-3 truncate text-[15px] font-semibold text-ink">{p.title}</p>
             <p className="mt-0.5 text-[13px] text-abu">{p.owner} · {formatDate(p.createdAt)}</p>
+            {p.caption?.trim() ? (
+              <p className="mt-1 line-clamp-2 text-[13px] leading-snug text-abu">{p.caption}</p>
+            ) : null}
             <div className="mt-4 flex items-center justify-between gap-2">
               <StatusPill status={LABEL_STATUS[p.status]} />
               <AksiFoto photo={p} busy={busyId === p.id} onSet={onSet} />

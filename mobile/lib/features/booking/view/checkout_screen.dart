@@ -25,7 +25,7 @@ class CheckoutScreen extends StatefulWidget {
 
 class _CheckoutScreenState extends State<CheckoutScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _name = TextEditingController();
+  late final _name = TextEditingController(text: AppState.instance.savedName);
   late final _whatsapp = TextEditingController(
     text: AppState.instance.savedWhatsapp,
   );

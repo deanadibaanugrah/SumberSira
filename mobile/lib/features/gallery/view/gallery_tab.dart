@@ -29,33 +29,73 @@ class _GalleryTabState extends State<GalleryTab> {
   bool _loading = true;
   bool _uploading = false;
   String? _error;
+  // Penanda dari AppState: naik saat sinkronisasi latar belakang meminta galeri dicek ulang
+  // (mis. admin baru menyetujui foto). Hanya dimuat ulang bila penandanya berubah.
+  int _revision = 0;
 
   @override
   void initState() {
     super.initState();
+    _revision = AppState.instance.galleryRevision;
+    AppState.instance.addListener(_onAppState);
     _load();
   }
 
+  @override
+  void dispose() {
+    AppState.instance.removeListener(_onAppState);
+    super.dispose();
+  }
+
+  void _onAppState() {
+    final revision = AppState.instance.galleryRevision;
+    if (revision == _revision) return;
+    _revision = revision;
+    _load(silent: true);
+  }
+
   // Muat foto yang sudah disetujui dari server.
-  Future<void> _load() async {
-    setState(() {
-      _loading = true;
-      _error = null;
-    });
+  // silent = pemeriksaan berkala: tanpa spinner dan tanpa mengubah layar bila isinya sama.
+  Future<void> _load({bool silent = false}) async {
+    if (!silent) {
+      setState(() {
+        _loading = true;
+        _error = null;
+      });
+    }
     try {
       final photos = await ApiClient.fetchGallery();
       if (!mounted) return;
+      if (silent && _photosSama(photos, _photos)) return;
       setState(() {
         _photos = photos;
         _loading = false;
+        _error = null;
       });
     } on ApiException catch (e) {
       if (!mounted) return;
+      // Saat galeri sudah terisi, kegagalan pemeriksaan latar belakang tidak perlu menutupi isi.
+      if (silent && _photos.isNotEmpty) return;
       setState(() {
         _error = e.message;
         _loading = false;
       });
     }
+  }
+
+  static bool _photosSama(List<GalleryPhoto> a, List<GalleryPhoto> b) {
+    if (a.length != b.length) return false;
+    for (var i = 0; i < a.length; i++) {
+      if (a[i].id != b[i].id ||
+          a[i].url != b[i].url ||
+          a[i].title != b[i].title ||
+          a[i].owner != b[i].owner ||
+          a[i].caption != b[i].caption ||
+          a[i].ai != b[i].ai) {
+        return false;
+      }
+    }
+    return true;
   }
 
   // Pilih foto, isi judul dan nama, lalu unggah. Server menyimpannya sebagai "pending" sampai
@@ -104,6 +144,7 @@ class _GalleryTabState extends State<GalleryTab> {
         fileBytes: bytes,
         title: isi.title,
         owner: isi.owner,
+        caption: isi.caption,
       );
       if (!mounted) return;
       _snack(
@@ -188,6 +229,16 @@ class _GalleryTabState extends State<GalleryTab> {
                           color: AppColors.putih72,
                         ),
                       ),
+                      if (photo.caption.trim().isNotEmpty) ...[
+                        const SizedBox(height: 6),
+                        Text(
+                          photo.caption,
+                          style: AppText.subheadline.copyWith(
+                            color: Colors.white,
+                            height: 1.35,
+                          ),
+                        ),
+                      ],
                     ],
                   ),
                 ),
@@ -268,7 +319,8 @@ class _GalleryTabState extends State<GalleryTab> {
                 crossAxisCount: 2,
                 mainAxisSpacing: 18,
                 crossAxisSpacing: 12,
-                childAspectRatio: w / (w + 48),
+                // Ruang teks lebih tinggi agar caption 2 baris muat.
+                childAspectRatio: w / (w + 72),
                 shrinkWrap: true,
                 padding: EdgeInsets.zero,
                 physics: const NeverScrollableScrollPhysics(),
@@ -317,6 +369,18 @@ class _GalleryTabState extends State<GalleryTab> {
                     Text(p.title, style: AppText.headline),
                     const SizedBox(height: 2),
                     Text(p.owner, style: AppText.footnote),
+                    if (p.caption.trim().isNotEmpty) ...[
+                      const SizedBox(height: 4),
+                      Text(
+                        p.caption,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: AppText.footnote.copyWith(
+                          color: AppColors.ink,
+                          height: 1.35,
+                        ),
+                      ),
+                    ],
                   ],
                 ),
               ),
@@ -393,6 +457,16 @@ class _GalleryTabState extends State<GalleryTab> {
           overflow: TextOverflow.ellipsis,
           style: AppText.footnote,
         ),
+        if (p.caption.trim().isNotEmpty)
+          Text(
+            p.caption,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: AppText.caption.copyWith(
+              color: AppColors.abu,
+              height: 1.3,
+            ),
+          ),
       ],
     ),
   );

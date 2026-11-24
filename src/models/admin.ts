@@ -21,6 +21,7 @@ export type AdminGalleryPhoto = {
   url: string;
   title: string;
   owner: string;
+  caption?: string;
   ai: boolean;
   status: "pending" | "approved" | "rejected";
   storageKey?: string;

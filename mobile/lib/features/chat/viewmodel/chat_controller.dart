@@ -25,7 +25,9 @@ class ChatController extends ChangeNotifier {
   final List<ChatMessage> messages = [
     const ChatMessage(
       fromBot: true,
-      text: 'Halo! Aku Tanya Sira 👋 Ada yang bisa dibantu soal Sumber Sira?',
+      text:
+          'Halo! 👋 Selamat datang di Tanya Sira.\n'
+          'Ada yang ingin kamu ketahui seputar Sumber Sira? Yuk, tanyakan apa saja. Aku siap membantu memberikan informasi yang kamu butuhkan!',
     ),
   ];
   bool busy = false;
@@ -39,19 +41,27 @@ class ChatController extends ChangeNotifier {
   Future<void> init() async {
     try {
       final list = await ApiClient.fetchQuickQuestions();
+      final berubah =
+          !online ||
+          (list.isNotEmpty && !listEquals(list, quickQuestions));
       online = true;
       if (list.isNotEmpty) {
         quickQuestions = list;
       }
-      notifyListeners();
+      if (berubah) notifyListeners();
     } on ApiException catch (e) {
       // Server tidak terjangkau: tidak ada tombol cepat dan status chat menjadi Offline.
-      online = !e.offline;
-      notifyListeners();
+      final status = !e.offline;
+      if (online != status) {
+        online = status;
+        notifyListeners();
+      }
     } catch (e) {
       // Balasan server yang bentuknya tidak terduga juga tidak boleh menghentikan aplikasi.
-      online = false;
-      notifyListeners();
+      if (online) {
+        online = false;
+        notifyListeners();
+      }
       debugPrint('ChatController.init gagal: $e');
     }
   }

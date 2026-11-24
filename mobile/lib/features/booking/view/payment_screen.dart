@@ -144,7 +144,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
         child: Image.network(url, width: 210, height: 210, fit: BoxFit.cover),
       );
     }
-    // Cadangan: QR kode booking, sama dengan yang discan petugas.
+    // Cadangan: QR kode booking, sama dengan yang di scan petugas.
     return QrImageView(
       data: widget.booking.code,
       size: 210,

@@ -27,6 +27,9 @@ export default function FotoList({
           <div className="min-w-0 flex-1">
             <p className="truncate text-[15px] font-semibold text-ink">{p.title}</p>
             <p className="truncate text-[13px] text-abu">{p.owner} · {formatDate(p.createdAt)}</p>
+            {p.caption?.trim() ? (
+              <p className="mt-0.5 line-clamp-2 text-[13px] leading-snug text-abu">{p.caption}</p>
+            ) : null}
           </div>
           {p.ai && <AiBadge className="hidden bg-leaf/12! sm:inline-flex" />}
           <StatusPill status={LABEL_STATUS[p.status]} />

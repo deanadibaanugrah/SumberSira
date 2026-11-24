@@ -6,6 +6,7 @@ class GalleryPhoto {
     required this.url,
     required this.title,
     required this.owner,
+    this.caption = '',
     this.ai = false,
     this.status = 'approved',
     this.createdAt,
@@ -15,6 +16,8 @@ class GalleryPhoto {
   final String url;
   final String title;
   final String owner;
+  // Keterangan/caption foto dari pengirim.
+  final String caption;
   // True bila foto berasal dari AI Photo Studio.
   final bool ai;
   // pending | approved | rejected.
@@ -26,6 +29,7 @@ class GalleryPhoto {
     url: json['url'] as String? ?? '',
     title: json['title'] as String? ?? '',
     owner: json['owner'] as String? ?? '',
+    caption: json['caption'] as String? ?? '',
     ai: json['ai'] as bool? ?? false,
     status: json['status'] as String? ?? 'approved',
     createdAt: DateTime.tryParse(json['createdAt'] as String? ?? ''),

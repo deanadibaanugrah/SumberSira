@@ -12,6 +12,7 @@ import '../../../widgets/common.dart';
 import '../../crowd/view/crowd_widgets.dart';
 import '../../chat/view/floating_chat.dart';
 import '../../../widgets/glass.dart';
+import '../../../widgets/logo_mark.dart';
 
 // Banner geser Beranda: konten promosi tetap dengan foto asli Sumber Sira (bukan data operasional).
 // Harga tidak ditulis di sini supaya tidak berbeda dari tarif yang diatur di server.
@@ -68,7 +69,7 @@ class HomeTab extends StatelessWidget {
         const FullBleed(child: _HeroCarousel()),
         const SectionTitle(
           'Keramaian Hari Ini',
-          subtitle: 'Jumlah orang di dalam per jam, dari tiket yang discan',
+          subtitle: 'Jumlah orang di dalam per jam, dari tiket yang di scan',
         ),
         _recommendation(),
       ],
@@ -136,9 +137,17 @@ class HomeTab extends StatelessWidget {
                           ],
                         ),
                         const SizedBox(height: 4),
-                        Text(
-                          'Sumber Sira',
-                          style: AppText.display(32, color: Colors.white),
+                        Row(
+                          children: [
+                            const LogoMark(size: 34, ring: true),
+                            const SizedBox(width: 10),
+                            Flexible(
+                              child: Text(
+                                'Sumber Sira',
+                                style: AppText.display(32, color: Colors.white),
+                              ),
+                            ),
+                          ],
                         ),
                       ],
                     ),
@@ -173,7 +182,7 @@ class HomeTab extends StatelessWidget {
             ? 'Crowd sekarang ${c.crowdLabel} (${c.percent}%)'
             : 'Data keramaian belum tersedia',
         c.ready
-            ? 'Dari tiket yang discan petugas di pintu masuk'
+            ? 'Dari tiket yang di scan petugas di pintu masuk'
             : 'Server belum terjangkau. Coba lagi nanti.',
       ),
       (
@@ -321,7 +330,14 @@ class _HeroCarousel extends StatefulWidget {
 }
 
 class _HeroCarouselState extends State<_HeroCarousel> {
-  final _controller = PageController(viewportFraction: .74);
+  // Halaman awal yang jauh di tengah supaya pengguna bisa menggeser ke kiri maupun ke kanan
+  // tanpa pernah mentok. Indeks asli slide dihitung dengan modulo jumlah slide.
+  static const _startPage = 5000;
+
+  final _controller = PageController(
+    viewportFraction: .74,
+    initialPage: _startPage * _homeSlides.length,
+  );
   int _page = 0;
   Timer? _timer;
 
@@ -330,9 +346,9 @@ class _HeroCarouselState extends State<_HeroCarousel> {
     super.initState();
     _timer = Timer.periodic(const Duration(seconds: 5), (_) {
       if (!_controller.hasClients) return;
-      final next = (_page + 1) % _homeSlides.length;
-      _controller.animateToPage(
-        next,
+      // nextPage (bukan animateToPage ke indeks terakhir) supaya setelah slide terakhir
+      // carousel langsung lanjut ke slide pertama, seperti siklus tanpa akhir.
+      _controller.nextPage(
         duration: const Duration(milliseconds: 500),
         curve: Curves.easeOutCubic,
       );
@@ -354,10 +370,12 @@ class _HeroCarouselState extends State<_HeroCarousel> {
           height: 280,
           child: PageView.builder(
             controller: _controller,
-            itemCount: _homeSlides.length,
-            onPageChanged: (i) => setState(() => _page = i),
+            // itemCount null = jumlah halaman tak terbatas; builder memakai modulo
+            // supaya foto dan teks kembali ke awal setelah slide terakhir.
+            onPageChanged: (i) =>
+                setState(() => _page = i % _homeSlides.length),
             itemBuilder: (_, i) {
-              final s = _homeSlides[i];
+              final s = _homeSlides[i % _homeSlides.length];
               return Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 6),
                 child: ClipRRect(
@@ -376,9 +394,8 @@ class _HeroCarouselState extends State<_HeroCarousel> {
                         left: 10,
                         right: 10,
                         bottom: 10,
-                        // Kaca Hijau Tua + teks putih supaya tetap terbaca di foto terang maupun gelap.
+                        // Kaca bening + teks gelap, selaras dengan caption di layar Tentang Sumber Sira.
                         child: Glass(
-                          tone: GlassTone.tint,
                           radius: 20,
                           shadow: false,
                           padding: const EdgeInsets.fromLTRB(14, 11, 14, 12),
@@ -389,7 +406,7 @@ class _HeroCarouselState extends State<_HeroCarousel> {
                               Text(
                                 s.label,
                                 style: AppText.caption.copyWith(
-                                  color: AppColors.putih72,
+                                  color: AppColors.abu,
                                   letterSpacing: .6,
                                   fontWeight: FontWeight.w600,
                                 ),
@@ -400,7 +417,7 @@ class _HeroCarouselState extends State<_HeroCarousel> {
                                 maxLines: 2,
                                 overflow: TextOverflow.ellipsis,
                                 style: AppText.headline.copyWith(
-                                  color: Colors.white,
+                                  color: AppColors.ink,
                                   fontSize: 15,
                                   height: 1.25,
                                 ),
@@ -411,7 +428,7 @@ class _HeroCarouselState extends State<_HeroCarousel> {
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                                 style: AppText.footnote.copyWith(
-                                  color: AppColors.putih72,
+                                  color: AppColors.abu,
                                 ),
                               ),
                             ],

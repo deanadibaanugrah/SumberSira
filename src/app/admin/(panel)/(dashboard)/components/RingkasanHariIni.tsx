@@ -21,13 +21,13 @@ export default function RingkasanHariIni({ canInsight }: { canInsight: boolean }
         <span className="grid size-10 place-items-center rounded-full bg-white/12"><TrendingUp size={18} aria-hidden="true" /></span>
         <div>
           <h2 className="text-lg font-semibold leading-tight">Ringkasan Hari Ini</h2>
-          <p className="text-[13px] text-white/70">{d.data ? "Dari tiket yang discan" : "Memuat..."}</p>
+          <p className="text-[13px] text-white/70">{d.data ? "Dari tiket yang di scan" : "Memuat..."}</p>
         </div>
       </div>
       <ul className="mt-5 space-y-2">
         <Baris icon={TrendingUp}
                title={puncak ? `Prakiraan puncak ${puncak.hour}.00, ${puncak.count} orang` : "Belum ada pengunjung masuk"}
-               sub={puncak ? (persenPuncak == null ? "Belum ada kapasitas dari server" : `${persenPuncak}% dari kapasitas`) : "Grafik naik saat tiket discan masuk"} />
+               sub={puncak ? (persenPuncak == null ? "Belum ada kapasitas dari server" : `${persenPuncak}% dari kapasitas`) : "Grafik naik saat tiket di scan masuk"} />
         <Baris icon={Ticket} title={`${d.data?.ticketsToday ?? t.sold} tiket terjual`}
                sub={`${d.data?.pendingCash ?? 0} pembayaran tunai menunggu konfirmasi`} />
         <Baris icon={Users} title={`${t.inside} orang di dalam`} sub={`Keramaian ${t.label ?? "–"}`} />

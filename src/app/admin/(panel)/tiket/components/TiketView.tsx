@@ -52,7 +52,7 @@ export default function TiketView() {
 
   return (
     <>
-      <AdminHeader title="Tiket & Check-in" subtitle="Tiket masuk online yang discan di pintu menjadi data Live Crowd"
+      <AdminHeader title="Tiket & Check-in" subtitle="Tiket masuk online yang di scan di pintu menjadi data Live Crowd"
                    action={<PrimaryButton icon={ScanLine} onClick={fokusScan}>Scan Tiket</PrimaryButton>}
                    search={{ value: query, onChange: setQuery, placeholder: "Cari nama atau kode tiket..." }} />
 

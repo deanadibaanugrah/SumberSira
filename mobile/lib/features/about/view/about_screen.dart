@@ -51,7 +51,8 @@ class AboutScreen extends StatelessWidget {
             constraints: const BoxConstraints(maxWidth: 480),
             child: ListView(
               padding: EdgeInsets.only(
-                bottom: MediaQuery.paddingOf(context).bottom + 24,
+                // Ruang ekstra agar info paling bawah tidak tertutup FloatingBar "Lanjut".
+                bottom: MediaQuery.paddingOf(context).bottom + 120,
               ),
               children: [
                 // [P3 Stack + Positioned] Bar atas dan panel judul kaca ditumpuk di atas foto.

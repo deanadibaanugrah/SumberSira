@@ -5,6 +5,7 @@ import '../../../theme/app_theme.dart';
 import '../../../utils/format.dart';
 import '../../../widgets/common.dart';
 import '../../../widgets/glass.dart';
+import '../../../widgets/ride_icon.dart';
 import '../viewmodel/booking_controller.dart';
 import '../../../widgets/motion.dart';
 
@@ -112,7 +113,7 @@ class BookingSection extends StatelessWidget {
   Widget _itemRow(Wahana w) {
     final qty = controller.qty[w.id] ?? 0;
     return ListRow(
-      icon: w.icon,
+      leading: RideIcon(id: w.id, fallback: w.icon),
       title: w.label,
       subtitle: rupiah(w.price),
       subtitleStyle: AppText.number(

@@ -99,11 +99,11 @@ void main() {
         expect(s.find(t.code), isNotNull);
         expect(s.ticketsFor(wa).first.code, t.code);
 
-        // Tiket yang belum discan tidak menaikkan Live Crowd.
+        // Tiket yang belum di scan tidak menaikkan Live Crowd.
         await c.refresh();
         expect(c.inside, insideBefore);
 
-        // Petugas mengonfirmasi pembayaran tunai di loket, baru tiket boleh discan masuk.
+        // Petugas mengonfirmasi pembayaran tunai di loket, baru tiket boleh di scan masuk.
         final bayar = await http.post(
           Uri.parse(
             '${ApiClient.baseUrl}/admin/tickets/${t.code}/confirm-cash',

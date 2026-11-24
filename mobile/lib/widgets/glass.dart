@@ -217,6 +217,9 @@ Future<T?> showGlassSheet<T>(
     context: context,
     isScrollControlled: true,
     useSafeArea: true,
+    // Geser ke bawah untuk menutup, dan ketuk area di luar sheet untuk menutup.
+    enableDrag: true,
+    isDismissible: true,
     backgroundColor: Colors.transparent,
     barrierColor: AppColors.line,
     builder: (ctx) {
@@ -258,6 +261,10 @@ class _SheetBody extends StatelessWidget {
       padding: EdgeInsets.only(bottom: MediaQuery.viewInsetsOf(context).bottom),
       child: Align(
         alignment: Alignment.bottomCenter,
+        // heightFactor 1 membuat sheet hanya setinggi isinya, bukan setinggi layar.
+        // Tanpa ini, area transparan menutupi seluruh layar sehingga gestur geser ke bawah
+        // dan ketukan di luar sheet (mis. tombol lonceng) tidak bekerja sebagaimana mestinya.
+        heightFactor: controller == null ? 1 : null,
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 480),
           child: Glass(

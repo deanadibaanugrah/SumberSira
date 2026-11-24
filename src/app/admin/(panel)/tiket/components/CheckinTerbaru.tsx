@@ -23,7 +23,7 @@ export default function CheckinTerbaru({ recent, ready, onRefresh }: { recent: T
             </span>
           </li>
         ))}
-        {ready && recent.length === 0 && <li className="rounded-2xl bg-paper px-4 py-5 text-center text-sm text-abu">Belum ada pengunjung yang discan masuk hari ini.</li>}
+        {ready && recent.length === 0 && <li className="rounded-2xl bg-paper px-4 py-5 text-center text-sm text-abu">Belum ada pengunjung yang di scan masuk hari ini.</li>}
       </ul>
       {/* Data diperbarui otomatis tiap beberapa detik; tombol ini memuat ulang saat itu juga */}
       <button type="button" onClick={onRefresh}

@@ -103,7 +103,7 @@ class Booking {
   final String orderedAt;
   // Tanggal kunjungan, mis. "Kamis, 13 November 2026". Kosong berarti hari ini.
   final String date;
-  // True bila booking tercatat di server (QR-nya bisa discan petugas).
+  // True bila booking tercatat di server (QR-nya bisa di scan petugas).
   final bool synced;
   // Total sebenarnya dihitung server. Null untuk data lama: dihitung dari baris item.
   final int? amount;

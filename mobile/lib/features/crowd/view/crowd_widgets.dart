@@ -130,13 +130,13 @@ class CrowdHero extends StatelessWidget {
                 ),
               ],
               const SizedBox(height: 10),
-              // Dari tiket yang discan petugas saat terhubung; penanda "tidak terbaru" bila data
+              // Dari tiket yang di scan petugas saat terhubung; penanda "tidak terbaru" bila data
               // server terakhir gagal diperbarui; status kosong bila belum pernah terhubung.
               Text(
                 s.isLive
                     ? (s.isStale
                           ? 'Tidak terbaru: server tidak terjangkau'
-                          : 'Dari tiket yang discan petugas di pintu masuk')
+                          : 'Dari tiket yang di scan petugas di pintu masuk')
                     : 'Belum terhubung ke server',
                 style: AppText.caption,
               ),

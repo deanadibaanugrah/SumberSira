@@ -4,11 +4,11 @@ import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
 import 'common.dart';
 
-// Isian judul dan nama pengirim untuk foto yang akan diunggah ke galeri.
-typedef PhotoDetails = ({String title, String owner});
+// Isian judul, nama pengirim, dan caption untuk foto yang akan diunggah ke galeri.
+typedef PhotoDetails = ({String title, String owner, String caption});
 
 // Form kecil di lembar kaca, dipakai galeri dan AI Photo saat mengirim foto.
-// Ditutup dengan Navigator.pop(context, (title: ..., owner: ...)).
+// Ditutup dengan Navigator.pop(context, (title: ..., owner: ..., caption: ...)).
 class PhotoForm extends StatefulWidget {
   const PhotoForm({
     super.key,
@@ -31,11 +31,13 @@ class _PhotoFormState extends State<PhotoForm> {
   final _formKey = GlobalKey<FormState>();
   late final _title = TextEditingController();
   late final _owner = TextEditingController(text: widget.ownerAwal);
+  late final _caption = TextEditingController();
 
   @override
   void dispose() {
     _title.dispose();
     _owner.dispose();
+    _caption.dispose();
     super.dispose();
   }
 
@@ -44,6 +46,7 @@ class _PhotoFormState extends State<PhotoForm> {
     Navigator.pop(context, (
       title: _title.text.trim(),
       owner: _owner.text.trim(),
+      caption: _caption.text.trim(),
     ));
   }
 
@@ -86,6 +89,19 @@ class _PhotoFormState extends State<PhotoForm> {
               ),
               validator: (v) =>
                   (v ?? '').trim().isEmpty ? 'Isi nama pengirim.' : null,
+            ),
+            const SizedBox(height: 10),
+            TextFormField(
+              controller: _caption,
+              maxLength: 280,
+              minLines: 2,
+              maxLines: 4,
+              textCapitalization: TextCapitalization.sentences,
+              decoration: const InputDecoration(
+                hintText: 'Caption foto (opsional)',
+                fillColor: AppColors.abuMuda,
+                counterText: '',
+              ),
             ),
             const SizedBox(height: 16),
             PrimaryButton(

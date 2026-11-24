@@ -26,6 +26,7 @@ class BookingController extends ChangeNotifier {
   String? slot;
   late int _bookingCount;
   late int _revision;
+  bool _reloading = false;
 
   // Mengambil wahana dari backend (GET /rides) dan pilihan jam dari backend (GET /booking-slots).
   // Gagal terhubung: daftar dikosongkan dan banner "Coba lagi" ditampilkan; tidak ada data bawaan.
@@ -120,13 +121,62 @@ class BookingController extends ChangeNotifier {
     final s = AppState.instance;
     if (s.wahanaRevision != _revision) {
       _revision = s.wahanaRevision;
-      reload();
+      _reloadSilently();
     }
     final count = s.bookings.length;
     if (count == _bookingCount) return;
     _bookingCount = count;
     qty.clear();
     notifyListeners();
+  }
+
+  // Memuat ulang daftar wahana di latar belakang tanpa spinner. Dipakai oleh sinkronisasi berkala:
+  // layar hanya berubah bila harga/nama/ketersediaan wahana benar-benar berbeda dari data terakhir.
+  Future<void> _reloadSilently() async {
+    if (_reloading) return;
+    _reloading = true;
+    try {
+      final rides = await ApiClient.fetchWahana();
+      final pilihan = await ApiClient.fetchBookingSlots();
+      final slotBaru = [for (final s in pilihan) s.id];
+      final berubah =
+          !_ridesSama(rides, _loaded) || !_slotsSama(slotBaru, slots);
+      if (!berubah) return;
+      _loaded = rides;
+      slots = slotBaru;
+      if (!slots.contains(slot)) slot = slots.isEmpty ? null : slots.first;
+      // Pilihan jumlah untuk wahana yang sudah tidak ada dibuang, pilihan lain tetap.
+      qty.removeWhere((id, _) => !rides.any((w) => w.id == id));
+      error = rides.isEmpty ? 'Belum ada wahana aktif di server.' : null;
+      items = Future.value(_loaded);
+      notifyListeners();
+    } catch (_) {
+      // Server tidak terjangkau: tampilan tetap memakai data terakhir.
+    } finally {
+      _reloading = false;
+    }
+  }
+
+  static bool _ridesSama(List<Wahana> a, List<Wahana> b) {
+    if (a.length != b.length) return false;
+    for (var i = 0; i < a.length; i++) {
+      if (a[i].id != b[i].id ||
+          a[i].name != b[i].name ||
+          a[i].category != b[i].category ||
+          a[i].price != b[i].price ||
+          a[i].unit != b[i].unit) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  static bool _slotsSama(List<String> a, List<String> b) {
+    if (a.length != b.length) return false;
+    for (var i = 0; i < a.length; i++) {
+      if (a[i] != b[i]) return false;
+    }
+    return true;
   }
 
   @override

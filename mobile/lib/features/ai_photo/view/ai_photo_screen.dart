@@ -268,6 +268,7 @@ class _AiPhotoScreenState extends State<AiPhotoScreen> {
         id: result.id,
         title: isi.title,
         owner: isi.owner,
+        caption: isi.caption,
       );
       if (!mounted) return;
       setState(() => _shared = true);

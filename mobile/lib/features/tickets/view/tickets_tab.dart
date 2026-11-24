@@ -108,7 +108,6 @@ class _TicketsTabState extends State<TicketsTab> {
           header: TabHeader(
             title: 'Tiket & Booking',
             photo: 'assets/images/onboarding-air-jernih.jpg',
-            subtitle: 'Tanpa login, riwayat dicari lewat nomor WhatsApp',
             child: HeaderSegments(
               labels: const ['Tiket Masuk', 'Sewa & Wahana', 'Riwayat'],
               index: _segment,

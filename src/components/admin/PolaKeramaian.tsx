@@ -6,7 +6,7 @@ import Heatmap from "@/components/charts/Heatmap";
 import { Card, CardTitle } from "@/components/admin/ui";
 import { useMingguan } from "@/viewmodels/mingguan-viewmodel";
 
-// Heatmap keramaian 7 hari terakhir (persen kapasitas puncak per jam), dihitung dari tiket yang discan masuk.
+// Heatmap keramaian 7 hari terakhir (persen kapasitas puncak per jam), dihitung dari tiket yang di scan masuk.
 // Catatan di bawahnya dibuat dari angka (hari dan jam tertinggi), bukan dari AI.
 // Backend tidak punya endpoint mingguan, jadi angkanya diagregasi di klien (src/viewmodels/mingguan-viewmodel.ts).
 export default function PolaKeramaian() {
@@ -14,7 +14,7 @@ export default function PolaKeramaian() {
   const pola = data?.pola;
   return (
     <Card>
-      <CardTitle sub="Persentase kapasitas per jam, 7 hari terakhir (dari tiket yang discan)">Pola Keramaian Minggu Ini</CardTitle>
+      <CardTitle sub="Persentase kapasitas per jam, 7 hari terakhir (dari tiket yang di scan)">Pola Keramaian Minggu Ini</CardTitle>
       <div className="mt-5">
         {pola
           ? <Heatmap hours={pola.hours} rows={pola.days} />

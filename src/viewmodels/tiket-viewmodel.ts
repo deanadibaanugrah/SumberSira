@@ -10,7 +10,7 @@ import type { Ticket } from "@/models/ticket";
 // Tiket masuk online, sekarang dari backend (bukan lagi localStorage).
 // Tiket dibeli pengunjung di aplikasi lalu muncul di sini; petugas menekan Check-in atau Keluar, dan angka Live Crowd
 // ikut naik atau turun untuk hari itu saja. Data diambil berkala dan dibagi ke semua komponen (dashboard, tiket, login).
-// Live Crowd = jumlah orang dari tiket yang sudah discan masuk dan belum keluar, dibagi kapasitas.
+// Live Crowd = jumlah orang dari tiket yang sudah di scan masuk dan belum keluar, dibagi kapasitas.
 
 // Label tampilan parkir dari server (GET /pricing). Tidak ada daftar harga di sini supaya
 // angka di layar selalu sesuai harga yang dipakai backend saat membuat tagihan.

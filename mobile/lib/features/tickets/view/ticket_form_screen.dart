@@ -34,7 +34,7 @@ class _TicketFormScreenState extends State<TicketFormScreen> {
   // [P6 Form] Kunci form untuk menjalankan semua validator sekaligus lewat validate().
   final _formKey = GlobalKey<FormState>();
   // [P4 TextEditingController] Membaca isi kolom nama dan WhatsApp (nomor terakhir diisi dari shared_preferences).
-  final _name = TextEditingController();
+  late final _name = TextEditingController(text: AppState.instance.savedName);
   late final _whatsapp = TextEditingController(
     text: AppState.instance.savedWhatsapp,
   );
@@ -190,7 +190,7 @@ class _TicketFormScreenState extends State<TicketFormScreen> {
     } on ApiException catch (e) {
       if (!mounted) return;
       setState(() => _paying = false);
-      // Tidak membuat tiket palsu di perangkat: tiket yang tidak tercatat di server tidak bisa discan petugas.
+      // Tidak membuat tiket palsu di perangkat: tiket yang tidak tercatat di server tidak bisa di scan petugas.
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
@@ -604,7 +604,7 @@ class _QrisSheetState extends State<_QrisSheet> {
         child: Image.network(url, width: 190, height: 190, fit: BoxFit.cover),
       );
     }
-    // Cadangan: QR kode tiket, sama dengan yang discan petugas.
+    // Cadangan: QR kode tiket, sama dengan yang di scan petugas.
     return QrImageView(
       data: widget.ticket.code,
       size: 190,

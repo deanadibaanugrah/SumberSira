@@ -406,11 +406,16 @@ class ApiClient {
     required List<int> fileBytes,
     required String title,
     required String owner,
+    String caption = '',
   }) async => GalleryPhoto.fromApi(
     _map(
       await postMultipart(
         '/gallery',
-        {'title': title.trim(), 'owner': owner.trim()},
+        {
+          'title': title.trim(),
+          'owner': owner.trim(),
+          'caption': caption.trim(),
+        },
         fileField: 'photo',
         fileName: fileName,
         fileBytes: fileBytes,
@@ -454,12 +459,17 @@ class ApiClient {
     required String id,
     required String title,
     required String owner,
+    String caption = '',
   }) async => GalleryPhoto.fromApi(
     _map(
       await _request(
         'POST',
         '/ai-photo/$id/share-to-gallery',
-        body: {'title': title.trim(), 'owner': owner.trim()},
+        body: {
+          'title': title.trim(),
+          'owner': owner.trim(),
+          'caption': caption.trim(),
+        },
       ),
     ),
   );

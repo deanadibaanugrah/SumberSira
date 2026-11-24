@@ -50,7 +50,7 @@ class _ETicketScreenState extends State<ETicketScreen> {
 
   // Pesan di bawah QR sesuai status tiket.
   static const _messages = {
-    TicketStatus.waiting: 'Tunjukkan QR ini ke petugas di pintu masuk. Setelah discan, kamu ikut terhitung di Live Crowd.',
+    TicketStatus.waiting: 'Tunjukkan QR ini ke petugas di pintu masuk. Setelah di scan, kamu ikut terhitung di Live Crowd.',
     TicketStatus.inside: 'Kamu sudah masuk dan ikut terhitung di Live Crowd. Selamat bermain air!',
     TicketStatus.out: 'Tiket sudah dipakai. Terima kasih sudah berkunjung!',
   };

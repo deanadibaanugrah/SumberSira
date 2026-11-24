@@ -1,0 +1,11 @@
+﻿{
+  "files.watcherExclude": {
+    "**/build_alt/**": true,
+    "**/build/**": true,
+    "**/.dart_tool/**": true
+  },
+  "search.exclude": {
+    "**/build_alt/**": true,
+    "**/build/**": true
+  }
+}

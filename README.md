@@ -24,7 +24,7 @@ Buka <http://localhost:3000>:
 
 | Alamat | Isi |
 |---|---|
-| `/` | Halaman perkenalan web (introduction web) |
+| `/` | Langsung diarahkan ke `/admin` (halaman masuk bila belum login). Web ini khusus panel admin; aplikasi pengunjung ada di folder `mobile/` |
 | `/admin` | Panel admin (wajib login, lihat akun demo di bawah). Desainnya untuk layar 1440 × 900 |
 
 **Akun demo panel admin** (dibuat oleh `npm run seed` di backend; password disimpan sebagai hash):
@@ -161,15 +161,21 @@ Di kode, bagian yang memakai materi kuliah diberi komentar penanda, misalnya `//
 
 Hanya ada **dua** fitur AI. Grafik keramaian dan Insight di admin **bukan AI**: dihitung dari tiket yang discan petugas.
 
-**1. Chatbot Tanya Sira (aplikasi pengunjung).** Pertanyaan cepat diambil dari `GET /chat/quick-questions`. Setiap
-pesan dikirim ke `POST /chat`; backend mencocokkannya dengan FAQ buatan pengelola (tanpa LLM). Pertanyaan yang tidak
-cocok disimpan backend dan muncul di halaman Chatbot & FAQ untuk dijawab admin. Menjawab pertanyaan berarti membuat
-FAQ baru lalu menghapus pertanyaan itu, supaya pertanyaan serupa berikutnya dijawab otomatis.
+**1. Chatbot Tanya Sira (aplikasi pengunjung).** Pertanyaan cepat diambil dari `GET /chat/quick-questions` dan
+**diatur admin** di halaman Chatbot & FAQ (tambah, kurangi, ubah; 1 sampai 6 tombol). Setiap pesan dikirim ke `POST /chat`:
+tombol cepat dijawab persis seperti FAQ buatan admin (tanpa AI); pertanyaan bebas dijawab Claude yang **hanya boleh memakai
+data resmi** dari database (harga, parkir, wahana, jam datang, keramaian, dan FAQ admin), tidak boleh mengarang. Bila datanya
+tidak ada, AI berkata belum tahu dan pertanyaan masuk ke daftar Belum Terjawab untuk dijawab admin lewat FAQ baru. Tanpa kunci
+AI (`ANTHROPIC_API_KEY` di backend), chatbot memakai pencocokan kata kunci FAQ. Status AI dan jatah harian tampil di halaman
+Chatbot & FAQ.
 
-**2. AI Photo Studio (aplikasi pengunjung).** Foto dari galeri atau kamera diunggah ke `POST /ai-photo`. Backend
-memperbaiki warna dan ketajamannya (analisis sebaran warna, kecerahan, kontras, kepekatan warna), lalu mengembalikan
-foto hasil. Aplikasi menampilkan foto asli dan hasil berdampingan; hasil bisa disimpan, dibagikan, atau dikirim ke
-Galeri Komunitas untuk disetujui admin.
+**2. AI Photo Studio (aplikasi pengunjung).** Foto dari galeri atau kamera diunggah ke `POST /ai-photo`. Claude menilai
+kondisi foto (bawah air atau tidak, kabut, terang-gelap, perlu kontras dan warna berapa) dan hanya mengembalikan angka;
+piksel diolah mesin pengolahan gambar biasa di server (koreksi warna bawah air, buang kabut, kecerahan, kontras lokal,
+vibrance). **Tidak ada model generatif**, jadi bentuk, wajah, dan latar tidak berubah, dan ponsel yang lemah pun mendapat
+hasil yang sama karena prosesnya di server. Slider **Kekuatan perbaikan** (0 sampai 100, bawaan 60) mengatur ulang hasil dari
+foto asli lewat `POST /ai-photo/:id/strength`. Aplikasi menampilkan foto asli dan hasil berdampingan; hasil bisa disimpan,
+dibagikan, atau dikirim ke Galeri Komunitas untuk disetujui admin.
 
 ## Pemenuhan Soal UTS
 
@@ -295,7 +301,7 @@ Login Google (OAuth) dan MFA belum dibuat karena butuh akun penyedia (Google Clo
 | Gunakan Next.js | Next.js 16 App Router + TypeScript (`src/app`) |
 | UTS fokus frontend web, minimal 3 slide (admin) | 6 halaman admin di `src/app/admin` |
 | Animasi grafik di admin | `src/components/charts/`: batang pill tumbuh dari bawah (`BarChart`), kotak heatmap muncul berurutan (`Heatmap`), batang progres mengisi (`ProgressBar`) |
-| Introduction web | `src/app/(intro)/page.tsx` |
+| Introduction web | Dulu `src/app/(intro)/page.tsx`; dihapus karena web kini khusus panel admin dan alamat utama langsung ke halaman masuk. Masih ada di riwayat git (commit sebelum perubahan ini) |
 | Tiap section halaman jadi file sendiri (Pertemuan 10) | Folder `components/` di dalam folder tiap halaman, `page.tsx` hanya menyusun section |
 
 ## Struktur folder

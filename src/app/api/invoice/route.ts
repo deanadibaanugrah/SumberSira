@@ -27,6 +27,11 @@ const json = (status, body) => Response.json(body, { status });
 
 // Dipanggil saat aplikasi minta invoice dikirim: cek data, hitung ulang total, buat PDF, lalu kirim ke WhatsApp penyewa.
 export async function POST(request) {
+  // Hanya akun admin atau petugas yang sudah login boleh memicu pengiriman. Tanpa ini, siapa pun di internet bisa
+  // menyuruh nomor bisnis resmi mengirim "invoice" ke nomor mana saja (spam dan penyalahgunaan kuota WhatsApp).
+  const me = await apiFetch("/auth/me").catch(() => null);
+  if (!me || !me.ok) return json(401, { ok: false, error: "unauthenticated" });
+
   let input;
   try {
     input = await request.json();

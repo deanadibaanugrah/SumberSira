@@ -328,7 +328,7 @@ mobile/                Aplikasi pengunjung (Flutter), lihat bagian Aplikasi Mobi
 desain/                Aset gambar
   foto/                Foto asli Sumber Sira yang dipakai aplikasi (di-import lewat src/lib/foto.ts)
   screenshot/          Tangkapan layar aplikasi untuk README
-  HI-FI · Web Admin ·  Ekspor PNG desain web admin dari Figma (acuan tampilan, diekspor 1,25×)
+  HI-FI · Web Admin ·  Ekspor PNG 11 halaman web admin dari Figma (acuan tampilan, diekspor 1×)
 src/app/               Halaman (App Router). Tiap halaman punya folder components/ berisi section-nya,
                        page.tsx hanya menyusun section. Folder (nama) = route group, tidak mengubah alamat
   admin/login/         Halaman login admin, alamat /admin/login
@@ -386,9 +386,9 @@ src/lib/               Utilitas tanpa state
 
 ## Catatan desain
 
-- Ukuran mengikuti Figma: frame mobile **375 × 812** dan admin **1440 × 900**. PNG admin di `desain/` diekspor 1,25×
-  (1 px di kode = 1,25 px di PNG), kecuali Chatbot & FAQ yang diekspor 1× dan lebih tinggi karena memuat kartu Alur Jawaban dan
-  Tombol Jawaban Cepat. Ukuran teks, jarak, dan kartu diukur dari PNG.
+- Ukuran mengikuti Figma: frame mobile **375 × 812** dan admin **1440 × 900**. PNG admin di `desain/` diekspor 1×
+  (1 px di kode = 1 px di PNG); Chatbot & FAQ lebih tinggi karena memuat kartu Alur Jawaban dan Tombol Jawaban Cepat.
+  Ada 11 halaman, sama dengan menu web admin. Ukuran teks, jarak, dan kartu diukur dari PNG.
 - Tampilan mobile mengikuti gaya iOS 27 (Liquid Glass), hanya mode terang, dengan dua lapisan yang jelas:
   lapisan navigasi (tab bar, nav bar saat digulir, CTA mengambang, sheet) dari kaca, lapisan konten (kartu, list, foto, form) permukaan putih solid.
   Kaca terang = Putih 72% + blur + garis tepi Putih 50% + bayangan 0 8 24 Ink 10%; kaca gelap = Putih 12% + blur; CTA primer = Hijau Tua 85%.

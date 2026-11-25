@@ -1,9 +1,8 @@
 "use client";
 
-import { Download } from "lucide-react";
 import { useMemo, useState } from "react";
 
-import { AdminHeader, PrimaryButton } from "@/components/admin/ui";
+import { AdminHeader } from "@/components/admin/ui";
 import { useBooking } from "@/viewmodels/booking-viewmodel";
 
 import DaftarBooking from "./DaftarBooking";
@@ -32,7 +31,6 @@ export default function BookingView({ canKelola }: { canKelola: boolean }) {
   return (
     <>
       <AdminHeader title="Booking Sewa & Wahana" subtitle="Kelola pesanan sewa alat dan wahana dari aplikasi"
-                   action={<PrimaryButton icon={Download}>Export</PrimaryButton>}
                    search={{ value: query, onChange: setQuery, placeholder: "Cari nama pemesan..." }} />
 
       <StatBooking />

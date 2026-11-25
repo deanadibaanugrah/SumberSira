@@ -15,6 +15,15 @@ export type AuthFailure = { ok: false; error: "UNAUTHORIZED" | "FORBIDDEN" };
 // Satu ulasan pengunjung untuk halaman Ulasan & Rating (khusus admin).
 export type AdminReview = { id: string; name: string; stars: number; text: string; createdAt: string };
 
+// Satu halaman daftar ulasan. average dihitung backend dari seluruh ulasan.
+export type AdminReviewPage = {
+  items: AdminReview[];
+  total: number;
+  page: number;
+  limit: number;
+  average: number;
+};
+
 // Satu foto galeri untuk halaman Galeri & Konten, termasuk status moderasinya.
 export type AdminGalleryPhoto = {
   id: string;
@@ -29,6 +38,18 @@ export type AdminGalleryPhoto = {
   createdAt: string;
 };
 
+// Rekap jumlah foto per status untuk kartu ringkasan (dihitung backend dari seluruh data).
+export type AdminGalleryCounts = { all: number; pending: number; approved: number; rejected: number };
+
+// Satu halaman daftar foto galeri.
+export type AdminGalleryPage = {
+  items: AdminGalleryPhoto[];
+  total: number;
+  page: number;
+  limit: number;
+  counts: AdminGalleryCounts;
+};
+
 // Satu FAQ pengelola. keys = kata kunci pencocokan; kata pertama dipakai sebagai judul di admin.
 export type AdminFaq = { id: string; keys: string[]; answer: string; sortOrder: number; active: boolean };
 
@@ -38,15 +59,7 @@ export type AdminAiStatus = { enabled: boolean; model: string; dailyLimit: numbe
 // Pertanyaan pengunjung yang tidak cocok dengan FAQ mana pun.
 export type AdminUnanswered = { id: string; question: string; createdAt: string };
 
-// Ringkasan Insight dari backend: rating ulasan, keramaian saat ini, jam terpadat, dan saran aturan.
-export type AdminInsight = {
-  rating: number;
-  reviewCount: number;
-  distribution: Record<"1" | "2" | "3" | "4" | "5", number>;
-  crowd: { inside: number; percent: number; label: string };
-  peakHour: string;
-  suggestions: string[];
-};
+
 
 // Harga tiket, kapasitas, dan tarif parkir. Bentuk ini sama dengan yang dipakai PUT /admin/pricing.
 export type AdminPricing = {

@@ -41,15 +41,22 @@ export default function WahanaView({
   pricingError: string | null;
   canEditPricing: boolean;
 }) {
-  // Data wahana, filter kategori, isi form (null = form tertutup), dan pesan error dari server.
+  // Data wahana, filter kategori, kata pencarian, isi form (null = form tertutup), dan pesan error dari server.
   const [items, setItems] = useState(initialItems);
   const [filter, setFilter] = useState("Semua");
+  const [query, setQuery] = useState("");
   const [form, setForm] = useState(null);
   const [error, setError] = useState("");
   const [pending, startTransition] = useTransition();
 
-  // Wahana yang tampil sesuai filter kategori.
-  const visible = useMemo(() => items.filter((w) => filter === "Semua" || w.category === filter), [items, filter]);
+  // Wahana yang tampil sesuai filter kategori dan kata pencarian.
+  const visible = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    return items.filter((w) =>
+      (filter === "Semua" || w.category === filter) &&
+      (!q || w.name.toLowerCase().includes(q) || (w.unit ?? "").toLowerCase().includes(q))
+    );
+  }, [items, filter, query]);
 
   // Terapkan hasil Server Action: berhasil = pakai daftar terbaru dari server, gagal = tampilkan alasannya.
   const apply = (result: WahanaActionResult, onSuccess?: () => void) => {
@@ -75,7 +82,8 @@ export default function WahanaView({
   return (
     <>
       <AdminHeader title="Wahana & Harga" subtitle="Daftar alat sewa dan wahana beserta tarifnya"
-                   action={<PrimaryButton icon={Plus} onClick={() => { setForm(EMPTY); setError(""); }}>Tambah Wahana</PrimaryButton>} />
+                   action={<PrimaryButton icon={Plus} onClick={() => { setForm(EMPTY); setError(""); }}>Tambah Wahana</PrimaryButton>}
+                   search={{ value: query, onChange: setQuery, placeholder: "Cari wahana..." }} />
 
       <PesanAkses canEdit={canEdit} error={error} />
 

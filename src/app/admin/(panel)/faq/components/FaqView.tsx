@@ -33,11 +33,15 @@ export default function FaqView({ faqs, pending, tombol, ai, error }: { faqs: Ad
   const [form, setForm] = useState<FormState | null>(null);
   const [saving, setSaving] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
+  const [query, setQuery] = useState("");
   const router = useRouter();
 
   // Nomor urut berikutnya untuk FAQ baru (backend memakai sortOrder).
   const urutanBaru = faqs.reduce((maks, f) => Math.max(maks, f.sortOrder ?? 0), 0) + 1;
   const faqAktif = faqs.filter((f) => f.active).length;
+  const q = query.trim().toLowerCase();
+  const faqsTampil = q ? faqs.filter((f) => f.answer.toLowerCase().includes(q) || f.keys.some((k) => k.toLowerCase().includes(q))) : faqs;
+  const pendingTampil = q ? pending.filter((p) => p.question.toLowerCase().includes(q)) : pending;
 
   const tambah = () => {
     setNotice(null);
@@ -136,6 +140,7 @@ export default function FaqView({ faqs, pending, tombol, ai, error }: { faqs: Ad
         title="Chatbot & FAQ"
         subtitle="Atur jawaban cepat Tanya Sira dan pantau pertanyaan yang belum terjawab"
         action={<PrimaryButton icon={Plus} onClick={tambah}>Tambah FAQ</PrimaryButton>}
+        search={{ value: query, onChange: setQuery, placeholder: "Cari FAQ atau pertanyaan..." }}
       />
 
       {(notice || error) && (
@@ -149,8 +154,8 @@ export default function FaqView({ faqs, pending, tombol, ai, error }: { faqs: Ad
       <TombolCepat key={tombol.join("|")} tombol={tombol} ai={ai} ready={!error} />
 
       <div className="mt-5 grid grid-cols-1 gap-5 xl:grid-cols-[736fr_380fr]">
-        <DaftarFaq faqs={faqs} ready={!error} onEdit={edit} onRemove={hapusSatuFaq} />
-        <BelumTerjawab pending={pending} ready={!error} onAnswer={jawab} onRemove={hapusSatuPertanyaan} />
+        <DaftarFaq faqs={faqsTampil} ready={!error} onEdit={edit} onRemove={hapusSatuFaq} />
+        <BelumTerjawab pending={pendingTampil} ready={!error} onAnswer={jawab} onRemove={hapusSatuPertanyaan} />
       </div>
 
       {form && <FormFaq form={form} saving={saving} notice={notice} onChange={setForm} onSave={simpan} onClose={() => setForm(null)} />}

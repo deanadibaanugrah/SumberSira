@@ -34,11 +34,17 @@ function pesanGalat(kode: string): string {
 // Halaman Akun Petugas: daftar akun, tambah, ubah peran/status, dan atur ulang password.
 export default function StaffView({ staff, error, currentId }: { staff: AdminStaff[]; error: string | null; currentId: string }) {
   const [items, setItems] = useState(staff);
+  const [query, setQuery] = useState("");
   const [form, setForm] = useState<IsiForm | null>(null);
   const [reset, setReset] = useState<AdminStaff | null>(null);
   const [password, setPassword] = useState("");
   const [saving, setSaving] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
+
+  const q = query.trim().toLowerCase();
+  const visible = q
+    ? items.filter((s) => s.name.toLowerCase().includes(q) || s.email.toLowerCase().includes(q) || ROLE_LABEL[s.role].toLowerCase().includes(q))
+    : items;
 
   const terapkan = (hasil: Awaited<ReturnType<typeof simpanStaff>>) => {
     if ("error" in hasil) {
@@ -91,6 +97,7 @@ export default function StaffView({ staff, error, currentId }: { staff: AdminSta
         title="Akun Petugas"
         subtitle="Kelola akun pengelola dan petugas loket"
         action={<PrimaryButton icon={Plus} onClick={() => { setForm({ ...KOSONG }); setNotice(null); }}>Tambah Akun</PrimaryButton>}
+        search={{ value: query, onChange: setQuery, placeholder: "Cari nama atau email..." }}
       />
 
       {error && (
@@ -107,7 +114,7 @@ export default function StaffView({ staff, error, currentId }: { staff: AdminSta
 
         {/* Di HP tabel diganti kartu agar peran, status, dan tombol aksi tetap terlihat. */}
         <ul className="mt-4 space-y-2 md:hidden">
-          {items.map((s) => (
+          {visible.map((s) => (
             <li key={s.id} className="rounded-2xl bg-paper p-3 animate-fade-up">
               <div className="flex items-start gap-3">
                 <Avatar name={s.name} solid={s.role === "admin"} />
@@ -125,7 +132,7 @@ export default function StaffView({ staff, error, currentId }: { staff: AdminSta
               </div>
             </li>
           ))}
-          {items.length === 0 && <li className="rounded-2xl bg-paper px-5 py-8 text-center text-sm text-abu">{error ? "Daftar akun belum bisa dimuat." : "Belum ada akun."}</li>}
+          {visible.length === 0 && <li className="rounded-2xl bg-paper px-5 py-8 text-center text-sm text-abu">{error ? "Daftar akun belum bisa dimuat." : q ? "Tidak ada akun yang cocok." : "Belum ada akun."}</li>}
         </ul>
 
         <div className="mt-4 hidden overflow-x-auto md:block">
@@ -140,7 +147,7 @@ export default function StaffView({ staff, error, currentId }: { staff: AdminSta
               </tr>
             </thead>
             <tbody>
-              {items.map((s) => (
+              {visible.map((s) => (
                 <tr key={s.id} className="rounded-2xl bg-paper animate-fade-up">
                   <td className="rounded-l-2xl py-3 pl-4">
                     <div className="flex items-center gap-3">
@@ -162,7 +169,7 @@ export default function StaffView({ staff, error, currentId }: { staff: AdminSta
             </tbody>
           </table>
         </div>
-        {items.length === 0 && <p className="mt-4 hidden px-2 text-sm text-abu md:block">{error ? "Daftar akun belum bisa dimuat." : "Belum ada akun."}</p>}
+        {visible.length === 0 && <p className="mt-4 hidden px-2 text-sm text-abu md:block">{error ? "Daftar akun belum bisa dimuat." : q ? "Tidak ada akun yang cocok." : "Belum ada akun."}</p>}
       </Card>
 
       {form && <FormStaffBaru form={form} saving={saving} notice={notice} onChange={setForm} onSave={simpan} onClose={() => { setForm(null); setNotice(null); }} />}

@@ -8,7 +8,7 @@ import type { WahanaItem } from "@/models/wahana";
 
 import { describeDevice } from "../lib/auth/device";
 import { ROLE_LABEL, can, type Permission, type Role } from "../lib/auth/roles";
-import type { AdminProfile, AuthFailure, AdminReview, AdminGalleryPhoto, AdminFaq, AdminUnanswered, AdminAiStatus, AdminInsight, AdminPricing, AdminStaff } from "@/models/admin";
+import type { AdminProfile, AuthFailure, AdminReview, AdminReviewPage, AdminGalleryPhoto, AdminGalleryPage, AdminFaq, AdminUnanswered, AdminAiStatus, AdminPricing, AdminStaff } from "@/models/admin";
 
 // Data Access Layer (DAL): satu pintu untuk mengecek sesi dan peran.
 // Sesi sekarang dicek ke backend (GET /auth/me), bukan lagi dari memori server Next.js.
@@ -57,25 +57,46 @@ export async function checkPermission(permission: Permission): Promise<{ ok: tru
 
 
 
-// Daftar semua ulasan, terbaru di atas. Galat backend dikembalikan sebagai kode agar halaman bisa
+// Satu halaman ulasan, terbaru di atas. Galat backend dikembalikan sebagai kode agar halaman bisa
 // menampilkan pesan yang jelas, bukan daftar kosong yang membingungkan.
-export async function getReviewsForAdmin() {
+export async function getReviewsForAdmin(page = 1, limit = 20) {
   await requirePermission("ulasan");
-  const res = await apiJson<AdminReview[]>("/admin/reviews");
+  const res = await apiJson<AdminReviewPage>(`/admin/reviews?page=${page}&limit=${limit}`);
   // "data" in res dipakai agar TypeScript bisa membedakan hasil berhasil dan galat (strict dimatikan).
-  if ("data" in res) return { items: res.data, error: null };
-  return { items: [] as AdminReview[], error: res.code };
+  if ("data" in res) return { ...res.data, error: null };
+  return {
+    items: [] as AdminReview[],
+    total: 0,
+    page,
+    limit,
+    average: 0,
+    error: res.code,
+  };
 }
 
 
 
-// Semua foto (pending, approved, rejected), terbaru di atas. Penyaringan status dilakukan di halaman.
+// Satu halaman foto (pending, approved, rejected), terbaru di atas. Penyaringan status
+// dilakukan di backend agar pagination dan rekap jumlah tetap akurat.
 // Galat backend dikembalikan sebagai kode agar halaman bisa menampilkan pesan yang jelas.
-export async function getGalleryForAdmin() {
+export async function getGalleryForAdmin(
+  page = 1,
+  status?: "pending" | "approved" | "rejected",
+  limit = 20
+) {
   await requirePermission("galeri");
-  const res = await apiJson<AdminGalleryPhoto[]>("/admin/gallery");
-  if ("data" in res) return { items: res.data, error: null };
-  return { items: [] as AdminGalleryPhoto[], error: res.code };
+  const query = new URLSearchParams({ page: String(page), limit: String(limit) });
+  if (status) query.set("status", status);
+  const res = await apiJson<AdminGalleryPage>(`/admin/gallery?${query.toString()}`);
+  if ("data" in res) return { ...res.data, error: null };
+  return {
+    items: [] as AdminGalleryPhoto[],
+    total: 0,
+    page,
+    limit,
+    counts: { all: 0, pending: 0, approved: 0, rejected: 0 },
+    error: res.code,
+  };
 }
 
 
@@ -104,13 +125,7 @@ export async function getFaqForAdmin() {
 
 
 
-// Analisis admin (khusus admin). Galat dikembalikan sebagai kode agar halaman bisa memberi pesan jelas.
-export async function getInsightForAdmin() {
-  await requirePermission("insight");
-  const res = await apiJson<AdminInsight>("/admin/insight");
-  if ("data" in res) return { data: res.data, error: null };
-  return { data: null, error: res.code };
-}
+
 
 
 

@@ -22,12 +22,14 @@ export function AdminHeader({ title, subtitle, action, search }: { title: ReactN
       {/* max-w-full + flex-wrap: di HP 320px tombol aksi yang lebar turun ke baris sendiri, bukan mendorong halaman melebar. */}
       <div className="flex max-w-full flex-wrap items-center justify-end gap-3">
         {action}
-        <label className="hidden h-12 w-[280px] items-center gap-3 rounded-full border border-ink/10 bg-white px-4 md:flex">
-          <Search size={18} className="shrink-0 text-abu" aria-hidden="true" />
-          <span className="sr-only">Cari</span>
-          <input {...searchProps} placeholder={search?.placeholder ?? "Cari booking, wahana, ulasan..."}
-                 className="w-full bg-transparent text-sm text-ink outline-none placeholder:text-ink/55" />
-        </label>
+        {search && (
+          <label className="flex h-12 w-full items-center gap-3 rounded-full border border-ink/10 bg-white px-4 sm:w-[280px]">
+            <Search size={18} className="shrink-0 text-abu" aria-hidden="true" />
+            <span className="sr-only">Cari</span>
+            <input {...searchProps} placeholder={search.placeholder ?? "Cari..."}
+                   className="w-full bg-transparent text-sm text-ink outline-none placeholder:text-ink/55" />
+          </label>
+        )}
 
       </div>
     </header>

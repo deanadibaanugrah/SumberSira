@@ -25,14 +25,20 @@ export default function HapusFoto({ id, title, owner }: { id: string; title: str
   const jalankan = async () => {
     if (sibuk) return;
     setSibuk(true);
-    const hasil = await hapusFotoGaleri(id);
-    setSibuk(false);
-    setKonfirmasi(false);
-    if ("error" in hasil) {
-      setPesan(pesanGalat(hasil.error));
-    } else {
-      setPesan(null);
-      router.refresh();
+    setPesan(null);
+    try {
+      const hasil = await hapusFotoGaleri(id);
+      setKonfirmasi(false);
+      if ("error" in hasil) {
+        setPesan(pesanGalat(hasil.error));
+      } else {
+        router.refresh();
+      }
+    } catch {
+      setKonfirmasi(false);
+      setPesan("Foto belum bisa dihapus. Periksa koneksi, lalu coba lagi.");
+    } finally {
+      setSibuk(false);
     }
   };
 

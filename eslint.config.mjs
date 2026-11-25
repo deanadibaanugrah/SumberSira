@@ -12,6 +12,8 @@ const eslintConfig = defineConfig([
     "next-env.d.ts",
     // Aplikasi Flutter punya alat analisis sendiri (flutter analyze).
     "mobile/**",
+    // Folder insight lama terkunci di Windows; menu sudah dihapus.
+    "src/app/admin/(panel)/insight/**",
   ]),
 ]);
 

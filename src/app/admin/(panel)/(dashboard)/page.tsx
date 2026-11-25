@@ -1,9 +1,6 @@
-import { Download } from "lucide-react";
-
 import PolaKeramaian from "@/components/admin/PolaKeramaian";
-import { AdminHeader, PrimaryButton } from "@/components/admin/ui";
+import { AdminHeader } from "@/components/admin/ui";
 import { requirePermission } from "@/repositories/admin-repository";
-import { can } from "@/lib/auth/roles";
 
 import BookingMasuk from "./components/BookingMasuk";
 import LiveCrowdMonitor from "./components/LiveCrowdMonitor";
@@ -24,8 +21,7 @@ export default async function DashboardPage() {
   return (
     <>
       <AdminHeader title={`Halo, ${admin.name}!`}
-                   subtitle={<><Today /> · ringkasan operasional Sumber Sira hari ini</>}
-                   action={<PrimaryButton icon={Download}>Unduh Laporan</PrimaryButton>} />
+                   subtitle={<><Today /> · ringkasan operasional Sumber Sira hari ini</>} />
 
       <div className="mt-6 space-y-5">
         {/* Baris 1: empat kartu ringkasan */}
@@ -34,7 +30,7 @@ export default async function DashboardPage() {
         {/* Baris 2: grafik pengunjung per jam dan kartu ringkasan hari ini */}
         <div className="grid grid-cols-1 gap-5 xl:grid-cols-[736fr_380fr]">
           <LiveCrowdMonitor />
-          <RingkasanHariIni canInsight={can(admin.role, "insight")} />
+          <RingkasanHariIni />
         </div>
 
         {/* Baris 3: tabel 3 booking sewa terbaru */}

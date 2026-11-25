@@ -26,14 +26,20 @@ export default function HapusUlasan({ id, name }: { id: string; name: string }) 
   const jalankan = async () => {
     if (sibuk) return;
     setSibuk(true);
-    const hasil = await hapusUlasan(id);
-    setSibuk(false);
-    setKonfirmasi(false);
-    if ("error" in hasil) {
-      setPesan(pesanGalat(hasil.error));
-    } else {
-      setPesan(null);
-      router.refresh();
+    setPesan(null);
+    try {
+      const hasil = await hapusUlasan(id);
+      setKonfirmasi(false);
+      if ("error" in hasil) {
+        setPesan(pesanGalat(hasil.error));
+      } else {
+        router.refresh();
+      }
+    } catch {
+      setKonfirmasi(false);
+      setPesan("Ulasan belum bisa dihapus. Periksa koneksi, lalu coba lagi.");
+    } finally {
+      setSibuk(false);
     }
   };
 

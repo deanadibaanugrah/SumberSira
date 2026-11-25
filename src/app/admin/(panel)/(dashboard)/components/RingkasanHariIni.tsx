@@ -1,14 +1,13 @@
 "use client";
 
 import { Ticket, TrendingUp, Users } from "lucide-react";
-import Link from "@/components/HardLink";
 
 import { useCrowd } from "@/viewmodels/crowd-viewmodel";
 import { useDashboard } from "@/viewmodels/dashboard-viewmodel";
 import { useTiket } from "@/viewmodels/tiket-viewmodel";
 
 // Kartu hijau ringkasan hari ini: angka dari dashboard backend, tiket live, dan Live Crowd.
-export default function RingkasanHariIni({ canInsight }: { canInsight: boolean }) {
+export default function RingkasanHariIni() {
   const d = useDashboard();
   const t = useTiket();
   const c = useCrowd();
@@ -32,12 +31,6 @@ export default function RingkasanHariIni({ canInsight }: { canInsight: boolean }
                sub={`${d.data?.pendingCash ?? 0} pembayaran tunai menunggu konfirmasi`} />
         <Baris icon={Users} title={`${t.inside} orang di dalam`} sub={`Keramaian ${t.label ?? "–"}`} />
       </ul>
-      {canInsight && (
-        <Link href="/admin/insight"
-              className="mt-auto flex h-10 items-center justify-center gap-2 rounded-full bg-white text-[15px] font-semibold text-forest transition hover:bg-white/90 max-xl:mt-5">
-          <TrendingUp size={17} aria-hidden="true" /> Buka Insight
-        </Link>
-      )}
     </section>
   );
 }

@@ -20,6 +20,39 @@ import 'eticket_screen.dart';
 // Tab Tiket & Booking, dibagi tiga segmen supaya satu tugas per tampilan:
 // Tiket Masuk (beli tiket), Sewa & Wahana (booking), dan Riwayat (tiket dan invoice per nomor WhatsApp, tanpa login).
 // Nomor terakhir yang dipakai membeli terisi otomatis (shared_preferences).
+const double _ticketCardHeight = 208;
+const double _ticketCardSeam = 80;
+const double _ticketNotchRadius = 11;
+
+class _TicketCardClipper extends CustomClipper<Path> {
+  const _TicketCardClipper();
+
+  @override
+  Path getClip(Size size) {
+    final outline = Path()
+      ..addRRect(
+        RRect.fromRectAndRadius(Offset.zero & size, const Radius.circular(24)),
+      );
+    final notches = Path()
+      ..addOval(
+        Rect.fromCircle(
+          center: const Offset(0, _ticketCardSeam),
+          radius: _ticketNotchRadius,
+        ),
+      )
+      ..addOval(
+        Rect.fromCircle(
+          center: Offset(size.width, _ticketCardSeam),
+          radius: _ticketNotchRadius,
+        ),
+      );
+    return Path.combine(PathOperation.difference, outline, notches);
+  }
+
+  @override
+  bool shouldReclip(covariant _TicketCardClipper oldClipper) => false;
+}
+
 class TicketsTab extends StatefulWidget {
   const TicketsTab({super.key});
 
@@ -148,76 +181,137 @@ class _TicketsTabState extends State<TicketsTab> {
       Pressable(
         onTap: () => Navigator.pushNamed(context, AppRoutes.buyTicket),
         semanticLabel: 'Beli tiket masuk online',
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(24),
-          child: SizedBox(
-            height: 268,
-            child: Stack(
-              fit: StackFit.expand,
-              children: [
-                Image.asset('assets/images/komunitas-2.jpg', fit: BoxFit.cover),
-                Positioned(
-                  left: 12,
-                  right: 12,
-                  bottom: 12,
-                  child: Glass(
-                    radius: 20,
-                    shadow: false,
-                    padding: const EdgeInsets.fromLTRB(16, 14, 12, 14),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
+        child: ClipPath(
+          clipper: const _TicketCardClipper(),
+          clipBehavior: Clip.antiAlias,
+          child: ColoredBox(
+            color: AppColors.forest,
+            child: SizedBox(
+              height: _ticketCardHeight,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  // Bagian atas tiket: ikon, judul, dan keterangan singkat.
+                  SizedBox(
+                    height: _ticketCardSeam,
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(20, 18, 20, 0),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Container(
+                            width: 38,
+                            height: 38,
+                            decoration: const BoxDecoration(
+                              color: AppColors.kaca,
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(
+                              CupertinoIcons.ticket_fill,
+                              size: 18,
+                              color: Colors.white,
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Beli Tiket Masuk Online',
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: AppText.headline.copyWith(
+                                    color: Colors.white,
+                                  ),
+                                ),
+                                const SizedBox(height: 3),
+                                Text(
+                                  'Tunjukkan QR di pintu, tanpa antre',
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: AppText.footnote.copyWith(
+                                    color: AppColors.putih72,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  // Bagian bawah tiket: harga dan tombol putih "Beli tiket".
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(20, 4, 20, 16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.end,
                             children: [
-                              const Text(
-                                'Beli Tiket Masuk Online',
-                                style: AppText.headline,
-                              ),
-                              const SizedBox(height: 2),
-                              const Text(
-                                'Tunjukkan QR di pintu, tanpa antre',
-                                style: AppText.footnote,
-                              ),
-                              const SizedBox(height: 10),
-                              Row(
-                                crossAxisAlignment: CrossAxisAlignment.baseline,
-                                textBaseline: TextBaseline.alphabetic,
-                                children: [
-                                  Text(
+                              Flexible(
+                                child: FittedBox(
+                                  fit: BoxFit.scaleDown,
+                                  alignment: Alignment.centerLeft,
+                                  child: Text(
                                     _state.hargaTiket == null
                                         ? '—'
                                         : rupiah(_state.hargaTiket!),
-                                    style: AppText.hero(28),
+                                    style: AppText.hero(
+                                      40,
+                                      color: Colors.white,
+                                    ),
                                   ),
-                                  const SizedBox(width: 4),
-                                  const Text(
-                                    '/ orang',
-                                    style: AppText.footnote,
+                                ),
+                              ),
+                              const SizedBox(width: 6),
+                              Padding(
+                                padding: const EdgeInsets.only(bottom: 6),
+                                child: Text(
+                                  '/ orang',
+                                  style: AppText.footnote.copyWith(
+                                    color: AppColors.putih72,
                                   ),
-                                ],
+                                ),
                               ),
                             ],
                           ),
-                        ),
-                        Container(
-                          width: 44,
-                          height: 44,
-                          decoration: const BoxDecoration(
-                            color: AppColors.forest,
-                            shape: BoxShape.circle,
+                          const Spacer(),
+                          Container(
+                            height: 46,
+                            decoration: const BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.all(
+                                Radius.circular(23),
+                              ),
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  'Beli tiket',
+                                  style: AppText.headline.copyWith(
+                                    fontSize: 15,
+                                    color: AppColors.forest,
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                const Icon(
+                                  CupertinoIcons.arrow_right,
+                                  size: 18,
+                                  color: AppColors.forest,
+                                ),
+                              ],
+                            ),
                           ),
-                          child: const Icon(
-                            CupertinoIcons.arrow_right,
-                            size: 20,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),

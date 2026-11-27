@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../theme/app_theme.dart';
-import 'glass.dart';
 import 'motion.dart';
 
 // Latar semua layar: Abu Muda, supaya kartu putih terlihat jelas.
@@ -313,7 +312,7 @@ class TabHeader extends StatelessWidget {
   }
 }
 
-// Kontrol bersegmen gaya iOS di atas header gelap: track kaca, pilihan aktif putih dengan teks Hijau Tua.
+// Kontrol bersegmen gaya iOS di atas header gelap: track Hijau Tua, pilihan aktif putih dengan teks Hijau Tua.
 // Kapsul putih meluncur dengan pegas ke segmen yang dipilih.
 class HeaderSegments extends StatelessWidget {
   const HeaderSegments({
@@ -329,10 +328,12 @@ class HeaderSegments extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Glass(
-      radius: 24,
-      shadow: false,
+    return Container(
       padding: const EdgeInsets.all(4),
+      decoration: BoxDecoration(
+        color: AppColors.forest,
+        borderRadius: BorderRadius.circular(24),
+      ),
       child: SizedBox(
         height: 40,
         child: Stack(
@@ -342,8 +343,15 @@ class HeaderSegments extends StatelessWidget {
                 index: index,
                 count: labels.length,
                 decoration: BoxDecoration(
-                  color: AppColors.forest,
+                  color: Colors.white,
                   borderRadius: BorderRadius.circular(20),
+                  boxShadow: const [
+                    BoxShadow(
+                      color: Color(0x1F172321),
+                      blurRadius: 8,
+                      offset: Offset(0, 2),
+                    ),
+                  ],
                 ),
               ),
             ),
@@ -366,8 +374,8 @@ class HeaderSegments extends StatelessWidget {
                               style: AppText.footnote.copyWith(
                                 fontWeight: FontWeight.w600,
                                 color: i == index
-                                    ? Colors.white
-                                    : AppColors.abu,
+                                    ? AppColors.forest
+                                    : AppColors.putih72,
                               ),
                               child: Text(
                                 label,

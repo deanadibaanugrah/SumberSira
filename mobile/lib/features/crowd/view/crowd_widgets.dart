@@ -65,6 +65,11 @@ class CrowdHero extends StatelessWidget {
         // Sebelum server menjawab, tampilkan status kosong yang jujur, bukan angka 0.
         final ready = s.ready;
         final label = s.crowdLabel ?? 'Belum terhubung';
+        final now = DateTime.now();
+        final isWeekend =
+            now.weekday == DateTime.saturday || now.weekday == DateTime.sunday;
+        final closeHour = isWeekend ? 17 : 16;
+        final isOpen = now.hour >= 8 && now.hour < closeHour;
         // Kartu kaca terang: Sepi Hijau Daun, Sedang Hijau Tua, Ramai Coral (di kaca putih, bukan putih).
         final color = !ready
             ? AppColors.abu
@@ -111,7 +116,31 @@ class CrowdHero extends StatelessWidget {
                       children: [
                         StatusChip(label: label, dot: color, tinted: true),
                         const SizedBox(height: 4),
-                        Text('kapasitas terisi', style: AppText.footnote),
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text('kapasitas terisi', style: AppText.footnote),
+                            const SizedBox(width: 8),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 2,
+                              ),
+                              decoration: BoxDecoration(
+                                color: (isOpen ? AppColors.leaf : AppColors.coral)
+                                    .withValues(alpha: .12),
+                                borderRadius: BorderRadius.circular(999),
+                              ),
+                              child: Text(
+                                isOpen ? 'Buka' : 'Tutup',
+                                style: AppText.caption.copyWith(
+                                  color: isOpen ? AppColors.leaf : AppColors.coral,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
                       ],
                     ),
                   ),

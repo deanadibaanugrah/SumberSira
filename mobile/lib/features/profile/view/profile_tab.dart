@@ -93,7 +93,7 @@ class ProfileTab extends StatelessWidget {
             'Weekday 08.00-16.00 · Weekend s/d 17.00',
           ),
           (CupertinoIcons.ticket, 'Tiket masuk', s.hargaTiketText),
-          (CupertinoIcons.car_detailed, 'Parkir', s.parkirText),
+          (Icons.local_parking, 'Parkir', s.parkirText),
           (CupertinoIcons.creditcard, 'Pembayaran', 'Tunai & QRIS'),
           (CupertinoIcons.location_solid, 'Lokasi', 'Desa Putukrejo, Malang'),
         ];

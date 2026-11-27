@@ -172,7 +172,14 @@ class HomeTab extends StatelessWidget {
   }
 
   // [P5 Modal Bottom Sheet] Lembar kaca notifikasi yang muncul dari bawah layar.
-  void _showNotifications(BuildContext context) {
+  static bool _notifOpen = false;
+
+  Future<void> _showNotifications(BuildContext context) async {
+    if (_notifOpen) {
+      Navigator.of(context).maybePop();
+      return;
+    }
+    _notifOpen = true;
     final s = AppState.instance;
     final c = CrowdState.instance;
     final items = [
@@ -198,7 +205,7 @@ class HomeTab extends StatelessWidget {
         'Atur di menu Profil',
       ),
     ];
-    showGlassSheet<void>(
+    await showGlassSheet<void>(
       context,
       builder: (_) => Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -222,6 +229,7 @@ class HomeTab extends StatelessWidget {
         ],
       ),
     );
+    _notifOpen = false;
   }
 
   // [P3 Row + Expanded] Menu cepat dibagi rata. Satu-satunya grup ikon berwadah (Hijau Daun 12%) di layar ini.

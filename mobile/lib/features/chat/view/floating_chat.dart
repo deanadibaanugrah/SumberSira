@@ -6,14 +6,11 @@ import 'package:flutter/material.dart';
 
 import '../viewmodel/chat_controller.dart';
 import '../../../theme/app_theme.dart';
-import '../../../utils/launcher.dart';
 import '../../../widgets/common.dart';
 import '../../../widgets/glass.dart';
 import '../../../widgets/motion.dart';
 
-// Nomor WhatsApp admin untuk eskalasi pertanyaan yang belum terjawab.
-// Kosongkan jika belum ingin menampilkan tombol hubungi admin via WhatsApp.
-const _adminWhatsapp = '';
+
 
 // Chatbot Tanya Sira yang mengambang di Beranda.
 // Tertutup: gelembung kaca Hijau Tua berisi ikon chat yang bisa digeser ke mana saja.
@@ -262,12 +259,7 @@ class _ChatPanelState extends State<_ChatPanel> {
                 padding: const EdgeInsets.fromLTRB(12, 12, 12, 8),
                 children: [
                   for (final (i, m) in chat.messages.indexed) ...[
-                    _bubble(
-                      m,
-                      questionForAdmin: i > 0 && m.fromBot && !chat.messages[i - 1].fromBot
-                          ? chat.messages[i - 1].text
-                          : null,
-                    ),
+                    _bubble(m),
                     // Pertanyaan cepat dari backend tampil di bawah sapaan pertama.
                     if (i == 0)
                       Padding(
@@ -383,8 +375,7 @@ class _ChatPanelState extends State<_ChatPanel> {
   );
 
   // Gelembung pesan: bot di kiri (putih), pengunjung di kanan (Hijau Tua). Pesan bot memuat asal jawabannya.
-  Widget _bubble(ChatMessage m, {String? questionForAdmin}) {
-    final perluAdmin = m.fromBot && m.source == 'Pertanyaan dicatat untuk admin';
+  Widget _bubble(ChatMessage m) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 10),
       child: Row(
@@ -425,22 +416,6 @@ class _ChatPanelState extends State<_ChatPanel> {
                       ),
                     ),
                   ],
-                  if (perluAdmin) ...[
-                    const SizedBox(height: 8),
-                    OutlinedButton.icon(
-                      onPressed: () => _hubungiAdmin(questionForAdmin ?? m.text),
-                      icon: const Icon(CupertinoIcons.chat_bubble_text, size: 14),
-                      label: const Text('Tanya Admin via WhatsApp'),
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: AppColors.forest,
-                        side: const BorderSide(color: AppColors.leaf),
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                        minimumSize: Size.zero,
-                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                        textStyle: AppText.caption.copyWith(fontWeight: FontWeight.w700),
-                      ),
-                    ),
-                  ],
                 ],
               ),
             ),
@@ -450,21 +425,4 @@ class _ChatPanelState extends State<_ChatPanel> {
     );
   }
 
-  // Eskalasi ke admin: buka WhatsApp dengan pertanyaan yang belum terjawab.
-  Future<void> _hubungiAdmin(String pertanyaan) async {
-    if (_adminWhatsapp.trim().isEmpty) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            'Nomor WhatsApp admin belum diatur. Pertanyaanmu sudah dicatat untuk admin.',
-          ),
-        ),
-      );
-      return;
-    }
-    final pesan =
-        'Halo Admin Sumber Sira, saya mau tanya:\n\n"$pertanyaan"\n\nMohon bantuannya ya. Terima kasih.';
-    await kirimWhatsApp(context, _adminWhatsapp, pesan);
-  }
 }

@@ -267,26 +267,36 @@ class _SheetBody extends StatelessWidget {
         heightFactor: controller == null ? 1 : null,
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 480),
-          child: Glass(
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
-            shadow: false,
-            child: controller == null
-                ? SafeArea(
-                    top: false,
-                    child: Padding(
-                      padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [grabber, child],
+          child: GestureDetector(
+            // Konten pendek (tanpa scroll) tetap bisa ditutup dengan geser ke bawah.
+            onVerticalDragEnd: controller == null
+                ? (d) {
+                    if ((d.primaryVelocity ?? 0) > 250) {
+                      Navigator.of(context).maybePop();
+                    }
+                  }
+                : null,
+            child: Glass(
+              borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
+              shadow: false,
+              child: controller == null
+                  ? SafeArea(
+                      top: false,
+                      child: Padding(
+                        padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [grabber, child],
+                        ),
                       ),
+                    )
+                  : ListView(
+                      controller: controller,
+                      padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
+                      children: [grabber, child],
                     ),
-                  )
-                : ListView(
-                    controller: controller,
-                    padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
-                    children: [grabber, child],
-                  ),
+            ),
           ),
         ),
       ),

@@ -330,7 +330,7 @@ class _TicketsTabState extends State<TicketsTab> {
             subtitle: 'Tiket untuk usia 3 tahun ke atas',
           ),
           ListRow(
-            icon: CupertinoIcons.car_detailed,
+            icon: Icons.local_parking,
             title: 'Parkir',
             subtitle: _state.parkirText,
           ),

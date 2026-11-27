@@ -108,7 +108,7 @@ class ChatController extends ChangeNotifier {
         ChatMessage(
           fromBot: true,
           text: e.offline
-              ? 'Server belum terjangkau di ${ApiClient.baseUrl}. Pastikan backend menyala, atau ubah alamat server di Profil → Server Backend.'
+              ? 'Server belum terjangkau. Periksa koneksi internet kamu, lalu coba lagi.'
               : e.message,
         ),
       );

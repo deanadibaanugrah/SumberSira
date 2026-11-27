@@ -52,7 +52,7 @@ class AboutScreen extends StatelessWidget {
             child: ListView(
               padding: EdgeInsets.only(
                 // Ruang ekstra agar info paling bawah tidak tertutup FloatingBar "Lanjut".
-                bottom: MediaQuery.paddingOf(context).bottom + 120,
+                bottom: MediaQuery.paddingOf(context).bottom + 160,
               ),
               children: [
                 // [P3 Stack + Positioned] Bar atas dan panel judul kaca ditumpuk di atas foto.
@@ -226,7 +226,7 @@ class AboutScreen extends StatelessWidget {
                                   s.hargaTiketText,
                                 ),
                                 (
-                                  CupertinoIcons.car_detailed,
+                                  Icons.local_parking,
                                   'Parkir',
                                   s.parkirText,
                                 ),
